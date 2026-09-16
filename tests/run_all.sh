@@ -6,6 +6,9 @@ GODOT="${GODOT:-/c/Users/b/Downloads/Godot_v4.6.3-stable_win64.exe/Godot_v4.6.3-
 cd "$(dirname "$0")/.."
 PROJECT="$(pwd -W 2>/dev/null || pwd)"
 
+# Import first so class_name cache and .uid files exist on fresh clones.
+timeout 180 "$GODOT" --headless --path "$PROJECT" --import >/dev/null 2>&1
+
 failed=0
 for scene in tests/*_test.tscn; do
 	# A GDScript parse error leaves Godot hanging, so a timeout counts as failure.

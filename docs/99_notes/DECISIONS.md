@@ -26,3 +26,6 @@ Status: Accepted. Shelter dog selection and random-human adoption are important 
 
 ## ADR-009 — Official Name
 Status: Accepted. The game is officially named **GOOD HUMAN!**. “狗老大” may be reused as an in-game title/rank rather than the product name.
+
+## ADR-010 — Portrait 720×1280, Mobile Renderer
+Status: Accepted. The game is portrait (base viewport 720×1280, `canvas_items` stretch, `expand` aspect) to support single-hand play; renderer is Mobile.
