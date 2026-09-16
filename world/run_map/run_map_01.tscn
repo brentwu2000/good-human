@@ -1,0 +1,371 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://world/run_map/run_map.gd" id="1_map"]
+[ext_resource type="PackedScene" path="res://actors/dog/dog.tscn" id="2_dog"]
+[ext_resource type="Script" path="res://core/run/run_manager.gd" id="3_run"]
+[ext_resource type="PackedScene" path="res://world/search_point/search_point.tscn" id="4_search"]
+[ext_resource type="PackedScene" path="res://world/extraction/extraction_point.tscn" id="5_extract"]
+[ext_resource type="PackedScene" path="res://ui/hud/run_hud.tscn" id="6_hud"]
+[ext_resource type="Resource" path="res://data/loot_tables/residential_trash.tres" id="7_trash"]
+[ext_resource type="Resource" path="res://data/loot_tables/park_search.tres" id="8_park"]
+
+[sub_resource type="RectangleShape2D" id="Rect_BoundaryTop"]
+size = Vector2(4200, 100)
+
+[sub_resource type="RectangleShape2D" id="Rect_BoundaryBottom"]
+size = Vector2(4200, 100)
+
+[sub_resource type="RectangleShape2D" id="Rect_BoundaryLeft"]
+size = Vector2(100, 15400)
+
+[sub_resource type="RectangleShape2D" id="Rect_BoundaryRight"]
+size = Vector2(100, 15400)
+
+[sub_resource type="RectangleShape2D" id="Rect_Houses"]
+size = Vector2(1800, 3300)
+
+[sub_resource type="RectangleShape2D" id="Rect_ConvenienceStore"]
+size = Vector2(650, 1000)
+
+[sub_resource type="RectangleShape2D" id="Rect_WestBlock"]
+size = Vector2(500, 5600)
+
+[sub_resource type="RectangleShape2D" id="Rect_InnerBlock"]
+size = Vector2(800, 5600)
+
+[sub_resource type="RectangleShape2D" id="Rect_EastBlock"]
+size = Vector2(1650, 5600)
+
+[sub_resource type="RectangleShape2D" id="Rect_Pond"]
+size = Vector2(500, 500)
+
+[node name="RunMap01" type="Node2D" node_paths=PackedStringArray("dog")]
+script = ExtResource("1_map")
+map_bounds = Rect2(-2000, -14600, 4000, 15400)
+dog = NodePath("Dog")
+
+[node name="Ground" type="Node2D" parent="."]
+
+[node name="StreetGround" type="ColorRect" parent="Ground"]
+offset_left = -2000.0
+offset_top = -900.0
+offset_right = 2000.0
+offset_bottom = 800.0
+mouse_filter = 2
+color = Color(0.45, 0.45, 0.47, 1)
+
+[node name="AlleyGround" type="ColorRect" parent="Ground"]
+offset_left = -2000.0
+offset_top = -4200.0
+offset_right = -900.0
+offset_bottom = -900.0
+mouse_filter = 2
+color = Color(0.38, 0.36, 0.34, 1)
+
+[node name="ConvenienceGround" type="ColorRect" parent="Ground"]
+offset_left = 900.0
+offset_top = -4200.0
+offset_right = 2000.0
+offset_bottom = -900.0
+mouse_filter = 2
+color = Color(0.5, 0.48, 0.42, 1)
+
+[node name="MainPathGround" type="ColorRect" parent="Ground"]
+offset_left = -350.0
+offset_top = -9800.0
+offset_right = 350.0
+offset_bottom = -4200.0
+mouse_filter = 2
+color = Color(0.62, 0.58, 0.5, 1)
+
+[node name="BackLaneGround" type="ColorRect" parent="Ground"]
+offset_left = -1500.0
+offset_top = -9800.0
+offset_right = -1150.0
+offset_bottom = -4200.0
+mouse_filter = 2
+color = Color(0.4, 0.37, 0.33, 1)
+
+[node name="ParkGround" type="ColorRect" parent="Ground"]
+offset_left = -2000.0
+offset_top = -14600.0
+offset_right = 2000.0
+offset_bottom = -9800.0
+mouse_filter = 2
+color = Color(0.36, 0.52, 0.33, 1)
+
+[node name="TreeArea" type="ColorRect" parent="Ground"]
+offset_left = -2000.0
+offset_top = -12400.0
+offset_right = -900.0
+offset_bottom = -10400.0
+mouse_filter = 2
+color = Color(0.26, 0.42, 0.25, 1)
+
+[node name="GymArea" type="ColorRect" parent="Ground"]
+offset_left = 900.0
+offset_top = -12900.0
+offset_right = 2000.0
+offset_bottom = -11700.0
+mouse_filter = 2
+color = Color(0.55, 0.5, 0.4, 1)
+
+[node name="Houses" type="ColorRect" parent="Ground"]
+offset_left = -900.0
+offset_top = -4200.0
+offset_right = 900.0
+offset_bottom = -900.0
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.28, 1)
+
+[node name="ConvenienceStore" type="ColorRect" parent="Ground"]
+offset_left = 1350.0
+offset_top = -3300.0
+offset_right = 2000.0
+offset_bottom = -2300.0
+mouse_filter = 2
+color = Color(0.3, 0.3, 0.4, 1)
+
+[node name="WestBlock" type="ColorRect" parent="Ground"]
+offset_left = -2000.0
+offset_top = -9800.0
+offset_right = -1500.0
+offset_bottom = -4200.0
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.28, 1)
+
+[node name="InnerBlock" type="ColorRect" parent="Ground"]
+offset_left = -1150.0
+offset_top = -9800.0
+offset_right = -350.0
+offset_bottom = -4200.0
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.28, 1)
+
+[node name="EastBlock" type="ColorRect" parent="Ground"]
+offset_left = 350.0
+offset_top = -9800.0
+offset_right = 2000.0
+offset_bottom = -4200.0
+mouse_filter = 2
+color = Color(0.25, 0.25, 0.28, 1)
+
+[node name="Pond" type="ColorRect" parent="Ground"]
+offset_left = -250.0
+offset_top = -12250.0
+offset_right = 250.0
+offset_bottom = -11750.0
+mouse_filter = 2
+color = Color(0.2, 0.35, 0.6, 1)
+
+[node name="Labels" type="Node2D" parent="."]
+
+[node name="SpawnLabel" type="Label" parent="Labels"]
+offset_left = -200.0
+offset_top = 500.0
+offset_right = 200.0
+offset_bottom = 540.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "出生點"
+horizontal_alignment = 1
+
+[node name="AlleyLabel" type="Label" parent="Labels"]
+offset_left = -1650.0
+offset_top = -4020.0
+offset_right = -1250.0
+offset_bottom = -3980.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "小巷"
+horizontal_alignment = 1
+
+[node name="ConvenienceLabel" type="Label" parent="Labels"]
+offset_left = 1250.0
+offset_top = -4020.0
+offset_right = 1650.0
+offset_bottom = -3980.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "便利商店"
+horizontal_alignment = 1
+
+[node name="MainPathLabel" type="Label" parent="Labels"]
+offset_left = -200.0
+offset_top = -9620.0
+offset_right = 200.0
+offset_bottom = -9580.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "主路"
+horizontal_alignment = 1
+
+[node name="BackLaneLabel" type="Label" parent="Labels"]
+offset_left = -1525.0
+offset_top = -9620.0
+offset_right = -1125.0
+offset_bottom = -9580.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "後巷"
+horizontal_alignment = 1
+
+[node name="ParkLabel" type="Label" parent="Labels"]
+offset_left = -200.0
+offset_top = -10220.0
+offset_right = 200.0
+offset_bottom = -10180.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "公園"
+horizontal_alignment = 1
+
+[node name="TreeLabel" type="Label" parent="Labels"]
+offset_left = -1650.0
+offset_top = -12320.0
+offset_right = -1250.0
+offset_bottom = -12280.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "大樹"
+horizontal_alignment = 1
+
+[node name="GymLabel" type="Label" parent="Labels"]
+offset_left = 1250.0
+offset_top = -12820.0
+offset_right = 1650.0
+offset_bottom = -12780.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+text = "運動區"
+horizontal_alignment = 1
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="BoundaryTop" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0.0, -14650.0)
+shape = SubResource("Rect_BoundaryTop")
+
+[node name="BoundaryBottom" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0.0, 850.0)
+shape = SubResource("Rect_BoundaryBottom")
+
+[node name="BoundaryLeft" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-2050.0, -6900.0)
+shape = SubResource("Rect_BoundaryLeft")
+
+[node name="BoundaryRight" type="CollisionShape2D" parent="Walls"]
+position = Vector2(2050.0, -6900.0)
+shape = SubResource("Rect_BoundaryRight")
+
+[node name="Houses" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0.0, -2550.0)
+shape = SubResource("Rect_Houses")
+
+[node name="ConvenienceStore" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1675.0, -2800.0)
+shape = SubResource("Rect_ConvenienceStore")
+
+[node name="WestBlock" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-1750.0, -7000.0)
+shape = SubResource("Rect_WestBlock")
+
+[node name="InnerBlock" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-750.0, -7000.0)
+shape = SubResource("Rect_InnerBlock")
+
+[node name="EastBlock" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1175.0, -7000.0)
+shape = SubResource("Rect_EastBlock")
+
+[node name="Pond" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0.0, -12000.0)
+shape = SubResource("Rect_Pond")
+
+[node name="SearchPoints" type="Node2D" parent="."]
+
+[node name="trash_alley" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(-1450, -2600)
+search_id = &"trash_alley"
+display_label = "垃圾桶"
+loot_table = ExtResource("7_trash")
+
+[node name="trash_convenience" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(1500, -1700)
+search_id = &"trash_convenience"
+display_label = "垃圾桶"
+loot_table = ExtResource("7_trash")
+
+[node name="trash_main_path" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(150, -7000)
+search_id = &"trash_main_path"
+display_label = "垃圾桶"
+loot_table = ExtResource("7_trash")
+
+[node name="bush_back_lane" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(-1325, -6500)
+search_id = &"bush_back_lane"
+display_label = "草叢"
+loot_table = ExtResource("8_park")
+
+[node name="bush_big_tree" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(-1300, -11200)
+search_id = &"bush_big_tree"
+display_label = "草叢"
+loot_table = ExtResource("8_park")
+
+[node name="bush_park_west" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(-1600, -13300)
+search_id = &"bush_park_west"
+display_label = "草叢"
+loot_table = ExtResource("8_park")
+
+[node name="bench_park_east" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(700, -10800)
+search_id = &"bench_park_east"
+display_label = "長椅"
+loot_table = ExtResource("8_park")
+
+[node name="bench_pond" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(-500, -12600)
+search_id = &"bench_pond"
+display_label = "長椅"
+loot_table = ExtResource("8_park")
+
+[node name="gym_equipment" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(1400, -12300)
+search_id = &"gym_equipment"
+display_label = "運動器材"
+loot_table = ExtResource("8_park")
+
+[node name="special_corner" parent="SearchPoints" instance=ExtResource("4_search")]
+position = Vector2(1800, -14350)
+search_id = &"special_corner"
+display_label = "奇怪的角落"
+loot_table = ExtResource("8_park")
+
+[node name="ExtractionPoints" type="Node2D" parent="."]
+
+[node name="bus_stop" parent="ExtractionPoints" instance=ExtResource("5_extract")]
+position = Vector2(1150, -1600)
+extraction_id = &"bus_stop"
+display_label = "🚌 公車站"
+unlock_time = 300.0
+unlock_message = "🚌 公車站現在可以撤離"
+
+[node name="north_gate" parent="ExtractionPoints" instance=ExtResource("5_extract")]
+position = Vector2(0, -14350)
+extraction_id = &"north_gate"
+display_label = "北門"
+unlock_time = 480.0
+unlock_message = "🚪 北門現在可以撤離"
+
+[node name="Dog" parent="." instance=ExtResource("2_dog")]
+position = Vector2(0, 300)
+
+[node name="RunManager" type="Node" parent="." node_paths=PackedStringArray("dog")]
+script = ExtResource("3_run")
+dog = NodePath("../Dog")
+
+[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager") instance=ExtResource("6_hud")]
+run_manager = NodePath("../RunManager")

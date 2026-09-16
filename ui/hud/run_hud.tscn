@@ -1,0 +1,85 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://ui/hud/run_hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://ui/hud/touch_controls.tscn" id="2_touch"]
+[ext_resource type="PackedScene" path="res://ui/inventory/inventory_panel.tscn" id="3_inventory"]
+[ext_resource type="PackedScene" path="res://ui/debug/debug_panel.tscn" id="4_debug"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill"]
+bg_color = Color(0, 0, 0, 0.55)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toast"]
+bg_color = Color(0.1, 0.1, 0.1, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+
+[node name="RunHUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="TouchControls" parent="." instance=ExtResource("2_touch")]
+unique_name_in_owner = true
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 88.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="TimeLabel" type="Label" parent="TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
+text = "00:00"
+
+[node name="Spacer" type="Control" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BagButton" type="Button" parent="TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 64)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+text = "🎒 0/8"
+
+[node name="ToastLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 40.0
+offset_top = 120.0
+offset_right = -40.0
+offset_bottom = 180.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_toast")
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="InventoryPanel" parent="." instance=ExtResource("3_inventory")]
+unique_name_in_owner = true
+visible = false
+
+[node name="DebugPanel" parent="." instance=ExtResource("4_debug")]
+unique_name_in_owner = true

@@ -41,3 +41,5 @@ func _load_items() -> void:
 			push_error("DataRegistry: duplicate item id %s in %s" % [item.id, file_name])
 			continue
 		_items[item.id] = item
+	if _items.is_empty():
+		push_error("DataRegistry: no items found in %s" % ITEMS_DIR)
