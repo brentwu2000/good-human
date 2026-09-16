@@ -51,4 +51,4 @@ Home → go out → move dog → search → loot → inventory → dog safe slot
 - No blocking bug.
 - Android build can complete the loop. (Deferred by owner decision 2026-09-17; Sprint 01 is validated on the Windows build for now.)
 - Art may be placeholder; art pipeline runs in parallel.
-- Sprint is not considered validated until independent Codex QA is completed.
+- Sprint is not considered validated until independent Codex QA is completed. (Deferred by owner decision 2026-09-17: Codex could not operate the game; Sprint 01 relies on owner playtest + automated golden path test for now.)
