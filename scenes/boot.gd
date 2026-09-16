@@ -4,4 +4,5 @@ extends Node
 
 func _ready() -> void:
 	SaveManager.load_game()
+	Game.load_profile()
 	Game.goto_home()

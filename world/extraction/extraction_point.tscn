@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://world/extraction/extraction_point.gd" id="1_point"]
+[ext_resource type="Script" path="res://core/interaction/interaction_area.gd" id="2_area"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 64.0
+
+[node name="ExtractionPoint" type="Node2D"]
+script = ExtResource("1_point")
+
+[node name="Visual" type="ColorRect" parent="."]
+unique_name_in_owner = true
+offset_left = -44.0
+offset_top = -44.0
+offset_right = 44.0
+offset_bottom = 44.0
+mouse_filter = 2
+color = Color(0.3, 0.6, 0.9, 1)
+
+[node name="NameLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = -140.0
+offset_top = 46.0
+offset_right = 140.0
+offset_bottom = 72.0
+theme_override_font_sizes/font_size = 18
+text = "撤離點"
+horizontal_alignment = 1
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_area")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("CircleShape2D_area")
