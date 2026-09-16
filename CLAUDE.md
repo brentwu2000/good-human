@@ -25,5 +25,10 @@ MVP. Current sprint: `docs/03_sprints/SPRINT_01_WALK.md`. Do not implement later
 - Do not implement multiplayer in MVP.
 - Do not expand scope without approval.
 
+## Validation & Build
+- Tests: `tests/run_all.sh` (headless; each `tests/*_test.tscn` is one scene). Never use `--script` for tests.
+- Windows debug build: `"$GODOT" --headless --path "$(pwd -W)" --export-debug "Windows Desktop" "$(pwd -W)/build/windows/GoodHuman.exe"` (`build/` is gitignored).
+- `GODOT` = `/c/Users/b/Downloads/Godot_v4.6.3-stable_win64.exe/Godot_v4.6.3-stable_win64_console.exe`.
+
 ## Work Rules
 Before coding: identify Task ID, inspect existing implementation, read only relevant docs, and avoid unnecessary rewrites. After coding: list changed files, tests/validation performed, unresolved issues, and update task status if requested. If code conflicts with an accepted design decision, stop and explain the conflict instead of silently changing the design.
