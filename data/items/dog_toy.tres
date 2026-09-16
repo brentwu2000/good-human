@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"dog_toy"
+display_name = "狗玩具"
+description = "會吱吱叫的玩具。"
+type = 0
+rarity = 0
+stackable = true
+max_stack = 5
+value = 10

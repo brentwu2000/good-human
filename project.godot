@@ -17,6 +17,7 @@ run/main_scene="res://scenes/boot.tscn"
 
 [autoload]
 
+DataRegistry="*res://autoload/data_registry.gd"
 SaveManager="*res://autoload/save_manager.gd"
 Game="*res://autoload/game.gd"
 

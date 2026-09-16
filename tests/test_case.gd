@@ -20,6 +20,9 @@ func check_eq(actual: Variant, expected: Variant, message: String) -> void:
 
 func finish() -> void:
 	var name_text: String = (get_script() as Script).resource_path.get_file()
+	if _checks == 0:
+		_failures += 1
+		push_error("FAIL: no checks ran")
 	if _failures == 0:
 		print("PASS %s: %d checks" % [name_text, _checks])
 	else:

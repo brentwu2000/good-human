@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"boxing_gloves"
+display_name = "舊拳擊手套"
+description = "手套內側寫著一個看不清楚的名字。"
+type = 4
+rarity = 2
+stackable = false
+max_stack = 1
+value = 120

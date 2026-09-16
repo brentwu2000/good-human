@@ -15,7 +15,7 @@ for scene in tests/*_test.tscn; do
 	output="$(timeout 60 "$GODOT" --headless --path "$PROJECT" "res://$scene" 2>&1)"
 	code=$?
 	echo "$output" | grep -E "^(PASS|FAILED)|FAIL:|SCRIPT ERROR"
-	if [ $code -ne 0 ]; then
+	if [ $code -ne 0 ] || echo "$output" | grep -q "SCRIPT ERROR"; then
 		echo "  -> $scene exited with $code"
 		failed=1
 	fi

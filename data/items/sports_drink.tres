@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"sports_drink"
+display_name = "運動飲料"
+description = "還沒開封的運動飲料。"
+type = 1
+rarity = 0
+stackable = true
+max_stack = 5
+value = 12

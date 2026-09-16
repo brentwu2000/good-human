@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"dog_treat"
+display_name = "肉乾"
+description = "香噴噴的肉乾，之後可以給狗吃。"
+type = 1
+rarity = 0
+stackable = true
+max_stack = 10
+value = 8
