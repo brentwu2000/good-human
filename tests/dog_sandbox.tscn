@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://actors/dog/dog.tscn" id="1_dog"]
+[ext_resource type="PackedScene" path="res://ui/hud/touch_controls.tscn" id="2_touch"]
 
 [sub_resource type="RectangleShape2D" id="Rect_wall_h"]
 size = Vector2(1400, 40)
@@ -57,3 +58,7 @@ position = Vector2(700, 0)
 shape = SubResource("Rect_wall_v")
 
 [node name="Dog" parent="." instance=ExtResource("1_dog")]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="TouchControls" parent="HUD" instance=ExtResource("2_touch")]
