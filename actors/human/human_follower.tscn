@@ -1,0 +1,66 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://actors/human/human_follower.gd" id="1_human"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_feet"]
+radius = 16.0
+
+[node name="Human" type="CharacterBody2D"]
+collision_layer = 0
+motion_mode = 1
+script = ExtResource("1_human")
+
+[node name="Shadow" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.25)
+polygon = PackedVector2Array(-22, -4, 22, -4, 22, 6, -22, 6)
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Legs" type="Polygon2D" parent="Visual"]
+color = Color(0.2, 0.25, 0.4, 1)
+polygon = PackedVector2Array(-12, -34, 12, -34, 12, 0, -12, 0)
+
+[node name="Body" type="Polygon2D" parent="Visual"]
+color = Color(0.85, 0.45, 0.35, 1)
+polygon = PackedVector2Array(-18, -82, 18, -82, 16, -34, -16, -34)
+
+[node name="Bag" type="Polygon2D" parent="Visual"]
+color = Color(0.4, 0.3, 0.2, 1)
+polygon = PackedVector2Array(-30, -78, -16, -78, -16, -44, -30, -44)
+
+[node name="Head" type="Polygon2D" parent="Visual"]
+color = Color(0.95, 0.8, 0.65, 1)
+polygon = PackedVector2Array(-12, -108, 12, -108, 14, -96, 12, -84, -12, -84, -14, -96)
+
+[node name="Hair" type="Polygon2D" parent="Visual"]
+color = Color(0.25, 0.18, 0.12, 1)
+polygon = PackedVector2Array(-14, -112, 14, -112, 14, -102, -14, -102)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_feet")
+
+[node name="Leash" type="Line2D" parent="."]
+width = 4.0
+default_color = Color(0.7, 0.3, 0.25, 1)
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -60.0
+offset_top = 6.0
+offset_right = 60.0
+offset_bottom = 30.0
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 1, 1, 0.8)
+text = "主人"
+horizontal_alignment = 1
+
+[node name="Bubble" type="Label" parent="."]
+unique_name_in_owner = true
+z_index = 10
+offset_left = -120.0
+offset_top = -160.0
+offset_right = 120.0
+offset_bottom = -118.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1

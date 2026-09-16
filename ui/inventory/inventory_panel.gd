@@ -14,12 +14,14 @@ var _selected_index: int = -1
 @onready var _dog_grid: InventoryGrid = %DogGrid
 @onready var _detail_label: Label = %DetailLabel
 @onready var _close_button: Button = %CloseButton
+@onready var _discard_button: Button = %DiscardButton
 
 
 func _ready() -> void:
 	_human_grid.slot_pressed.connect(_on_slot_pressed)
 	_dog_grid.slot_pressed.connect(_on_slot_pressed)
 	_close_button.pressed.connect(close)
+	_discard_button.pressed.connect(discard_selected)
 
 
 func setup(human: Inventory, dog: Inventory) -> void:
@@ -52,7 +54,8 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 			return
 		_selected_inventory = inventory
 		_selected_index = index
-		_detail_label.text = "%s：%s\n再點一格來移動" % [stack.item.display_name, stack.item.description]
+		_detail_label.text = "%s（$%d）：%s\n再點一格移動，或按「丟掉」" % [stack.item.display_name, stack.item.value, stack.item.description]
+		_discard_button.disabled = false
 		_update_highlight()
 		return
 
@@ -61,11 +64,20 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 	_clear_selection()
 
 
+## Throws away the selected stack (frees a slot for better loot).
+func discard_selected() -> void:
+	if _selected_inventory == null:
+		return
+	_selected_inventory.take_stack(_selected_index)
+	_clear_selection()
+
+
 func _clear_selection() -> void:
 	_selected_inventory = null
 	_selected_index = -1
 	if is_node_ready():
 		_detail_label.text = "點一格選取物品，再點目標格移動。狗包的東西失敗也不會遺失。"
+		_discard_button.disabled = true
 		_update_highlight()
 
 

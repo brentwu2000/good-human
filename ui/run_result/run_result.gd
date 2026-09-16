@@ -24,14 +24,15 @@ func show_result(result: RunResult) -> void:
 	_summary_label.text = "散步時間 %02d:%02d\nSeed %d" % [seconds / 60, seconds % 60, result.run_seed]
 
 	var lines: Array[String] = []
-	lines.append("帶回來的東西：")
+	lines.append("帶回來的東西（$%d）：" % _value_of(result.to_stash))
 	lines.append_array(_describe(result.to_stash))
 	if not result.lost.is_empty():
-		lines.append("\n遺失的東西：")
+		lines.append("\n遺失的東西（$%d）：" % _value_of(result.lost))
 		lines.append_array(_describe(result.lost))
 	if not result.stash_overflow.is_empty():
 		lines.append("\n倉庫放不下（已遺失）：")
 		lines.append_array(_describe(result.stash_overflow))
+	lines.append("\n倉庫總價值 $%d" % Game.home_stash.total_value())
 	_items_label.text = "\n".join(lines)
 
 
@@ -40,5 +41,13 @@ func _describe(stacks: Array[ItemStack]) -> Array[String]:
 	if stacks.is_empty():
 		lines.append("  （沒有）")
 	for stack in stacks:
-		lines.append("  %s x%d" % [stack.item.display_name, stack.quantity])
+		var mark := "✨" if stack.item.rarity == ItemData.Rarity.RARE else ""
+		lines.append("  %s%s x%d  $%d" % [mark, stack.item.display_name, stack.quantity, stack.item.value * stack.quantity])
 	return lines
+
+
+func _value_of(stacks: Array[ItemStack]) -> int:
+	var total := 0
+	for stack in stacks:
+		total += stack.item.value * stack.quantity
+	return total

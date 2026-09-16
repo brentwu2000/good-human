@@ -17,7 +17,7 @@ func open(stash: Inventory) -> void:
 	if _grid.inventory != stash:
 		_grid.bind(stash)
 	_grid.set_selected(-1)
-	_title_label.text = "倉庫 %d/%d" % [stash.used_slot_count(), stash.capacity]
+	_title_label.text = "倉庫 %d/%d　$%d" % [stash.used_slot_count(), stash.capacity, stash.total_value()]
 	_detail_label.text = "點物品看說明"
 	show()
 

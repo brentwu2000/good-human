@@ -75,6 +75,16 @@ func start_run(seed_value: int = fixed_seed) -> void:
 			extraction_states[point.extraction_id] = false
 			point.set_available(false)
 
+	# Roll every point's loot up front, in a stable order, so it follows the seed.
+	var points: Array[SearchPoint] = []
+	for node in get_tree().get_nodes_in_group(SearchPoint.GROUP):
+		var point := node as SearchPoint
+		if point != null and _belongs_to_run(point):
+			points.append(point)
+	points.sort_custom(func(a: SearchPoint, b: SearchPoint) -> bool: return String(a.search_id) < String(b.search_id))
+	for point in points:
+		point.prepare(self)
+
 	run_status = RunStatus.RUNNING
 	_update_extractions()
 	run_started.emit(run_seed)
@@ -186,6 +196,16 @@ func debug_set_time(seconds: float) -> void:
 		return
 	elapsed_time = maxf(seconds, 0.0)
 	_update_extractions()
+
+
+## Jumps to `seconds` before the next extraction unlock.
+func debug_skip_to_next_unlock(seconds: float = 10.0) -> void:
+	var next := INF
+	for point in _extraction_points:
+		if is_instance_valid(point) and not extraction_states.get(point.extraction_id, false):
+			next = minf(next, point.unlock_time)
+	if next < INF:
+		debug_set_time(maxf(next - seconds, elapsed_time))
 
 
 func debug_unlock_all_extractions() -> void:

@@ -6,7 +6,7 @@ const TOAST_SECONDS: float = 2.4
 
 @export var run_manager: RunManager
 
-var _toast_queue: Array[String] = []
+var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
 
 @onready var _time_label: Label = %TimeLabel
@@ -51,8 +51,8 @@ func toggle_inventory() -> void:
 		_inventory_panel.open()
 
 
-func show_toast(message: String) -> void:
-	_toast_queue.append(message)
+func show_toast(message: String, color: Color = Color.WHITE, big: bool = false) -> void:
+	_toast_queue.append({"text": message, "color": color, "big": big})
 
 
 func _on_inventory_closed() -> void:
@@ -62,23 +62,27 @@ func _on_inventory_closed() -> void:
 func _on_run_started(_run_seed: int) -> void:
 	_inventory_panel.setup(run_manager.human_run_inventory, run_manager.dog_safe_inventory)
 	run_manager.human_run_inventory.changed.connect(_update_bag_button)
+	run_manager.dog_safe_inventory.changed.connect(_update_bag_button)
 	_update_bag_button()
 
 
 func _on_loot_gained(item: ItemData, quantity: int) -> void:
-	show_toast("獲得 %s%s" % [item.display_name, " x%d" % quantity if quantity > 1 else ""])
+	var text := "獲得 %s%s（$%d）" % [item.display_name, " x%d" % quantity if quantity > 1 else "", item.value * quantity]
+	if item.rarity == ItemData.Rarity.RARE:
+		text = "✨ 稀有！" + text
+	show_toast(text, item.get_rarity_color(), item.rarity == ItemData.Rarity.RARE)
 
 
 func _on_loot_blocked(item: ItemData, _quantity: int) -> void:
-	show_toast("背包滿了！%s 還留在原地" % item.display_name)
+	show_toast("背包滿了！%s 還留在原地（可以丟掉東西再來）" % item.display_name, Color(1.0, 0.55, 0.5))
 
 
 func _on_search_empty(_point: SearchPoint) -> void:
-	show_toast("什麼都沒聞到……")
+	show_toast("什麼都沒聞到……", Color(0.75, 0.75, 0.75))
 
 
 func _on_extraction_unlocked(point: ExtractionPoint) -> void:
-	show_toast(point.unlock_message)
+	show_toast(point.unlock_message, Color(0.6, 1.0, 0.6), true)
 
 
 func _on_focus_changed(target: Interactable) -> void:
@@ -92,7 +96,8 @@ func _on_focus_changed(target: Interactable) -> void:
 
 func _update_bag_button() -> void:
 	var bag := run_manager.human_run_inventory
-	_bag_button.text = "🎒 %d/%d" % [bag.used_slot_count(), bag.capacity]
+	var value := bag.total_value() + run_manager.dog_safe_inventory.total_value()
+	_bag_button.text = "🎒 %d/%d  $%d" % [bag.used_slot_count(), bag.capacity, value]
 
 
 func _update_time() -> void:
@@ -108,6 +113,13 @@ func _update_toast(delta: float) -> void:
 		return
 	if _toast_queue.is_empty():
 		return
-	_toast_label.text = _toast_queue.pop_front()
+	var toast: Dictionary = _toast_queue.pop_front()
+	_toast_label.text = toast["text"]
+	_toast_label.modulate = toast["color"]
+	_toast_label.add_theme_font_size_override("font_size", 36 if toast["big"] else 28)
 	_toast_label.show()
-	_toast_time_left = TOAST_SECONDS
+	_toast_time_left = TOAST_SECONDS + (1.0 if toast["big"] else 0.0)
+	if toast["big"]:
+		_toast_label.pivot_offset = _toast_label.size / 2.0
+		_toast_label.scale = Vector2(1.25, 1.25)
+		create_tween().tween_property(_toast_label, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK)

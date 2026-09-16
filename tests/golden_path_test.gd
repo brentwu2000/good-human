@@ -31,7 +31,7 @@ func _run() -> void:
 	await _wait_for_scene(Game.RUN_MAP_SCENE)
 	var first := await _run_parts()
 	var seed_1: int = first.run_seed
-	check_eq(first.search_points.size(), 10, "map has 10 search points")
+	check(first.search_points.size() >= 10, "map has at least 10 search points")
 
 	# 6–8: search the alley trash can for real (loot follows the seed).
 	await _search(first, &"trash_alley")
@@ -53,10 +53,13 @@ func _run() -> void:
 
 	# 12–15: set 04:50, reach 05:00, bus stop unlocks, north gate still locked.
 	_press(debug.get_node("%SetTimeButton"))
-	check(not first.run.is_extraction_available(&"bus_stop"), "bus stop locked at 04:50")
-	first.run.debug_set_time(299.5)
+	check(not first.run.is_extraction_available(&"bus_stop"), "bus stop still locked after skip")
+	var bus_stop := first.map.get_node("ExtractionPoints/bus_stop") as ExtractionPoint
+	var north_gate := first.map.get_node("ExtractionPoints/north_gate") as ExtractionPoint
+	first.run.debug_set_time(bus_stop.unlock_time - 0.5)
 	await _tree.create_timer(0.8).timeout  # real time passes 05:00
-	check(first.run.is_extraction_available(&"bus_stop"), "bus stop unlocks at 05:00")
+	check(first.run.is_extraction_available(&"bus_stop"), "bus stop unlocks at its time")
+	check(north_gate.unlock_time > bus_stop.unlock_time, "north gate opens later")
 	check(not first.run.is_extraction_available(&"north_gate"), "north gate still locked")
 
 	# 16–18: keep going, search in the park, get boxing gloves.

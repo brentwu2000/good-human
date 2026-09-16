@@ -39,6 +39,14 @@ func count_item(item_id: StringName) -> int:
 	return total
 
 
+func total_value() -> int:
+	var total := 0
+	for stack in slots:
+		if stack != null:
+			total += stack.item.value * stack.quantity
+	return total
+
+
 ## How many of `item` could be added right now.
 func space_for(item: ItemData) -> int:
 	var limit := item.get_stack_limit()

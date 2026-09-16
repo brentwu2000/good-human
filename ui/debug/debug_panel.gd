@@ -16,7 +16,7 @@ func _ready() -> void:
 	_body.hide()
 	_toggle_button.pressed.connect(toggle)
 	_bind(%AddMinuteButton, func() -> void: run_manager.debug_add_time(60.0))
-	_bind(%SetTimeButton, func() -> void: run_manager.debug_set_time(290.0))
+	_bind(%SetTimeButton, func() -> void: run_manager.debug_skip_to_next_unlock(10.0))
 	_bind(%UnlockButton, func() -> void: run_manager.debug_unlock_all_extractions())
 	_bind(%GiveBallButton, func() -> void: run_manager.debug_give_item(&"tennis_ball"))
 	_bind(%GiveMysteryButton, func() -> void: run_manager.debug_give_item(&"mysterious_item"))

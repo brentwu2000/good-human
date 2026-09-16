@@ -57,11 +57,11 @@ mouse_filter = 2
 
 [node name="BagButton" type="Button" parent="TopBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 64)
+custom_minimum_size = Vector2(230, 64)
 layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 28
-text = "🎒 0/8"
+text = "🎒 0/8  $0"
 
 [node name="ToastLabel" type="Label" parent="."]
 unique_name_in_owner = true

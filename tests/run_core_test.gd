@@ -15,6 +15,7 @@ var trash_point: SearchPoint
 var ball_point: SearchPoint
 var ext_a: ExtractionPoint
 var ext_b: ExtractionPoint
+var ball_table: LootTableData
 var ended: Array[RunResult] = []
 var unlocked: Array[StringName] = []
 
@@ -42,7 +43,7 @@ func _run() -> void:
 
 func _build_world() -> void:
 	trash_point = _add_point(&"trash_1", Vector2(0, 0), TRASH_TABLE)
-	var ball_table := LootTableData.new()
+	ball_table = LootTableData.new()
 	var entry := LootEntry.new()
 	entry.item = DataRegistry.get_item(&"tennis_ball")
 	entry.weight = 1
@@ -76,9 +77,12 @@ func _test_focus() -> void:
 
 
 func _test_search_uses_run_rng() -> void:
+	# Points roll at run start sorted by search_id: ball_1 first, then trash_1.
 	var expected_rng := RandomNumberGenerator.new()
 	expected_rng.seed = SEED
+	ball_table.roll(expected_rng)
 	var expected := TRASH_TABLE.roll(expected_rng)
+	check_eq(trash_point.get_scent_rarity(), -1 if expected == null else expected.item.rarity, "scent matches pre-rolled loot")
 
 	await _move_dog(trash_point.global_position)
 	await _press_interact()

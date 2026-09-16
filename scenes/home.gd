@@ -16,7 +16,7 @@ func _ready() -> void:
 
 func _refresh() -> void:
 	var stash := Game.home_stash
-	_stash_label.text = "倉庫 %d/%d" % [stash.used_slot_count(), stash.capacity]
+	_stash_label.text = "倉庫 %d/%d　總價值 $%d" % [stash.used_slot_count(), stash.capacity, stash.total_value()]
 	# Dog Safe Inventory is run-scoped in Sprint 01, so it is empty at Home.
 	_dog_bag_label.text = "狗包 0/%d" % DataRegistry.balance.dog_safe_slots
 	_walk_button.disabled = not Game.can_start_run()

@@ -78,7 +78,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 0
 theme_override_font_sizes/font_size = 22
-text = "設為 04:50"
+text = "跳到撤離前 10 秒"
 
 [node name="UnlockButton" type="Button" parent="Body/Margin/Grid"]
 unique_name_in_owner = true

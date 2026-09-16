@@ -38,6 +38,10 @@ func refresh() -> void:
 			button.text = "%s\nx%d" % [stack.item.display_name, stack.quantity]
 		else:
 			button.text = stack.item.display_name
+		var text_color := Color(0.6, 0.6, 0.6) if stack == null else stack.item.get_rarity_color()
+		button.add_theme_color_override("font_color", text_color)
+		button.add_theme_color_override("font_hover_color", text_color)
+		button.add_theme_color_override("font_pressed_color", text_color)
 		button.modulate = Color(1.0, 0.85, 0.3) if i == _selected_index else Color.WHITE
 
 
