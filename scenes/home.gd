@@ -6,6 +6,7 @@ extends Control
 @onready var _walk_button: Button = %WalkButton
 @onready var _view_stash_button: Button = %ViewStashButton
 @onready var _stash_panel: StashPanel = %StashPanel
+@onready var _controls_label: Label = %ControlsLabel
 
 
 func _ready() -> void:
@@ -20,6 +21,7 @@ func _refresh() -> void:
 	# Dog Safe Inventory is run-scoped in Sprint 01, so it is empty at Home.
 	_dog_bag_label.text = "狗包 0/%d" % DataRegistry.balance.dog_safe_slots
 	_walk_button.disabled = not Game.can_start_run()
+	_controls_label.text = preload("res://ui/hud/run_hud.gd").controls_hint()
 
 
 func _on_walk_pressed() -> void:

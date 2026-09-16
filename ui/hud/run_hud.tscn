@@ -46,6 +46,7 @@ mouse_filter = 2
 [node name="TimeLabel" type="Label" parent="TopBar"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 0
 theme_override_font_sizes/font_size = 36
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "00:00"
@@ -75,6 +76,26 @@ grow_horizontal = 2
 theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_toast")
 horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="HintLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -420.0
+offset_right = -40.0
+offset_bottom = -330.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_toast")
+text = "WASD 移動"
+horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="InventoryPanel" parent="." instance=ExtResource("3_inventory")]

@@ -1,11 +1,11 @@
 class_name DebugPanel
 extends Control
 ## All Sprint 01 debug actions in one place. Removed from non-debug builds.
+## Hidden by default (blind QA): open with F1, or tap the run timer 5 times quickly.
 
 @export var run_manager: RunManager
 
 @onready var _info_label: Label = %InfoLabel
-@onready var _toggle_button: Button = %ToggleButton
 @onready var _body: Control = %Body
 
 
@@ -14,7 +14,6 @@ func _ready() -> void:
 		queue_free()
 		return
 	_body.hide()
-	_toggle_button.pressed.connect(toggle)
 	_bind(%AddMinuteButton, func() -> void: run_manager.debug_add_time(60.0))
 	_bind(%SetTimeButton, func() -> void: run_manager.debug_skip_to_next_unlock(10.0))
 	_bind(%UnlockButton, func() -> void: run_manager.debug_unlock_all_extractions())

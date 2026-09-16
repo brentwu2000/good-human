@@ -3,11 +3,18 @@ extends CanvasLayer
 ## Reads RunManager / DogController; never changes run rules itself.
 
 const TOAST_SECONDS: float = 2.4
+const DEBUG_TAPS: int = 5
+const DEBUG_TAP_WINDOW: float = 2.0
+const HINT_SECONDS: float = 12.0
+const HINT_MOVE_DISTANCE: float = 250.0
 
 @export var run_manager: RunManager
 
 var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
+var _debug_taps: Array[float] = []
+var _hint_time_left: float = HINT_SECONDS
+var _dog_start: Vector2
 
 @onready var _time_label: Label = %TimeLabel
 @onready var _bag_button: Button = %BagButton
@@ -16,6 +23,7 @@ var _toast_time_left: float = 0.0
 @onready var _inventory_panel: InventoryPanel = %InventoryPanel
 @onready var _interact_button: TouchActionButton = _touch_controls.get_node("%InteractButton")
 @onready var _debug_panel: DebugPanel = get_node_or_null("%DebugPanel")
+@onready var _hint_label: Label = %HintLabel
 
 
 func _ready() -> void:
@@ -25,6 +33,8 @@ func _ready() -> void:
 	_toast_label.hide()
 	if _debug_panel != null:
 		_debug_panel.run_manager = run_manager
+		_time_label.gui_input.connect(_on_time_label_input)
+	_hint_label.text = controls_hint()
 
 	run_manager.run_started.connect(_on_run_started)
 	run_manager.loot_gained.connect(_on_loot_gained)
@@ -41,6 +51,7 @@ func _process(delta: float) -> void:
 		toggle_inventory()
 	_update_time()
 	_update_toast(delta)
+	_update_hint(delta)
 
 
 func toggle_inventory() -> void:
@@ -55,12 +66,44 @@ func show_toast(message: String, color: Color = Color.WHITE, big: bool = false) 
 	_toast_queue.append({"text": message, "color": color, "big": big})
 
 
+## Controls text shown in the first seconds of a walk.
+static func controls_hint() -> String:
+	# Not is_touchscreen_available(): mouse-to-touch emulation makes it true on desktop.
+	if OS.has_feature("mobile"):
+		return "左下拖曳移動 · 右下按鈕聞聞看 · 🎒 看背包"
+	return "WASD 移動 · E 聞聞看／互動 · Tab 背包\n（也可以用滑鼠拖曳左下搖桿）"
+
+
+func _update_hint(delta: float) -> void:
+	if not _hint_label.visible:
+		return
+	_hint_time_left -= delta
+	var moved := run_manager.dog != null and run_manager.dog.global_position.distance_to(_dog_start) > HINT_MOVE_DISTANCE
+	if _hint_time_left <= 0.0 or moved:
+		_hint_label.hide()
+
+
+func _on_time_label_input(event: InputEvent) -> void:
+	var press := event as InputEventMouseButton
+	if press == null or not press.pressed or press.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var now := Time.get_ticks_msec() / 1000.0
+	_debug_taps.append(now)
+	while not _debug_taps.is_empty() and now - _debug_taps[0] > DEBUG_TAP_WINDOW:
+		_debug_taps.pop_front()
+	if _debug_taps.size() >= DEBUG_TAPS:
+		_debug_taps.clear()
+		_debug_panel.toggle()
+
+
 func _on_inventory_closed() -> void:
 	_touch_controls.show()
 
 
 func _on_run_started(_run_seed: int) -> void:
 	_inventory_panel.setup(run_manager.human_run_inventory, run_manager.dog_safe_inventory)
+	if run_manager.dog != null:
+		_dog_start = run_manager.dog.global_position
 	run_manager.human_run_inventory.changed.connect(_update_bag_button)
 	run_manager.dog_safe_inventory.changed.connect(_update_bag_button)
 	_update_bag_button()

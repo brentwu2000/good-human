@@ -25,12 +25,14 @@ func _run() -> void:
 	_tree.change_scene_to_file(Game.BOOT_SCENE)
 	await _wait_for_scene(Game.HOME_SCENE)
 	check_eq(Game.home_stash.used_slot_count(), 0, "fresh stash empty")
+	check(not (_tree.current_scene.get_node("%ControlsLabel") as Label).text.is_empty(), "home shows controls")
 
 	# 3–4: start walk.
 	_press(_tree.current_scene.get_node("%WalkButton"))
 	await _wait_for_scene(Game.RUN_MAP_SCENE)
 	var first := await _run_parts()
 	var seed_1: int = first.run_seed
+	check(first.hud.get_node("%HintLabel").visible, "controls hint shown at walk start")
 	check(first.search_points.size() >= 10, "map has at least 10 search points")
 
 	# 6–8: search the alley trash can for real (loot follows the seed).
@@ -39,6 +41,15 @@ func _run() -> void:
 
 	# 9–11: debug mysterious item, move it into the dog safe slot through the panel.
 	var debug := first.hud.get_node("%DebugPanel") as DebugPanel
+	check(not debug.get_node("%Body").visible, "debug panel hidden by default")
+	var timer_label := first.hud.get_node("%TimeLabel") as Label
+	for i in 5:
+		var tap := InputEventMouseButton.new()
+		tap.button_index = MOUSE_BUTTON_LEFT
+		tap.pressed = true
+		timer_label.gui_input.emit(tap)
+	check(debug.get_node("%Body").visible, "5 taps on timer open debug panel")
+	debug.toggle()
 	_press(debug.get_node("%ClearBagButton"))
 	_press(debug.get_node("%GiveBallButton"))
 	_press(debug.get_node("%GiveMysteryButton"))

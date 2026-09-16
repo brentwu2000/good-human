@@ -30,6 +30,8 @@ Allowed states: `TODO`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`
 Claude owns engineering status. Codex QA does not change implementation task states; QA produces reports.
 
 ## Engineering Notes (Claude)
-- Validation: `tests/run_all.sh` (8 headless scene tests incl. automated golden path). Windows debug build: `build/windows/GoodHuman.exe`.
+- Validation: `tests/run_all.sh` (8 headless scene tests incl. automated golden path).
+- Builds (gitignored, rebuilt by Claude): owner/debug `build/windows/GoodHuman.exe`; blind QA release (no debug panel) `build/windows_qa/GoodHuman.exe`.
+- Debug panel (debug builds only) is hidden: F1, or tap the run timer 5 times quickly.
 - P0-019 BLOCKED: no JDK 17 / Android SDK installed on the dev machine.
 - P0-020: owner playtest #1 → "沒感覺"; tuning pass applied (owner on leash, loot value/rarity feedback, pre-rolled scent hints, discard). Playtest #2 → "好多了". Tuned values (3:00 / 5:00 extraction, 16 search points) approved and written into SPRINT_01_WALK.md. Awaiting Android (P0-019) and Codex QA.
