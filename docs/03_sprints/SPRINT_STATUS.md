@@ -24,8 +24,8 @@ Allowed states: `TODO`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`
 | P0-016 | Home Stash | REVIEW |
 | P0-017 | Second Run reset | REVIEW |
 | P0-018 | Debug Panel | REVIEW |
-| P0-019 | Android export | BLOCKED |
-| P0-020 | Sprint playtest readiness | IN_PROGRESS |
+| P0-019 | Android export | TODO |
+| P0-020 | Sprint playtest readiness | REVIEW |
 
 Claude owns engineering status. Codex QA does not change implementation task states; QA produces reports.
 
@@ -33,5 +33,5 @@ Claude owns engineering status. Codex QA does not change implementation task sta
 - Validation: `tests/run_all.sh` (8 headless scene tests incl. automated golden path).
 - Builds (gitignored, rebuilt by Claude): owner/debug `build/windows/GoodHuman.exe`; blind QA release (no debug panel) `build/windows_qa/GoodHuman.exe`.
 - Debug panel (debug builds only) is hidden: F1, or tap the run timer 5 times quickly.
-- P0-019 BLOCKED: no JDK 17 / Android SDK installed on the dev machine.
-- P0-020: owner playtest #1 → "沒感覺"; tuning pass applied (owner on leash, loot value/rarity feedback, pre-rolled scent hints, discard). Playtest #2 → "好多了". Tuned values (3:00 / 5:00 extraction, 16 search points) approved and written into SPRINT_01_WALK.md. Awaiting Android (P0-019) and Codex QA.
+- P0-019 deferred by owner decision (2026-09-17): Android is not validated for now. When resumed, it needs JDK 17 + Android SDK on the dev machine.
+- P0-020: owner playtest #1 → "沒感覺"; tuning pass applied (owner on leash, loot value/rarity feedback, pre-rolled scent hints, discard). Playtest #2 → "好多了". Tuned values (3:00 / 5:00 extraction, 16 search points) approved and written into SPRINT_01_WALK.md. Ready for Codex blind QA on the Windows QA build.
