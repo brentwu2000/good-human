@@ -1,26 +1,23 @@
 # GOOD HUMAN! — Project Overview
 
 ## Pitch
-**Humans train dogs. You train humans.**
+GOOD HUMAN! reverses the familiar pet relationship: the player is a dog who gradually trains a randomly obtained human owner.
 
-The player is a dog. A random human adopts you; through walks, dog behaviors, exploration and dangerous encounters, you gradually train that human into an unexpectedly capable partner. Other dogs have humans too, and disputes between dogs may end with their humans fighting.
+Walks are extraction runs. The dog searches, causes situations, trains the human through behavior, encounters other dogs and lets the humans fight.
 
-## Product
-- 2D hand-drawn mobile indie game
-- Godot 4.x / GDScript
+## Core Loop
+Home → Walk → Search → Loot → Dog behavior → Human growth → Encounter → Auto battle + limited dog intervention → Greed vs extract → Home → Progress → Repeat
+
+## Platform / Format
+- Mobile first
+- Single-hand-friendly
+- 2D
+- Modern town/neighborhood
 - Single-player first
-- Single-hand mobile play
-- Modern neighborhood / park setting
-- Comedy + genuine dog/human attachment
+- Small indie-team scope
 
-## Experience Priorities
-1. Turn an ordinary/random human into *your* extraordinary human.
-2. Each walk should feel uncertain and tempting.
-3. Extraction creates the decision: leave safely or risk one more search.
-4. Comedy comes from the dog-centric systems and perspective.
+## First Major Goal
+Become ruler of the local park.
 
-## First Objective
-Become king of the local park. This is the first chapter goal, not the limit of the IP.
-
-## Opening (later MVP phase)
-The player chooses which randomized shelter/hospital dog they are. A short first-dog-person sequence establishes perspective. Random humans visit; dog behaviors influence who adopts the player. The owner is not directly selected and their true strengths/background are discovered over time.
+## Brand
+The phrase GOOD HUMAN! is the inversion of “Good boy!” and can also function as an in-game reward/feedback motif.

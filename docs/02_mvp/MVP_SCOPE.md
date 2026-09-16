@@ -1,24 +1,24 @@
 # GOOD HUMAN! — MVP Scope
 
-## MVP Purpose
-Prove three feelings before expanding content:
-1. “This is the human I raised through my dog actions.”
-2. “I have valuable loot; should I extract now?”
-3. “My human fights automatically, but I am still engaged as the dog.”
+## MVP Questions
+The MVP exists to prove:
+1. Does the player feel “this is the human I raised through dog behavior”?
+2. Does valuable loot create “I should extract, but I want one more” tension?
+3. Is autonomous human combat engaging because the dog can meaningfully intervene?
 
-## Development Sequence
-- Sprint 01 WALK — movement/search/loot/safe slots/extraction/home
+## Sprint Sequence
+- Sprint 01 WALK — movement/search/loot/inventory/extraction/save
 - Sprint 02 FIGHT — autonomous human combat and defeat
 - Sprint 03 TRAIN — dog behavior → TrainingTags → human growth
-- Sprint 04 DOG — leash/bark battle interventions
-- Sprint 05 GREED — risk gradient, rare loot, territory
-- Sprint 06 IDENTITY — randomized dog selection and human adoption opening
+- Sprint 04 DOG — dog battle interventions/QTE
+- Sprint 05 GREED — stronger extraction risk/reward and territory
+- Sprint 06 IDENTITY — kennel dog selection and random-human adoption opening
 
-## Vertical Slice Target
-30–60 minutes of replayable content before attempting the full 5–10 hour first chapter.
-
-## First Prototype Content
-One greybox map; ~10 search points; 12 initial items; 2 loot tables; 8-slot run inventory; 2 dog safe slots; 30-slot home stash; two timed extraction points; no combat.
-
-## Explicitly Out of Scope for Sprint 01
-Combat, QTE, training, skill tree, hospital, territory, random events, day/night, weather, adoption opening, multiple breeds, bosses, multiplayer, monetization and final art.
+## Explicitly Not MVP-First
+- Multiplayer implementation
+- Procedural city
+- Job minigames
+- Large dog roster
+- Deep economy
+- Full park story before core loop validation
+- Monetization

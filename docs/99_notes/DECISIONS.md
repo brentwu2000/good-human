@@ -1,31 +1,22 @@
-# GOOD HUMAN! — Accepted Decisions
+# Accepted Decisions
 
-## ADR-001 — Godot + GDScript
-Status: Accepted. Godot 4.x and GDScript are the project baseline.
+## ADR-001 — RunManager is not Autoload
+A run is temporary session state and is destroyed after leaving the run.
 
-## ADR-002 — RunManager is not Autoload
-Status: Accepted. A Run is a temporary session and its state should die with the Run scene.
+## ADR-002 — Fixed map, semi-random run
+Do not procedurally generate the city. Randomize content such as loot, encounters, events and extraction availability.
 
-## ADR-003 — Fixed Map + Semi-random Content
-Status: Accepted. Do not procedurally generate the city. Randomize run content inside a familiar map.
+## ADR-003 — Human combat is autonomous
+The player remains the dog. Human combat must not become direct player-controlled action combat.
 
-## ADR-004 — Human Combat is Auto Battle
-Status: Accepted. Direct human combat control would undermine the dog-player identity.
+## ADR-004 — Appearance != strength
+A frail-looking human may be extremely strong and a muscular human may be weak.
 
-## ADR-005 — One Random Owner
-Status: Accepted. The player does not collect humans; one randomized owner is developed over the save.
+## ADR-005 — Engineering and Art run in parallel
+Claude Code owns gameplay engineering. Codex owns the art pipeline. Missing final art does not block engineering.
 
-## ADR-006 — Appearance ≠ Strength
-Status: Accepted. Combat power must not be reliably readable from human silhouette/body type.
+## ADR-006 — Codex performs independent QA
+After each playable sprint, Codex uses a fresh context and tests without reading implementation details first.
 
-## ADR-007 — Three Inventory Layers
-Status: Accepted. Human Run Inventory is risky, Dog Safe Inventory is protected, Home Stash is permanent after extraction.
-
-## ADR-008 — Opening Comes After Core Validation
-Status: Accepted. Shelter dog selection and random-human adoption are important identity features but are not part of the first playable Sprint.
-
-## ADR-009 — Official Name
-Status: Accepted. The game is officially named **GOOD HUMAN!**. “狗老大” may be reused as an in-game title/rank rather than the product name.
-
-## ADR-010 — Portrait 720×1280, Mobile Renderer
-Status: Accepted. The game is portrait (base viewport 720×1280, `canvas_items` stretch, `expand` aspect) to support single-hand play; renderer is Mobile.
+## ADR-007 — Portrait 720×1280, Mobile renderer
+The game is portrait (base viewport 720×1280, `canvas_items` stretch, `expand` aspect) for single-hand play. Renderer is Godot Mobile. Art and UI are produced for this frame.
