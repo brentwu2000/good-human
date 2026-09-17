@@ -35,3 +35,29 @@ Claude owns engineering status. Codex QA does not change implementation task sta
 - Debug panel (debug builds only) is hidden: F1, or tap the run timer 5 times quickly.
 - P0-019 deferred by owner decision (2026-09-17): Android is not validated for now. When resumed, it needs JDK 17 + Android SDK on the dev machine.
 - P0-020: owner playtest #1 → "沒感覺"; tuning pass applied (owner on leash, loot value/rarity feedback, pre-rolled scent hints, discard). Playtest #2 → "好多了". Tuned values (3:00 / 5:00 extraction, 16 search points) approved and written into SPRINT_01_WALK.md. Codex blind QA deferred by owner (2026-09-17): the Codex environment could not operate the game window. Validation so far = owner playtests + automated `golden_path_test`.
+
+## Sprint 02 — FIGHT
+Do not begin until Sprint 01 is implementation-complete and has completed independent Codex QA.
+
+| ID | Task | Status |
+|---|---|---|
+| P1-001 | Combat foundation | TODO |
+| P1-002 | Human combat stats | TODO |
+| P1-003 | Combat skill data model | TODO |
+| P1-004 | Punch | TODO |
+| P1-005 | Kick | TODO |
+| P1-006 | Block | TODO |
+| P1-007 | Dodge | TODO |
+| P1-008 | Condition + priority AI | TODO |
+| P1-009 | Combat presentation | TODO |
+| P1-010 | Encounter trigger | TODO |
+| P1-011 | Provoke / Leave | TODO |
+| P1-012 | Ordinary opponents | TODO |
+| P1-013 | Old Master encounter | TODO |
+| P1-014 | Victory reward | TODO |
+| P1-015 | Defeat resolution | TODO |
+| P1-016 | Loss / dog-safe preservation | TODO |
+| P1-017 | Minimal hospital/result | TODO |
+| P1-018 | Debug/test hooks | TODO |
+| P1-019 | Android combat validation | TODO |
+| P1-020 | Sprint 02 QA readiness | TODO |
