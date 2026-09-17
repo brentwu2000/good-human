@@ -4,22 +4,29 @@ extends Node
 ## dragged, getting exhausted, hesitating near unfamiliar pairs, slowing down
 ## under a heavy bag. Values come from HumanTraits (GrowthResolver), so a
 ## trained owner visibly handles the same walk better. Presentation of
-## behaviour only; no stats or loot here.
+## behaviour only; no stats or loot here. Works in 2D and 3D (duck-typed
+## owner, coordinator and pairs; distances in meters).
 
 signal stumbled
 signal exhausted
-signal hesitated(pair: OpponentPair)
+## `pair` is an OpponentPair or OpponentPair3D.
+signal hesitated(pair: Node)
 
 ## Faster than this share of walk_speed counts as being dragged.
 const DRAGGED_SPEED_RATIO: float = 1.05
 const STUMBLE_HOLD: float = 0.35
-const MEET_DISTANCE: float = 200.0
+## Meters.
+const MEET_DISTANCE: float = 2.5
 const EXERTION_DECAY: float = 0.08
 const EXERTION_AFTER_REST: float = 0.25
 
 @export var run_manager: RunManager
-@export var human: HumanFollower
-@export var coordinator: CombatCoordinator
+## HumanFollower or HumanFollower3D.
+@export var human: Node
+## CombatCoordinator or CombatCoordinator3D.
+@export var coordinator: Node
+## World units per meter: 80 on the 2D map (pixels), 1 in 3D.
+@export var units_per_meter: float = 80.0
 
 var traits: HumanTraits = HumanTraits.new()
 ## 0..1; exhausted at 1.
@@ -48,7 +55,7 @@ func refresh_traits() -> void:
 
 
 func is_dragged() -> bool:
-	return human.is_following() and human.velocity.length() > human.walk_speed * DRAGGED_SPEED_RATIO
+	return human.is_following() and human.planar_speed() > human.walk_speed * DRAGGED_SPEED_RATIO
 
 
 func _physics_process(delta: float) -> void:
@@ -85,13 +92,13 @@ func _physics_process(delta: float) -> void:
 
 ## First time the dog brings the owner near a pair this walk.
 func _check_pairs() -> void:
-	var dog := run_manager.dog
+	var dog := run_manager.dog_actor
 	if dog == null or coordinator == null:
 		return
 	for pair in coordinator.get_pairs():
-		if not pair.is_present() or pair.state != OpponentPair.State.IDLE or _met_pairs.has(pair.spot_id):
+		if not pair.is_present() or not pair.is_idle() or _met_pairs.has(pair.spot_id):
 			continue
-		if dog.global_position.distance_to(pair.global_position) > MEET_DISTANCE:
+		if dog.global_position.distance_to(pair.global_position) > MEET_DISTANCE * units_per_meter:
 			continue
 		_met_pairs[pair.spot_id] = true
 		if traits.hesitation_time > 0.05:

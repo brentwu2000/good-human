@@ -9,13 +9,13 @@ const DRAG_SECONDS: float = 2.0
 ## A brief slowdown (stumble, breather, corner) does not break a drag.
 const DRAG_GRACE: float = 0.4
 ## Owner distance walked with a heavy bag for one moment.
-const HEAVY_BAG_DISTANCE: float = 400.0
+const HEAVY_BAG_DISTANCE: float = 5.0
 ## Owner held in place while the dog keeps pulling.
 const TUG_SECONDS: float = 0.6
 ## Owner distance per long-walk moment.
-const LONG_WALK_DISTANCE: float = 1500.0
+const LONG_WALK_DISTANCE: float = 18.75
 ## Dog staying near a pair counts as lingering.
-const LINGER_DISTANCE: float = 180.0
+const LINGER_DISTANCE: float = 2.25
 const LINGER_SECONDS: float = 2.0
 const ESCAPE_HURT_RATIO: float = 0.6
 const HARD_FIGHT_HP_RATIO: float = 0.4
@@ -24,8 +24,12 @@ const HARD_FIGHT_SECONDS: float = 12.0
 const LINE_GAP: float = 6.0
 
 @export var run_manager: RunManager
-@export var human: HumanFollower
-@export var coordinator: CombatCoordinator
+## HumanFollower or HumanFollower3D.
+@export var human: Node
+## CombatCoordinator or CombatCoordinator3D.
+@export var coordinator: Node
+## World units per meter: 80 on the 2D map (pixels), 1 in 3D.
+@export var units_per_meter: float = 80.0
 @export var behavior: OwnerBehavior
 
 var _drag_time: float = 0.0
@@ -34,7 +38,8 @@ var _heavy_distance: float = 0.0
 var _tug_time: float = 0.0
 var _walk_distance: float = 0.0
 var _linger: Dictionary[StringName, float] = {}
-var _last_position: Vector2
+## Vector2 or Vector3.
+var _last_position: Variant
 var _last_line_time: float = -INF
 
 
@@ -60,7 +65,7 @@ func _on_run_started(_seed: int) -> void:
 func _physics_process(delta: float) -> void:
 	if not run_manager.is_running():
 		return
-	var moved := human.global_position.distance_to(_last_position)
+	var moved: float = human.global_position.distance_to(_last_position)
 	_last_position = human.global_position
 	if not human.is_following():
 		_drag_time = 0.0
@@ -69,12 +74,12 @@ func _physics_process(delta: float) -> void:
 	# Ignore catch-up snaps.
 	if moved < human.walk_speed:
 		_walk_distance += moved
-	if _walk_distance >= LONG_WALK_DISTANCE:
-		_walk_distance -= LONG_WALK_DISTANCE
+	if _walk_distance >= LONG_WALK_DISTANCE * units_per_meter:
+		_walk_distance -= LONG_WALK_DISTANCE * units_per_meter
 		_record(&"endure_long_walk")
 
 	# RUN: dragged along at speed (a stumble or breather mid-drag still counts).
-	if human.velocity.length() > human.walk_speed * OwnerBehavior.DRAGGED_SPEED_RATIO:
+	if human.planar_speed() > human.walk_speed * OwnerBehavior.DRAGGED_SPEED_RATIO:
 		_drag_pause = 0.0
 		_drag_time += delta
 		if _drag_time >= DRAG_SECONDS:
@@ -88,10 +93,10 @@ func _physics_process(delta: float) -> void:
 	# STRAIN: walking with a heavy bag, or the dog pulling while the owner is stuck.
 	if run_manager.human_run_inventory.used_slot_count() >= DataRegistry.training.heavy_bag_slots:
 		_heavy_distance += moved if moved < human.walk_speed else 0.0
-		if _heavy_distance >= HEAVY_BAG_DISTANCE:
+		if _heavy_distance >= HEAVY_BAG_DISTANCE * units_per_meter:
 			_heavy_distance = 0.0
 			_record(&"strain_heavy_bag")
-	var dog := run_manager.dog
+	var dog := run_manager.dog_actor
 	if dog != null and human.hold_time > 0.0 and dog.global_position.distance_to(human.global_position) > human.max_length:
 		_tug_time += delta
 		if _tug_time >= TUG_SECONDS:
@@ -106,13 +111,13 @@ func _physics_process(delta: float) -> void:
 ## SOCIAL: hanging around a pair without starting a fight. COURAGE when the
 ## pair is secretly dangerous.
 func _check_lingering(delta: float) -> void:
-	var dog := run_manager.dog
+	var dog := run_manager.dog_actor
 	if dog == null:
 		return
 	for pair in coordinator.get_pairs():
-		if not pair.is_present() or pair.state != OpponentPair.State.IDLE:
+		if not pair.is_present() or not pair.is_idle():
 			continue
-		if dog.global_position.distance_to(pair.global_position) > LINGER_DISTANCE:
+		if dog.global_position.distance_to(pair.global_position) > LINGER_DISTANCE * units_per_meter:
 			_linger.erase(pair.spot_id)
 			continue
 		var before: float = _linger.get(pair.spot_id, 0.0)
@@ -125,15 +130,16 @@ func _check_lingering(delta: float) -> void:
 				_record(&"courage_linger_danger", pair.spot_id, context)
 
 
-func _on_engagement_started(engagement: Engagement) -> void:
-	var pair := engagement.pair
+## `engagement` is an Engagement or Engagement3D (pair + simulation).
+func _on_engagement_started(engagement: RefCounted) -> void:
+	var pair: Node = engagement.pair
 	var scale := 2.0 if pair.encounter.tier == EncounterData.Tier.OVERPOWERED else 1.0
 	_linger.erase(pair.spot_id)
 	_record(&"courage_provoke", pair.spot_id, {"name": pair.encounter.human.display_name}, scale)
 
 
-func _on_engagement_ended(engagement: Engagement, result: CombatSimulation.Result) -> void:
-	var sim := engagement.simulation
+func _on_engagement_ended(engagement: RefCounted, result: CombatSimulation.Result) -> void:
+	var sim: CombatSimulation = engagement.simulation
 	var hp := sim.fighters[CombatSimulation.PLAYER].hp_ratio()
 	match result:
 		CombatSimulation.Result.DISENGAGED:

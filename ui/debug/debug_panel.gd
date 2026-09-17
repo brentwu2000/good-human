@@ -4,7 +4,8 @@ extends Control
 ## Hidden by default (blind QA): open with F1, or tap the run timer 5 times quickly.
 
 @export var run_manager: RunManager
-var combat_coordinator: CombatCoordinator
+## CombatCoordinator or CombatCoordinator3D.
+var combat_coordinator: Node
 var owner_behavior: OwnerBehavior
 var goal_director: GoalDirector
 
@@ -26,14 +27,14 @@ func _ready() -> void:
 	_bind(%ClearBagButton, func() -> void: run_manager.human_run_inventory.clear())
 	_bind(%ExtractButton, func() -> void: run_manager.extract(&"debug"))
 	_bind(%FailButton, func() -> void: run_manager.fail_run())
-	_bind(%NextEncounterButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_goto_next_pair()))
-	_bind(%WinFightButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_force_result(CombatSimulation.Result.VICTORY)))
+	_bind(%NextEncounterButton, func() -> void: _with_combat(func(c: Node) -> void: c.debug_goto_next_pair()))
+	_bind(%WinFightButton, func() -> void: _with_combat(func(c: Node) -> void: c.debug_force_result(CombatSimulation.Result.VICTORY)))
 	_bind(%TrainAllButton, func() -> void: run_manager.training.debug_add_all(3.0))
 	_bind(%GrowFullButton, func() -> void: _set_growth(DataRegistry.training.trait_full_growth))
 	_bind(%ResetGrowthButton, func() -> void: _set_growth(0.0))
 	_bind(%CompleteDesireButton, func() -> void: _with_goals(func(g: GoalDirector) -> void: g.debug_complete_first()))
 	_bind(%ResetGoalsButton, func() -> void: _with_goals(func(g: GoalDirector) -> void: g.debug_reset_goals()))
-	_bind(%LoseFightButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_force_result(CombatSimulation.Result.DEFEAT)))
+	_bind(%LoseFightButton, func() -> void: _with_combat(func(c: Node) -> void: c.debug_force_result(CombatSimulation.Result.DEFEAT)))
 
 
 func _process(_delta: float) -> void:

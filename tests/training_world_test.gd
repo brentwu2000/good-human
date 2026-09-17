@@ -61,7 +61,7 @@ func _run() -> void:
 	check(exhausted[0] == 1 and human.hold_time > balance.recovery_trained + 0.3, "visible 2: untrained owner stops to catch breath for a while")
 	check_eq(_count(run, &"endure_exhausted"), 1, "ENDURE: pushed through exhaustion")
 	await _hold_until_free(human)
-	parts.observer._walk_distance = TrainingObserver.LONG_WALK_DISTANCE - 5.0
+	parts.observer._walk_distance = TrainingObserver.LONG_WALK_DISTANCE * parts.observer.units_per_meter - 5.0
 	await _drag(dog, human, Vector2.UP, 0.5)
 	check_eq(_count(run, &"endure_long_walk"), 1, "ENDURE: long walk")
 
@@ -70,7 +70,7 @@ func _run() -> void:
 		run.debug_give_item(&"boxing_gloves")
 	await _physics(2)
 	check_eq(human.speed_multiplier, balance.heavy_bag_speed_untrained, "visible 3: heavy bag slows the untrained owner")
-	parts.observer._heavy_distance = TrainingObserver.HEAVY_BAG_DISTANCE - 5.0
+	parts.observer._heavy_distance = TrainingObserver.HEAVY_BAG_DISTANCE * parts.observer.units_per_meter - 5.0
 	await _drag(dog, human, Vector2.DOWN, 0.5)
 	check(_count(run, &"strain_heavy_bag") >= 1, "STRAIN: carrying a heavy bag")
 	run.human_run_inventory.clear()

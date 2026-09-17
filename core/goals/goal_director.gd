@@ -8,17 +8,22 @@ extends Node
 ## Events: item_found, brought_home, extracted, pair_met, fight_started,
 ## fight_won, fight_lost, disengaged, cue_sniffed, squirrel_spotted,
 ## squirrel_treed, squirrel_escaped, place_visited.
+## Works in 2D and 3D: cues, squirrels, places and pairs are found by group and
+## used through shared methods; distances are in meters.
 
 signal desire_started(desire: DesireData, reason: StringName)
 signal desire_completed(desire: DesireData)
 signal desire_failed(desire: DesireData)
 signal discovered(category: StringName, id: StringName)
 
-## The dog counts as meeting a pair this close.
-const MEET_DISTANCE: float = 220.0
+## The dog counts as meeting a pair this close (meters).
+const MEET_DISTANCE: float = 2.75
 
 @export var run_manager: RunManager
-@export var coordinator: CombatCoordinator
+## CombatCoordinator or CombatCoordinator3D.
+@export var coordinator: Node
+## World units per meter: 80 on the 2D map (pixels), 1 in 3D.
+@export var units_per_meter: float = 80.0
 
 var tracker: DesireTracker
 
@@ -36,13 +41,12 @@ func _ready() -> void:
 	run_manager.loot_gained.connect(_on_loot_gained)
 	coordinator.engagement_started.connect(_on_engagement_started)
 	coordinator.engagement_ended.connect(_on_engagement_ended)
-	for node in get_tree().get_nodes_in_group(ScentCue.GROUP):
-		(node as ScentCue).sniffed.connect(func(cue: ScentCue) -> void: send(&"cue_sniffed", cue.cue_id))
-	for node in get_tree().get_nodes_in_group(Squirrel.GROUP):
-		var squirrel := node as Squirrel
-		squirrel.spotted.connect(func(s: Squirrel) -> void: send(&"squirrel_spotted", s.squirrel_id))
-		squirrel.treed.connect(func(s: Squirrel) -> void: send(&"squirrel_treed", s.squirrel_id))
-		squirrel.escaped.connect(func(s: Squirrel) -> void: send(&"squirrel_escaped", s.squirrel_id))
+	for cue in _in_run(ScentCue.GROUP):
+		cue.connect(&"sniffed", func(c: Node) -> void: send(&"cue_sniffed", c.cue_id))
+	for squirrel in _in_run(Squirrel.GROUP):
+		squirrel.connect(&"spotted", func(s: Node) -> void: send(&"squirrel_spotted", s.squirrel_id))
+		squirrel.connect(&"treed", func(s: Node) -> void: send(&"squirrel_treed", s.squirrel_id))
+		squirrel.connect(&"escaped", func(s: Node) -> void: send(&"squirrel_escaped", s.squirrel_id))
 
 
 ## Reports one semantic event to the tracker.
@@ -64,8 +68,8 @@ func _on_run_started(_seed: int) -> void:
 	_visited_places.clear()
 	for pair in coordinator.get_pairs():
 		pair.refresh_presence()
-	for node in get_tree().get_nodes_in_group(Squirrel.GROUP):
-		(node as Squirrel).prepare(run_manager.dog, run_manager.run_rng)
+	for squirrel in _in_run(Squirrel.GROUP):
+		squirrel.prepare(run_manager.dog_actor, run_manager.run_rng)
 	tracker.human_perks = Game.human_growth.perks.size()
 	tracker.undiscovered = _undiscovered_counts()
 	tracker.begin_walk(run_manager.run_rng)
@@ -83,19 +87,18 @@ func _on_run_ended(result: RunResult) -> void:
 # --- World observation --------------------------------------------------------------
 
 func _physics_process(_delta: float) -> void:
-	if not run_manager.is_running() or run_manager.dog == null:
+	if not run_manager.is_running() or run_manager.dog_actor == null:
 		return
-	var dog_position := run_manager.dog.global_position
+	var dog_position: Variant = run_manager.dog_actor.global_position
 	for pair in coordinator.get_pairs():
 		if not pair.is_present() or _met_pairs.has(pair.spot_id):
 			continue
-		if dog_position.distance_to(pair.human_global_position()) <= MEET_DISTANCE:
+		if dog_position.distance_to(pair.human_global_position()) <= MEET_DISTANCE * units_per_meter:
 			_met_pairs[pair.spot_id] = true
 			var is_new := _discover(&"dogs", pair.encounter.id)
 			_discover(&"humans", pair.encounter.human.id)
 			send(&"pair_met", pair.encounter.id, is_new)
-	for node in get_tree().get_nodes_in_group(PlaceMarker.GROUP):
-		var place := node as PlaceMarker
+	for place in _in_run(PlaceMarker.GROUP):
 		if _visited_places.has(place.place_id) or dog_position.distance_to(place.global_position) > place.radius:
 			continue
 		_visited_places[place.place_id] = true
@@ -106,12 +109,13 @@ func _on_loot_gained(item: ItemData, _quantity: int) -> void:
 	send(&"item_found", item.id, _discover(&"items", item.id))
 
 
-func _on_engagement_started(engagement: Engagement) -> void:
+## `engagement` is an Engagement or Engagement3D.
+func _on_engagement_started(engagement: RefCounted) -> void:
 	send(&"fight_started", engagement.pair.encounter.id)
 
 
-func _on_engagement_ended(engagement: Engagement, result: CombatSimulation.Result) -> void:
-	var id := engagement.pair.encounter.id
+func _on_engagement_ended(engagement: RefCounted, result: CombatSimulation.Result) -> void:
+	var id: StringName = engagement.pair.encounter.id
 	match result:
 		CombatSimulation.Result.VICTORY:
 			send(&"fight_won", id)
@@ -157,8 +161,8 @@ func _undiscovered_counts() -> Dictionary[StringName, int]:
 	for pair in coordinator.get_pairs():
 		if pair.is_present() and not progress.is_discovered(&"dogs", pair.encounter.id):
 			counts[&"dogs"] += 1
-	for node in get_tree().get_nodes_in_group(PlaceMarker.GROUP):
-		if not progress.is_discovered(&"places", (node as PlaceMarker).place_id):
+	for place in _in_run(PlaceMarker.GROUP):
+		if not progress.is_discovered(&"places", place.place_id):
 			counts[&"places"] += 1
 	return counts
 
@@ -171,39 +175,46 @@ func _refresh_cues() -> void:
 	for desire in tracker.active:
 		if not desire.hint_target.is_empty():
 			targets[desire.hint_target] = true
-	for node in get_tree().get_nodes_in_group(ScentCue.GROUP):
-		var cue := node as ScentCue
+	for cue in _in_run(ScentCue.GROUP):
 		cue.set_active(targets.has(cue.cue_id))
 	for pair in coordinator.get_pairs():
 		if pair.is_present():
-			pair.set_hinted(targets.has(pair.encounter.id) and pair.state != OpponentPair.State.BEATEN)
+			pair.set_hinted(targets.has(pair.encounter.id) and not pair.is_beaten())
 
 
 ## Closest thing an active desire points at (for the HUD arrow), or null.
-func hint_position(from: Vector2) -> Variant:
+## `from` and the result are Vector2 in 2D, Vector3 in 3D.
+func hint_position(from: Variant) -> Variant:
 	var best: Variant = null
 	for desire in tracker.active:
 		var target := desire.hint_target
 		if target.is_empty():
 			continue
-		for node in get_tree().get_nodes_in_group(ScentCue.GROUP):
-			var cue := node as ScentCue
+		for cue in _in_run(ScentCue.GROUP):
 			if cue.cue_id == target and cue.active:
 				best = _closer(from, best, cue.global_position)
 		for pair in coordinator.get_pairs():
 			if pair.is_present() and pair.encounter.id == target:
 				best = _closer(from, best, pair.human_global_position())
-		for node in get_tree().get_nodes_in_group(Squirrel.GROUP):
-			var squirrel := node as Squirrel
+		for squirrel in _in_run(Squirrel.GROUP):
 			if squirrel.squirrel_id == target and squirrel.visible:
 				best = _closer(from, best, squirrel.global_position)
 	return best
 
 
-func _closer(from: Vector2, current: Variant, candidate: Vector2) -> Vector2:
+func _closer(from: Variant, current: Variant, candidate: Variant) -> Variant:
 	if current == null or from.distance_to(candidate) < from.distance_to(current):
 		return candidate
 	return current
+
+
+## Nodes of a group that belong to this run's scene.
+func _in_run(group: StringName) -> Array[Node]:
+	var nodes: Array[Node] = []
+	for node in get_tree().get_nodes_in_group(group):
+		if owner == null or owner.is_ancestor_of(node):
+			nodes.append(node)
+	return nodes
 
 
 # --- Debug ----------------------------------------------------------------------------

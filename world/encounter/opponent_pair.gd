@@ -123,6 +123,10 @@ func end_combat(result: CombatSimulation.Result) -> void:
 		state = State.RETURNING
 
 
+func is_idle() -> bool:
+	return state == State.IDLE
+
+
 func is_beaten() -> bool:
 	return state == State.BEATEN
 

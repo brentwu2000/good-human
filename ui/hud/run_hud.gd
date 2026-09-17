@@ -11,7 +11,7 @@ const EXPERIENCE_SECONDS: float = 2.2
 
 @export var run_manager: RunManager
 ## Optional; enables the combat debug buttons.
-@export var combat_coordinator: CombatCoordinator
+@export var combat_coordinator: Node
 @export var owner_behavior: OwnerBehavior
 @export var goal_director: GoalDirector
 

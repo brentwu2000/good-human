@@ -7,7 +7,8 @@ extends CanvasLayer
 const POPUP_SECONDS: float = 2.6
 const ARROW_RADIUS: float = 250.0
 ## Arrow hides when the target is already on screen.
-const ARROW_MIN_DISTANCE: float = 380.0
+## Meters (scaled by the director's units_per_meter).
+const ARROW_MIN_DISTANCE: float = 4.75
 const CATEGORY_ICONS: Dictionary = {
 	DesireData.Category.SCENT: "👃",
 	DesireData.Category.CHASE: "🐿",
@@ -109,17 +110,36 @@ func _update_popup(delta: float) -> void:
 
 
 func _update_arrow() -> void:
-	var dog := run_manager.dog
+	var dog := run_manager.dog_actor
 	if dog == null or not run_manager.is_running():
 		_arrow.hide()
 		return
 	var target: Variant = director.hint_position(dog.global_position)
-	if target == null or dog.global_position.distance_to(target) < ARROW_MIN_DISTANCE:
+	if target == null or dog.global_position.distance_to(target) < ARROW_MIN_DISTANCE * director.units_per_meter:
 		_arrow.hide()
 		return
-	var direction: Vector2 = ((target as Vector2) - dog.global_position).normalized()
+	var direction := _screen_direction(dog, target)
+	if direction == Vector2.ZERO:
+		_arrow.hide()
+		return
 	var center := _arrow.get_viewport_rect().size / 2.0
 	_arrow.show()
 	_arrow.pivot_offset = _arrow.size / 2.0
 	_arrow.position = center + direction * ARROW_RADIUS - _arrow.size / 2.0
 	_arrow.rotation = direction.angle()
+
+
+## On-screen direction from the dog to the target. In 3D the target is
+## projected through the camera (flipped when it is behind the camera).
+func _screen_direction(dog: Node, target: Variant) -> Vector2:
+	if dog is Node2D:
+		return ((target as Vector2) - (dog as Node2D).global_position).normalized()
+	var camera := get_viewport().get_camera_3d()
+	if camera == null:
+		return Vector2.ZERO
+	var from := camera.unproject_position((dog as Node3D).global_position)
+	var to := camera.unproject_position(target as Vector3)
+	var direction := (to - from).normalized()
+	if camera.is_position_behind(target as Vector3):
+		direction = -direction
+	return direction

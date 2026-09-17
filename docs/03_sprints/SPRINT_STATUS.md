@@ -218,13 +218,13 @@ Owner approved 2026-09-17. Plan: `docs/03_sprints/P_03_3D_CONTENT_PORT.md`.
 
 | ID | Task | Status |
 |---|---|---|
-| V3C-001 | Observers work in 2D and 3D | IN_PROGRESS |
-| V3C-002 | Owner behaviour traits in 3D | TODO |
-| V3C-003 | Training events in 3D | TODO |
-| V3C-004 | 3D combat coordinator parity | TODO |
-| V3C-005 | Dog desires + desire HUD in 3D | TODO |
-| V3C-006 | Scent cues, squirrel, places in 3D | TODO |
-| V3C-007 | Rival and Old Master in 3D | TODO |
-| V3C-008 | Debug panel in 3D | TODO |
+| V3C-001 | Observers work in 2D and 3D | REVIEW |
+| V3C-002 | Owner behaviour traits in 3D | IN_PROGRESS |
+| V3C-003 | Training events in 3D | IN_PROGRESS |
+| V3C-004 | 3D combat coordinator parity | IN_PROGRESS |
+| V3C-005 | Dog desires + desire HUD in 3D | IN_PROGRESS |
+| V3C-006 | Scent cues, squirrel, places in 3D | IN_PROGRESS |
+| V3C-007 | Rival and Old Master in 3D | IN_PROGRESS |
+| V3C-008 | Debug panel in 3D | IN_PROGRESS |
 | V3C-009 | Scene tests | TODO |
 | V3C-010 | Build for owner playtest | TODO |

@@ -85,6 +85,11 @@ func _update_follow_animation() -> void:
 		_owner_sprite.play(next_animation)
 
 
+## Movement speed on the ground plane (shared with HumanFollower3D).
+func planar_speed() -> float:
+	return velocity.length()
+
+
 func is_following() -> bool:
 	return state == State.FOLLOW
 
