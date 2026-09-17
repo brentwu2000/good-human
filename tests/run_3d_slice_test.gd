@@ -65,6 +65,29 @@ func _run() -> void:
 	await _hold(&"move_right", 40)
 	check(absf(rig.yaw) < 0.05, "walking sideways keeps the camera still")
 
+	# Turning then walking forward: the camera eases round smoothly (no jumps).
+	dog.velocity = Vector3.ZERO
+	await _physics(20)
+	var largest_step := 0.0
+	var previous := rig.yaw
+	Input.action_press(&"move_up")
+	for i in 90:
+		await _tree.physics_frame
+		largest_step = maxf(largest_step, absf(angle_difference(previous, rig.yaw)))
+		previous = rig.yaw
+	Input.action_release(&"move_up")
+	check(largest_step < 0.08, "camera turns without jumps (max step %.3f rad)" % largest_step)
+
+	# Arrow keys turn the camera by hand, and auto-follow waits.
+	rig.yaw = 0.0
+	dog.velocity = Vector3.ZERO
+	await _physics(10)
+	await _hold(&"camera_turn_right", 20)
+	check(rig.yaw < -0.3, "arrow key turns the camera")
+	var turned := rig.yaw
+	await _physics(10)
+	check(is_equal_approx(rig.yaw, turned), "camera stays where the player turned it")
+
 	# Owner between camera and dog fades.
 	dog.global_position = Vector3(0, 0.1, 2.5)
 	dog.velocity = Vector3.ZERO

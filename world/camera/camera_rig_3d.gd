@@ -5,21 +5,28 @@ extends Node3D
 ## anything too close, the owner or foliage that hides the dog fades out.
 ## Fights pull the camera back to frame both humans. Framing never changes
 ## gameplay.
+## Turning: the camera eases behind the dog continuously, weighted by how much
+## the stick points forward (sideways input doesn't spin it; no hard
+## thresholds, so it never starts or stops abruptly). Players can also turn it
+## by dragging on the right side of the screen or with the arrow keys.
 
 const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0}
 ## Pulled back to keep the dog and both humans in view during a fight.
 const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.5, "fov": 64.0}
 
 @export var smoothing: float = 6.0
-@export var yaw_follow_speed: float = 2.2
+## Auto-follow rate when running straight ahead (per second, exponential).
+@export var follow_rate: float = 2.4
+## Arrow keys (rad/s).
+@export var manual_turn_speed: float = 2.4
+## Screen drag (rad per pixel).
+@export var drag_turn_sensitivity: float = 0.006
+## Auto-follow waits this long after a manual turn.
+@export var manual_hold_seconds: float = 1.5
 @export var collision_margin: float = 0.25
 ## A wall may pull the camera in down to this distance; anything closer fades
 ## instead, so the camera stays low behind the dog.
 @export var collision_min_distance: float = 1.2
-## The camera swings behind the dog only while the stick points within this
-## angle (deg) of forward and the dog already faces roughly away from the
-## camera, so sideways input doesn't spin dog and camera in circles.
-@export var follow_max_angle: float = 50.0
 
 var dog: DogController3D
 var owner_actor: HumanFollower3D
@@ -31,6 +38,7 @@ var collided: bool = false
 var camera: Camera3D
 var _focus: Vector3
 var _faded: Dictionary[Node, bool] = {}
+var _manual_hold: float = 0.0
 
 
 func _ready() -> void:
@@ -69,9 +77,8 @@ func _update(delta: float, instant: bool) -> void:
 	for key: String in ["pivot", "pitch", "distance", "fov"]:
 		current[key] = lerpf(current[key], target[key], t)
 
-	if not instant and dog.planar_speed() > 0.5 and _stick_points_forward() \
-			and absf(angle_difference(yaw, dog.heading())) <= deg_to_rad(follow_max_angle):
-		yaw = lerp_angle(yaw, dog.heading(), minf(yaw_follow_speed * delta, 1.0))
+	if not instant:
+		_update_yaw(delta)
 	dog.camera_yaw = yaw
 
 	var focus := dog.global_position + Vector3(0, current["pivot"], 0)
@@ -90,11 +97,40 @@ func _update(delta: float, instant: bool) -> void:
 	_update_owner_fade()
 
 
-func _stick_points_forward() -> bool:
+func _update_yaw(delta: float) -> void:
+	var turn := Input.get_axis("camera_turn_left", "camera_turn_right")
+	if turn != 0.0:
+		yaw -= turn * manual_turn_speed * delta
+		_manual_hold = manual_hold_seconds
+	_manual_hold -= delta
+	if _manual_hold > 0.0 or dog.planar_speed() < 0.3:
+		return
+	yaw = lerp_angle(yaw, dog.heading(), 1.0 - exp(-follow_rate * follow_weight() * delta))
+
+
+## 0..1: how strongly the camera should ease behind the dog right now.
+## Forward stick at full speed = 1; sideways or backwards = 0; smooth between.
+func follow_weight() -> float:
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	if input.y >= -0.1:
-		return false
-	return rad_to_deg(atan2(absf(input.x), -input.y)) <= follow_max_angle
+	if input.length() < 0.05:
+		return 0.0
+	var forward := clampf(-input.y / input.length(), 0.0, 1.0)
+	var speed := clampf(dog.planar_speed() / dog.walk_speed, 0.0, 1.0)
+	return forward * forward * speed
+
+
+## Drag on the right side of the screen (the joystick owns the left side).
+func _unhandled_input(event: InputEvent) -> void:
+	var relative_x := 0.0
+	var drag := event as InputEventScreenDrag
+	if drag != null and drag.position.x > get_viewport().get_visible_rect().size.x * 0.45:
+		relative_x = drag.relative.x
+	var motion := event as InputEventMouseMotion
+	if motion != null and motion.button_mask & MOUSE_BUTTON_MASK_RIGHT:
+		relative_x = motion.relative.x
+	if relative_x != 0.0:
+		yaw -= relative_x * drag_turn_sensitivity
+		_manual_hold = manual_hold_seconds
 
 
 ## Walls pull the camera in; fade-group occluders and too-close walls fade.
