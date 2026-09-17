@@ -1,0 +1,128 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://world/run_map_3d/run_map_3d.gd" id="1_map"]
+[ext_resource type="Script" path="res://actors/dog/dog_controller_3d.gd" id="2_dog"]
+[ext_resource type="Script" path="res://actors/human/human_follower_3d.gd" id="3_human"]
+[ext_resource type="Resource" path="res://data/combat/fighters/player_human.tres" id="4_player"]
+[ext_resource type="Script" path="res://world/search_point/search_point_3d.gd" id="5_search"]
+[ext_resource type="Resource" path="res://data/loot_tables/residential_trash.tres" id="6_trash"]
+[ext_resource type="Resource" path="res://data/loot_tables/park_search.tres" id="7_park"]
+[ext_resource type="Script" path="res://world/extraction/extraction_point_3d.gd" id="8_extract"]
+[ext_resource type="Script" path="res://world/encounter/opponent_pair_3d.gd" id="9_pair"]
+[ext_resource type="Resource" path="res://data/encounters/enc_delivery.tres" id="10_delivery"]
+[ext_resource type="Script" path="res://core/run/run_manager.gd" id="11_run"]
+[ext_resource type="Script" path="res://core/combat/combat_coordinator_3d.gd" id="12_coordinator"]
+[ext_resource type="PackedScene" path="res://ui/hud/run_hud.tscn" id="13_hud"]
+[ext_resource type="Resource" path="res://data/encounters/enc_gym.tres" id="14_gym"]
+
+[node name="RunMap3D01" type="Node3D" node_paths=PackedStringArray("dog", "human", "run_manager", "coordinator")]
+script = ExtResource("1_map")
+dog = NodePath("Actors/Dog")
+human = NodePath("Actors/Human")
+run_manager = NodePath("RunManager")
+coordinator = NodePath("CombatCoordinator3D")
+
+[node name="Actors" type="Node3D" parent="."]
+
+[node name="Dog" type="CharacterBody3D" parent="Actors"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 3)
+script = ExtResource("2_dog")
+
+[node name="Human" type="CharacterBody3D" parent="Actors" node_paths=PackedStringArray("dog")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.2, 3.9)
+script = ExtResource("3_human")
+dog = NodePath("../Dog")
+fighter = ExtResource("4_player")
+
+[node name="SearchPoints" type="Node3D" parent="."]
+
+[node name="trash_street_east" type="Node3D" parent="SearchPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.15, 3.3)
+script = ExtResource("5_search")
+search_id = &"trash_street_east"
+display_label = "垃圾桶"
+loot_table = ExtResource("6_trash")
+
+[node name="mailbox_street" type="Node3D" parent="SearchPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.15, 3.4)
+script = ExtResource("5_search")
+search_id = &"mailbox_street"
+display_label = "信箱"
+loot_table = ExtResource("6_trash")
+color = Color(0.8, 0.3, 0.3, 1)
+
+[node name="trash_far_side" type="Node3D" parent="SearchPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.15, -6.8)
+script = ExtResource("5_search")
+search_id = &"trash_far_side"
+display_label = "垃圾桶"
+loot_table = ExtResource("6_trash")
+
+[node name="bush_park_gate" type="Node3D" parent="SearchPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0, -23)
+script = ExtResource("5_search")
+search_id = &"bush_park_gate"
+display_label = "草叢"
+loot_table = ExtResource("7_park")
+color = Color(0.3, 0.7, 0.3, 1)
+
+[node name="bench_park" type="Node3D" parent="SearchPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34.5)
+script = ExtResource("5_search")
+search_id = &"bench_park"
+display_label = "長椅"
+loot_table = ExtResource("7_park")
+color = Color(0.65, 0.45, 0.3, 1)
+
+[node name="gym_corner" type="Node3D" parent="SearchPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -45)
+script = ExtResource("5_search")
+search_id = &"gym_corner"
+display_label = "運動器材"
+loot_table = ExtResource("7_park")
+color = Color(0.8, 0.5, 0.2, 1)
+
+[node name="ExtractionPoints" type="Node3D" parent="."]
+
+[node name="bus_stop" type="Node3D" parent="ExtractionPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.15, 3)
+script = ExtResource("8_extract")
+extraction_id = &"bus_stop"
+display_label = "🚌 公車站"
+unlock_time = 60.0
+unlock_message = "🚌 公車站現在可以撤離"
+
+[node name="park_north_gate" type="Node3D" parent="ExtractionPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -64)
+script = ExtResource("8_extract")
+extraction_id = &"park_north_gate"
+display_label = "🚪 公園北門"
+unlock_time = 120.0
+unlock_message = "🚪 公園北門現在可以撤離"
+
+[node name="Encounters" type="Node3D" parent="."]
+
+[node name="pair_park" type="Node3D" parent="Encounters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -37)
+script = ExtResource("9_pair")
+spot_id = &"pair_park"
+encounter = ExtResource("10_delivery")
+
+[node name="pair_street" type="Node3D" parent="Encounters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.15, -6.8)
+script = ExtResource("9_pair")
+spot_id = &"pair_street"
+encounter = ExtResource("14_gym")
+
+[node name="RunManager" type="Node" parent="." node_paths=PackedStringArray("dog_actor")]
+script = ExtResource("11_run")
+dog_actor = NodePath("../Actors/Dog")
+
+[node name="CombatCoordinator3D" type="Node" parent="." node_paths=PackedStringArray("run_manager", "human", "dog")]
+script = ExtResource("12_coordinator")
+run_manager = NodePath("../RunManager")
+human = NodePath("../Actors/Human")
+dog = NodePath("../Actors/Dog")
+
+[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager") instance=ExtResource("13_hud")]
+run_manager = NodePath("../RunManager")

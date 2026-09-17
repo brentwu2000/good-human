@@ -4,6 +4,7 @@ extends Control
 @onready var _stash_label: Label = %StashLabel
 @onready var _dog_bag_label: Label = %DogBagLabel
 @onready var _walk_button: Button = %WalkButton
+@onready var _walk_3d_button: Button = %Walk3DButton
 @onready var _view_stash_button: Button = %ViewStashButton
 @onready var _stash_panel: StashPanel = %StashPanel
 @onready var _controls_label: Label = %ControlsLabel
@@ -13,6 +14,7 @@ extends Control
 
 func _ready() -> void:
 	_walk_button.pressed.connect(_on_walk_pressed)
+	_walk_3d_button.pressed.connect(Game.start_run_3d)
 	_view_stash_button.pressed.connect(func() -> void: _stash_panel.open(Game.home_stash))
 	_refresh()
 

@@ -5,6 +5,8 @@ extends Node
 const BOOT_SCENE: String = "res://scenes/boot.tscn"
 const HOME_SCENE: String = "res://scenes/home.tscn"
 const RUN_MAP_SCENE: String = "res://world/run_map/run_map_01.tscn"
+## P-02 3D vertical slice (switchable top-down / dog view).
+const RUN_MAP_3D_SCENE: String = "res://world/run_map_3d/run_map_3d_01.tscn"
 const RUN_RESULT_SCENE: String = "res://ui/run_result/run_result.tscn"
 
 var home_stash: Inventory
@@ -34,6 +36,10 @@ func goto_home() -> void:
 
 func start_run() -> void:
 	_change_scene(RUN_MAP_SCENE)
+
+
+func start_run_3d() -> void:
+	_change_scene(RUN_MAP_3D_SCENE)
 
 
 func can_start_run() -> bool:

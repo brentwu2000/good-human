@@ -193,14 +193,22 @@ Owner approved the move to 3D (2026-09-17). Plan: `docs/03_sprints/P_02_3D_VERTI
 | ID | Task | Status |
 |---|---|---|
 | V3D-001 | Run systems accept 3D world objects | REVIEW |
-| V3D-002 | Dog 3D controller (camera-relative) | IN_PROGRESS |
-| V3D-003 | Owner 3D follower + leash | IN_PROGRESS |
-| V3D-004 | 3D interaction (Interactable3D) | IN_PROGRESS |
-| V3D-005 | 3D search + extraction points | IN_PROGRESS |
-| V3D-006 | Street + park slice level | IN_PROGRESS |
-| V3D-007 | Camera rig A/B switch | IN_PROGRESS |
-| V3D-008 | Occlusion: collision, owner fade, building fade | IN_PROGRESS |
-| V3D-009 | Seamless 3D fight (one pair) | IN_PROGRESS |
-| V3D-010 | Home entry + run flow | IN_PROGRESS |
-| V3D-011 | Scene test | TODO |
-| V3D-012 | Build for owner playtest | TODO |
+| V3D-002 | Dog 3D controller (camera-relative) | REVIEW |
+| V3D-003 | Owner 3D follower + leash | REVIEW |
+| V3D-004 | 3D interaction (Interactable3D) | REVIEW |
+| V3D-005 | 3D search + extraction points | REVIEW |
+| V3D-006 | Street + park slice level | REVIEW |
+| V3D-007 | Camera rig A/B switch | REVIEW |
+| V3D-008 | Occlusion: collision, owner fade, building fade | REVIEW |
+| V3D-009 | Seamless 3D fight (one pair) | REVIEW |
+| V3D-010 | Home entry + run flow | REVIEW |
+| V3D-011 | Scene test | REVIEW |
+| V3D-012 | Build for owner playtest | REVIEW |
+
+## P-02 Engineering Notes (Claude)
+- Play: Home → "🐕 3D 散步（試玩）" (the 2D walk stays next to it until the port is complete). Switch view with the 👁 button (top right) or V.
+- Validation: `tests/run_all.sh` (16 scene tests). `run_3d_slice_test` = Home → 3D walk, camera-relative movement in both views, view toggle (key + button), owner fade, top-down building fade vs dog-view wall collision, 3D search through RunManager, fight in place + disengage + victory reward, extraction → result → Home stash.
+- Reused unchanged: RunManager rules, loot tables, inventory, save, HUD, result, Home, CombatSimulation, growth stat bonuses. RunManager/RunHUD now accept a `dog_actor` of either dimension (V3D-001).
+- New 3D code: `DogController3D`, `HumanFollower3D` (+ leash, growth hooks), `Interactable3D`/`InteractionArea3D`, `SearchPoint3D`, `ExtractionPoint3D`, `OpponentPair3D`, `FighterPuppet3D`, `CombatCoordinator3D` (1 m = 100 simulation units, disengage 9 m), `CameraRig3D`, `RunMap3D` + `run_map_3d_01.tscn`, `Greybox` primitives.
+- Camera rules: movement is always relative to the camera. Top-down = fixed north, no collision, buildings near the dog and anything in front of it fade. Dog view = follows the dog's heading, walls pull the camera in (rises when too close), the owner fades while blocking, foliage fades, fights pull back to frame both humans. Switching to the dog view starts behind the dog's current heading.
+- Not in the slice yet: training/goal world observers, owner behaviour traits, squirrel/scents/places, rival and Old Master, debug combat buttons (the 2D debug panel's combat hooks don't target the 3D coordinator), full neighbourhood, 3D art, Android performance.
