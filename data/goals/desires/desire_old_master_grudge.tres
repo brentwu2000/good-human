@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="DesireData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://resources/desire_data.gd" id="1_desire"]
+[ext_resource type="Script" path="res://resources/desire_condition.gd" id="2_cond"]
+
+[sub_resource type="Resource" id="Cond_trigger"]
+script = ExtResource("2_cond")
+event_type = &"fight_started"
+subject = &"enc_old_master"
+only_new = false
+count = 1
+
+[sub_resource type="Resource" id="Cond_completion"]
+script = ExtResource("2_cond")
+event_type = &"fight_won"
+subject = &"enc_old_master"
+only_new = false
+count = 1
+
+[sub_resource type="Resource" id="Cond_failure"]
+script = ExtResource("2_cond")
+event_type = &"fight_lost"
+subject = &"enc_old_master"
+only_new = false
+count = 1
+
+[resource]
+script = ExtResource("1_desire")
+id = &"desire_old_master_grudge"
+category = 5
+layer = 1
+dog_text = "這個老爺爺…好像不太簡單？"
+world_hint = ""
+hint_target = &""
+priority = 25
+persistent = false
+trigger = SubResource("Cond_trigger")
+completion = SubResource("Cond_completion")
+failure = SubResource("Cond_failure")
+requires_flags = Array[StringName]([])
+blocked_by_flags = Array[StringName]([])
+min_human_perks = 0
+repeatable = false
+needs_undiscovered = &""
+next_on_complete = Array[StringName]([])
+next_on_fail = Array[StringName]([])
+sets_flags = Array[StringName]([&"old_master_beaten"])
+fail_sets_flags = Array[StringName]([&"lost_to_old_master"])
+complete_text = "主人…贏了那個老爺爺？！"
+fail_text = "主人被老爺爺一下就放倒了…"

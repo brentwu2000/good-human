@@ -6,6 +6,7 @@ extends Control
 @export var run_manager: RunManager
 var combat_coordinator: CombatCoordinator
 var owner_behavior: OwnerBehavior
+var goal_director: GoalDirector
 
 @onready var _info_label: Label = %InfoLabel
 @onready var _body: Control = %Body
@@ -30,6 +31,8 @@ func _ready() -> void:
 	_bind(%TrainAllButton, func() -> void: run_manager.training.debug_add_all(3.0))
 	_bind(%GrowFullButton, func() -> void: _set_growth(DataRegistry.training.trait_full_growth))
 	_bind(%ResetGrowthButton, func() -> void: _set_growth(0.0))
+	_bind(%CompleteDesireButton, func() -> void: _with_goals(func(g: GoalDirector) -> void: g.debug_complete_first()))
+	_bind(%ResetGoalsButton, func() -> void: _with_goals(func(g: GoalDirector) -> void: g.debug_reset_goals()))
 	_bind(%LoseFightButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_force_result(CombatSimulation.Result.DEFEAT)))
 
 
@@ -40,8 +43,7 @@ func _process(_delta: float) -> void:
 		toggle()
 	if _body.visible:
 		var seconds := int(run_manager.elapsed_time)
-		_info_label.text = "Run %02d:%02d   Seed %d
-%s" % [seconds / 60, seconds % 60, run_manager.run_seed, _training_text()]
+		_info_label.text = "Run %02d:%02d   Seed %d\n%s\n%s" % [seconds / 60, seconds % 60, run_manager.run_seed, _training_text(), _goals_text()]
 
 
 func toggle() -> void:
@@ -70,6 +72,23 @@ func _set_growth(value: float) -> void:
 	SaveManager.save_game()
 	if owner_behavior != null:
 		owner_behavior.refresh_traits()
+
+
+func _goals_text() -> String:
+	if goal_director == null:
+		return ""
+	var ids: Array[String] = []
+	for desire in goal_director.active_desires():
+		ids.append(String(desire.id))
+	var flags: Array[String] = []
+	for flag in Game.goal_progress.flags:
+		flags.append(String(flag))
+	return "Goals: %s  Flags: %s" % [", ".join(ids), ", ".join(flags)]
+
+
+func _with_goals(action: Callable) -> void:
+	if goal_director != null:
+		action.call(goal_director)
 
 
 func _with_combat(action: Callable) -> void:

@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="DesireData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/desire_data.gd" id="1_desire"]
+[ext_resource type="Script" path="res://resources/desire_condition.gd" id="2_cond"]
+
+[sub_resource type="Resource" id="Cond_trigger"]
+script = ExtResource("2_cond")
+event_type = &"item_found"
+subject = &"tennis_ball"
+only_new = false
+count = 1
+
+[sub_resource type="Resource" id="Cond_completion"]
+script = ExtResource("2_cond")
+event_type = &"brought_home"
+subject = &"tennis_ball"
+only_new = false
+count = 1
+
+[resource]
+script = ExtResource("1_desire")
+id = &"desire_bring_ball_home"
+category = 3
+layer = 1
+dog_text = "這顆網球…要帶回家收好！"
+world_hint = ""
+hint_target = &""
+priority = 15
+persistent = false
+trigger = SubResource("Cond_trigger")
+completion = SubResource("Cond_completion")
+requires_flags = Array[StringName]([])
+blocked_by_flags = Array[StringName]([])
+min_human_perks = 0
+repeatable = true
+needs_undiscovered = &""
+next_on_complete = Array[StringName]([])
+next_on_fail = Array[StringName]([])
+sets_flags = Array[StringName]([])
+fail_sets_flags = Array[StringName]([])
+complete_text = "網球平安到家了。"
+fail_text = ""

@@ -205,7 +205,7 @@ func debug_goto_next_pair() -> void:
 		return
 	var best: OpponentPair = null
 	for pair in _pairs:
-		if pair.state == OpponentPair.State.IDLE and pair.encounter != null:
+		if pair.state == OpponentPair.State.IDLE and pair.is_present():
 			if best == null or dog.global_position.distance_to(pair.global_position) < dog.global_position.distance_to(best.global_position):
 				best = pair
 	if best != null:

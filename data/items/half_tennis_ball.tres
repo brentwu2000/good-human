@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"half_tennis_ball"
+display_name = "半顆網球"
+description = "被咬成兩半的網球，上面有別隻狗的口水味。"
+type = 5
+rarity = 1
+stackable = false
+max_stack = 1
+value = 1

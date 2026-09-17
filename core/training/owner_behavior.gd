@@ -89,7 +89,7 @@ func _check_pairs() -> void:
 	if dog == null or coordinator == null:
 		return
 	for pair in coordinator.get_pairs():
-		if pair.encounter == null or pair.state != OpponentPair.State.IDLE or _met_pairs.has(pair.spot_id):
+		if not pair.is_present() or pair.state != OpponentPair.State.IDLE or _met_pairs.has(pair.spot_id):
 			continue
 		if dog.global_position.distance_to(pair.global_position) > MEET_DISTANCE:
 			continue

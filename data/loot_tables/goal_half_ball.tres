@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="LootTableData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/loot_table_data.gd" id="1_table"]
+[ext_resource type="Script" path="res://resources/loot_entry.gd" id="2_entry"]
+[ext_resource type="Resource" path="res://data/items/half_tennis_ball.tres" id="3_half_ball"]
+
+[sub_resource type="Resource" id="entry_half_ball"]
+script = ExtResource("2_entry")
+item = ExtResource("3_half_ball")
+weight = 1
+min_quantity = 1
+max_quantity = 1
+
+[resource]
+script = ExtResource("1_table")
+id = &"goal_half_ball"
+entries = Array[ExtResource("2_entry")]([SubResource("entry_half_ball")])
+nothing_weight = 0

@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="DesireData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/desire_data.gd" id="1_desire"]
+[ext_resource type="Script" path="res://resources/desire_condition.gd" id="2_cond"]
+
+[sub_resource type="Resource" id="Cond_completion"]
+script = ExtResource("2_cond")
+event_type = &"fight_won"
+subject = &"enc_old_master"
+only_new = false
+count = 1
+
+[sub_resource type="Resource" id="Cond_failure"]
+script = ExtResource("2_cond")
+event_type = &"fight_lost"
+subject = &"enc_old_master"
+only_new = false
+count = 1
+
+[resource]
+script = ExtResource("1_desire")
+id = &"desire_rematch_old_master"
+category = 5
+layer = 0
+dog_text = "主人好像變強了…要不要再去找那個老爺爺？"
+world_hint = "大樹下"
+hint_target = &"enc_old_master"
+priority = 40
+persistent = false
+completion = SubResource("Cond_completion")
+failure = SubResource("Cond_failure")
+requires_flags = Array[StringName]([&"lost_to_old_master"])
+blocked_by_flags = Array[StringName]([&"old_master_beaten"])
+min_human_perks = 2
+repeatable = true
+needs_undiscovered = &""
+next_on_complete = Array[StringName]([])
+next_on_fail = Array[StringName]([])
+sets_flags = Array[StringName]([&"old_master_beaten"])
+fail_sets_flags = Array[StringName]([])
+complete_text = "贏了老爺爺！公園的狗都在看！"
+fail_text = "還是差一點…再多練練。"

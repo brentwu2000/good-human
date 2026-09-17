@@ -1,0 +1,32 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://world/goals/scent_cue.gd" id="1_cue"]
+[ext_resource type="Script" path="res://core/interaction/interaction_area.gd" id="2_area"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 56.0
+
+[node name="ScentCue" type="Node2D"]
+script = ExtResource("1_cue")
+
+[node name="Visual" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = -80.0
+offset_top = -40.0
+offset_right = 80.0
+offset_bottom = 0.0
+theme_override_colors/font_color = Color(0.85, 0.6, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "〰？〰"
+horizontal_alignment = 1
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("2_area")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("CircleShape2D_area")

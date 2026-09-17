@@ -4,6 +4,7 @@ extends "res://tests/test_case.gd"
 const SPRINT_ITEMS: Array[StringName] = [
 	&"tennis_ball", &"dog_treat", &"sports_drink", &"bandage", &"old_running_shoes", &"umbrella",
 	&"jump_rope", &"hand_grip", &"dog_toy", &"old_sports_watch", &"boxing_gloves", &"mysterious_item",
+	&"half_tennis_ball",
 ]
 const TABLE_PATHS: Array[String] = [
 	"res://data/loot_tables/residential_trash.tres",
@@ -23,7 +24,7 @@ func _ready() -> void:
 
 
 func _test_registry() -> void:
-	check_eq(DataRegistry.get_all_item_ids().size(), SPRINT_ITEMS.size(), "registry has exactly the Sprint 01 items")
+	check_eq(DataRegistry.get_all_item_ids().size(), SPRINT_ITEMS.size(), "registry has exactly the known items")
 	for id in SPRINT_ITEMS:
 		var item := DataRegistry.get_item(id)
 		check(item != null, "item %s loaded" % id)

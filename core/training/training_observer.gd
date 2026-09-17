@@ -110,7 +110,7 @@ func _check_lingering(delta: float) -> void:
 	if dog == null:
 		return
 	for pair in coordinator.get_pairs():
-		if pair.encounter == null or pair.state != OpponentPair.State.IDLE:
+		if not pair.is_present() or pair.state != OpponentPair.State.IDLE:
 			continue
 		if dog.global_position.distance_to(pair.global_position) > LINGER_DISTANCE:
 			_linger.erase(pair.spot_id)

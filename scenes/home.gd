@@ -8,6 +8,7 @@ extends Control
 @onready var _stash_panel: StashPanel = %StashPanel
 @onready var _controls_label: Label = %ControlsLabel
 @onready var _growth_label: Label = %GrowthLabel
+@onready var _goals_label: Label = %GoalsLabel
 
 
 func _ready() -> void:
@@ -24,6 +25,7 @@ func _refresh() -> void:
 	_walk_button.disabled = not Game.can_start_run()
 	_controls_label.text = preload("res://ui/hud/run_hud.gd").controls_hint()
 	_growth_label.text = growth_text()
+	_goals_label.text = goals_text()
 
 
 ## The owner's unlocked changes, in words.
@@ -35,6 +37,30 @@ static func growth_text() -> String:
 	for perk in perks:
 		names.append("「%s」" % perk.display_name)
 	return "主人的變化：" + "、".join(names)
+
+
+## Unresolved dog threads (why go out again) and how much has been discovered.
+static func goals_text() -> String:
+	var progress := Game.goal_progress
+	var catalog := DataRegistry.goals
+	var lines: Array[String] = []
+	var threads: Array[String] = []
+	for desire in catalog.desires:
+		if progress.state_of(desire.id) == GoalProgress.State.DORMANT:
+			threads.append("・" + desire.dog_text)
+	if not threads.is_empty():
+		lines.append("狗狗還掛念著：")
+		lines.append_array(threads)
+	lines.append("發現　狗 %s・地點 %s・東西 %s" % [
+		_count_text(progress.discovered_count(&"dogs"), catalog.dogs.size()),
+		_count_text(progress.discovered_count(&"places"), catalog.places.size()),
+		_count_text(progress.discovered_count(&"items"), DataRegistry.get_all_item_ids().size()),
+	])
+	return "\n".join(lines)
+
+
+static func _count_text(found: int, total: int) -> String:
+	return "%d/%d" % [found, total]
 
 
 func _on_walk_pressed() -> void:

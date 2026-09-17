@@ -17,6 +17,8 @@ const DOG_OFFSET: float = 50.0
 @export var fixed_encounter: EncounterData
 ## Direction the pair faces while idle (-1 = left).
 @export var facing: float = -1.0
+## Only present once the dog has discovered this goal flag (empty = always).
+@export var required_flag: StringName
 
 var encounter: EncounterData
 var state: State = State.IDLE
@@ -45,7 +47,7 @@ func setup(data: EncounterData) -> void:
 	state = State.IDLE
 	if not is_node_ready():
 		return
-	visible = encounter != null
+	visible = is_present()
 	if encounter == null:
 		return
 	human_puppet.apply(encounter.human)
@@ -60,9 +62,31 @@ func setup(data: EncounterData) -> void:
 	_place_dog()
 
 
+## In the world this walk (has a pair and any required discovery).
+func is_present() -> bool:
+	return encounter != null and Game.goal_progress.has_flag(required_flag)
+
+
+## Shows a pair that was just discovered mid-walk.
+func refresh_presence() -> void:
+	visible = is_present()
+
+
+## Marks the pair as what the dog currently wants.
+func set_hinted(value: bool) -> void:
+	if encounter == null:
+		return
+	var label := "%s和%s" % [encounter.human.display_name, encounter.dog_name]
+	_name_label.text = "❗ " + label if value else label
+	if value:
+		_name_label.modulate = Color(1.0, 0.85, 0.4)
+	else:
+		_name_label.modulate = Color(0.6, 0.6, 0.6) if state == State.BEATEN else Color.WHITE
+
+
 func can_interact(context: Object) -> bool:
 	var run := context as RunManager
-	if not enabled or encounter == null or state != State.IDLE or run == null or not run.is_running():
+	if not enabled or not is_present() or state != State.IDLE or run == null or not run.is_running():
 		return false
 	return coordinator == null or coordinator.can_provoke(self)
 

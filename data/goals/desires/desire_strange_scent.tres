@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="DesireData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/desire_data.gd" id="1_desire"]
+[ext_resource type="Script" path="res://resources/desire_condition.gd" id="2_cond"]
+[ext_resource type="Resource" path="res://data/loot_tables/goal_half_ball.tres" id="3_reward"]
+
+[sub_resource type="Resource" id="Cond_completion"]
+script = ExtResource("2_cond")
+event_type = &"cue_sniffed"
+subject = &"scent_park"
+only_new = false
+count = 1
+
+[resource]
+script = ExtResource("1_desire")
+id = &"desire_strange_scent"
+category = 0
+layer = 0
+dog_text = "公園那邊飄來一股從沒聞過的味道…"
+world_hint = "公園長椅附近"
+hint_target = &"scent_park"
+priority = 30
+persistent = true
+completion = SubResource("Cond_completion")
+reward_table = ExtResource("3_reward")
+requires_flags = Array[StringName]([])
+blocked_by_flags = Array[StringName]([&"found_half_ball"])
+min_human_perks = 0
+repeatable = false
+needs_undiscovered = &""
+next_on_complete = Array[StringName]([&"desire_whose_ball"])
+next_on_fail = Array[StringName]([])
+sets_flags = Array[StringName]([&"found_half_ball"])
+fail_sets_flags = Array[StringName]([])
+complete_text = "找到半顆網球！上面有別隻狗的口水味。"
+fail_text = ""

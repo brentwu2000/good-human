@@ -10,6 +10,8 @@ const RUN_RESULT_SCENE: String = "res://ui/run_result/run_result.tscn"
 var home_stash: Inventory
 ## The one human's persistent growth.
 var human_growth: HumanGrowth = HumanGrowth.new()
+## The dog's desires, threads and discoveries.
+var goal_progress: GoalProgress = GoalProgress.new()
 var last_run_result: RunResult
 
 
@@ -22,6 +24,8 @@ func load_profile() -> void:
 	home_stash.deserialize(SaveManager.data["stash"], DataRegistry.get_item)
 	var human: Dictionary = SaveManager.data["human"]
 	human_growth.deserialize(human.get("growth_data", {}))
+	var dog: Dictionary = SaveManager.data["dog"]
+	goal_progress.deserialize(dog.get("goals", {}))
 
 
 func goto_home() -> void:
@@ -51,6 +55,7 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 		GrowthResolver.apply(human_growth, result.training, result.outcome == RunResult.Outcome.DEFEATED, DataRegistry.training)
 	SaveManager.data["stash"] = home_stash.serialize()
 	SaveManager.data["human"]["growth_data"] = human_growth.serialize()
+	SaveManager.data["dog"]["goals"] = goal_progress.serialize()
 	SaveManager.save_game()
 
 	last_run_result = result

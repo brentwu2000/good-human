@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="DesireData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://resources/desire_data.gd" id="1_desire"]
+[ext_resource type="Script" path="res://resources/desire_condition.gd" id="2_cond"]
+
+[sub_resource type="Resource" id="Cond_trigger"]
+script = ExtResource("2_cond")
+event_type = &"squirrel_spotted"
+subject = &""
+only_new = false
+count = 1
+
+[sub_resource type="Resource" id="Cond_completion"]
+script = ExtResource("2_cond")
+event_type = &"squirrel_treed"
+subject = &""
+only_new = false
+count = 1
+
+[sub_resource type="Resource" id="Cond_failure"]
+script = ExtResource("2_cond")
+event_type = &"squirrel_escaped"
+subject = &""
+only_new = false
+count = 1
+
+[resource]
+script = ExtResource("1_desire")
+id = &"desire_chase_squirrel"
+category = 1
+layer = 1
+dog_text = "松鼠！！追！！"
+world_hint = ""
+hint_target = &"squirrel"
+priority = 20
+persistent = false
+trigger = SubResource("Cond_trigger")
+completion = SubResource("Cond_completion")
+failure = SubResource("Cond_failure")
+requires_flags = Array[StringName]([])
+blocked_by_flags = Array[StringName]([])
+min_human_perks = 0
+repeatable = false
+needs_undiscovered = &""
+next_on_complete = Array[StringName]([])
+next_on_fail = Array[StringName]([])
+sets_flags = Array[StringName]([&"squirrel_treed_once"])
+fail_sets_flags = Array[StringName]([&"squirrel_got_away"])
+complete_text = "把松鼠逼上樹了！汪汪汪！"
+fail_text = "松鼠跑掉了…可惡。"

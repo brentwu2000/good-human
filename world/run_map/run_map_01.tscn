@@ -13,6 +13,12 @@
 [ext_resource type="Script" path="res://core/combat/combat_coordinator.gd" id="11_coordinator"]
 [ext_resource type="Script" path="res://core/training/owner_behavior.gd" id="19_behavior"]
 [ext_resource type="Script" path="res://core/training/training_observer.gd" id="20_observer"]
+[ext_resource type="Resource" path="res://data/encounters/enc_rival.tres" id="21_rival"]
+[ext_resource type="PackedScene" path="res://world/goals/scent_cue.tscn" id="22_scent"]
+[ext_resource type="PackedScene" path="res://world/goals/squirrel.tscn" id="23_squirrel"]
+[ext_resource type="Script" path="res://world/goals/place_marker.gd" id="24_place"]
+[ext_resource type="Script" path="res://core/goals/goal_director.gd" id="25_director"]
+[ext_resource type="PackedScene" path="res://ui/goals/desire_hud.tscn" id="26_desire_hud"]
 [ext_resource type="Script" path="res://resources/encounter_data.gd" id="14_encounter_data"]
 [ext_resource type="Resource" path="res://data/encounters/enc_jogger.tres" id="15_jogger"]
 [ext_resource type="Resource" path="res://data/encounters/enc_delivery.tres" id="16_delivery"]
@@ -456,6 +462,42 @@ display_label = "🚪 北門"
 unlock_time = 120.0
 unlock_message = "🚪 北門現在可以撤離"
 
+[node name="Places" type="Node2D" parent="."]
+
+[node name="street" type="Node2D" parent="Places"]
+script = ExtResource("24_place")
+place_id = &"street"
+display_name = "家門口的街"
+radius = 280.0
+
+[node name="alley" type="Node2D" parent="Places"]
+position = Vector2(-580, -1000)
+script = ExtResource("24_place")
+place_id = &"alley"
+display_name = "小巷"
+radius = 260.0
+
+[node name="main_path" type="Node2D" parent="Places"]
+position = Vector2(0, -2600)
+script = ExtResource("24_place")
+place_id = &"main_path"
+display_name = "主路"
+radius = 260.0
+
+[node name="park" type="Node2D" parent="Places"]
+position = Vector2(300, -4500)
+script = ExtResource("24_place")
+place_id = &"park"
+display_name = "公園"
+radius = 350.0
+
+[node name="big_tree" type="Node2D" parent="Places"]
+position = Vector2(-620, -4600)
+script = ExtResource("24_place")
+place_id = &"big_tree"
+display_name = "大樹下"
+radius = 220.0
+
 [node name="Actors" type="Node2D" parent="."]
 y_sort_enabled = true
 
@@ -477,6 +519,25 @@ position = Vector2(-620, -4700)
 spot_id = &"pair_big_tree"
 fixed_encounter = ExtResource("18_old_master")
 facing = 1.0
+
+[node name="pair_rival" parent="Actors" instance=ExtResource("10_pair")]
+position = Vector2(-560, -900)
+spot_id = &"pair_rival"
+fixed_encounter = ExtResource("21_rival")
+facing = 1.0
+required_flag = &"rival_revealed"
+
+[node name="scent_park" parent="Actors" instance=ExtResource("22_scent")]
+position = Vector2(360, -4200)
+cue_id = &"scent_park"
+
+[node name="scent_alley" parent="Actors" instance=ExtResource("22_scent")]
+position = Vector2(-560, -440)
+cue_id = &"scent_alley"
+
+[node name="Squirrel" parent="Actors" instance=ExtResource("23_squirrel")]
+spawn_points = Array[Vector2]([Vector2(-400, -4400), Vector2(500, -4700), Vector2(-200, -5500)])
+bounds = Rect2(-780, -5820, 1560, 1880)
 
 [node name="Dog" parent="Actors" instance=ExtResource("2_dog")]
 move_speed = 280.0
@@ -510,7 +571,17 @@ human = NodePath("../Actors/Human")
 coordinator = NodePath("../CombatCoordinator")
 behavior = NodePath("../OwnerBehavior")
 
-[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator", "owner_behavior") instance=ExtResource("6_hud")]
+[node name="GoalDirector" type="Node" parent="." node_paths=PackedStringArray("run_manager", "coordinator")]
+script = ExtResource("25_director")
+run_manager = NodePath("../RunManager")
+coordinator = NodePath("../CombatCoordinator")
+
+[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator", "owner_behavior", "goal_director") instance=ExtResource("6_hud")]
 run_manager = NodePath("../RunManager")
 combat_coordinator = NodePath("../CombatCoordinator")
 owner_behavior = NodePath("../OwnerBehavior")
+goal_director = NodePath("../GoalDirector")
+
+[node name="DesireHUD" parent="." node_paths=PackedStringArray("director", "run_manager") instance=ExtResource("26_desire_hud")]
+director = NodePath("../GoalDirector")
+run_manager = NodePath("../RunManager")

@@ -13,6 +13,7 @@ const EXPERIENCE_SECONDS: float = 2.2
 ## Optional; enables the combat debug buttons.
 @export var combat_coordinator: CombatCoordinator
 @export var owner_behavior: OwnerBehavior
+@export var goal_director: GoalDirector
 
 var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
@@ -44,6 +45,7 @@ func _ready() -> void:
 		_debug_panel.run_manager = run_manager
 		_debug_panel.combat_coordinator = combat_coordinator
 		_debug_panel.owner_behavior = owner_behavior
+		_debug_panel.goal_director = goal_director
 		_time_label.gui_input.connect(_on_time_label_input)
 	_hint_label.text = controls_hint()
 

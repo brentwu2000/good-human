@@ -41,7 +41,9 @@ func _run() -> void:
 	await _physics(2)
 
 	# --- Pairs: 3 ordinary shuffled + Old Master under the big tree ------------
-	var pairs := coordinator.get_pairs()
+	var pairs: Array[OpponentPair] = []
+	pairs.assign(coordinator.get_pairs().filter(func(p: OpponentPair) -> bool: return p.is_present()))
+	check(not Game.goal_progress.has_flag(&"rival_revealed"), "fresh save: rival not discovered yet")
 	check_eq(pairs.size(), 4, "four pairs in the Run World")
 	var ordinary: Array[OpponentPair] = []
 	var master: OpponentPair = null

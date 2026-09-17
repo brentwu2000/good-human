@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EncounterData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/encounter_data.gd" id="1_enc"]
+[ext_resource type="Resource" path="res://data/combat/fighters/opp04_student.tres" id="2_human"]
+[ext_resource type="Resource" path="res://data/loot_tables/fight_reward.tres" id="3_reward"]
+
+[resource]
+script = ExtResource("1_enc")
+id = &"enc_rival"
+tier = 1
+human = ExtResource("2_human")
+dog_name = "阿黑"
+dog_color = Color(0.15, 0.15, 0.17, 1)
+dog_scale = 1.05
+intro_text = "巷子裡的黑狗阿黑，嘴邊還叼著另外半顆網球。"
+reward_table = ExtResource("3_reward")

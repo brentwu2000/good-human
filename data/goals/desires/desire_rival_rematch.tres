@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="DesireData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/desire_data.gd" id="1_desire"]
+[ext_resource type="Script" path="res://resources/desire_condition.gd" id="2_cond"]
+
+[sub_resource type="Resource" id="Cond_completion"]
+script = ExtResource("2_cond")
+event_type = &"fight_won"
+subject = &"enc_rival"
+only_new = false
+count = 1
+
+[resource]
+script = ExtResource("1_desire")
+id = &"desire_rival_rematch"
+category = 2
+layer = 2
+dog_text = "下次一定要贏阿黑。先讓主人多跑跑、多練練。"
+world_hint = "巷子裡"
+hint_target = &"enc_rival"
+priority = 30
+persistent = true
+completion = SubResource("Cond_completion")
+requires_flags = Array[StringName]([])
+blocked_by_flags = Array[StringName]([])
+min_human_perks = 0
+repeatable = false
+needs_undiscovered = &""
+next_on_complete = Array[StringName]([])
+next_on_fail = Array[StringName]([])
+sets_flags = Array[StringName]([&"rival_beaten"])
+fail_sets_flags = Array[StringName]([])
+complete_text = "終於贏了阿黑！"
+fail_text = ""

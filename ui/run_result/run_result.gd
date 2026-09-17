@@ -96,8 +96,7 @@ static func training_lines(summary: RunTrainingSummary) -> Array[String]:
 	if summary.is_partial():
 		lines.append("  （被打倒了，只記住了一半）")
 	for perk in summary.new_perks:
-		lines.append("✨ 主人好像變了：「%s」
-    %s" % [perk.display_name, perk.description])
+		lines.append("✨ 主人好像變了：「%s」\n    %s" % [perk.display_name, perk.description])
 	lines.append("")
 	return lines
 

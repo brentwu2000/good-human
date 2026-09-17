@@ -5,9 +5,11 @@ const ITEMS_DIR: String = "res://data/items"
 const BALANCE_PATH: String = "res://data/game_balance/game_balance.tres"
 const TRAINING_BALANCE_PATH: String = "res://data/training/training_balance.tres"
 const TRAINING_EVENTS_DIR: String = "res://data/training/events"
+const GOAL_CATALOG_PATH: String = "res://data/goals/goal_catalog.tres"
 
 var balance: GameBalance
 var training: TrainingBalance
+var goals: GoalCatalog
 
 var _items: Dictionary[StringName, ItemData] = {}
 var _training_events: Dictionary[StringName, TrainingEventData] = {}
@@ -16,6 +18,7 @@ var _training_events: Dictionary[StringName, TrainingEventData] = {}
 func _ready() -> void:
 	balance = load(BALANCE_PATH) as GameBalance
 	training = load(TRAINING_BALANCE_PATH) as TrainingBalance
+	goals = load(GOAL_CATALOG_PATH) as GoalCatalog
 	_load_items()
 	_load_training_events()
 

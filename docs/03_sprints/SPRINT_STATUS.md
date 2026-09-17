@@ -123,23 +123,23 @@ Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_
 
 | ID | Task | Status |
 |---|---|---|
-| P2G-001 | Desire model | TODO |
-| P2G-002 | Desire tracker | TODO |
-| P2G-003 | Primary selection | TODO |
-| P2G-004 | Emergent triggers | TODO |
-| P2G-005 | Persistent threads | TODO |
-| P2G-006 | Completion/failure | TODO |
-| P2G-007 | Goal chaining | TODO |
-| P2G-008 | Context selection | TODO |
-| P2G-009 | Strange Scent chain | TODO |
-| P2G-010 | Squirrel desire | TODO |
-| P2G-011 | Rival desire | TODO |
-| P2G-012 | Bring-it-home | TODO |
-| P2G-013 | New-dog discovery | TODO |
-| P2G-014 | Old Master thread | TODO |
-| P2G-015 | Collection discovery | TODO |
-| P2G-016 | Desire UI | TODO |
-| P2G-017 | World cues | TODO |
-| P2G-018 | Save/load | TODO |
-| P2G-019 | Debug tools | TODO |
+| P2G-001 | Desire model | REVIEW |
+| P2G-002 | Desire tracker | REVIEW |
+| P2G-003 | Primary selection | REVIEW |
+| P2G-004 | Emergent triggers | REVIEW |
+| P2G-005 | Persistent threads | REVIEW |
+| P2G-006 | Completion/failure | REVIEW |
+| P2G-007 | Goal chaining | REVIEW |
+| P2G-008 | Context selection | REVIEW |
+| P2G-009 | Strange Scent chain | REVIEW |
+| P2G-010 | Squirrel desire | REVIEW |
+| P2G-011 | Rival desire | REVIEW |
+| P2G-012 | Bring-it-home | REVIEW |
+| P2G-013 | New-dog discovery | REVIEW |
+| P2G-014 | Old Master thread | REVIEW |
+| P2G-015 | Collection discovery | REVIEW |
+| P2G-016 | Desire UI | REVIEW |
+| P2G-017 | World cues | REVIEW |
+| P2G-018 | Save/load | REVIEW |
+| P2G-019 | Debug tools | REVIEW |
 | P2G-020 | QA readiness | TODO |

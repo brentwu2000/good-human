@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="GoalCatalog" load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://resources/goal_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" path="res://resources/desire_data.gd" id="2_desire"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_strange_scent.tres" id="3_desire_strange_scent"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_whose_ball.tres" id="4_desire_whose_ball"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_find_rival.tres" id="5_desire_find_rival"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_rival_duel.tres" id="6_desire_rival_duel"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_rival_rematch.tres" id="7_desire_rival_rematch"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_chase_squirrel.tres" id="8_desire_chase_squirrel"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_squirrel_again.tres" id="9_desire_squirrel_again"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_bring_ball_home.tres" id="10_desire_bring_ball_home"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_bring_clue_home.tres" id="11_desire_bring_clue_home"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_new_dog.tres" id="12_desire_new_dog"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_new_place.tres" id="13_desire_new_place"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_old_master_grudge.tres" id="14_desire_old_master_grudge"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_avoid_old_master.tres" id="15_desire_avoid_old_master"]
+[ext_resource type="Resource" path="res://data/goals/desires/desire_rematch_old_master.tres" id="16_desire_rematch_old_master"]
+
+[resource]
+script = ExtResource("1_catalog")
+desires = Array[ExtResource("2_desire")]([ExtResource("3_desire_strange_scent"), ExtResource("4_desire_whose_ball"), ExtResource("5_desire_find_rival"), ExtResource("6_desire_rival_duel"), ExtResource("7_desire_rival_rematch"), ExtResource("8_desire_chase_squirrel"), ExtResource("9_desire_squirrel_again"), ExtResource("10_desire_bring_ball_home"), ExtResource("11_desire_bring_clue_home"), ExtResource("12_desire_new_dog"), ExtResource("13_desire_new_place"), ExtResource("14_desire_old_master_grudge"), ExtResource("15_desire_avoid_old_master"), ExtResource("16_desire_rematch_old_master")])
+places = Array[StringName]([&"street", &"alley", &"main_path", &"park", &"big_tree"])
+dogs = Array[StringName]([&"enc_jogger", &"enc_delivery", &"enc_gym", &"enc_old_master", &"enc_rival"])
