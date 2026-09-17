@@ -24,7 +24,14 @@ var human_puppet: FighterPuppet3D
 
 var _dog: Node3D
 var _name_label: Label3D
+var _dog_label: Label3D
+var _dog_label_left: float = 0.0
+var _dog_lunge: Vector3 = Vector3.ZERO
 var _time: float = 0.0
+
+## Opponent dog reactions (Sprint 04 basic hooks).
+const WATCH_DISTANCE: float = 6.0
+const SNIFF_DISTANCE: float = 1.3
 
 
 func _enter_tree() -> void:
@@ -37,6 +44,8 @@ func _ready() -> void:
 	add_child(human_puppet)
 	_name_label = Greybox.label("", 2.0, 30)
 	add_child(_name_label)
+	_dog_label = Greybox.label("", 1.0, 36, Color(1.0, 0.9, 0.5))
+	add_child(_dog_label)
 	add_interaction_area(1.2)
 	setup(fixed_encounter)
 
@@ -124,11 +133,45 @@ func is_beaten() -> bool:
 	return state == State.BEATEN
 
 
+## Barks back and lunges towards a barking dog.
+func react_to_bark(from: Vector3) -> void:
+	if _dog == null:
+		return
+	_show_dog_text("汪汪！")
+	var towards := from - _dog.global_position
+	towards.y = 0.0
+	_dog_lunge = towards.normalized() * minf(0.8, towards.length() * 0.5) if towards.length() > 0.01 else Vector3.ZERO
+
+
+func _show_dog_text(text: String) -> void:
+	_dog_label.text = text
+	_dog_label_left = 0.9
+
+
+func _update_dog_reactions(delta: float) -> void:
+	_dog_label_left -= delta
+	if _dog_label_left <= 0.0:
+		_dog_label.text = ""
+	_dog_lunge = _dog_lunge.move_toward(Vector3.ZERO, 1.5 * delta)
+	var player_dog: Node3D = coordinator.dog if coordinator != null else null
+	if _dog == null or player_dog == null or not visible:
+		return
+	var to_player := player_dog.global_position - _dog.global_position
+	to_player.y = 0.0
+	if to_player.length() <= WATCH_DISTANCE:
+		_dog.rotation.y = lerp_angle(_dog.rotation.y, atan2(-to_player.x, -to_player.z), minf(delta * 6.0, 1.0))
+		if state == State.IDLE and to_player.length() <= SNIFF_DISTANCE and _dog_label_left <= -4.0:
+			_show_dog_text("嗅嗅")
+	_dog_label.global_position = _dog.global_position + Vector3(0, 1.0, 0)
+
+
 func _process(delta: float) -> void:
 	_time += delta
+	_update_dog_reactions(delta)
 	if state == State.COMBAT and _dog != null:
 		_dog.position.y = absf(sin(_time * 12.0)) * 0.08
 	if state != State.RETURNING:
+		_place_dog()
 		return
 	var to_home := -human_puppet.position
 	to_home.y = 0.0
@@ -145,5 +188,4 @@ func _process(delta: float) -> void:
 func _place_dog() -> void:
 	if _dog == null:
 		return
-	_dog.position = human_puppet.position + Vector3(0.8, 0, 0.3)
-	_dog.rotation.y = human_puppet.rotation.y
+	_dog.position = human_puppet.position + Vector3(0.8, 0, 0.3) + _dog_lunge

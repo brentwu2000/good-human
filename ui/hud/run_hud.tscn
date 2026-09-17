@@ -99,9 +99,9 @@ unique_name_in_owner = true
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 76.0
-offset_top = 228.0
+offset_top = 370.0
 offset_right = -76.0
-offset_bottom = 334.0
+offset_bottom = 476.0
 grow_horizontal = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_experience")
@@ -119,6 +119,7 @@ vertical_alignment = 1
 
 [node name="ExperienceLabel" type="Label" parent="ExperienceFX/Layout"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.96, 0.92, 0.82, 1)

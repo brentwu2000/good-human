@@ -240,19 +240,29 @@ Camera Gate decided before install (ADR-010: dog-height camera only), so the cam
 
 | ID | Task | Status |
 |---|---|---|
-| P3-001 | DogAgency coordinator/events | TODO |
-| P3-002 | Bark world event | TODO |
-| P3-003 | Bark attention reaction | TODO |
-| P3-004 | Bark anti-spam | TODO |
-| P3-005 | Leash tension model | TODO |
-| P3-006 | Leash pull owner reaction | TODO |
-| P3-007 | Bad-pull/stumble outcome | TODO |
-| P3-008 | Pull-assisted disengage | TODO |
-| P3-009 | Nearby interaction during combat | TODO |
-| P3-010 | TrainingEvent integration | TODO |
-| P3-011 | Opponent dog basic reactions | TODO |
-| P3-012 | Camera-specific tuning | TODO |
-| P3-013 | Mobile input/HUD integration | TODO |
-| P3-014 | Debug overlay | TODO |
-| P3-015 | Sprint 04 QA readiness | TODO |
+| P3-001 | DogAgency coordinator/events | REVIEW |
+| P3-002 | Bark world event | REVIEW |
+| P3-003 | Bark attention reaction | REVIEW |
+| P3-004 | Bark anti-spam | REVIEW |
+| P3-005 | Leash tension model | REVIEW |
+| P3-006 | Leash pull owner reaction | REVIEW |
+| P3-007 | Bad-pull/stumble outcome | REVIEW |
+| P3-008 | Pull-assisted disengage | REVIEW |
+| P3-009 | Nearby interaction during combat | REVIEW |
+| P3-010 | TrainingEvent integration | REVIEW |
+| P3-011 | Opponent dog basic reactions | REVIEW |
+| P3-012 | Camera-specific tuning | REVIEW |
+| P3-013 | Mobile input/HUD integration | REVIEW |
+| P3-014 | Debug overlay | REVIEW |
+| P3-015 | Sprint 04 QA readiness | REVIEW |
 | P3-016 | Core Experience Gate 02 | TODO |
+
+## Sprint 04 Engineering Notes (Claude)
+- Play: Home → "🐕 3D 散步（試玩）". Bark = Q or the "🐶 汪！" button above the interact button. Leash pull = run away from your fighting owner past the leash length.
+- Validation: `tests/run_all.sh` (18 scene tests, all pass). `combat_sim_test` adds distract / pull / stumble hooks; `dog_agency_3d_test` = through the real 3D walk: bark outside a fight (their dog answers), bark from the flank (opponent looks away, COURAGE), resistance (second bark weaker, third ignored), bark from behind your owner (owner startled), facing away (unheard), pull away during a kick (saved, STRAIN), sideways pull (stumble, ENDURE), sustained pull (dragged out of the fight, RUN), sniffing a bench while the humans fight, opponent dog watching the player dog, debug overlay.
+- Design (ADR-011, no QTE): `DogAgency` reads the dog's position, facing and movement. Bark works only near the fight (5 m), facing the opponent (75°) and from a useful side (≥50° away from the owner as seen from the opponent); each bark within 6 s halves the next; below 30% it's ignored. Leash pull: the fighting owner is yanked when the dog runs ≥0.3 m past the leash; ≥50% away from the opponent = reposition (and dodges a wind-up in progress), otherwise or two pulls within 1.6 s = stumble; staying 1.5 m past the leash for 1.2 s drags the owner out. CombatSimulation only gained situation hooks — the dog still never commands attacks.
+- Opponent dogs: watch the player dog within 6 m, bark back and lunge on barks, sniff when close to an idle pair.
+- Training: bark distraction (COURAGE), pull save (STRAIN), drag out (RUN), bad pull (ENDURE), with cooldowns; routed through TrainingObserver.
+- HUD fix: the "主人記住了" experience card could grow to half the screen (autowrap) and sat under the desire card; it now keeps its size and sits below the desire card.
+- Hidden numbers only in the debug panel ("Agency:" line). All tuning values are placeholders for playtesting.
+- P3-016 Core Experience Gate 02 is for the owner after playtesting.

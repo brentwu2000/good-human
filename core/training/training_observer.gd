@@ -31,6 +31,8 @@ const LINE_GAP: float = 6.0
 ## World units per meter: 80 on the 2D map (pixels), 1 in 3D.
 @export var units_per_meter: float = 80.0
 @export var behavior: OwnerBehavior
+## Optional DogAgency (3D walk): bark/leash moments.
+@export var agency: Node
 
 var _drag_time: float = 0.0
 var _drag_pause: float = 0.0
@@ -50,6 +52,8 @@ func _ready() -> void:
 	coordinator.engagement_ended.connect(_on_engagement_ended)
 	if behavior != null:
 		behavior.exhausted.connect(func() -> void: _record(&"endure_exhausted"))
+	if agency != null:
+		agency.connect(&"training_moment", func(event_id: StringName, key: StringName) -> void: _record(event_id, key))
 
 
 func _on_run_started(_seed: int) -> void:

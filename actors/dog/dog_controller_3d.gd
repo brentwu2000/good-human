@@ -24,6 +24,8 @@ var focused: Interactable3D
 
 var _visual: Node3D
 var _detector: Area3D
+var _bark_label: Label3D
+var _bark_left: float = 0.0
 
 
 func _ready() -> void:
@@ -49,9 +51,14 @@ func _ready() -> void:
 	detect_shape.shape = sphere
 	_detector.add_child(detect_shape)
 	add_child(_detector)
+	_bark_label = Greybox.label("", 1.1, 44, Color(1.0, 0.95, 0.6))
+	add_child(_bark_label)
 
 
 func _physics_process(delta: float) -> void:
+	_bark_left -= delta
+	if _bark_left <= 0.0:
+		_bark_label.text = ""
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var direction := Vector3(input.x, 0.0, input.y).rotated(Vector3.UP, camera_yaw)
 	var sprinting := Input.is_action_pressed("sprint") or input.length() >= stick_sprint_threshold
@@ -68,6 +75,15 @@ func _physics_process(delta: float) -> void:
 	_update_focus()
 	if focused != null and Input.is_action_just_pressed("interact"):
 		interact_requested.emit(focused)
+
+
+## Bark body language (DogAgency decides what it does).
+func play_bark() -> void:
+	_bark_label.text = "汪！"
+	_bark_left = 0.7
+	var tween := create_tween()
+	tween.tween_property(_visual, "position:y", 0.12, 0.06)
+	tween.tween_property(_visual, "position:y", 0.0, 0.12)
 
 
 ## Yaw the dog is facing (0 = -Z).

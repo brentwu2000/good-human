@@ -8,6 +8,8 @@ extends Control
 var combat_coordinator: Node
 var owner_behavior: OwnerBehavior
 var goal_director: GoalDirector
+## Optional DogAgency (3D walk).
+var dog_agency: Node
 
 @onready var _info_label: Label = %InfoLabel
 @onready var _body: Control = %Body
@@ -45,6 +47,8 @@ func _process(_delta: float) -> void:
 	if _body.visible:
 		var seconds := int(run_manager.elapsed_time)
 		_info_label.text = "Run %02d:%02d   Seed %d\n%s\n%s" % [seconds / 60, seconds % 60, run_manager.run_seed, _training_text(), _goals_text()]
+		if dog_agency != null:
+			_info_label.text += "\n" + dog_agency.debug_text()
 
 
 func toggle() -> void:

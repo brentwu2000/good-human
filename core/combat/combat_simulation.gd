@@ -5,7 +5,8 @@ extends RefCounted
 ## humans' positions (see Engagement); presentation listens to `combat_event`.
 ## Each fighter picks skills with a condition + priority evaluator.
 
-## kind: skill_started, hit, blocked, dodged, missed, staggered, defeated.
+## kind: skill_started, hit, blocked, dodged, missed, staggered, defeated,
+## distracted, pulled, stumbled (dog agency).
 ## `fighter` is the side the event is about (the attacker for hit/blocked/
 ## dodged/missed, the victim for staggered/defeated).
 signal combat_event(kind: StringName, fighter: int, skill: CombatSkillData, amount: float)
@@ -92,6 +93,49 @@ func force_result(value: Result) -> void:
 	_finish(value)
 
 
+# --- Dog agency (Sprint 04) ---------------------------------------------------
+# The dog never commands attacks; it changes the situation the humans react to.
+
+## A bark makes `side` look away: no decisions for `seconds`, and a wind-up in
+## progress is lost (an opening for the other human).
+func distract(side: int, seconds: float) -> void:
+	var fighter := fighters[side]
+	if is_finished() or fighter.is_defeated() or seconds <= 0.0:
+		return
+	fighter.distracted_until = maxf(fighter.distracted_until, time + seconds)
+	fighter.ready_at = maxf(fighter.ready_at, time + seconds)
+	if fighter.is_winding_up_attack():
+		_enter(fighter, CombatFighter.Phase.RECOVERY, fighter.action.recovery)
+	combat_event.emit(&"distracted", side, null, seconds)
+
+
+## The leash yanks `side` away from the opponent by `amount` units. Returns
+## true when it pulled them out of an incoming attack.
+func pull(side: int, amount: float) -> bool:
+	var fighter := fighters[side]
+	if is_finished() or fighter.is_defeated():
+		return false
+	var attacker := _other(fighter)
+	var saved := attacker.is_winding_up_attack()
+	_move(fighter, -amount * _toward_opponent(fighter))
+	if saved:
+		# Out of the way until that attack has landed.
+		fighter.pulled_until = time + attacker.phase_time_left + 0.05
+	combat_event.emit(&"pulled", side, null, amount)
+	return saved
+
+
+## A bad pull knocks `side` off balance: current action lost, no attacks for a while.
+func stumble(side: int, seconds: float) -> void:
+	var fighter := fighters[side]
+	if is_finished() or fighter.is_defeated():
+		return
+	if not fighter.is_idle() and fighter.action != null:
+		_enter(fighter, CombatFighter.Phase.RECOVERY, maxf(fighter.action.recovery, seconds))
+	fighter.ready_at = maxf(fighter.ready_at, time + seconds)
+	combat_event.emit(&"stumbled", side, null, seconds)
+
+
 # --- AI -----------------------------------------------------------------------
 
 ## Valid skills are filtered by condition and cooldown, then the highest
@@ -123,6 +167,8 @@ func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
 
 
 func _decide(fighter: CombatFighter, delta: float) -> void:
+	if time < fighter.distracted_until:
+		return
 	var skill := choose_skill(fighter)
 	if skill != null:
 		# Hesitation only delays attacks; it never makes the AI scripted.
@@ -196,7 +242,7 @@ func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 	if distance() > skill.preferred_range + REACH_TOLERANCE:
 		combat_event.emit(&"missed", attacker.side, skill, 0.0)
 		return
-	if target.is_evading():
+	if target.is_evading() or time < target.pulled_until:
 		combat_event.emit(&"dodged", attacker.side, skill, 0.0)
 		return
 	var variance := 1.0 + _rng.randf_range(-_balance.damage_variance, _balance.damage_variance)

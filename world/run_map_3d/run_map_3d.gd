@@ -23,6 +23,7 @@ func _ready() -> void:
 	rig.owner_actor = human
 	rig.coordinator = coordinator
 	rig.snap_behind_dog()
+	_build_bark_button()
 	run_manager.run_started.connect(func(_s: int) -> void: human.say("好，出去散步吧！"))
 	run_manager.loot_gained.connect(_on_loot_gained)
 
@@ -35,6 +36,27 @@ func _on_loot_gained(item: ItemData, _quantity: int) -> void:
 			human.say("喔？這個不錯", item.get_rarity_color())
 		_:
 			human.say("嗯…收好了", Color(0.9, 0.9, 0.9), 1.0)
+
+
+## Mobile: a bark button above the interact button (keyboard: Q).
+func _build_bark_button() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 2
+	add_child(layer)
+	var button := TouchActionButton.new()
+	button.name = "BarkButton"
+	button.action = &"bark"
+	button.text = "🐶 汪！"
+	button.anchor_left = 1.0
+	button.anchor_top = 1.0
+	button.anchor_right = 1.0
+	button.anchor_bottom = 1.0
+	button.offset_left = -200.0
+	button.offset_top = -420.0
+	button.offset_right = -60.0
+	button.offset_bottom = -290.0
+	button.add_theme_font_size_override("font_size", 30)
+	layer.add_child(button)
 
 
 # --- Greybox geometry -----------------------------------------------------------

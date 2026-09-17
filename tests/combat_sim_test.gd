@@ -26,6 +26,7 @@ func _ready() -> void:
 	_test_deterministic()
 	_test_fights_complete()
 	_test_force_result()
+	_test_dog_agency_hooks()
 	finish()
 
 
@@ -171,6 +172,44 @@ func _test_force_result() -> void:
 	var aborted := CombatSimulation.new(PLAYER, JOGGER, 9)
 	aborted.abort()
 	check_eq(aborted.result, CombatSimulation.Result.ABORTED, "abort result")
+
+
+func _test_dog_agency_hooks() -> void:
+	# Bark: opponent loses its wind-up and makes no decisions for a while.
+	var sim := _duel(60.0)
+	var them := sim.fighters[CombatSimulation.OPPONENT]
+	_start_attack(them, KICK)
+	var kinds := _collect(sim)
+	sim.distract(CombatSimulation.OPPONENT, 0.8)
+	check(kinds.has(&"distracted") and them.phase == CombatFighter.Phase.RECOVERY, "bark cancels the opponent's wind-up")
+	for i in 30:
+		sim.step(1.0 / 60.0)
+	check(them.uses.is_empty(), "distracted opponent starts nothing")
+
+	# Pull out of an incoming attack: it misses.
+	sim = _duel(60.0)
+	var me := sim.fighters[CombatSimulation.PLAYER]
+	them = sim.fighters[CombatSimulation.OPPONENT]
+	me.data = _attacks_only(PLAYER)
+	_start_attack(them, KICK)
+	kinds = _collect(sim)
+	var before := me.position
+	check(sim.pull(CombatSimulation.PLAYER, 20.0), "pull during an incoming kick saves the owner")
+	check(me.position < before, "pull moves the owner away from the opponent")
+	_step_until(sim, func() -> bool: return kinds.has(&"dodged") or kinds.has(&"hit") or kinds.has(&"missed"))
+	check_eq(me.hp, me.max_hp, "pulled owner takes no damage")
+
+	# Pull with nothing incoming just repositions.
+	sim = _duel(60.0)
+	check(not sim.pull(CombatSimulation.PLAYER, 20.0), "pull without an attack is only a reposition")
+
+	# Bad pull: stumble, no attacks for a while.
+	sim = _duel(60.0)
+	me = sim.fighters[CombatSimulation.PLAYER]
+	_start_attack(me, PUNCH)
+	kinds = _collect(sim)
+	sim.stumble(CombatSimulation.PLAYER, 0.6)
+	check(kinds.has(&"stumbled") and me.phase == CombatFighter.Phase.RECOVERY and me.ready_at >= sim.time + 0.59, "bad pull knocks the owner off balance")
 
 
 # --- helpers ---------------------------------------------------------------

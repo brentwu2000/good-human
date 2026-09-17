@@ -14,6 +14,8 @@ const EXPERIENCE_SECONDS: float = 2.2
 @export var combat_coordinator: Node
 @export var owner_behavior: OwnerBehavior
 @export var goal_director: GoalDirector
+## Optional DogAgency (3D walk).
+@export var dog_agency: Node
 
 var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
@@ -47,6 +49,7 @@ func _ready() -> void:
 		_debug_panel.combat_coordinator = combat_coordinator
 		_debug_panel.owner_behavior = owner_behavior
 		_debug_panel.goal_director = goal_director
+		_debug_panel.dog_agency = dog_agency
 		_time_label.gui_input.connect(_on_time_label_input)
 	_hint_label.text = controls_hint()
 
@@ -164,6 +167,8 @@ func _play_next_experience() -> void:
 		_experience_fx.hide()
 		return
 	_experience_label.text = "主人記住了：\n%s" % _experience_queue.pop_front()
+	# Autowrapped text can grow the card; shrink it back to its content.
+	_experience_fx.size.y = 0.0
 	_experience_fx.show()
 	_experience_fx.modulate = Color(1, 1, 1, 0)
 	_experience_fx.position.y += 14.0

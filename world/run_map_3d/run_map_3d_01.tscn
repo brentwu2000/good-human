@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3]
+[gd_scene load_steps=28 format=3]
 
 [ext_resource type="Script" path="res://world/run_map_3d/run_map_3d.gd" id="1_map"]
 [ext_resource type="Script" path="res://actors/dog/dog_controller_3d.gd" id="2_dog"]
@@ -25,6 +25,7 @@
 [ext_resource type="Script" path="res://core/training/training_observer.gd" id="23_observer"]
 [ext_resource type="Script" path="res://core/goals/goal_director.gd" id="24_director"]
 [ext_resource type="PackedScene" path="res://ui/goals/desire_hud.tscn" id="25_desire_hud"]
+[ext_resource type="Script" path="res://core/agency/dog_agency.gd" id="26_agency"]
 
 [node name="RunMap3D01" type="Node3D" node_paths=PackedStringArray("dog", "human", "run_manager", "coordinator")]
 script = ExtResource("1_map")
@@ -212,12 +213,20 @@ human = NodePath("../Actors/Human")
 coordinator = NodePath("../CombatCoordinator3D")
 units_per_meter = 1.0
 
-[node name="TrainingObserver" type="Node" parent="." node_paths=PackedStringArray("run_manager", "human", "coordinator", "behavior")]
+[node name="DogAgency" type="Node" parent="." node_paths=PackedStringArray("run_manager", "dog", "human", "coordinator")]
+script = ExtResource("26_agency")
+run_manager = NodePath("../RunManager")
+dog = NodePath("../Actors/Dog")
+human = NodePath("../Actors/Human")
+coordinator = NodePath("../CombatCoordinator3D")
+
+[node name="TrainingObserver" type="Node" parent="." node_paths=PackedStringArray("run_manager", "human", "coordinator", "behavior", "agency")]
 script = ExtResource("23_observer")
 run_manager = NodePath("../RunManager")
 human = NodePath("../Actors/Human")
 coordinator = NodePath("../CombatCoordinator3D")
 behavior = NodePath("../OwnerBehavior")
+agency = NodePath("../DogAgency")
 units_per_meter = 1.0
 
 [node name="GoalDirector" type="Node" parent="." node_paths=PackedStringArray("run_manager", "coordinator")]
@@ -226,11 +235,12 @@ run_manager = NodePath("../RunManager")
 coordinator = NodePath("../CombatCoordinator3D")
 units_per_meter = 1.0
 
-[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator", "owner_behavior", "goal_director") instance=ExtResource("13_hud")]
+[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator", "owner_behavior", "goal_director", "dog_agency") instance=ExtResource("13_hud")]
 run_manager = NodePath("../RunManager")
 combat_coordinator = NodePath("../CombatCoordinator3D")
 owner_behavior = NodePath("../OwnerBehavior")
 goal_director = NodePath("../GoalDirector")
+dog_agency = NodePath("../DogAgency")
 
 [node name="DesireHUD" parent="." node_paths=PackedStringArray("director", "run_manager") instance=ExtResource("25_desire_hud")]
 director = NodePath("../GoalDirector")
