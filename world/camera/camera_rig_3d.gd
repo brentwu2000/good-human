@@ -1,37 +1,25 @@
 class_name CameraRig3D
 extends Node3D
-## Production camera (ADR-010): switch any time between A, a 3/4 top-down view
-## like the 2D game, and B, a dog-height chase camera. Pivot + boom with
-## smoothing. B avoids walls, fades the owner or foliage when they hide the
-## dog, and pulls back to frame fights. A fades buildings/foliage in front of
-## the dog. Framing changes never change gameplay.
+## Production camera (ADR-010): a low chase camera behind the dog (the P-01
+## "B" framing). Pivot + boom with smoothing. Walls pull the camera in, and
+## anything too close, the owner or foliage that hides the dog fades out.
+## Fights pull the camera back to frame both humans. Framing never changes
+## gameplay.
 
-signal view_changed(view: View)
+const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0}
+## Pulled back to keep the dog and both humans in view during a fight.
+const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.5, "fov": 64.0}
 
-enum View { TOP_DOWN, DOG }
-
-const PROFILES: Dictionary = {
-	View.TOP_DOWN: {"pivot": 0.5, "pitch": -72.0, "distance": 18.0, "fov": 42.0},
-	# Same framing as P-01 "B" (low chase camera behind the dog).
-	View.DOG: {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0},
-}
-## B pulls back to keep both humans in view during a fight.
-const DOG_COMBAT: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.5, "fov": 64.0}
-const VIEW_NAMES: Array[String] = ["俯視", "狗視角"]
-
-@export var view: View = View.DOG
 @export var smoothing: float = 6.0
 @export var yaw_follow_speed: float = 2.2
 @export var collision_margin: float = 0.25
-## Dog view: a wall may pull the camera in down to this distance; anything
-## closer fades instead, so the camera stays low behind the dog.
+## A wall may pull the camera in down to this distance; anything closer fades
+## instead, so the camera stays low behind the dog.
 @export var collision_min_distance: float = 1.2
-## Dog view: the camera swings behind the dog only while the stick points
-## within this angle (deg) of forward, so sideways input doesn't spin the dog
-## and the camera in circles.
+## The camera swings behind the dog only while the stick points within this
+## angle (deg) of forward and the dog already faces roughly away from the
+## camera, so sideways input doesn't spin dog and camera in circles.
 @export var follow_max_angle: float = 50.0
-## Top-down cutaway: buildings whose center is this close to the dog fade.
-@export var top_down_cutaway_radius: float = 11.0
 
 var dog: DogController3D
 var owner_actor: HumanFollower3D
@@ -52,18 +40,10 @@ func _ready() -> void:
 	add_child(camera)
 
 
-func toggle() -> void:
-	set_view(View.DOG if view == View.TOP_DOWN else View.TOP_DOWN)
-
-
-## Switching keeps control readable: B starts behind the dog's heading,
-## A returns to screen-north. Movement is always relative to the camera.
-func set_view(value: View) -> void:
-	view = value
-	yaw = dog.heading() if view == View.DOG else 0.0
-	current.clear()
+## Places the camera straight behind the dog's current heading.
+func snap_behind_dog() -> void:
+	yaw = dog.heading()
 	snap()
-	view_changed.emit(view)
 
 
 func snap() -> void:
@@ -72,32 +52,25 @@ func snap() -> void:
 
 
 func is_combat_framing() -> bool:
-	return view == View.DOG and coordinator != null and coordinator.is_fighting()
+	return coordinator != null and coordinator.is_fighting()
 
 
 func _physics_process(delta: float) -> void:
 	if dog == null:
 		return
-	if Input.is_action_just_pressed("camera_toggle"):
-		toggle()
 	_update(delta, false)
 
 
 func _update(delta: float, instant: bool) -> void:
-	var target: Dictionary = DOG_COMBAT if is_combat_framing() else PROFILES[view]
+	var target: Dictionary = COMBAT_FRAMING if is_combat_framing() else FRAMING
 	var t := 1.0 if instant or current.is_empty() else 1.0 - exp(-smoothing * delta)
 	if current.is_empty():
 		current = target.duplicate()
 	for key: String in ["pivot", "pitch", "distance", "fov"]:
 		current[key] = lerpf(current[key], target[key], t)
 
-	if view == View.TOP_DOWN:
-		yaw = 0.0
-	elif instant:
-		pass
-	elif dog.planar_speed() > 0.5 and _stick_points_forward() and absf(angle_difference(yaw, dog.heading())) <= deg_to_rad(follow_max_angle):
-		# Only ease in behind a dog that is already heading roughly away from
-		# the camera; chasing a dog mid-turn would swing the controls around.
+	if not instant and dog.planar_speed() > 0.5 and _stick_points_forward() \
+			and absf(angle_difference(yaw, dog.heading())) <= deg_to_rad(follow_max_angle):
 		yaw = lerp_angle(yaw, dog.heading(), minf(yaw_follow_speed * delta, 1.0))
 	dog.camera_yaw = yaw
 
@@ -117,7 +90,14 @@ func _update(delta: float, instant: bool) -> void:
 	_update_owner_fade()
 
 
-## Fades occluders between focus and camera; in B, solid walls pull the camera in.
+func _stick_points_forward() -> bool:
+	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if input.y >= -0.1:
+		return false
+	return rad_to_deg(atan2(absf(input.x), -input.y)) <= follow_max_angle
+
+
+## Walls pull the camera in; fade-group occluders and too-close walls fade.
 func _place_camera(from: Vector3, to: Vector3) -> Vector3:
 	var space := get_world_3d().direct_space_state
 	var exclude: Array[RID] = []
@@ -130,28 +110,15 @@ func _place_camera(from: Vector3, to: Vector3) -> Vector3:
 		if hit.is_empty():
 			break
 		var body := hit["collider"] as Node
-		var fades := body.is_in_group(Greybox.FADE_GROUP) or (view == View.TOP_DOWN and body.is_in_group(Greybox.FADE_TOP_DOWN_GROUP))
-		if fades or view == View.TOP_DOWN:
-			if fades:
-				fade_now[body] = true
-			exclude.append(hit["rid"])
-			continue
 		var point: Vector3 = hit["position"]
 		var pulled := point + (from - point).normalized() * collision_margin
-		if pulled.distance_to(from) < collision_min_distance:
-			# Too close to stay behind the wall: see through it instead.
+		if body.is_in_group(Greybox.FADE_GROUP) or pulled.distance_to(from) < collision_min_distance:
 			fade_now[body] = true
 			exclude.append(hit["rid"])
 			continue
 		collided = true
 		result = pulled
 		break
-	if view == View.TOP_DOWN:
-		for node in get_tree().get_nodes_in_group(Greybox.FADE_TOP_DOWN_GROUP):
-			var body3d := node as Node3D
-			var offset := body3d.global_position - dog.global_position
-			if Vector2(offset.x, offset.z).length() <= top_down_cutaway_radius:
-				fade_now[body3d] = true
 	for body in _faded.keys():
 		if not fade_now.has(body) and is_instance_valid(body):
 			Greybox.set_faded(body, false)
@@ -162,14 +129,7 @@ func _place_camera(from: Vector3, to: Vector3) -> Vector3:
 	return result
 
 
-func _stick_points_forward() -> bool:
-	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	if input.y >= -0.1:
-		return false
-	return rad_to_deg(atan2(absf(input.x), -input.y)) <= follow_max_angle
-
-
-## The leashed owner walks behind the dog, right where a chase camera looks.
+## The leashed owner walks behind the dog, right where the camera looks.
 func _update_owner_fade() -> void:
 	if owner_actor == null:
 		return
@@ -179,7 +139,7 @@ func _update_owner_fade() -> void:
 	var segment := to - from
 	var t := clampf((body - from).dot(segment) / maxf(segment.length_squared(), 0.001), 0.0, 1.0)
 	var closest := from + segment * t
-	var blocking := view == View.DOG and t > 0.05 and t < 0.95 and Vector2(body.x - closest.x, body.z - closest.z).length() < 0.6
+	var blocking := t > 0.05 and t < 0.95 and Vector2(body.x - closest.x, body.z - closest.z).length() < 0.6
 	owner_actor.set_faded(blocking)
 
 

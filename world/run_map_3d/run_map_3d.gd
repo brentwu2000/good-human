@@ -2,8 +2,8 @@ class_name RunMap3D
 extends Node3D
 ## 3D vertical slice level (P-02): a street, a path and a park entrance.
 ## Gameplay nodes (points, pairs, actors, managers) live in the scene; this
-## script builds the greybox geometry, wires the camera and adds the view
-## switch button. Geometry is placeholder until the 3D art kit exists.
+## script builds the greybox geometry and wires the dog camera. Geometry is
+## placeholder until the 3D art kit exists.
 
 @export var dog: DogController3D
 @export var human: HumanFollower3D
@@ -11,8 +11,6 @@ extends Node3D
 @export var coordinator: CombatCoordinator3D
 
 var rig: CameraRig3D
-
-var _view_button: Button
 
 
 func _ready() -> void:
@@ -24,9 +22,7 @@ func _ready() -> void:
 	rig.dog = dog
 	rig.owner_actor = human
 	rig.coordinator = coordinator
-	rig.view_changed.connect(_on_view_changed)
-	_build_view_button()
-	rig.set_view(CameraRig3D.View.DOG)
+	rig.snap_behind_dog()
 	run_manager.run_started.connect(func(_s: int) -> void: human.say("好，出去散步吧！"))
 	run_manager.loot_gained.connect(_on_loot_gained)
 
@@ -39,28 +35,6 @@ func _on_loot_gained(item: ItemData, _quantity: int) -> void:
 			human.say("喔？這個不錯", item.get_rarity_color())
 		_:
 			human.say("嗯…收好了", Color(0.9, 0.9, 0.9), 1.0)
-
-
-func _on_view_changed(view: CameraRig3D.View) -> void:
-	_view_button.text = "👁 %s" % CameraRig3D.VIEW_NAMES[view]
-
-
-func _build_view_button() -> void:
-	var layer := CanvasLayer.new()
-	layer.layer = 3
-	add_child(layer)
-	_view_button = Button.new()
-	_view_button.name = "ViewButton"
-	_view_button.focus_mode = Control.FOCUS_NONE
-	_view_button.anchor_left = 1.0
-	_view_button.anchor_right = 1.0
-	_view_button.offset_left = -220.0
-	_view_button.offset_right = -24.0
-	_view_button.offset_top = 110.0
-	_view_button.offset_bottom = 180.0
-	_view_button.add_theme_font_size_override("font_size", 28)
-	_view_button.pressed.connect(rig.toggle)
-	layer.add_child(_view_button)
 
 
 # --- Greybox geometry -----------------------------------------------------------
@@ -83,7 +57,6 @@ func _build_environment() -> void:
 
 
 func _build_street() -> void:
-	var fade_top := Greybox.FADE_TOP_DOWN_GROUP
 	add_child(Greybox.solid_box(Vector3(64, 0.2, 120), Color(0.45, 0.45, 0.47), Vector3(0, -0.1, -30)))
 	add_child(Greybox.box(Vector3(64, 0.02, 7), Color(0.3, 0.3, 0.32), Vector3(0, 0.01, -2)))
 	for x in range(-28, 29, 4):
@@ -92,9 +65,9 @@ func _build_street() -> void:
 	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, 3)))
 	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, -7)))
 	for i in 5:
-		add_child(Greybox.solid_box(Vector3(9, 6, 6), Color(0.62 + 0.05 * (i % 2), 0.55, 0.5), Vector3(-24.0 + i * 12.0, 3, 8.5), fade_top))
+		add_child(Greybox.solid_box(Vector3(9, 6, 6), Color(0.62 + 0.05 * (i % 2), 0.55, 0.5), Vector3(-24.0 + i * 12.0, 3, 8.5)))
 	for x in [-19.0, -9.0, 9.0, 19.0]:
-		add_child(Greybox.solid_box(Vector3(8, 5, 10), Color(0.55, 0.5, 0.48), Vector3(x, 2.5, -13.5), fade_top))
+		add_child(Greybox.solid_box(Vector3(8, 5, 10), Color(0.55, 0.5, 0.48), Vector3(x, 2.5, -13.5)))
 	add_child(Greybox.box(Vector3(6, 0.02, 12), Color(0.62, 0.58, 0.5), Vector3(0, 0.02, -14)))
 	# Map edges.
 	for x in [-32.0, 32.0]:

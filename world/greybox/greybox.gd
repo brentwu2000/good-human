@@ -6,9 +6,8 @@ extends RefCounted
 const WORLD_LAYER: int = 1
 const ACTOR_LAYER: int = 1 << 1
 const INTERACTABLE_LAYER: int = 1 << 2
-## Occluders faded when they block the camera: always / only in the top-down view.
+## Occluders the camera fades when they hide the dog (foliage, props).
 const FADE_GROUP: StringName = &"fade_occluder"
-const FADE_TOP_DOWN_GROUP: StringName = &"fade_occluder_top_down"
 
 
 static func material(color: Color) -> StandardMaterial3D:

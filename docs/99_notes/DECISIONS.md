@@ -31,5 +31,5 @@ Human growth comes from meaningful dog behavior in normal runs, not a minigame o
 ## ADR-009 — Dog desires, not quest checklists
 Short-term progression is framed as optional dog desires, discoveries and causal threads that persist and fork, not generic quest checklists. Full record: `ADR_009_DOG_DESIRES_NOT_QUEST_CHECKLISTS.md`.
 
-## ADR-010 — Camera perspective: switchable A (3/4 top-down) + B (dog-height chase) in 3D (ACCEPTED 2026-09-17)
-Evaluated in P-01; owner chose free switching between A and B, which moves production to 3D, starting with the P-02 vertical slice. Full record: `ADR_010_CAMERA_PERSPECTIVE_UNDER_EVALUATION.md`.
+## ADR-010 — Camera perspective: dog-height chase camera in 3D (ACCEPTED 2026-09-17)
+Evaluated in P-01; owner first chose switchable top-down + dog view, then after playing the P-02 slice kept only the dog view (P-01 "B" framing). Production moves to 3D. Full record: `ADR_010_CAMERA_PERSPECTIVE_UNDER_EVALUATION.md`.

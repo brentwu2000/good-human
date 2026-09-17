@@ -53,3 +53,5 @@ Mobile renderer, portrait 3D: low-poly budgets, limited real-time shadows, simpl
 4. Android performance check before content expansion.
 
 Decision: **APPROVED by owner (2026-09-17)** — move to 3D, starting with the P-02 vertical slice (`docs/03_sprints/P_02_3D_VERTICAL_SLICE.md`).
+
+Update after playing the slice (owner): "我覺得俯視不好" / "狗視角就可以" — the top-down view was removed; the game uses the dog-height chase camera only.

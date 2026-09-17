@@ -206,9 +206,9 @@ Owner approved the move to 3D (2026-09-17). Plan: `docs/03_sprints/P_02_3D_VERTI
 | V3D-012 | Build for owner playtest | REVIEW |
 
 ## P-02 Engineering Notes (Claude)
-- Play: Home → "🐕 3D 散步（試玩）" (the 2D walk stays next to it until the port is complete). Switch view with the 👁 button (top right) or V.
+- Play: Home → "🐕 3D 散步（試玩）" (the 2D walk stays next to it until the port is complete).
 - Validation: `tests/run_all.sh` (16 scene tests). `run_3d_slice_test` = Home → 3D walk, camera-relative movement in both views, view toggle (key + button), owner fade, top-down building fade vs dog-view wall collision, 3D search through RunManager, fight in place + disengage + victory reward, extraction → result → Home stash.
 - Reused unchanged: RunManager rules, loot tables, inventory, save, HUD, result, Home, CombatSimulation, growth stat bonuses. RunManager/RunHUD now accept a `dog_actor` of either dimension (V3D-001).
 - New 3D code: `DogController3D`, `HumanFollower3D` (+ leash, growth hooks), `Interactable3D`/`InteractionArea3D`, `SearchPoint3D`, `ExtractionPoint3D`, `OpponentPair3D`, `FighterPuppet3D`, `CombatCoordinator3D` (1 m = 100 simulation units, disengage 9 m), `CameraRig3D`, `RunMap3D` + `run_map_3d_01.tscn`, `Greybox` primitives.
-- Camera rules: movement is always relative to the camera. Top-down = fixed north, no collision, buildings near the dog and anything in front of it fade. Dog view = follows the dog's heading, walls pull the camera in (rises when too close), the owner fades while blocking, foliage fades, fights pull back to frame both humans. Switching to the dog view starts behind the dog's current heading.
+- Camera (owner after playing: dog view only, top-down removed): low chase camera with P-01 "B" framing; movement is relative to the camera; the camera eases behind the dog only while the stick points forward and the dog already faces away (sideways input no longer spins it); walls pull the camera in down to 1.2 m, closer walls fade instead of lifting it; the owner and foliage fade while blocking; fights pull back to frame both humans.
 - Not in the slice yet: training/goal world observers, owner behaviour traits, squirrel/scents/places, rival and Old Master, debug combat buttons (the 2D debug panel's combat hooks don't target the 3D coordinator), full neighbourhood, 3D art, Android performance.

@@ -1,7 +1,7 @@
 extends "res://tests/test_case.gd"
-## P-02 3D vertical slice through real scenes: Home -> 3D walk, A/B view switch
-## with camera-relative movement, search loot, seamless fight + disengage and
-## victory, owner/building fading, extraction -> result -> Home.
+## P-02 3D vertical slice through real scenes: Home -> 3D walk, dog camera
+## (camera-relative movement, no spin, owner/wall fading, collision), search
+## loot, seamless fight + disengage and victory, extraction -> result -> Home.
 
 const TEST_SAVE: String = "user://tests/run_3d_slice_save.json"
 const OLD_MASTER: FighterData = preload("res://data/combat/fighters/oppx01_old_master.tres")
@@ -37,70 +37,54 @@ func _run() -> void:
 	var coordinator := map.coordinator
 	coordinator.time_scale = 25.0
 	check(run.is_running() and run.dog_actor == dog, "3D walk running with the 3D dog")
-	check_eq(rig.view, CameraRig3D.View.DOG, "starts in the dog view")
 	check(rig.is_dog_visible(), "dog view: dog visible at start")
-	check(rig.global_position.y - dog.global_position.y < 1.6, "dog view starts low behind the dog")
-	rig.set_view(CameraRig3D.View.TOP_DOWN)
+	check(rig.global_position.y - dog.global_position.y < 1.6, "camera starts low behind the dog")
+	check(not map.find_child("ViewButton", true, false), "no view switch: dog view only")
 
-	# --- Movement is camera-relative in both views ------------------------------
+	# --- Camera-relative movement ------------------------------------------------
 	var start := dog.global_position
 	await _hold(&"move_up", 40)
-	check(dog.global_position.z < start.z - 0.8, "top-down: up walks screen-north (-Z)")
+	check(dog.global_position.z < start.z - 0.8, "up walks away from the camera")
 	check(human.global_position.distance_to(dog.global_position) < 4.0, "owner follows on the leash")
 
-	dog.global_position = Vector3(0, 0.2, 2.5)
+	dog.global_position = Vector3(0, 0.1, 2.5)
 	dog.velocity = Vector3.ZERO
 	await _physics(2)
 	dog.facing = Vector3.RIGHT
-	Input.action_press(&"camera_toggle")
-	await _physics(1)
-	Input.action_release(&"camera_toggle")
-	await _physics(2)
-	check_eq(rig.view, CameraRig3D.View.DOG, "toggle action switches to the dog view")
-	check(is_equal_approx(rig.yaw, dog.heading()), "dog view starts behind the dog")
+	rig.snap_behind_dog()
+	check(is_equal_approx(rig.yaw, dog.heading()), "camera snaps behind the dog")
 	start = dog.global_position
 	await _hold(&"move_up", 30)
-	check(dog.global_position.x > start.x + 0.8, "dog view: up walks where the dog was facing")
-	check(rig.is_dog_visible(), "dog view: dog visible")
-	check(rig.global_position.y - dog.global_position.y < 2.5, "dog view is low")
-
-	# Owner between camera and dog fades.
-	dog.global_position = Vector3(0, 0.2, 2.5)
-	dog.facing = Vector3.FORWARD
-	human.global_position = dog.global_position + Vector3(0, 0, 1.6)
-	rig.set_view(CameraRig3D.View.DOG)
-	await _physics(2)
-	check(human.faded, "dog view: owner blocking the camera fades")
-	_find_button(map).pressed.emit()
-	await _physics(2)
-	check(rig.view == CameraRig3D.View.TOP_DOWN and not human.faded, "HUD button switches back to top-down")
-
-	# Top-down: a house between camera and dog fades instead of blocking.
-	dog.global_position = Vector3(-12, 0.2, 4.2)
-	rig.snap()
-	await _physics(2)
-	check(not rig.collided, "top-down never pulls the camera in")
-	check(rig._faded.keys().any(func(n: Node) -> bool: return n.is_in_group(Greybox.FADE_TOP_DOWN_GROUP)), "top-down: house in front of the dog fades")
-	# Dog view: a wall behind the dog pulls the camera in but keeps it low.
-	dog.global_position = Vector3(-12, 0.1, 3.3)
-	dog.facing = Vector3.FORWARD
-	rig.set_view(CameraRig3D.View.DOG)
-	await _physics(2)
-	check(rig.collided and rig.is_dog_visible(), "dog view: wall pulls camera in, dog still visible")
-	check(rig.global_position.y - dog.global_position.y < 1.6, "dog view stays low near walls")
-	# Right against the wall the camera looks through it instead of climbing.
-	dog.global_position = Vector3(-12, 0.1, 4.8)
-	rig.snap()
-	await _physics(2)
-	check(not rig.collided and rig._faded.size() > 0 and rig.global_position.y - dog.global_position.y < 1.6, "dog view: too close to a wall, the wall fades")
+	check(dog.global_position.x > start.x + 0.8, "up walks where the dog was facing")
+	check(rig.is_dog_visible(), "dog visible while walking")
 
 	# Sideways input does not swing the camera around.
 	dog.global_position = Vector3(0, 0.1, 2.5)
 	dog.velocity = Vector3.ZERO
 	rig.yaw = 0.0
 	await _hold(&"move_right", 40)
-	check(absf(rig.yaw) < 0.05, "dog view: walking sideways keeps the camera still")
-	rig.set_view(CameraRig3D.View.TOP_DOWN)
+	check(absf(rig.yaw) < 0.05, "walking sideways keeps the camera still")
+
+	# Owner between camera and dog fades.
+	dog.global_position = Vector3(0, 0.1, 2.5)
+	dog.velocity = Vector3.ZERO
+	dog.facing = Vector3.FORWARD
+	human.global_position = dog.global_position + Vector3(0, 0, 1.6)
+	rig.snap_behind_dog()
+	await _physics(2)
+	check(human.faded, "owner blocking the camera fades")
+
+	# A wall behind the dog pulls the camera in but keeps it low.
+	dog.global_position = Vector3(-12, 0.1, 3.3)
+	human.global_position = dog.global_position + Vector3(1.5, 0, 0)
+	rig.snap_behind_dog()
+	await _physics(2)
+	check(rig.collided and rig.is_dog_visible(), "wall pulls camera in, dog still visible")
+	check(rig.global_position.y - dog.global_position.y < 1.6, "camera stays low near walls")
+	dog.global_position = Vector3(-12, 0.1, 4.8)
+	rig.snap()
+	await _physics(2)
+	check(not rig.collided and rig._faded.size() > 0 and rig.global_position.y - dog.global_position.y < 1.6, "too close to a wall, the wall fades")
 
 	# --- Search ------------------------------------------------------------------
 	var trash := map.get_node("SearchPoints/trash_street_east") as SearchPoint3D
@@ -113,9 +97,8 @@ func _run() -> void:
 	var pair := map.get_node("Encounters/pair_park") as OpponentPair3D
 	await _interact_at(dog, human, pair)
 	check(coordinator.is_fighting() and human.state == HumanFollower3D.State.COMBAT, "provoke starts a fight in place")
-	rig.set_view(CameraRig3D.View.DOG)
 	await _physics(2)
-	check(rig.is_combat_framing(), "dog view pulls back to frame the fight")
+	check(rig.is_combat_framing(), "camera pulls back to frame the fight")
 	var dog_before := dog.global_position
 	await _hold(&"move_left", 15)
 	check(dog.global_position.distance_to(dog_before) > 0.3, "dog stays controllable during the fight")
@@ -132,7 +115,6 @@ func _run() -> void:
 	await _wait_until(func() -> bool: return not coordinator.is_fighting(), 900)
 	check_eq(coordinator.last_result, CombatSimulation.Result.VICTORY, "3D fight won autonomously")
 	check(pair.is_beaten() and gained[0] > 0, "beaten pair, reward in the bag")
-	rig.set_view(CameraRig3D.View.TOP_DOWN)
 
 	# --- Extraction -> result -> Home ---------------------------------------------
 	run.debug_unlock_all_extractions()
@@ -150,10 +132,6 @@ func _run() -> void:
 
 
 # --- helpers ---------------------------------------------------------------
-
-func _find_button(map: Node) -> Button:
-	return map.find_child("ViewButton", true, false) as Button
-
 
 func _interact_at(dog: DogController3D, human: HumanFollower3D, target: Node3D) -> void:
 	dog.global_position = target.global_position + Vector3(0.6, 0.2, 0.6)
