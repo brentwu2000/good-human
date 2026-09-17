@@ -33,3 +33,6 @@ Short-term progression is framed as optional dog desires, discoveries and causal
 
 ## ADR-010 — Camera perspective: dog-height chase camera in 3D (ACCEPTED 2026-09-17)
 Evaluated in P-01; owner first chose switchable top-down + dog view, then after playing the P-02 slice kept only the dog view (P-01 "B" framing). Production moves to 3D. Full record: `ADR_010_CAMERA_PERSPECTIVE_UNDER_EVALUATION.md`.
+
+## ADR-011 — Dog agency over QTE
+Combat participation comes from continuous dog movement and contextual world actions (Bark, Leash Pull), not isolated QTE prompts. Full record: `ADR_011_DOG_AGENCY_OVER_QTE.md`.

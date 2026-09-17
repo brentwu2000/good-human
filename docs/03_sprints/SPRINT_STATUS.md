@@ -234,3 +234,25 @@ Owner approved 2026-09-17. Plan: `docs/03_sprints/P_03_3D_CONTENT_PORT.md`.
 - Approach: OwnerBehavior, TrainingObserver, GoalDirector and DesireHUD are dimension-agnostic (meters × `units_per_meter`: 80 on the 2D map, 1 in 3D); 3D actors expose the same methods (`planar_speed`, `play_growth_behavior`, `is_present`, `is_idle`, `set_hinted`, `get_pairs`, `Engagement3D`). No rule logic was duplicated.
 - 3D level additions: 3 m alley between the west blocks (rival 阿黑 at its entrance, hidden until `rival_revealed`), the Old Master under the big tree, three ordinary pair spots shuffled per walk, park and alley scent cues, squirrel with three spawn points, place markers (street, alley, main path, park, big tree).
 - Not yet: full neighbourhood layout (convenience store, back lane, gym area), retiring the 2D map and its tests, Android performance.
+
+## Sprint 04 — DOG AGENCY
+Camera Gate decided before install (ADR-010: dog-height camera only), so the camera-gated tasks P3-012/P3-013 are unblocked. Built in the 3D walk.
+
+| ID | Task | Status |
+|---|---|---|
+| P3-001 | DogAgency coordinator/events | TODO |
+| P3-002 | Bark world event | TODO |
+| P3-003 | Bark attention reaction | TODO |
+| P3-004 | Bark anti-spam | TODO |
+| P3-005 | Leash tension model | TODO |
+| P3-006 | Leash pull owner reaction | TODO |
+| P3-007 | Bad-pull/stumble outcome | TODO |
+| P3-008 | Pull-assisted disengage | TODO |
+| P3-009 | Nearby interaction during combat | TODO |
+| P3-010 | TrainingEvent integration | TODO |
+| P3-011 | Opponent dog basic reactions | TODO |
+| P3-012 | Camera-specific tuning | TODO |
+| P3-013 | Mobile input/HUD integration | TODO |
+| P3-014 | Debug overlay | TODO |
+| P3-015 | Sprint 04 QA readiness | TODO |
+| P3-016 | Core Experience Gate 02 | TODO |
