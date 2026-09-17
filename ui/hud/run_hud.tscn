@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://ui/hud/run_hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://ui/hud/touch_controls.tscn" id="2_touch"]
@@ -26,6 +26,22 @@ content_margin_left = 20.0
 content_margin_top = 12.0
 content_margin_right = 20.0
 content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_experience"]
+bg_color = Color(0.12, 0.14, 0.14, 0.94)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.96, 0.72, 0.36, 0.9)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 24.0
+content_margin_bottom = 18.0
 
 [node name="RunHUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -76,6 +92,39 @@ grow_horizontal = 2
 theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_toast")
 horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ExperienceFX" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 76.0
+offset_top = 228.0
+offset_right = -76.0
+offset_bottom = 334.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_experience")
+
+[node name="Layout" type="HBoxContainer" parent="ExperienceFX"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="MomentIcon" type="Label" parent="ExperienceFX/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.81, 0.44, 1)
+theme_override_font_sizes/font_size = 38
+text = "✦"
+vertical_alignment = 1
+
+[node name="ExperienceLabel" type="Label" parent="ExperienceFX/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.92, 0.82, 1)
+theme_override_font_sizes/font_size = 22
+text = "主人記住了這一刻"
+vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="HintLabel" type="Label" parent="."]

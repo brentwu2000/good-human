@@ -7,6 +7,7 @@ const DEBUG_TAPS: int = 5
 const DEBUG_TAP_WINDOW: float = 2.0
 const HINT_SECONDS: float = 12.0
 const HINT_MOVE_DISTANCE: float = 250.0
+const EXPERIENCE_SECONDS: float = 2.2
 
 @export var run_manager: RunManager
 ## Optional; enables the combat debug buttons.
@@ -18,6 +19,8 @@ var _toast_time_left: float = 0.0
 var _debug_taps: Array[float] = []
 var _hint_time_left: float = HINT_SECONDS
 var _dog_start: Vector2
+var _experience_queue: Array[String] = []
+var _experience_tween: Tween
 
 @onready var _time_label: Label = %TimeLabel
 @onready var _bag_button: Button = %BagButton
@@ -27,6 +30,8 @@ var _dog_start: Vector2
 @onready var _interact_button: TouchActionButton = _touch_controls.get_node("%InteractButton")
 @onready var _debug_panel: DebugPanel = get_node_or_null("%DebugPanel")
 @onready var _hint_label: Label = %HintLabel
+@onready var _experience_fx: PanelContainer = %ExperienceFX
+@onready var _experience_label: Label = %ExperienceLabel
 
 
 func _ready() -> void:
@@ -34,6 +39,7 @@ func _ready() -> void:
 	_inventory_panel.closed.connect(_on_inventory_closed)
 	_bag_button.pressed.connect(toggle_inventory)
 	_toast_label.hide()
+	_experience_fx.hide()
 	if _debug_panel != null:
 		_debug_panel.run_manager = run_manager
 		_debug_panel.combat_coordinator = combat_coordinator
@@ -46,6 +52,8 @@ func _ready() -> void:
 	run_manager.loot_blocked.connect(_on_loot_blocked)
 	run_manager.search_empty.connect(_on_search_empty)
 	run_manager.extraction_unlocked.connect(_on_extraction_unlocked)
+	if run_manager.training != null:
+		run_manager.training.event_recorded.connect(_on_training_event_recorded)
 	if run_manager.dog != null:
 		run_manager.dog.focus_changed.connect(_on_focus_changed)
 	_on_focus_changed(null)
@@ -132,6 +140,35 @@ func _on_search_empty(_point: SearchPoint) -> void:
 
 func _on_extraction_unlocked(point: ExtractionPoint) -> void:
 	show_toast(point.unlock_message, Color(0.6, 1.0, 0.6), true)
+
+
+func _on_training_event_recorded(event: TrainingEvent) -> void:
+	var memory := event.experience_text()
+	if memory.is_empty():
+		return
+	_experience_queue.append(memory)
+	if not _experience_fx.visible:
+		_play_next_experience()
+
+
+func _play_next_experience() -> void:
+	if _experience_queue.is_empty():
+		_experience_fx.hide()
+		return
+	_experience_label.text = "主人記住了：\n%s" % _experience_queue.pop_front()
+	_experience_fx.show()
+	_experience_fx.modulate = Color(1, 1, 1, 0)
+	_experience_fx.position.y += 14.0
+	if _experience_tween != null:
+		_experience_tween.kill()
+	_experience_tween = create_tween()
+	_experience_tween.set_parallel(true)
+	_experience_tween.tween_property(_experience_fx, "modulate", Color.WHITE, 0.22)
+	_experience_tween.tween_property(_experience_fx, "position:y", _experience_fx.position.y - 14.0, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_experience_tween.set_parallel(false)
+	_experience_tween.tween_interval(EXPERIENCE_SECONDS)
+	_experience_tween.tween_property(_experience_fx, "modulate", Color(1, 1, 1, 0), 0.28)
+	_experience_tween.tween_callback(_play_next_experience)
 
 
 func _on_focus_changed(target: Interactable) -> void:

@@ -1,11 +1,98 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://actors/human/human_follower.gd" id="1_human"]
 [ext_resource type="PackedScene" path="res://actors/fighter/fighter_puppet.tscn" id="2_puppet"]
 [ext_resource type="Resource" path="res://data/combat/fighters/player_human.tres" id="3_fighter"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_v1/idle_00.png" id="4_idle"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_v1/walk_00.png" id="5_walk0"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_v1/walk_01.png" id="6_walk1"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_v1/walk_02.png" id="7_walk2"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_v1/walk_03.png" id="8_walk3"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_growth_v1/leash_before.png" id="9_leash_before"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_growth_v1/leash_after.png" id="10_leash_after"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_growth_v1/recovery_before.png" id="11_recovery_before"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_growth_v1/recovery_after.png" id="12_recovery_after"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_growth_v1/threat_before.png" id="13_threat_before"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_growth_v1/threat_after.png" id="14_threat_after"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_feet"]
 radius = 16.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_owner"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_idle")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_leash_after")
+}],
+"loop": false,
+"name": &"leash_after",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_leash_before")
+}],
+"loop": false,
+"name": &"leash_before",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_recovery_after")
+}],
+"loop": false,
+"name": &"recovery_after",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_recovery_before")
+}],
+"loop": false,
+"name": &"recovery_before",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_threat_after")
+}],
+"loop": false,
+"name": &"threat_after",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_threat_before")
+}],
+"loop": false,
+"name": &"threat_before",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_walk0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_walk1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_walk2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_walk3")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 10.0
+}]
 
 [node name="Human" type="CharacterBody2D"]
 collision_layer = 0
@@ -15,6 +102,12 @@ fighter = ExtResource("3_fighter")
 
 [node name="Puppet" parent="." instance=ExtResource("2_puppet")]
 unique_name_in_owner = true
+
+[node name="OwnerSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -120)
+sprite_frames = SubResource("SpriteFrames_owner")
+animation = &"idle"
+autoplay = "idle"
 
 [node name="Bag" type="Polygon2D" parent="Puppet/Visual"]
 z_index = -1
@@ -42,9 +135,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 10
 offset_left = -120.0
-offset_top = -160.0
+offset_top = -278.0
 offset_right = 120.0
-offset_bottom = -118.0
+offset_bottom = -226.0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 26

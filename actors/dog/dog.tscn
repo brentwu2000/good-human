@@ -1,12 +1,45 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://actors/dog/dog_controller.gd" id="1_dog"]
+[ext_resource type="Texture2D" path="res://assets/characters/dog/sprites/player_dog_v1/idle_00.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://assets/characters/dog/sprites/player_dog_v1/walk_00.png" id="3_walk0"]
+[ext_resource type="Texture2D" path="res://assets/characters/dog/sprites/player_dog_v1/walk_01.png" id="4_walk1"]
+[ext_resource type="Texture2D" path="res://assets/characters/dog/sprites/player_dog_v1/walk_02.png" id="5_walk2"]
+[ext_resource type="Texture2D" path="res://assets/characters/dog/sprites/player_dog_v1/walk_03.png" id="6_walk3"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 20.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detector"]
 radius = 72.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dog"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_idle")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_walk0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_walk1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_walk2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_walk3")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 10.0
+}]
 
 [node name="Dog" type="CharacterBody2D"]
 collision_layer = 2
@@ -15,11 +48,19 @@ script = ExtResource("1_dog")
 
 [node name="Visual" type="Node2D" parent="."]
 
+[node name="Sprite" type="AnimatedSprite2D" parent="Visual"]
+position = Vector2(0, -64)
+sprite_frames = SubResource("SpriteFrames_dog")
+animation = &"idle"
+autoplay = "idle"
+
 [node name="Body" type="Polygon2D" parent="Visual"]
+visible = false
 color = Color(0.78, 0.6, 0.38, 1)
 polygon = PackedVector2Array(-26, -16, 18, -16, 18, 16, -26, 16)
 
 [node name="Nose" type="Polygon2D" parent="Visual"]
+visible = false
 color = Color(0.25, 0.18, 0.12, 1)
 polygon = PackedVector2Array(18, -10, 32, 0, 18, 10)
 

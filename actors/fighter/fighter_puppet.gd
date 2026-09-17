@@ -14,6 +14,7 @@ var _pose_tween: Tween
 var _popup_tween: Tween
 
 @onready var _visual: Node2D = %Visual
+@onready var _combat_sprite: AnimatedSprite2D = %CombatSprite
 @onready var _front_leg: Polygon2D = %FrontLeg
 @onready var _back_leg: Polygon2D = %BackLeg
 @onready var _body: Polygon2D = %Body
@@ -41,6 +42,13 @@ func apply(fighter: FighterData) -> void:
 	_body.color = fighter.shirt_color
 	_front_leg.color = fighter.pants_color
 	_back_leg.color = fighter.pants_color
+	if fighter.combat_sprite_frames != null:
+		_combat_sprite.sprite_frames = fighter.combat_sprite_frames
+		_combat_sprite.visible = true
+		_visual.visible = false
+	else:
+		_combat_sprite.visible = false
+		_visual.visible = true
 	set_facing(facing)
 
 
@@ -49,6 +57,7 @@ func set_facing(direction: float) -> void:
 	if not is_node_ready() or data == null:
 		return
 	_visual.scale = Vector2(data.body_scale.x * facing, data.body_scale.y)
+	_combat_sprite.flip_h = facing < 0.0
 	_reset_pose()
 
 
@@ -68,6 +77,9 @@ func set_hp_ratio(ratio: float) -> void:
 
 
 func set_guard(active: bool) -> void:
+	if _using_sprite_art():
+		_show_sprite_pose(&"block" if active and not _down else &"neutral")
+		return
 	_guard.visible = active and not _down
 	if _guard.visible:
 		_arm.rotation = -2.2
@@ -76,7 +88,10 @@ func set_guard(active: bool) -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	if not _down and (_pose_tween == null or not _pose_tween.is_running()):
-		_visual.position.y = sin(_time * 6.0) * 1.5
+		if _using_sprite_art():
+			_combat_sprite.position.y = -120.0 + sin(_time * 6.0) * 1.5
+		else:
+			_visual.position.y = sin(_time * 6.0) * 1.5
 
 
 # --- Skill animations (keyed by CombatSkillData.animation_key) ---------------
@@ -84,6 +99,15 @@ func _process(delta: float) -> void:
 func play_windup(skill: CombatSkillData) -> void:
 	_popup_text(skill.display_name, Color.WHITE)
 	var tween := _new_pose_tween()
+	if _using_sprite_art():
+		match skill.animation_key:
+			&"block":
+				_show_sprite_pose(&"block")
+			&"dodge":
+				_show_sprite_pose(&"dodge")
+			_:
+				tween.tween_property(_combat_sprite, "position:x", -8.0 * facing, skill.windup)
+		return
 	match skill.animation_key:
 		&"punch":
 			tween.tween_property(_visual, "position:x", -8.0 * facing, skill.windup)
@@ -99,6 +123,13 @@ func play_windup(skill: CombatSkillData) -> void:
 
 func play_strike(skill: CombatSkillData) -> void:
 	var tween := _new_pose_tween()
+	if _using_sprite_art():
+		var pose: StringName = &"kick" if skill.animation_key == &"kick" else &"punch"
+		_show_sprite_pose(pose)
+		tween.tween_property(_combat_sprite, "position:x", 14.0 * facing, 0.08)
+		tween.tween_interval(0.12)
+		tween.tween_callback(_reset_pose)
+		return
 	match skill.animation_key:
 		&"kick":
 			tween.tween_property(_visual, "position:x", 22.0 * facing, 0.08)
@@ -113,6 +144,14 @@ func play_strike(skill: CombatSkillData) -> void:
 
 func play_hurt(blocked: bool) -> void:
 	var tween := _new_pose_tween()
+	if _using_sprite_art():
+		_show_sprite_pose(&"block" if blocked else &"hit")
+		_combat_sprite.modulate = Color(0.6, 0.8, 1.0) if blocked else HIT_COLOR
+		tween.tween_property(_combat_sprite, "position:x", -10.0 * facing, 0.05)
+		tween.tween_property(_combat_sprite, "modulate", Color.WHITE, 0.2)
+		tween.parallel().tween_property(_combat_sprite, "position:x", 0.0, 0.2)
+		tween.tween_callback(_reset_pose)
+		return
 	_visual.modulate = Color(0.6, 0.8, 1.0) if blocked else HIT_COLOR
 	tween.tween_property(_visual, "position:x", -10.0 * facing, 0.05)
 	tween.tween_property(_visual, "modulate", Color.WHITE, 0.2)
@@ -122,6 +161,11 @@ func play_hurt(blocked: bool) -> void:
 
 
 func play_evade() -> void:
+	if _using_sprite_art():
+		var tween := _new_pose_tween()
+		_show_sprite_pose(&"dodge")
+		tween.tween_interval(0.18)
+		tween.tween_callback(_reset_pose)
 	_popup_text("閃過！", Color(0.7, 1.0, 0.7))
 
 
@@ -132,6 +176,11 @@ func play_miss() -> void:
 func play_stagger() -> void:
 	_popup_text("被打斷！", Color(1.0, 0.7, 0.3))
 	var tween := _new_pose_tween()
+	if _using_sprite_art():
+		_show_sprite_pose(&"hit")
+		tween.tween_interval(0.2)
+		tween.tween_callback(_reset_pose)
+		return
 	tween.tween_property(_visual, "rotation", _lean() - 0.3 * facing, 0.08)
 	tween.tween_property(_visual, "rotation", _lean(), 0.25)
 
@@ -139,6 +188,12 @@ func play_stagger() -> void:
 func play_down() -> void:
 	_down = true
 	_guard.hide()
+	if _using_sprite_art():
+		if _pose_tween != null:
+			_pose_tween.kill()
+		_show_sprite_pose(&"down")
+		_combat_sprite.position = Vector2(0.0, -120.0)
+		return
 	var tween := _new_pose_tween()
 	tween.tween_property(_visual, "rotation", -1.45 * facing, 0.35).set_trans(Tween.TRANS_BOUNCE)
 	tween.parallel().tween_property(_visual, "position:y", -6.0, 0.35)
@@ -146,6 +201,11 @@ func play_down() -> void:
 
 func play_victory() -> void:
 	var tween := _new_pose_tween()
+	if _using_sprite_art():
+		_show_sprite_pose(&"neutral")
+		tween.tween_property(_combat_sprite, "position:y", -138.0, 0.15)
+		tween.tween_property(_combat_sprite, "position:y", -120.0, 0.15)
+		return
 	tween.tween_property(_arm, "rotation", -2.9, 0.2)
 	tween.tween_property(_visual, "position:y", -18.0, 0.15)
 	tween.tween_property(_visual, "position:y", 0.0, 0.15)
@@ -154,6 +214,11 @@ func play_victory() -> void:
 ## Sitting on the ground after losing (world pair).
 func set_beaten(beaten: bool) -> void:
 	_down = beaten
+	if _using_sprite_art():
+		_show_sprite_pose(&"down" if beaten else &"neutral")
+		_combat_sprite.position = Vector2(0.0, -120.0)
+		modulate = Color(0.7, 0.7, 0.7) if beaten else Color.WHITE
+		return
 	_visual.rotation = -0.5 * facing if beaten else _lean()
 	modulate = Color(0.7, 0.7, 0.7) if beaten else Color.WHITE
 
@@ -178,12 +243,26 @@ func shout(text: String, color: Color = Color.WHITE) -> void:
 func _reset_pose() -> void:
 	if _down:
 		return
+	if _using_sprite_art():
+		_show_sprite_pose(&"neutral")
+		_combat_sprite.position = Vector2(0.0, -120.0)
+		_combat_sprite.modulate = Color.WHITE
 	_visual.position = Vector2.ZERO
 	_visual.rotation = _lean()
 	_visual.modulate = Color.WHITE
 	_arm.rotation = 0.0
 	_front_leg.rotation = 0.0
 	_guard.hide()
+
+
+func _using_sprite_art() -> bool:
+	return data != null and data.combat_sprite_frames != null
+
+
+func _show_sprite_pose(pose: StringName) -> void:
+	if not _using_sprite_art() or not _combat_sprite.sprite_frames.has_animation(pose):
+		return
+	_combat_sprite.play(pose)
 
 
 ## Resting forward lean (older people stoop), mirrored with facing.

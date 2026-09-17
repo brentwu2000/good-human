@@ -12,6 +12,11 @@ polygon = PackedVector2Array(-24, -4, 24, -4, 24, 6, -24, 6)
 [node name="Visual" type="Node2D" parent="."]
 unique_name_in_owner = true
 
+[node name="CombatSprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+visible = false
+position = Vector2(0, -120)
+
 [node name="BackLeg" type="Polygon2D" parent="Visual"]
 unique_name_in_owner = true
 position = Vector2(-5, -34)

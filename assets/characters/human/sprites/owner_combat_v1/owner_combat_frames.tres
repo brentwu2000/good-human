@@ -1,0 +1,47 @@
+[gd_resource type="SpriteFrames" load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_combat_v1/neutral.png" id="1_neutral"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_combat_v1/punch.png" id="2_punch"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_combat_v1/kick.png" id="3_kick"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_combat_v1/block.png" id="4_block"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_combat_v1/dodge.png" id="5_dodge"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_combat_v1/hit.png" id="6_hit"]
+[ext_resource type="Texture2D" path="res://assets/characters/human/sprites/owner_combat_v1/down.png" id="7_down"]
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("4_block")}],
+"loop": false,
+"name": &"block",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("5_dodge")}],
+"loop": false,
+"name": &"dodge",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("7_down")}],
+"loop": false,
+"name": &"down",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("6_hit")}],
+"loop": false,
+"name": &"hit",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("3_kick")}],
+"loop": false,
+"name": &"kick",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("1_neutral")}],
+"loop": true,
+"name": &"neutral",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("2_punch")}],
+"loop": false,
+"name": &"punch",
+"speed": 1.0
+}]

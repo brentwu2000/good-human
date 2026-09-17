@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
+  <defs>
+    <style>
+      .ink{stroke:#17333a;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+      .fine{stroke:#17333a;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+      .measure{stroke:#d8953f;stroke-width:3;stroke-dasharray:9 8}
+      .label{font:700 24px Arial,sans-serif;fill:#17333a}
+      .small{font:18px Arial,sans-serif;fill:#385158}
+      .tiny{font:15px Arial,sans-serif;fill:#385158}
+    </style>
+  </defs>
+  <rect width="720" height="1280" fill="#f6f0e4"/>
+  <rect x="28" y="28" width="664" height="1224" rx="28" fill="#fffaf0" stroke="#17333a" stroke-width="4"/>
+  <text x="64" y="84" class="label">DOG / HUMAN SCALE GUIDE 01</text>
+  <text x="64" y="113" class="small">720 × 1280 portrait • exploration baseline • REVIEW</text>
+
+  <rect x="64" y="152" width="592" height="104" rx="18" fill="#e7efe6"/>
+  <text x="88" y="190" class="small">ACTION-SAFE FACES</text>
+  <text x="88" y="220" class="label">x 64–656  /  y 190–1030</text>
+  <text x="88" y="246" class="tiny">Top 170 px and bottom 190 px remain UI-aware.</text>
+
+  <line x1="74" y1="330" x2="646" y2="330" class="measure"/>
+  <text x="78" y="316" class="tiny">TOP UI RESERVE</text>
+
+  <!-- human, 210 px visible height -->
+  <g transform="translate(390 462)">
+    <ellipse cx="0" cy="211" rx="39" ry="13" fill="#d9d2c3"/>
+    <circle cx="0" cy="26" r="30" fill="#d8a279" class="ink"/>
+    <path d="M-24 10 Q0-14 25 8 L20 25 Q2 12-25 27Z" fill="#513c32" class="fine"/>
+    <path d="M-37 61 Q0 43 37 61 L43 135 Q15 151-16 140 L-40 119Z" fill="#82926d" class="ink"/>
+    <path d="M-40 76 L-67 130 M39 76 L70 128" fill="none" class="ink"/>
+    <path d="M-18 139 L-24 199 M18 139 L26 199" fill="none" class="ink"/>
+    <path d="M-31 199 L-12 199 M18 199 L38 199" fill="none" class="ink"/>
+    <path d="M-28 67 L25 67" fill="none" stroke="#f5ead7" stroke-width="17"/>
+    <circle cx="-9" cy="25" r="7" fill="none" class="fine"/>
+    <circle cx="11" cy="25" r="7" fill="none" class="fine"/>
+    <line x1="-2" y1="25" x2="4" y2="25" class="fine"/>
+  </g>
+
+  <!-- dog, 112 px visible height -->
+  <g transform="translate(202 558)">
+    <ellipse cx="0" cy="116" rx="49" ry="12" fill="#d9d2c3"/>
+    <path d="M-51 73 Q-42 39-6 41 Q34 41 47 72 L39 99 Q5 111-42 96Z" fill="#a96f42" class="ink"/>
+    <circle cx="44" cy="52" r="32" fill="#b97b49" class="ink"/>
+    <path d="M23 33 Q15 7 38 19 M59 30 Q70 10 75 36" fill="#5a4034" class="ink"/>
+    <path d="M45 43 Q62 43 69 56 Q59 70 42 67Z" fill="#f0dfc3"/>
+    <circle cx="56" cy="48" r="4" fill="#17333a"/>
+    <circle cx="70" cy="57" r="5" fill="#17333a"/>
+    <path d="M-42 91 L-44 112 M-10 96 L-9 115 M28 93 L29 113" fill="none" class="ink"/>
+    <path d="M-48 55 Q-80 33-67 13" fill="none" class="ink"/>
+    <path d="M13 45 Q22 68 39 82" fill="none" stroke="#218f92" stroke-width="13"/>
+    <circle cx="22" cy="66" r="5" fill="#d8953f"/>
+  </g>
+
+  <!-- leash -->
+  <path d="M224 624 Q292 568 458 590" fill="none" stroke="#17333a" stroke-width="10" stroke-linecap="round"/>
+  <path d="M224 624 Q292 568 458 590" fill="none" stroke="#d36f43" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- measurement rules -->
+  <line x1="350" y1="462" x2="350" y2="672" class="measure"/>
+  <line x1="339" y1="462" x2="361" y2="462" class="fine"/>
+  <line x1="339" y1="672" x2="361" y2="672" class="fine"/>
+  <text x="382" y="704" class="label">HUMAN 210 px</text>
+  <line x1="135" y1="558" x2="135" y2="670" class="measure"/>
+  <line x1="124" y1="558" x2="146" y2="558" class="fine"/>
+  <line x1="124" y1="670" x2="146" y2="670" class="fine"/>
+  <text x="74" y="704" class="label">DOG 112 px</text>
+  <text x="79" y="734" class="small">53% of owner height</text>
+
+  <rect x="64" y="780" width="592" height="164" rx="22" fill="#f0dfc3"/>
+  <text x="88" y="821" class="label">LEASH READABILITY</text>
+  <path d="M92 862 Q205 817 326 874" fill="none" stroke="#17333a" stroke-width="10" stroke-linecap="round"/>
+  <path d="M92 862 Q205 817 326 874" fill="none" stroke="#d36f43" stroke-width="6" stroke-linecap="round"/>
+  <text x="356" y="857" class="small">6 px baseline</text>
+  <text x="356" y="886" class="small">4 px hard minimum</text>
+  <text x="88" y="921" class="tiny">Relaxed span 95–175 px • tension begins above 210 px</text>
+
+  <rect x="64" y="976" width="280" height="198" rx="22" fill="#e7efe6"/>
+  <text x="88" y="1017" class="label">GROUND FOOTPRINT</text>
+  <ellipse cx="150" cy="1080" rx="38" ry="22" fill="none" class="fine"/>
+  <text x="205" y="1086" class="small">Human 38×22</text>
+  <ellipse cx="150" cy="1130" rx="44" ry="24" fill="none" class="fine"/>
+  <text x="205" y="1136" class="small">Dog 44×24</text>
+
+  <rect x="368" y="976" width="288" height="198" rx="22" fill="#e4ddec"/>
+  <text x="392" y="1017" class="label">READABILITY FLOOR</text>
+  <text x="392" y="1056" class="small">Human 180 px</text>
+  <text x="392" y="1088" class="small">Player dog 96 px</text>
+  <text x="392" y="1120" class="small">Tap target ≥ 64×64 px</text>
+  <text x="392" y="1152" class="tiny">Test at 100%, 50%, and 33%.</text>
+
+  <text x="64" y="1215" class="tiny">GOOD HUMAN! • character proportions are visual targets, not collision bounds</text>
+</svg>

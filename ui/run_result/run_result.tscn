@@ -1,6 +1,78 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://ui/run_result/run_result.gd" id="1_result"]
+
+[sub_resource type="StyleBoxFlat" id="Header"]
+bg_color = Color(0.105, 0.122, 0.145, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.73, 0.66, 0.65)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxFlat" id="Training"]
+bg_color = Color(0.12, 0.15, 0.17, 0.96)
+border_width_left = 7
+border_color = Color(0.94, 0.69, 0.32, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+content_margin_left = 24.0
+content_margin_top = 18.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="Perk"]
+bg_color = Color(0.20, 0.17, 0.09, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.80, 0.38, 0.85)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+content_margin_left = 24.0
+content_margin_top = 18.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="Loot"]
+bg_color = Color(0.11, 0.135, 0.16, 0.96)
+border_width_left = 7
+border_color = Color(0.35, 0.62, 0.80, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+content_margin_left = 24.0
+content_margin_top = 18.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="Button"]
+bg_color = Color(0.32, 0.63, 0.55, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+bg_color = Color(0.40, 0.72, 0.63, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
 
 [node name="RunResult" type="Control"]
 layout_mode = 3
@@ -18,7 +90,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.15, 0.17, 0.2, 1)
+color = Color(0.055, 0.067, 0.08, 1)
+
+[node name="TopGlow" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 310.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.16, 0.30, 0.28, 0.42)
 
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -27,43 +108,127 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 40
-theme_override_constants/margin_top = 80
-theme_override_constants/margin_right = 40
-theme_override_constants/margin_bottom = 60
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 54
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 42
 
 [node name="Layout" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 20
 
-[node name="TitleLabel" type="Label" parent="Margin/Layout"]
-unique_name_in_owner = true
+[node name="EyebrowLabel" type="Label" parent="Margin/Layout"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 44
-text = "結果"
+theme_override_colors/font_color = Color(0.56, 0.84, 0.76, 1)
+theme_override_font_sizes/font_size = 20
+text = "WALK REPORT  ·  散步紀錄"
 horizontal_alignment = 1
 
-[node name="SummaryLabel" type="Label" parent="Margin/Layout"]
+[node name="HeaderCard" type="PanelContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Header")
+
+[node name="HeaderLayout" type="VBoxContainer" parent="Margin/Layout/HeaderCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="Margin/Layout/HeaderCard/HeaderLayout"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.96, 0.94, 0.86, 1)
+theme_override_font_sizes/font_size = 42
+text = "散步結束"
 horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SummaryLabel" type="Label" parent="Margin/Layout/HeaderCard/HeaderLayout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.79, 0.79, 1)
+theme_override_font_sizes/font_size = 23
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="Scroll" type="ScrollContainer" parent="Margin/Layout"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="ItemsLabel" type="Label" parent="Margin/Layout/Scroll"]
-unique_name_in_owner = true
+[node name="Cards" type="VBoxContainer" parent="Margin/Layout/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 26
+theme_override_constants/separation = 16
+
+[node name="TrainingCard" type="PanelContainer" parent="Margin/Layout/Scroll/Cards"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("Training")
+[node name="Body" type="VBoxContainer" parent="Margin/Layout/Scroll/Cards/TrainingCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+[node name="SectionTitle" type="Label" parent="Margin/Layout/Scroll/Cards/TrainingCard/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.72, 0.36, 1)
+theme_override_font_sizes/font_size = 22
+text = "🐾  今天學到的事"
+[node name="TrainingLabel" type="Label" parent="Margin/Layout/Scroll/Cards/TrainingCard/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.90, 0.84, 1)
+theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
+
+[node name="PerkCard" type="PanelContainer" parent="Margin/Layout/Scroll/Cards"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("Perk")
+[node name="Body" type="VBoxContainer" parent="Margin/Layout/Scroll/Cards/PerkCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+[node name="SectionTitle" type="Label" parent="Margin/Layout/Scroll/Cards/PerkCard/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.42, 1)
+theme_override_font_sizes/font_size = 22
+text = "✨  主人有點不一樣了"
+[node name="PerkLabel" type="Label" parent="Margin/Layout/Scroll/Cards/PerkCard/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.72, 1)
+theme_override_font_sizes/font_size = 24
+autowrap_mode = 3
+
+[node name="LootCard" type="PanelContainer" parent="Margin/Layout/Scroll/Cards"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("Loot")
+[node name="Body" type="VBoxContainer" parent="Margin/Layout/Scroll/Cards/LootCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+[node name="SectionTitle" type="Label" parent="Margin/Layout/Scroll/Cards/LootCard/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.47, 0.73, 0.91, 1)
+theme_override_font_sizes/font_size = 22
+text = "🎒  這趟帶回來的東西"
+[node name="LootLabel" type="Label" parent="Margin/Layout/Scroll/Cards/LootCard/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.91, 0.93, 1)
+theme_override_font_sizes/font_size = 24
+autowrap_mode = 3
+
+[node name="ItemsLabel" type="Label" parent="Margin/Layout/Scroll/Cards"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
 
 [node name="HomeButton" type="Button" parent="Margin/Layout"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 96)
+custom_minimum_size = Vector2(0, 88)
 layout_mode = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 32
-text = "回家"
+theme_override_colors/font_color = Color(0.04, 0.09, 0.08, 1)
+theme_override_colors/font_hover_color = Color(0.04, 0.09, 0.08, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("Button")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("Button")
+text = "回到家  →"

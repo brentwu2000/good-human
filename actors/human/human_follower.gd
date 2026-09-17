@@ -26,8 +26,11 @@ var speed_multiplier: float = 1.0
 var hold_time: float = 0.0
 
 var _bubble_tween: Tween
+var _behavior_tween: Tween
+var _behavior_pose_active: bool = false
 
 @onready var puppet: FighterPuppet = %Puppet
+@onready var _owner_sprite: AnimatedSprite2D = $OwnerSprite
 @onready var _leash: Line2D = $Leash
 @onready var _bubble: Label = %Bubble
 
@@ -38,6 +41,7 @@ func _ready() -> void:
 	_leash.top_level = true
 	if fighter != null:
 		puppet.apply(fighter)
+	_update_state_presentation()
 
 
 func _physics_process(delta: float) -> void:
@@ -69,6 +73,16 @@ func _follow(delta: float) -> void:
 
 	if absf(velocity.x) > 5.0:
 		puppet.set_facing(velocity.x)
+		_owner_sprite.flip_h = velocity.x < 0.0
+	_update_follow_animation()
+
+
+func _update_follow_animation() -> void:
+	if _behavior_pose_active:
+		return
+	var next_animation: StringName = &"walk" if velocity.length_squared() > 100.0 else &"idle"
+	if _owner_sprite.animation != next_animation:
+		_owner_sprite.play(next_animation)
 
 
 func is_following() -> bool:
@@ -80,9 +94,49 @@ func set_state(value: State) -> void:
 	state = value
 	velocity = Vector2.ZERO
 	hold_time = 0.0
+	_clear_growth_behavior()
+	_update_state_presentation()
 	if value == State.FOLLOW:
 		puppet.revive()
 		puppet.show_hp(false)
+
+
+func _update_state_presentation() -> void:
+	var following := state == State.FOLLOW
+	_owner_sprite.visible = following
+	puppet.visible = not following
+	if following:
+		_owner_sprite.play(&"idle")
+
+
+## Presentation hook for OwnerBehavior. This never mutates growth or traits.
+func play_growth_behavior(effect: StringName, improved: bool, seconds: float) -> void:
+	if state != State.FOLLOW:
+		return
+	var suffix := "after" if improved else "before"
+	var animation := StringName("%s_%s" % [effect, suffix])
+	if not _owner_sprite.sprite_frames.has_animation(animation):
+		return
+	if _behavior_tween != null:
+		_behavior_tween.kill()
+	_behavior_pose_active = true
+	_owner_sprite.play(animation)
+	_behavior_tween = create_tween()
+	_behavior_tween.tween_interval(maxf(seconds, 0.1))
+	_behavior_tween.tween_callback(_finish_growth_behavior)
+
+
+func _clear_growth_behavior() -> void:
+	if _behavior_tween != null:
+		_behavior_tween.kill()
+	_finish_growth_behavior()
+
+
+func _finish_growth_behavior() -> void:
+	_behavior_tween = null
+	_behavior_pose_active = false
+	if state == State.FOLLOW:
+		_update_follow_animation()
 
 
 func say(text: String, color: Color = Color.WHITE, seconds: float = 1.6) -> void:
@@ -99,8 +153,10 @@ func say(text: String, color: Color = Color.WHITE, seconds: float = 1.6) -> void
 
 
 func _update_leash() -> void:
-	var hand := global_position + Vector2(14.0 * puppet.facing, -30.0)
+	var hand := global_position + Vector2(20.0 * puppet.facing, -96.0)
 	var collar := dog.global_position
+	if dog.has_method("leash_anchor_global_position"):
+		collar = dog.call("leash_anchor_global_position")
 	# During a fight the leash is dropped: it trails loosely instead of pulling.
 	var reach := max_length if state == State.FOLLOW else maxf(hand.distance_to(collar), max_length)
 	var sag := clampf(1.0 - hand.distance_to(collar) / reach, 0.0, 1.0) * 40.0
