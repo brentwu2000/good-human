@@ -19,6 +19,11 @@ enum State { FOLLOW, COMBAT, DOWN }
 @export var catch_up_distance: float = 700.0
 
 var state: State = State.FOLLOW
+## Follow speed multiplier set by OwnerBehavior (growth traits). 1 = normal.
+var speed_multiplier: float = 1.0
+## While > 0 the owner stands still while following (stumble, catching
+## breath, hesitating). Set by OwnerBehavior.
+var hold_time: float = 0.0
 
 var _bubble_tween: Tween
 
@@ -35,21 +40,24 @@ func _ready() -> void:
 		puppet.apply(fighter)
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if dog == null:
 		return
 	if state == State.FOLLOW:
-		_follow()
+		_follow(delta)
 	_update_leash()
 
 
-func _follow() -> void:
+func _follow(delta: float) -> void:
 	var to_dog := dog.global_position - global_position
 	var distance := to_dog.length()
-	if distance > slack_length:
+	if hold_time > 0.0:
+		hold_time -= delta
+		velocity = Vector2.ZERO
+	elif distance > slack_length:
 		# Walk faster the tighter the leash gets.
 		var pull := inverse_lerp(slack_length, max_length, distance)
-		velocity = to_dog.normalized() * walk_speed * clampf(0.5 + pull, 0.5, 1.6)
+		velocity = to_dog.normalized() * walk_speed * speed_multiplier * clampf(0.5 + pull, 0.5, 1.6)
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, walk_speed * 0.25)
 	move_and_slide()
@@ -71,6 +79,7 @@ func is_following() -> bool:
 func set_state(value: State) -> void:
 	state = value
 	velocity = Vector2.ZERO
+	hold_time = 0.0
 	if value == State.FOLLOW:
 		puppet.revive()
 		puppet.show_hp(false)

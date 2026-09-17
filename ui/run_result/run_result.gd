@@ -30,7 +30,7 @@ func show_result(result: RunResult) -> void:
 		_:
 			_title_label.text = "😵 散步失敗……"
 
-	var lines: Array[String] = []
+	var lines: Array[String] = training_lines(result.training)
 	lines.append("帶回來的東西（$%d）：" % _value_of(result.to_stash))
 	lines.append_array(_describe(result.to_stash))
 	if not result.lost.is_empty():
@@ -41,6 +41,24 @@ func show_result(result: RunResult) -> void:
 		lines.append_array(_describe(result.stash_overflow))
 	lines.append("\n倉庫總價值 $%d" % Game.home_stash.total_value())
 	_items_label.text = "\n".join(lines)
+
+
+## Experiences and changes in words; never raw TrainingTags.
+static func training_lines(summary: RunTrainingSummary) -> Array[String]:
+	var lines: Array[String] = []
+	if summary == null or summary.is_empty():
+		return lines
+	lines.append("今天的散步，主人…")
+	for experience in summary.experiences():
+		var count: int = experience["count"]
+		lines.append("  ・%s%s" % [experience["text"], "（好幾次）" if count >= 3 else ""])
+	if summary.is_partial():
+		lines.append("  （被打倒了，只記住了一半）")
+	for perk in summary.new_perks:
+		lines.append("✨ 主人好像變了：「%s」
+    %s" % [perk.display_name, perk.description])
+	lines.append("")
+	return lines
 
 
 func _describe(stacks: Array[ItemStack]) -> Array[String]:

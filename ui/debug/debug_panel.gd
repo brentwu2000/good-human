@@ -5,6 +5,7 @@ extends Control
 
 @export var run_manager: RunManager
 var combat_coordinator: CombatCoordinator
+var owner_behavior: OwnerBehavior
 
 @onready var _info_label: Label = %InfoLabel
 @onready var _body: Control = %Body
@@ -26,6 +27,9 @@ func _ready() -> void:
 	_bind(%FailButton, func() -> void: run_manager.fail_run())
 	_bind(%NextEncounterButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_goto_next_pair()))
 	_bind(%WinFightButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_force_result(CombatSimulation.Result.VICTORY)))
+	_bind(%TrainAllButton, func() -> void: run_manager.training.debug_add_all(3.0))
+	_bind(%GrowFullButton, func() -> void: _set_growth(DataRegistry.training.trait_full_growth))
+	_bind(%ResetGrowthButton, func() -> void: _set_growth(0.0))
 	_bind(%LoseFightButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_force_result(CombatSimulation.Result.DEFEAT)))
 
 
@@ -36,11 +40,36 @@ func _process(_delta: float) -> void:
 		toggle()
 	if _body.visible:
 		var seconds := int(run_manager.elapsed_time)
-		_info_label.text = "Run %02d:%02d   Seed %d" % [seconds / 60, seconds % 60, run_manager.run_seed]
+		_info_label.text = "Run %02d:%02d   Seed %d
+%s" % [seconds / 60, seconds % 60, run_manager.run_seed, _training_text()]
 
 
 func toggle() -> void:
 	_body.visible = not _body.visible
+
+
+## Raw numbers are debug-only (players never see tags).
+func _training_text() -> String:
+	var parts: Array[String] = []
+	for tag in run_manager.training.totals:
+		parts.append("%s %.1f/%.1f" % [TrainingEventData.tag_name(tag), run_manager.training.totals[tag], Game.human_growth.get_growth(tag)])
+	return "  ".join(parts)
+
+
+## Sets every tag's permanent growth, re-resolves perks and saves.
+func _set_growth(value: float) -> void:
+	var growth := Game.human_growth
+	var defeats := growth.defeats
+	growth.clear()
+	# Full growth also counts as having survived hard defeats (unlocks every perk).
+	growth.defeats = maxi(defeats, 2) if value > 0.0 else 0
+	for tag_name: String in growth.growth.keys():
+		growth.growth[tag_name] = value
+	GrowthResolver.apply(growth, RunTrainingSummary.new(), false, DataRegistry.training)
+	SaveManager.data["human"]["growth_data"] = growth.serialize()
+	SaveManager.save_game()
+	if owner_behavior != null:
+		owner_behavior.refresh_traits()
 
 
 func _with_combat(action: Callable) -> void:

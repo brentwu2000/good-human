@@ -85,11 +85,11 @@ Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_
 |---|---|---|
 | P2-001 | TrainingEvent model | REVIEW |
 | P2-002 | TrainingTracker | REVIEW |
-| P2-003 | RUN generation | TODO |
-| P2-004 | STRAIN generation | TODO |
-| P2-005 | COURAGE generation | TODO |
-| P2-006 | SOCIAL generation | TODO |
-| P2-007 | ENDURE generation | TODO |
+| P2-003 | RUN generation | REVIEW |
+| P2-004 | STRAIN generation | REVIEW |
+| P2-005 | COURAGE generation | REVIEW |
+| P2-006 | SOCIAL generation | REVIEW |
+| P2-007 | ENDURE generation | REVIEW |
 | P2-008 | Anti-farming rules | REVIEW |
 | P2-009 | RunTrainingSummary | REVIEW |
 | P2-010 | Training conversion | REVIEW |
@@ -97,9 +97,9 @@ Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_
 | P2-012 | Persistent Growth data | REVIEW |
 | P2-013 | GrowthResolver | REVIEW |
 | P2-014 | Prototype perks | REVIEW |
-| P2-015 | Visible growth effect 1 | TODO |
-| P2-016 | Visible growth effect 2 | TODO |
-| P2-017 | Visible growth effect 3 | TODO |
-| P2-018 | Training result presentation | TODO |
-| P2-019 | Debug tools | TODO |
+| P2-015 | Visible growth effect 1 | REVIEW |
+| P2-016 | Visible growth effect 2 | REVIEW |
+| P2-017 | Visible growth effect 3 | REVIEW |
+| P2-018 | Training result presentation | REVIEW |
+| P2-019 | Debug tools | REVIEW |
 | P2-020 | Sprint 03 QA readiness | TODO |

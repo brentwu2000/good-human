@@ -27,7 +27,7 @@ anchor_right = 1.0
 offset_left = 24.0
 offset_top = 100.0
 offset_right = -24.0
-offset_bottom = 740.0
+offset_bottom = 900.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_debug")
 
@@ -158,3 +158,30 @@ size_flags_horizontal = 3
 focus_mode = 0
 theme_override_font_sizes/font_size = 22
 text = "戰鬥：直接戰敗"
+
+[node name="TrainAllButton" type="Button" parent="Body/Margin/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "訓練：全部 +3"
+
+[node name="GrowFullButton" type="Button" parent="Body/Margin/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "主人成長：全滿"
+
+[node name="ResetGrowthButton" type="Button" parent="Body/Margin/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "主人成長：重置"

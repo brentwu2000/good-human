@@ -11,6 +11,7 @@ const HINT_MOVE_DISTANCE: float = 250.0
 @export var run_manager: RunManager
 ## Optional; enables the combat debug buttons.
 @export var combat_coordinator: CombatCoordinator
+@export var owner_behavior: OwnerBehavior
 
 var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
@@ -36,6 +37,7 @@ func _ready() -> void:
 	if _debug_panel != null:
 		_debug_panel.run_manager = run_manager
 		_debug_panel.combat_coordinator = combat_coordinator
+		_debug_panel.owner_behavior = owner_behavior
 		_time_label.gui_input.connect(_on_time_label_input)
 	_hint_label.text = controls_hint()
 
