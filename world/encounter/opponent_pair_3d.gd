@@ -11,7 +11,12 @@ const GROUP: StringName = &"opponent_pairs_3d"
 const RETURN_SPEED: float = 1.6
 
 @export var spot_id: StringName
-@export var encounter: EncounterData
+## Fixed pair for this spot. Empty = assigned from the ordinary pool each walk.
+@export var fixed_encounter: EncounterData
+## Only present once the dog has discovered this goal flag (empty = always).
+@export var required_flag: StringName
+
+var encounter: EncounterData
 
 var state: State = State.IDLE
 var coordinator: CombatCoordinator3D
@@ -33,15 +38,16 @@ func _ready() -> void:
 	_name_label = Greybox.label("", 2.0, 30)
 	add_child(_name_label)
 	add_interaction_area(1.2)
-	setup(encounter)
+	setup(fixed_encounter)
 
 
 func setup(data: EncounterData) -> void:
 	encounter = data
 	state = State.IDLE
-	visible = encounter != null
+	visible = is_present()
 	if encounter == null:
 		return
+	_name_label.modulate = Color.WHITE
 	human_puppet.apply(encounter.human)
 	human_puppet.position = Vector3.ZERO
 	human_puppet.show_hp(false)
@@ -53,9 +59,34 @@ func setup(data: EncounterData) -> void:
 	_place_dog()
 
 
+## In the world this walk (has a pair and any required discovery).
+func is_present() -> bool:
+	return encounter != null and Game.goal_progress.has_flag(required_flag)
+
+
+func refresh_presence() -> void:
+	visible = is_present()
+
+
+## Marks the pair as what the dog currently wants.
+func set_hinted(value: bool) -> void:
+	if encounter == null:
+		return
+	var label := "%s和%s" % [encounter.human.display_name, encounter.dog_name]
+	_name_label.text = "❗ " + label if value else label
+	if value:
+		_name_label.modulate = Color(1.0, 0.85, 0.4)
+	else:
+		_name_label.modulate = Color(0.6, 0.6, 0.6) if state == State.BEATEN else Color.WHITE
+
+
+func is_idle() -> bool:
+	return state == State.IDLE
+
+
 func can_interact(context: Object) -> bool:
 	var run := context as RunManager
-	if not enabled or encounter == null or state != State.IDLE or run == null or not run.is_running():
+	if not enabled or not is_present() or state != State.IDLE or run == null or not run.is_running():
 		return false
 	return coordinator == null or coordinator.can_provoke(self)
 

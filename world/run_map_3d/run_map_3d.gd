@@ -66,8 +66,10 @@ func _build_street() -> void:
 	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, -7)))
 	for i in 5:
 		add_child(Greybox.solid_box(Vector3(9, 6, 6), Color(0.62 + 0.05 * (i % 2), 0.55, 0.5), Vector3(-24.0 + i * 12.0, 3, 8.5)))
-	for x in [-19.0, -9.0, 9.0, 19.0]:
+	# West blocks leave a 3 m alley at x = -14.5.
+	for x in [-20.0, -9.0, 9.0, 19.0]:
 		add_child(Greybox.solid_box(Vector3(8, 5, 10), Color(0.55, 0.5, 0.48), Vector3(x, 2.5, -13.5)))
+	add_child(Greybox.box(Vector3(3, 0.02, 10), Color(0.4, 0.37, 0.33), Vector3(-14.5, 0.02, -13.5)))
 	add_child(Greybox.box(Vector3(6, 0.02, 12), Color(0.62, 0.58, 0.5), Vector3(0, 0.02, -14)))
 	# Map edges.
 	for x in [-32.0, 32.0]:

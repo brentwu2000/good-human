@@ -219,12 +219,18 @@ Owner approved 2026-09-17. Plan: `docs/03_sprints/P_03_3D_CONTENT_PORT.md`.
 | ID | Task | Status |
 |---|---|---|
 | V3C-001 | Observers work in 2D and 3D | REVIEW |
-| V3C-002 | Owner behaviour traits in 3D | IN_PROGRESS |
-| V3C-003 | Training events in 3D | IN_PROGRESS |
-| V3C-004 | 3D combat coordinator parity | IN_PROGRESS |
-| V3C-005 | Dog desires + desire HUD in 3D | IN_PROGRESS |
-| V3C-006 | Scent cues, squirrel, places in 3D | IN_PROGRESS |
-| V3C-007 | Rival and Old Master in 3D | IN_PROGRESS |
-| V3C-008 | Debug panel in 3D | IN_PROGRESS |
-| V3C-009 | Scene tests | TODO |
-| V3C-010 | Build for owner playtest | TODO |
+| V3C-002 | Owner behaviour traits in 3D | REVIEW |
+| V3C-003 | Training events in 3D | REVIEW |
+| V3C-004 | 3D combat coordinator parity | REVIEW |
+| V3C-005 | Dog desires + desire HUD in 3D | REVIEW |
+| V3C-006 | Scent cues, squirrel, places in 3D | REVIEW |
+| V3C-007 | Rival and Old Master in 3D | REVIEW |
+| V3C-008 | Debug panel in 3D | REVIEW |
+| V3C-009 | Scene tests | REVIEW |
+| V3C-010 | Build for owner playtest | REVIEW |
+
+## P-03 Engineering Notes (Claude)
+- Validation: `tests/run_all.sh` (17 scene tests, all pass). `content_3d_test` = through the real 3D walk: shuffled ordinary pairs + Old Master + hidden rival, desire card and nose arrow, owner stumbling when dragged and hesitating near pairs, RUN/COURAGE training events, strange scent → half tennis ball → alley scent → 阿黑 revealed → duel desire, squirrel chase up a tree, place/dog discoveries, debug next-pair, extraction converts training, goal thread saved, next walk resumes the duel and beating 阿黑 resolves it.
+- Approach: OwnerBehavior, TrainingObserver, GoalDirector and DesireHUD are dimension-agnostic (meters × `units_per_meter`: 80 on the 2D map, 1 in 3D); 3D actors expose the same methods (`planar_speed`, `play_growth_behavior`, `is_present`, `is_idle`, `set_hinted`, `get_pairs`, `Engagement3D`). No rule logic was duplicated.
+- 3D level additions: 3 m alley between the west blocks (rival 阿黑 at its entrance, hidden until `rival_revealed`), the Old Master under the big tree, three ordinary pair spots shuffled per walk, park and alley scent cues, squirrel with three spawn points, place markers (street, alley, main path, park, big tree).
+- Not yet: full neighbourhood layout (convenience store, back lane, gym area), retiring the 2D map and its tests, Android performance.

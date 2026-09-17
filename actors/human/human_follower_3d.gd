@@ -84,6 +84,31 @@ func _follow(delta: float) -> void:
 		puppet.rotation.y = lerp_angle(puppet.rotation.y, atan2(-planar.x, -planar.z), minf(delta * 8.0, 1.0))
 
 
+## Movement speed on the ground plane (shared with HumanFollower).
+func planar_speed() -> float:
+	return Vector2(velocity.x, velocity.z).length()
+
+
+## Growth-shaped reaction (OwnerBehavior): greybox body language until 3D art.
+## `effect`: leash (stumble), recovery (catching breath), threat (hesitation).
+func play_growth_behavior(effect: StringName, improved: bool, seconds: float) -> void:
+	if state != State.FOLLOW or puppet == null:
+		return
+	var tween := create_tween()
+	match effect:
+		&"leash":
+			tween.tween_property(puppet, "rotation:x", -0.35 if not improved else -0.12, 0.08)
+			tween.tween_property(puppet, "rotation:x", 0.0, maxf(seconds, 0.15))
+		&"recovery":
+			tween.tween_property(puppet, "rotation:x", -0.45 if not improved else -0.2, 0.2)
+			tween.tween_interval(maxf(seconds - 0.4, 0.05))
+			tween.tween_property(puppet, "rotation:x", 0.0, 0.2)
+		_:
+			tween.tween_property(puppet, "position:z", 0.25 if not improved else 0.0, 0.1)
+			tween.tween_interval(maxf(seconds - 0.2, 0.05))
+			tween.tween_property(puppet, "position:z", 0.0, 0.1)
+
+
 func is_following() -> bool:
 	return state == State.FOLLOW
 

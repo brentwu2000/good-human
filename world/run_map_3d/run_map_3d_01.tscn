@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://world/run_map_3d/run_map_3d.gd" id="1_map"]
 [ext_resource type="Script" path="res://actors/dog/dog_controller_3d.gd" id="2_dog"]
@@ -14,6 +14,17 @@
 [ext_resource type="Script" path="res://core/combat/combat_coordinator_3d.gd" id="12_coordinator"]
 [ext_resource type="PackedScene" path="res://ui/hud/run_hud.tscn" id="13_hud"]
 [ext_resource type="Resource" path="res://data/encounters/enc_gym.tres" id="14_gym"]
+[ext_resource type="Resource" path="res://data/encounters/enc_jogger.tres" id="15_jogger"]
+[ext_resource type="Resource" path="res://data/encounters/enc_rival.tres" id="16_rival"]
+[ext_resource type="Resource" path="res://data/encounters/enc_old_master.tres" id="17_old_master"]
+[ext_resource type="Script" path="res://resources/encounter_data.gd" id="18_encounter_data"]
+[ext_resource type="Script" path="res://world/goals/scent_cue_3d.gd" id="19_scent"]
+[ext_resource type="Script" path="res://world/goals/squirrel_3d.gd" id="20_squirrel"]
+[ext_resource type="Script" path="res://world/goals/place_marker_3d.gd" id="21_place"]
+[ext_resource type="Script" path="res://core/training/owner_behavior.gd" id="22_behavior"]
+[ext_resource type="Script" path="res://core/training/training_observer.gd" id="23_observer"]
+[ext_resource type="Script" path="res://core/goals/goal_director.gd" id="24_director"]
+[ext_resource type="PackedScene" path="res://ui/goals/desire_hud.tscn" id="25_desire_hud"]
 
 [node name="RunMap3D01" type="Node3D" node_paths=PackedStringArray("dog", "human", "run_manager", "coordinator")]
 script = ExtResource("1_map")
@@ -102,17 +113,86 @@ unlock_message = "🚪 公園北門現在可以撤離"
 
 [node name="Encounters" type="Node3D" parent="."]
 
+[node name="pair_far_side" type="Node3D" parent="Encounters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.05, -6.8)
+script = ExtResource("9_pair")
+spot_id = &"pair_far_side"
+
 [node name="pair_park" type="Node3D" parent="Encounters"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -37)
 script = ExtResource("9_pair")
 spot_id = &"pair_park"
-encounter = ExtResource("10_delivery")
 
-[node name="pair_street" type="Node3D" parent="Encounters"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.05, -6.8)
+[node name="pair_park_east" type="Node3D" parent="Encounters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, -36)
 script = ExtResource("9_pair")
-spot_id = &"pair_street"
-encounter = ExtResource("14_gym")
+spot_id = &"pair_park_east"
+
+[node name="pair_rival" type="Node3D" parent="Encounters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0, -12.5)
+script = ExtResource("9_pair")
+spot_id = &"pair_rival"
+fixed_encounter = ExtResource("16_rival")
+required_flag = &"rival_revealed"
+
+[node name="pair_big_tree" type="Node3D" parent="Encounters"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -52.5)
+script = ExtResource("9_pair")
+spot_id = &"pair_big_tree"
+fixed_encounter = ExtResource("17_old_master")
+
+[node name="Goals" type="Node3D" parent="."]
+
+[node name="scent_park" type="Node3D" parent="Goals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, -33)
+script = ExtResource("19_scent")
+cue_id = &"scent_park"
+
+[node name="scent_alley" type="Node3D" parent="Goals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0.05, -7.5)
+script = ExtResource("19_scent")
+cue_id = &"scent_alley"
+
+[node name="Squirrel" type="Node3D" parent="Goals"]
+script = ExtResource("20_squirrel")
+spawn_points = Array[Vector3]([Vector3(-6, 0, -40), Vector3(8, 0, -50), Vector3(-9, 0, -60)])
+
+[node name="Places" type="Node3D" parent="."]
+
+[node name="street" type="Node3D" parent="Places"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+script = ExtResource("21_place")
+place_id = &"street"
+display_name = "家門口的街"
+radius = 6.0
+
+[node name="alley" type="Node3D" parent="Places"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.5, 0, -12)
+script = ExtResource("21_place")
+place_id = &"alley"
+display_name = "小巷"
+radius = 3.5
+
+[node name="main_path" type="Node3D" parent="Places"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -14)
+script = ExtResource("21_place")
+place_id = &"main_path"
+display_name = "主路"
+radius = 3.5
+
+[node name="park" type="Node3D" parent="Places"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -38)
+script = ExtResource("21_place")
+place_id = &"park"
+display_name = "公園"
+radius = 8.0
+
+[node name="big_tree" type="Node3D" parent="Places"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -54)
+script = ExtResource("21_place")
+place_id = &"big_tree"
+display_name = "大樹下"
+radius = 4.0
 
 [node name="RunManager" type="Node" parent="." node_paths=PackedStringArray("dog_actor")]
 script = ExtResource("11_run")
@@ -123,6 +203,35 @@ script = ExtResource("12_coordinator")
 run_manager = NodePath("../RunManager")
 human = NodePath("../Actors/Human")
 dog = NodePath("../Actors/Dog")
+ordinary_pool = Array[ExtResource("18_encounter_data")]([ExtResource("15_jogger"), ExtResource("10_delivery"), ExtResource("14_gym")])
 
-[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager") instance=ExtResource("13_hud")]
+[node name="OwnerBehavior" type="Node" parent="." node_paths=PackedStringArray("run_manager", "human", "coordinator")]
+script = ExtResource("22_behavior")
+run_manager = NodePath("../RunManager")
+human = NodePath("../Actors/Human")
+coordinator = NodePath("../CombatCoordinator3D")
+units_per_meter = 1.0
+
+[node name="TrainingObserver" type="Node" parent="." node_paths=PackedStringArray("run_manager", "human", "coordinator", "behavior")]
+script = ExtResource("23_observer")
+run_manager = NodePath("../RunManager")
+human = NodePath("../Actors/Human")
+coordinator = NodePath("../CombatCoordinator3D")
+behavior = NodePath("../OwnerBehavior")
+units_per_meter = 1.0
+
+[node name="GoalDirector" type="Node" parent="." node_paths=PackedStringArray("run_manager", "coordinator")]
+script = ExtResource("24_director")
+run_manager = NodePath("../RunManager")
+coordinator = NodePath("../CombatCoordinator3D")
+units_per_meter = 1.0
+
+[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator", "owner_behavior", "goal_director") instance=ExtResource("13_hud")]
+run_manager = NodePath("../RunManager")
+combat_coordinator = NodePath("../CombatCoordinator3D")
+owner_behavior = NodePath("../OwnerBehavior")
+goal_director = NodePath("../GoalDirector")
+
+[node name="DesireHUD" parent="." node_paths=PackedStringArray("director", "run_manager") instance=ExtResource("25_desire_hud")]
+director = NodePath("../GoalDirector")
 run_manager = NodePath("../RunManager")
