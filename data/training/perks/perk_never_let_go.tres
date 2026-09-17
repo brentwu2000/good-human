@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PerkData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/perk_data.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+id = &"perk_never_let_go"
+display_name = "死都不放牽繩"
+description = "揹著重背包也跟得上狗。"
+hidden = false
+requirements = Dictionary[String, float]({"STRAIN": 6.0})
+min_defeats = 0
+trait_key = &"heavy_bag"
+bonus_strength = 0
+bonus_endurance = 0
+bonus_agility = 0
+bonus_will = 0

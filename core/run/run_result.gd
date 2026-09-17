@@ -15,6 +15,8 @@ var defeated_by: String = ""
 var to_stash: Array[ItemStack] = []
 ## Items lost with the run (unprotected human inventory on failure).
 var lost: Array[ItemStack] = []
+## What the run taught the human (new perks filled in by Game).
+var training: RunTrainingSummary
 ## Items that did not fit in the stash (filled in by Game).
 var stash_overflow: Array[ItemStack] = []
 

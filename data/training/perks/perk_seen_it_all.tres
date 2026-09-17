@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PerkData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/perk_data.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+id = &"perk_seen_it_all"
+display_name = "見怪不怪"
+description = "靠近陌生人狗組合時不再猶豫。"
+hidden = false
+requirements = Dictionary[String, float]({"COURAGE": 5.0})
+min_defeats = 0
+trait_key = &"hesitation"
+bonus_strength = 0
+bonus_endurance = 0
+bonus_agility = 0
+bonus_will = 0

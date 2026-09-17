@@ -1,7 +1,8 @@
 class_name RunManager
 extends Node
 ## Scene-scoped controller for one walk (NOT an autoload, ADR-001).
-## Owns time, seed/RNG, run inventories, searched points and extraction state.
+## Owns time, seed/RNG, run inventories, searched points, extraction state and
+## run-scoped training (TrainingTracker).
 
 signal run_started(run_seed: int)
 signal loot_gained(item: ItemData, quantity: int)
@@ -29,6 +30,7 @@ var searched_points: Dictionary[StringName, bool] = {}
 var extraction_states: Dictionary[StringName, bool] = {}
 var run_status: RunStatus = RunStatus.NOT_STARTED
 var run_result: RunResult
+var training: TrainingTracker
 
 var _extraction_points: Array[ExtractionPoint] = []
 var _all_extractions_forced: bool = false
@@ -38,6 +40,7 @@ func _ready() -> void:
 	var balance := DataRegistry.balance
 	human_run_inventory = Inventory.new(balance.human_run_slots)
 	dog_safe_inventory = Inventory.new(balance.dog_safe_slots)
+	training = TrainingTracker.new(DataRegistry.training)
 	if dog != null:
 		dog.interaction_context = self
 		dog.interact_requested.connect(_on_dog_interact_requested)
@@ -63,6 +66,7 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	human_run_inventory.clear()
 	dog_safe_inventory.clear()
 	searched_points.clear()
+	training.reset()
 	run_result = null
 	_all_extractions_forced = false
 
@@ -120,6 +124,15 @@ func resolve_search(point: SearchPoint, stack: ItemStack) -> ItemStack:
 		return null
 	loot_blocked.emit(stack.item, left)
 	return ItemStack.new(stack.item, left)
+
+
+# --- Training -----------------------------------------------------------------
+
+## World observers report meaningful moments here; returns the accepted amount.
+func record_training(data: TrainingEventData, key: StringName = &"", source: String = "", context: Dictionary = {}, scale: float = 1.0) -> float:
+	if not is_running() or data == null:
+		return 0.0
+	return training.record(TrainingEvent.new(data, key, elapsed_time, source, context, scale))
 
 
 # --- Combat outcomes -------------------------------------------------------------
@@ -194,6 +207,7 @@ func _build_result(outcome: RunResult.Outcome, extraction_id: StringName) -> Run
 	result.run_seed = run_seed
 	result.elapsed_time = elapsed_time
 	result.extraction_id = extraction_id
+	result.training = RunTrainingSummary.from_tracker(training, outcome)
 	return result
 
 

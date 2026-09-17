@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PerkData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/perk_data.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+id = &"perk_familiar_face"
+display_name = "巷口熟面孔"
+description = "跟誰都能聊，面對誰都不慌。"
+hidden = true
+requirements = Dictionary[String, float]({"SOCIAL": 3.0, "COURAGE": 3.0})
+min_defeats = 0
+trait_key = &""
+bonus_strength = 0
+bonus_endurance = 0
+bonus_agility = 0
+bonus_will = 1

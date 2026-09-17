@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PerkData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/perk_data.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+id = &"perk_survived_today"
+display_name = "今天也活下來了"
+description = "走很久也不太會累垮。"
+hidden = false
+requirements = Dictionary[String, float]({"ENDURE": 5.0})
+min_defeats = 1
+trait_key = &"exertion"
+bonus_strength = 0
+bonus_endurance = 0
+bonus_agility = 0
+bonus_will = 0

@@ -8,6 +8,8 @@ const RUN_MAP_SCENE: String = "res://world/run_map/run_map_01.tscn"
 const RUN_RESULT_SCENE: String = "res://ui/run_result/run_result.tscn"
 
 var home_stash: Inventory
+## The one human's persistent growth.
+var human_growth: HumanGrowth = HumanGrowth.new()
 var last_run_result: RunResult
 
 
@@ -18,6 +20,8 @@ func _ready() -> void:
 ## Rebuilds persistent state from SaveManager.data (call after load_game()).
 func load_profile() -> void:
 	home_stash.deserialize(SaveManager.data["stash"], DataRegistry.get_item)
+	var human: Dictionary = SaveManager.data["human"]
+	human_growth.deserialize(human.get("growth_data", {}))
 
 
 func goto_home() -> void:
@@ -43,7 +47,10 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 	stats["runs"] = int(stats["runs"]) + 1
 	if result.is_success():
 		stats["successful_extractions"] = int(stats["successful_extractions"]) + 1
+	if result.training != null:
+		GrowthResolver.apply(human_growth, result.training, result.outcome == RunResult.Outcome.DEFEATED, DataRegistry.training)
 	SaveManager.data["stash"] = home_stash.serialize()
+	SaveManager.data["human"]["growth_data"] = human_growth.serialize()
 	SaveManager.save_game()
 
 	last_run_result = result

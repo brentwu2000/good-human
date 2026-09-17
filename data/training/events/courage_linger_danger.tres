@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrainingEventData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/training_event_data.gd" id="1_event"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"courage_linger_danger"
+tag = 2
+magnitude = 0.8
+cooldown = 0.0
+unique_per_key = true
+experience_text = "在{name}旁邊緊張地待了一陣子"
+owner_line = "（總覺得這個人不太對勁…）"

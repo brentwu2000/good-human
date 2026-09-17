@@ -3,14 +3,17 @@ extends Node
 
 const ITEMS_DIR: String = "res://data/items"
 const BALANCE_PATH: String = "res://data/game_balance/game_balance.tres"
+const TRAINING_BALANCE_PATH: String = "res://data/training/training_balance.tres"
 
 var balance: GameBalance
+var training: TrainingBalance
 
 var _items: Dictionary[StringName, ItemData] = {}
 
 
 func _ready() -> void:
 	balance = load(BALANCE_PATH) as GameBalance
+	training = load(TRAINING_BALANCE_PATH) as TrainingBalance
 	_load_items()
 
 

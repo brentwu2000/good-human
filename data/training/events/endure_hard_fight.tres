@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrainingEventData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/training_event_data.gd" id="1_event"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"endure_hard_fight"
+tag = 4
+magnitude = 1.5
+cooldown = 0.0
+unique_per_key = false
+experience_text = "咬著牙打贏了一場硬仗"
+owner_line = ""

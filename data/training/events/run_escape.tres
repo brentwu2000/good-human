@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrainingEventData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/training_event_data.gd" id="1_event"]
+
+[resource]
+script = ExtResource("1_event")
+id = &"run_escape"
+tag = 0
+magnitude = 1.0
+cooldown = 0.0
+unique_per_key = false
+experience_text = "打到一半被狗拉著逃跑"
+owner_line = "跑、跑就對了！"

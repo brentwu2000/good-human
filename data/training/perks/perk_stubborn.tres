@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PerkData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/perk_data.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+id = &"perk_stubborn"
+display_name = "越挫越勇"
+description = "被打倒越多次，出手越狠。"
+hidden = true
+requirements = Dictionary[String, float]({"STRAIN": 3.0, "ENDURE": 3.0})
+min_defeats = 2
+trait_key = &""
+bonus_strength = 1
+bonus_endurance = 0
+bonus_agility = 0
+bonus_will = 0

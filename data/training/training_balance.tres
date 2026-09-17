@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="TrainingBalance" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://resources/training_balance.gd" id="1_balance"]
+[ext_resource type="Script" path="res://resources/perk_data.gd" id="2_perk"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_forced_jogging.tres" id="3_perk_forced_jogging"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_never_let_go.tres" id="4_perk_never_let_go"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_seen_it_all.tres" id="5_perk_seen_it_all"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_less_shy.tres" id="6_perk_less_shy"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_where_is_dog_going.tres" id="7_perk_where_is_dog_going"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_survived_today.tres" id="8_perk_survived_today"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_familiar_face.tres" id="9_perk_familiar_face"]
+[ext_resource type="Resource" path="res://data/training/perks/perk_stubborn.tres" id="10_perk_stubborn"]
+
+[resource]
+script = ExtResource("1_balance")
+extract_conversion = 1.0
+defeat_conversion = 0.5
+failed_conversion = 0.5
+tag_run_cap = 12.0
+repeat_diminishing = 0.7
+min_contribution = 0.05
+run_to_agility = 0.25
+run_to_endurance = 0.1
+strain_to_strength = 0.25
+courage_to_will = 0.25
+endure_to_endurance = 0.2
+endure_to_will = 0.1
+trait_full_growth = 10.0
+perk_trait_progress = 1.0
+stumble_after_untrained = 2.5
+stumble_after_trained = 9.0
+exertion_gain_untrained = 0.14
+exertion_gain_trained = 0.05
+recovery_untrained = 2.6
+recovery_trained = 0.8
+hesitation_untrained = 1.4
+hesitation_trained = 0.0
+heavy_bag_speed_untrained = 0.75
+heavy_bag_speed_trained = 1.0
+heavy_bag_slots = 6
+perks = Array[ExtResource("2_perk")]([ExtResource("3_perk_forced_jogging"), ExtResource("4_perk_never_let_go"), ExtResource("5_perk_seen_it_all"), ExtResource("6_perk_less_shy"), ExtResource("7_perk_where_is_dog_going"), ExtResource("8_perk_survived_today"), ExtResource("9_perk_familiar_face"), ExtResource("10_perk_stubborn")])

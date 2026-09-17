@@ -24,11 +24,14 @@ var engagements: Array[Engagement] = []
 var last_result: CombatSimulation.Result = CombatSimulation.Result.NONE
 
 var _pairs: Array[OpponentPair] = []
+## The human's untrained fighter; growth bonuses are applied on top each run.
+var _base_fighter: FighterData
 var _defeat_left: float = -1.0
 var _defeated_by: String = ""
 
 
 func _ready() -> void:
+	_base_fighter = human.fighter
 	run_manager.run_started.connect(_on_run_started)
 
 
@@ -51,6 +54,8 @@ func _on_run_started(_seed: int) -> void:
 	_defeat_left = -1.0
 	last_result = CombatSimulation.Result.NONE
 	human.set_state(HumanFollower.State.FOLLOW)
+	if _base_fighter != null:
+		human.fighter = GrowthResolver.apply_to_fighter(_base_fighter, Game.human_growth, DataRegistry.training)
 	_pairs.clear()
 	for node in get_tree().get_nodes_in_group(OpponentPair.GROUP):
 		var pair := node as OpponentPair

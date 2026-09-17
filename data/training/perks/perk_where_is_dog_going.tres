@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PerkData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/perk_data.gd" id="1_perk"]
+
+[resource]
+script = ExtResource("1_perk")
+id = &"perk_where_is_dog_going"
+display_name = "這狗到底要跑去哪"
+description = "被拖著跑完，喘一下就恢復了。"
+hidden = false
+requirements = Dictionary[String, float]({"RUN": 4.0, "ENDURE": 4.0})
+min_defeats = 0
+trait_key = &"recovery"
+bonus_strength = 0
+bonus_endurance = 0
+bonus_agility = 0
+bonus_will = 0
