@@ -51,18 +51,18 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 | P1-006 | Block | REVIEW |
 | P1-007 | Dodge | REVIEW |
 | P1-008 | Condition + priority AI | REVIEW |
-| P1-009 | Combat presentation | REVIEW |
-| P1-010 | Encounter trigger | REVIEW |
-| P1-011 | Provoke / Leave | REVIEW |
+| P1-009 | Combat presentation | IN_PROGRESS |
+| P1-010 | Encounter trigger | IN_PROGRESS |
+| P1-011 | Provoke / Leave | IN_PROGRESS |
 | P1-012 | Ordinary opponents | REVIEW |
-| P1-013 | Old Master encounter | REVIEW |
-| P1-014 | Victory reward | REVIEW |
-| P1-015 | Defeat resolution | REVIEW |
+| P1-013 | Old Master encounter | IN_PROGRESS |
+| P1-014 | Victory reward | IN_PROGRESS |
+| P1-015 | Defeat resolution | IN_PROGRESS |
 | P1-016 | Loss / dog-safe preservation | REVIEW |
-| P1-017 | Minimal hospital/result | REVIEW |
-| P1-018 | Debug/test hooks | REVIEW |
+| P1-017 | Minimal hospital/result | IN_PROGRESS |
+| P1-018 | Debug/test hooks | IN_PROGRESS |
 | P1-019 | Android combat validation | TODO |
-| P1-020 | Sprint 02 QA readiness | REVIEW |
+| P1-020 | Sprint 02 QA readiness | IN_PROGRESS |
 
 ## Sprint 02 Engineering Notes (Claude)
 - Validation: `tests/run_all.sh` (10 headless scene tests). `combat_sim_test` = stats, 4 skills, AI, win-rate bands; `encounter_flow_test` = Required Flow through real scenes (Leave, 3 fights, Old Master defeat, hospital result, loss rules).
