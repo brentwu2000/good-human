@@ -79,6 +79,8 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 ## Sprint 03 — TRAIN
 Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_SLICE_GATE.md`) is reviewed.
 
+> Gate reviewed 2026-09-17: PROCEED WITH CHANGES (`docs/07_qa/reports/PHASE2_VERTICAL_SLICE_GATE_REVIEW.md`). Sprint 03 started.
+
 | ID | Task | Status |
 |---|---|---|
 | P2-001 | TrainingEvent model | TODO |
