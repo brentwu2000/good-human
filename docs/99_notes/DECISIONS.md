@@ -27,3 +27,6 @@ No separate Battle Scene: encounters, human combat, dog control and disengagemen
 
 ## ADR-008 — Behavior-driven human training
 Human growth comes from meaningful dog behavior in normal runs, not a minigame or XP screen. Full record: `ADR_008_BEHAVIOR_DRIVEN_TRAINING.md`.
+
+## ADR-009 — Dog desires, not quest checklists
+Short-term progression is framed as optional dog desires, discoveries and causal threads that persist and fork, not generic quest checklists. Full record: `ADR_009_DOG_DESIRES_NOT_QUEST_CHECKLISTS.md`.

@@ -116,3 +116,28 @@ Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_
 - Note: the untrained owner now stumbles/hangs back/tires by default, so walks feel slower than Sprint 02 until trained. Values are placeholders.
 - `HumanFollower` only gained `speed_multiplier` / `hold_time` hooks; Codex art integration in that file was left uncommitted and untouched.
 - Validation pacing pass (owner, 2026-09-17: "現在是驗證用 節奏不該這麼長"): run map scaled to 0.4 (1600×6160, same layout), dog 280 / owner 270 speed, search 1.0 s, extraction 1:00 / 2:00, human HP ~40% lower (shorter fights, win-rate bands unchanged), disengage 400; owner interruptions softened (stumble after 3 s for 0.35 s, breather 1.2 s, hesitation 0.6 s, heavy bag ×0.85); growth ~2× faster (traits full at 4, perk thresholds halved, run cap 8); training detection shortened (drag 2 s, linger 2 s, long walk 1500). Bigger/smaller maps are for later content. Core Loop Gate 01 decision pending replay (`docs/07_qa/reports/CORE_LOOP_GATE_01_REVIEW.md`).
+
+## Sprint 03.5 — GOALS
+
+| ID | Task | Status |
+|---|---|---|
+| P2G-001 | Desire model | TODO |
+| P2G-002 | Desire tracker | TODO |
+| P2G-003 | Primary selection | TODO |
+| P2G-004 | Emergent triggers | TODO |
+| P2G-005 | Persistent threads | TODO |
+| P2G-006 | Completion/failure | TODO |
+| P2G-007 | Goal chaining | TODO |
+| P2G-008 | Context selection | TODO |
+| P2G-009 | Strange Scent chain | TODO |
+| P2G-010 | Squirrel desire | TODO |
+| P2G-011 | Rival desire | TODO |
+| P2G-012 | Bring-it-home | TODO |
+| P2G-013 | New-dog discovery | TODO |
+| P2G-014 | Old Master thread | TODO |
+| P2G-015 | Collection discovery | TODO |
+| P2G-016 | Desire UI | TODO |
+| P2G-017 | World cues | TODO |
+| P2G-018 | Save/load | TODO |
+| P2G-019 | Debug tools | TODO |
+| P2G-020 | QA readiness | TODO |
