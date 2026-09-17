@@ -18,10 +18,10 @@ static func material(color: Color) -> StandardMaterial3D:
 	return mat
 
 
-static func box(size: Vector3, color: Color, position: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+static func box(size: Vector3, color: Color, position: Vector3 = Vector3.ZERO, rotation: Vector3 = Vector3.ZERO) -> MeshInstance3D:
 	var mesh := BoxMesh.new()
 	mesh.size = size
-	return _instance(mesh, color, position)
+	return _instance(mesh, color, position, rotation)
 
 
 static func cylinder(radius: float, height: float, color: Color, position: Vector3 = Vector3.ZERO) -> MeshInstance3D:
@@ -78,14 +78,23 @@ static func tree(position: Vector3) -> Node3D:
 
 static func human(shirt: Color, pants: Color, hair: Color, skin: Color = Color(0.93, 0.78, 0.64)) -> Node3D:
 	var root := Node3D.new()
+	var shoe := Color(0.10, 0.12, 0.14)
+	var shirt_shadow := shirt.darkened(0.16)
 	root.add_child(capsule(0.11, 0.66, pants, Vector3(-0.10, 0.38, 0)))
 	root.add_child(capsule(0.11, 0.66, pants, Vector3(0.10, 0.38, 0)))
+	root.add_child(box(Vector3(0.16, 0.08, 0.28), shoe, Vector3(-0.10, 0.065, -0.07)))
+	root.add_child(box(Vector3(0.16, 0.08, 0.28), shoe, Vector3(0.10, 0.065, -0.07)))
 	root.add_child(capsule(0.27, 0.58, shirt, Vector3(0, 1.12, 0)))
+	root.add_child(box(Vector3(0.20, 0.10, 0.08), shirt_shadow, Vector3(0, 1.36, -0.23)))
 	root.add_child(capsule(0.07, 0.54, skin, Vector3(-0.34, 1.12, 0), Vector3(0, 0, -0.16)))
 	root.add_child(capsule(0.07, 0.54, skin, Vector3(0.34, 1.12, 0), Vector3(0, 0, 0.16)))
+	root.add_child(cylinder(0.095, 0.12, skin, Vector3(0, 1.42, 0)))
 	root.add_child(sphere(0.19, skin, Vector3(0, 1.62, 0)))
 	root.add_child(sphere(0.20, hair, Vector3(0, 1.72, 0.025)))
+	root.add_child(sphere(0.105, hair, Vector3(0, 1.89, 0.02)))
 	root.add_child(box(Vector3(0.34, 0.42, 0.14), hair.darkened(0.35), Vector3(0, 1.12, 0.24)))
+	root.add_child(box(Vector3(0.035, 0.48, 0.035), hair.darkened(0.25), Vector3(-0.16, 1.15, 0.16), Vector3(0, 0, -0.12)))
+	root.add_child(box(Vector3(0.035, 0.48, 0.035), hair.darkened(0.25), Vector3(0.16, 1.15, 0.16), Vector3(0, 0, 0.12)))
 	return root
 
 
@@ -100,11 +109,16 @@ static func dog(color: Color, size: float = 1.0) -> Node3D:
 	root.add_child(cone(0.02, 0.10, 0.22, dark, Vector3(0.15, 0.79, -0.43), Vector3(-0.12, 0, -0.18)))
 	root.add_child(sphere(0.032, Color(0.04, 0.03, 0.02), Vector3(-0.09, 0.68, -0.60)))
 	root.add_child(sphere(0.032, Color(0.04, 0.03, 0.02), Vector3(0.09, 0.68, -0.60)))
-	root.add_child(box(Vector3(0.44, 0.045, 0.07), Color(0.12, 0.55, 0.48), Vector3(0, 0.54, -0.02)))
+	var harness := Color(0.12, 0.55, 0.48)
+	root.add_child(box(Vector3(0.44, 0.045, 0.07), harness, Vector3(0, 0.54, -0.02)))
+	root.add_child(box(Vector3(0.08, 0.28, 0.06), harness.lightened(0.12), Vector3(0, 0.58, -0.33)))
+	root.add_child(cylinder(0.13, 0.045, harness.darkened(0.20), Vector3(0, 0.68, -0.44)))
 	for x in [-0.11, 0.11]:
 		for z in [-0.25, 0.25]:
 			root.add_child(capsule(0.045, 0.24, dark, Vector3(x, 0.15, z)))
 	root.add_child(capsule(0.035, 0.30, dark, Vector3(0, 0.58, 0.42), Vector3(PI / 2.0, 0, 0.28)))
+	for x in [-0.04, 0.04]:
+		root.add_child(sphere(0.035, Color(0.10, 0.07, 0.05), Vector3(x, 0.07, -0.33)))
 	root.scale = Vector3.ONE * size
 	return root
 
