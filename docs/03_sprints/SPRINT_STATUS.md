@@ -192,15 +192,15 @@ Owner approved the move to 3D (2026-09-17). Plan: `docs/03_sprints/P_02_3D_VERTI
 
 | ID | Task | Status |
 |---|---|---|
-| V3D-001 | Run systems accept 3D world objects | TODO |
-| V3D-002 | Dog 3D controller (camera-relative) | TODO |
-| V3D-003 | Owner 3D follower + leash | TODO |
-| V3D-004 | 3D interaction (Interactable3D) | TODO |
-| V3D-005 | 3D search + extraction points | TODO |
-| V3D-006 | Street + park slice level | TODO |
-| V3D-007 | Camera rig A/B switch | TODO |
-| V3D-008 | Occlusion: collision, owner fade, building fade | TODO |
-| V3D-009 | Seamless 3D fight (one pair) | TODO |
-| V3D-010 | Home entry + run flow | TODO |
+| V3D-001 | Run systems accept 3D world objects | REVIEW |
+| V3D-002 | Dog 3D controller (camera-relative) | IN_PROGRESS |
+| V3D-003 | Owner 3D follower + leash | IN_PROGRESS |
+| V3D-004 | 3D interaction (Interactable3D) | IN_PROGRESS |
+| V3D-005 | 3D search + extraction points | IN_PROGRESS |
+| V3D-006 | Street + park slice level | IN_PROGRESS |
+| V3D-007 | Camera rig A/B switch | IN_PROGRESS |
+| V3D-008 | Occlusion: collision, owner fade, building fade | IN_PROGRESS |
+| V3D-009 | Seamless 3D fight (one pair) | IN_PROGRESS |
+| V3D-010 | Home entry + run flow | IN_PROGRESS |
 | V3D-011 | Scene test | TODO |
 | V3D-012 | Build for owner playtest | TODO |

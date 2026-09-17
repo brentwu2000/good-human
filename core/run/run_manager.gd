@@ -3,17 +3,23 @@ extends Node
 ## Scene-scoped controller for one walk (NOT an autoload, ADR-001).
 ## Owns time, seed/RNG, run inventories, searched points, extraction state and
 ## run-scoped training (TrainingTracker).
+## Works with 2D and 3D worlds (P-02): search/extraction points are found by
+## group and used through their shared methods, not their node class.
 
 signal run_started(run_seed: int)
 signal loot_gained(item: ItemData, quantity: int)
 signal loot_blocked(item: ItemData, quantity: int)
-signal search_empty(point: SearchPoint)
-signal extraction_unlocked(point: ExtractionPoint)
+## `point` is a SearchPoint or SearchPoint3D.
+signal search_empty(point: Node)
+## `point` is an ExtractionPoint or ExtractionPoint3D.
+signal extraction_unlocked(point: Node)
 signal run_ended(result: RunResult)
 
 enum RunStatus { NOT_STARTED, RUNNING, EXTRACTED, FAILED }
 
 @export var dog: DogController
+## The player dog in any world (DogController or DogController3D). Defaults to `dog`.
+@export var dog_actor: Node
 @export var auto_start: bool = true
 ## 0 = generate a new seed each run.
 @export var fixed_seed: int = 0
@@ -32,7 +38,7 @@ var run_status: RunStatus = RunStatus.NOT_STARTED
 var run_result: RunResult
 var training: TrainingTracker
 
-var _extraction_points: Array[ExtractionPoint] = []
+var _extraction_points: Array[Node] = []
 var _all_extractions_forced: bool = false
 
 
@@ -41,9 +47,11 @@ func _ready() -> void:
 	human_run_inventory = Inventory.new(balance.human_run_slots)
 	dog_safe_inventory = Inventory.new(balance.dog_safe_slots)
 	training = TrainingTracker.new(DataRegistry.training)
-	if dog != null:
-		dog.interaction_context = self
-		dog.interact_requested.connect(_on_dog_interact_requested)
+	if dog_actor == null:
+		dog_actor = dog
+	if dog_actor != null:
+		dog_actor.set("interaction_context", self)
+		dog_actor.connect(&"interact_requested", _on_dog_interact_requested)
 	if auto_start:
 		start_run.call_deferred()
 
@@ -72,20 +80,18 @@ func start_run(seed_value: int = fixed_seed) -> void:
 
 	_extraction_points.clear()
 	extraction_states.clear()
-	for node in get_tree().get_nodes_in_group(ExtractionPoint.GROUP):
-		var point := node as ExtractionPoint
-		if point != null and _belongs_to_run(point):
+	for point in get_tree().get_nodes_in_group(ExtractionPoint.GROUP):
+		if _belongs_to_run(point):
 			_extraction_points.append(point)
 			extraction_states[point.extraction_id] = false
 			point.set_available(false)
 
 	# Roll every point's loot up front, in a stable order, so it follows the seed.
-	var points: Array[SearchPoint] = []
-	for node in get_tree().get_nodes_in_group(SearchPoint.GROUP):
-		var point := node as SearchPoint
-		if point != null and _belongs_to_run(point):
+	var points: Array[Node] = []
+	for point in get_tree().get_nodes_in_group(SearchPoint.GROUP):
+		if _belongs_to_run(point):
 			points.append(point)
-	points.sort_custom(func(a: SearchPoint, b: SearchPoint) -> bool: return String(a.search_id) < String(b.search_id))
+	points.sort_custom(func(a: Node, b: Node) -> bool: return String(a.search_id) < String(b.search_id))
 	for point in points:
 		point.prepare(self)
 
@@ -107,7 +113,7 @@ func is_searched(search_id: StringName) -> bool:
 ## Called by SearchPoint when its search completes. `stack` is the rolled
 ## (or still pending) loot. Returns what is left over because the bag is full,
 ## or null when the point is finished.
-func resolve_search(point: SearchPoint, stack: ItemStack) -> ItemStack:
+func resolve_search(point: Node, stack: ItemStack) -> ItemStack:
 	if not is_running():
 		return stack
 	if stack == null:
@@ -218,7 +224,8 @@ func _end_run(result: RunResult) -> void:
 		Game.finish_run(result)
 
 
-func _on_dog_interact_requested(target: Interactable) -> void:
+## `target` is an Interactable or Interactable3D.
+func _on_dog_interact_requested(target: Node) -> void:
 	if is_running() and target != null and target.can_interact(self):
 		target.interact(self)
 

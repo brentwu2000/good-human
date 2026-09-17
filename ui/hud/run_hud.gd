@@ -19,7 +19,8 @@ var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
 var _debug_taps: Array[float] = []
 var _hint_time_left: float = HINT_SECONDS
-var _dog_start: Vector2
+## Vector2 or Vector3 depending on the world.
+var _dog_start: Variant
 var _experience_queue: Array[String] = []
 var _experience_tween: Tween
 
@@ -56,8 +57,8 @@ func _ready() -> void:
 	run_manager.extraction_unlocked.connect(_on_extraction_unlocked)
 	if run_manager.training != null:
 		run_manager.training.event_recorded.connect(_on_training_event_recorded)
-	if run_manager.dog != null:
-		run_manager.dog.focus_changed.connect(_on_focus_changed)
+	if run_manager.dog_actor != null:
+		run_manager.dog_actor.connect(&"focus_changed", _on_focus_changed)
 	_on_focus_changed(null)
 
 
@@ -89,11 +90,16 @@ static func controls_hint() -> String:
 	return "WASD 移動 · E 聞聞看／互動 · Tab 背包\n（也可以用滑鼠拖曳左下搖桿）"
 
 
+## Pixels in 2D, meters in 3D.
+func _hint_move_distance() -> float:
+	return HINT_MOVE_DISTANCE if run_manager.dog_actor is Node2D else HINT_MOVE_DISTANCE / 80.0
+
+
 func _update_hint(delta: float) -> void:
 	if not _hint_label.visible:
 		return
 	_hint_time_left -= delta
-	var moved := run_manager.dog != null and run_manager.dog.global_position.distance_to(_dog_start) > HINT_MOVE_DISTANCE
+	var moved: bool = run_manager.dog_actor != null and _dog_start != null and run_manager.dog_actor.global_position.distance_to(_dog_start) > _hint_move_distance()
 	if _hint_time_left <= 0.0 or moved:
 		_hint_label.hide()
 
@@ -117,8 +123,8 @@ func _on_inventory_closed() -> void:
 
 func _on_run_started(_run_seed: int) -> void:
 	_inventory_panel.setup(run_manager.human_run_inventory, run_manager.dog_safe_inventory)
-	if run_manager.dog != null:
-		_dog_start = run_manager.dog.global_position
+	if run_manager.dog_actor != null:
+		_dog_start = run_manager.dog_actor.global_position
 	for inventory in [run_manager.human_run_inventory, run_manager.dog_safe_inventory]:
 		if not inventory.changed.is_connected(_update_bag_button):
 			inventory.changed.connect(_update_bag_button)
@@ -136,11 +142,11 @@ func _on_loot_blocked(item: ItemData, _quantity: int) -> void:
 	show_toast("背包滿了！%s 還留在原地（可以丟掉東西再來）" % item.display_name, Color(1.0, 0.55, 0.5))
 
 
-func _on_search_empty(_point: SearchPoint) -> void:
+func _on_search_empty(_point: Node) -> void:
 	show_toast("什麼都沒聞到……", Color(0.75, 0.75, 0.75))
 
 
-func _on_extraction_unlocked(point: ExtractionPoint) -> void:
+func _on_extraction_unlocked(point: Node) -> void:
 	show_toast(point.unlock_message, Color(0.6, 1.0, 0.6), true)
 
 
@@ -173,7 +179,8 @@ func _play_next_experience() -> void:
 	_experience_tween.tween_callback(_play_next_experience)
 
 
-func _on_focus_changed(target: Interactable) -> void:
+## `target` is an Interactable or Interactable3D (or null).
+func _on_focus_changed(target: Node) -> void:
 	if target == null:
 		_interact_button.text = "互動"
 		_interact_button.disabled = true
