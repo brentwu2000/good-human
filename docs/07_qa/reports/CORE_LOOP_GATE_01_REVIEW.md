@@ -1,4 +1,4 @@
-# Core Loop Gate 01 — Review (in progress)
+# Core Loop Gate 01 — Review
 
 Date: 2026-09-17
 Reviewer: owner playtests (Windows debug build after Sprint 03). Codex blind QA not run (owner decision).
@@ -12,4 +12,4 @@ Reviewer: owner playtests (Windows debug build after Sprint 03). Codex blind QA 
 Validation pacing pass (numbers and map scale only, no rule changes) before deciding PROCEED / PROCEED WITH CHANGES / REWORK CORE LOOP.
 
 ## Decision
-Pending replay after the pacing pass.
+PROCEED WITH CHANGES — owner (2026-09-17): record now, tune later, start Sprint 03.5 GOALS. The pacing pass has not been replayed yet; pacing/fun and training feel remain open items to revisit.

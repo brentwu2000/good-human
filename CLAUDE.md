@@ -11,7 +11,7 @@ Codex owns the art pipeline and later performs independent QA. Do not replace fi
 - Platform: mobile-first 2D
 - Player identity: the dog
 - Current phase: MVP
-- Current sprint: `docs/03_sprints/SPRINT_03_TRAIN.md`
+- Current sprint: `docs/03_sprints/SPRINT_03_5_GOALS.md`
 
 ## Read Order
 Before coding:

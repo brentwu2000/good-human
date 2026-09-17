@@ -20,3 +20,4 @@ From Phase 2 Vertical Slice Gate (2026-09-17, see `docs/07_qa/reports/PHASE2_VER
 - extraction tension not felt yet (G1)
 - opponent pairs do not create curiosity yet (G2)
 - player wants dog actions during combat (G4 → Sprint 04)
+- pacing/fun and training feel after validation pacing pass (Core Loop Gate 01, revisit later)
