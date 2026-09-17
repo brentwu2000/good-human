@@ -58,14 +58,33 @@ func _run() -> void:
 	check(dog.global_position.x > start.x + 0.8, "up walks where the dog was facing")
 	check(rig.is_dog_visible(), "dog visible while walking")
 
-	# Sideways input does not swing the camera around.
-	dog.global_position = Vector3(0, 0.1, 2.5)
+	# Push right: the dog runs right in a straight line and the view turns with it.
+	dog.global_position = Vector3(-8, 0.1, 0.0)
 	dog.velocity = Vector3.ZERO
-	rig.yaw = 0.0
-	await _hold(&"move_right", 40)
-	check(absf(rig.yaw) < 0.05, "walking sideways keeps the camera still")
+	dog.facing = Vector3.FORWARD
+	rig.snap_behind_dog()
+	await _physics(2)
+	var start_right := dog.global_position
+	Input.action_press(&"move_right")
+	for i in 150:
+		await _tree.physics_frame
+	var mid_z := dog.global_position.z
+	for i in 60:
+		await _tree.physics_frame
+	Input.action_release(&"move_right")
+	check(dog.global_position.x > start_right.x + 8.0, "pushing right runs right")
+	check(absf(dog.global_position.z - start_right.z) < 0.6 and absf(mid_z - start_right.z) < 0.6, "held direction stays straight (no circling)")
+	check(absf(angle_difference(rig.yaw, -PI / 2.0)) < 0.35, "view turned to follow the dog to the right")
+
+	# Released and pushed up again: "up" is now the new camera direction.
+	dog.velocity = Vector3.ZERO
+	await _physics(20)
+	var before_up := dog.global_position
+	await _hold(&"move_up", 40)
+	check(dog.global_position.x > before_up.x + 1.0, "after the view turned, up goes where the camera looks")
 
 	# Turning then walking forward: the camera eases round smoothly (no jumps).
+	dog.global_position = Vector3(0, 0.1, 2.5)
 	dog.velocity = Vector3.ZERO
 	await _physics(20)
 	var largest_step := 0.0

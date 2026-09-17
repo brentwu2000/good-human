@@ -5,18 +5,22 @@ extends Node3D
 ## anything too close, the owner or foliage that hides the dog fades out.
 ## Fights pull the camera back to frame both humans. Framing never changes
 ## gameplay.
-## Turning: the camera eases behind the dog continuously, weighted by how much
-## the stick points forward (sideways input doesn't spin it; no hard
-## thresholds, so it never starts or stops abruptly). Players can also turn it
-## by dragging on the right side of the screen or with the arrow keys.
+## Turning: while the dog runs, the camera eases round behind it in whatever
+## direction it goes (push right → dog turns right → view turns right).
+## To stop that from spinning the controls, the stick direction is latched to
+## the camera yaw at the moment the stick is pushed and stays until release.
+## Players can also turn the camera by dragging on the right side of the
+## screen, right mouse drag, or the arrow keys.
 
 const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0}
 ## Pulled back to keep the dog and both humans in view during a fight.
 const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.5, "fov": 64.0}
 
 @export var smoothing: float = 6.0
-## Auto-follow rate when running straight ahead (per second, exponential).
+## Auto-follow rate at full speed (per second, exponential).
 @export var follow_rate: float = 2.4
+## Share of the follow rate kept when the dog runs back towards the camera.
+@export var backward_follow_share: float = 0.35
 ## Arrow keys (rad/s).
 @export var manual_turn_speed: float = 2.4
 ## Screen drag (rad per pixel).
@@ -39,6 +43,12 @@ var camera: Camera3D
 var _focus: Vector3
 var _faded: Dictionary[Node, bool] = {}
 var _manual_hold: float = 0.0
+## Control frame for the stick, latched when it is pushed (see header).
+var _control_yaw: float = 0.0
+var _stick_held: bool = false
+var _stick_angle: float = 0.0
+## Steering the stick further than this (deg) re-latches to the current view.
+@export var relatch_angle: float = 45.0
 
 
 func _ready() -> void:
@@ -51,6 +61,7 @@ func _ready() -> void:
 ## Places the camera straight behind the dog's current heading.
 func snap_behind_dog() -> void:
 	yaw = dog.heading()
+	_control_yaw = yaw
 	snap()
 
 
@@ -79,7 +90,7 @@ func _update(delta: float, instant: bool) -> void:
 
 	if not instant:
 		_update_yaw(delta)
-	dog.camera_yaw = yaw
+	_update_control_frame()
 
 	var focus := dog.global_position + Vector3(0, current["pivot"], 0)
 	if is_combat_framing():
@@ -108,15 +119,27 @@ func _update_yaw(delta: float) -> void:
 	yaw = lerp_angle(yaw, dog.heading(), 1.0 - exp(-follow_rate * follow_weight() * delta))
 
 
-## 0..1: how strongly the camera should ease behind the dog right now.
-## Forward stick at full speed = 1; sideways or backwards = 0; smooth between.
+## 0..1: how strongly the camera should ease behind the dog right now:
+## by speed, a bit gentler when the dog runs back towards the camera.
 func follow_weight() -> float:
-	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	if input.length() < 0.05:
-		return 0.0
-	var forward := clampf(-input.y / input.length(), 0.0, 1.0)
 	var speed := clampf(dog.planar_speed() / dog.walk_speed, 0.0, 1.0)
-	return forward * forward * speed
+	var facing_away := (1.0 + cos(angle_difference(yaw, dog.heading()))) * 0.5
+	return speed * lerpf(backward_follow_share, 1.0, facing_away)
+
+
+## The stick keeps the camera direction from when it was pushed while it is
+## held in roughly the same direction, so a turning camera never bends the
+## dog's path into a circle. Releasing it, or steering it more than
+## `relatch_angle`, switches to the current view.
+func _update_control_frame() -> void:
+	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var held := input.length() >= 0.1
+	var angle := input.angle()
+	if not held or not _stick_held or absf(rad_to_deg(angle_difference(_stick_angle, angle))) > relatch_angle:
+		_control_yaw = yaw
+		_stick_angle = angle
+	_stick_held = held
+	dog.camera_yaw = _control_yaw
 
 
 ## Drag on the right side of the screen (the joystick owns the left side).
