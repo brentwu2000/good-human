@@ -142,4 +142,13 @@ Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_
 | P2G-017 | World cues | REVIEW |
 | P2G-018 | Save/load | REVIEW |
 | P2G-019 | Debug tools | REVIEW |
-| P2G-020 | QA readiness | TODO |
+| P2G-020 | QA readiness | REVIEW |
+
+## Sprint 03.5 Engineering Notes (Claude)
+- Validation: `tests/run_all.sh` (14 headless scene tests). `goals_core_test` = catalog, selection context, chains across walks, forks, emergent limit, growth-gated rematch, ignore/decay, save; `goals_world_test` = real scenes: walk-start desire + HUD + cues, Strange Scent chain over two walks, squirrel emergent chase, bring the clue home through the dog safe slot, rival reveal/meet/duel, discoveries, save/load, Home text, debug reset.
+- Architecture (ADR-009): `GoalDirector` (scene node) observes existing signals (loot, extraction, engagements, proximity, scent cues, squirrel, places) and sends semantic events to `DesireTracker` (pure logic); persistent `GoalProgress` lives on `Game` (save `dog.goals`). Rewards go through `RunManager.grant_reward`. WALK/FIGHT/TRAIN rules are unchanged; no quest mode.
+- Content (`data/goals`): 14 desires. Required chain: strange scent (park) → half tennis ball → alley scent trail → rival 阿黑 appears (hidden pair) → meet → duel → win, or lose → rematch thread. Other follow-ups/forks: squirrel escape → "squirrel again" on a later walk; Old Master fight → win / lose → avoid him, or rematch once the human has 2+ perks. Emergent triggers: squirrel spotted, tennis ball / clue found, provoking the Old Master (max 2 emergent at once).
+- Selection: unresolved thread +100, priority, small run-RNG jitter, −30 if offered last walk; discovery desires only while something is undiscovered; growth-gated desires.
+- Desires can be ignored: non-persistent ones fade at walk end; persistent ones sleep (DORMANT) and are listed at Home ("狗狗還掛念著").
+- UI: dog-voiced list under the timer, popups for new/follow-up/resolved thoughts, nose arrow to the current target, ❗ on wanted pairs; Home shows threads and discovery counts. Debug panel shows active desires/flags, complete current, reset goals.
+- Placeholder art: scent cue text, squirrel emoji, rival pair uses the fighter puppet. Codex desire icons (`assets/ui/desires`, `ui/desire`) were in progress and not committed by Claude.
