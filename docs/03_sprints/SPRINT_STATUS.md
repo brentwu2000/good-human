@@ -173,7 +173,7 @@ Isolated greybox experiment. Sprint 04 production is paused until the Camera Gat
 | CAM-013 | runtime tuning/debug | REVIEW |
 | CAM-014 | A/B/C build | REVIEW |
 | CAM-015 | blind QA | TODO |
-| CAM-016 | Camera Gate decision | TODO |
+| CAM-016 | Camera Gate decision | REVIEW |
 
 ## P-01 Engineering Notes (Claude)
 - Build: `build/p01_camera/GoodHumanP01Camera.exe` (export preset "Windows P-01 Camera", feature tag `p01_camera` overrides the main scene). The game builds are unchanged; the QA release preset excludes `prototypes/*`.
@@ -185,3 +185,4 @@ Isolated greybox experiment. Sprint 04 production is paused until the Camera Gat
 - Early engineering observations for the Camera Gate (not QA): in B, and in C's close framings, the leashed owner walks between the dog and the camera and blocks the view; the prototype fades the owner while it blocks (standard chase-cam fix). Close walls pull the camera in; below 1.8 m it rises so the dog stays in frame. A shows the most surroundings but the dog is small in portrait.
 - `p01_camera_test`: all variants keep the dog visible while walking, C context switching, wall collision, owner fade, seamless fight + disengage, squirrel.
 - CAM-015 (blind QA) and CAM-016 (Camera Gate decision) are for Codex/owner.
+- Camera Gate (2026-09-17): owner prefers free switching between A and B in the game. Recorded with a 2D→3D impact estimate in `docs/07_qa/reports/P_01_CAMERA_GATE_REVIEW.md`; migration not started, ADR-010 stays PROPOSED until the owner approves. CAM-015 blind QA not run.
