@@ -17,7 +17,7 @@ Pay special attention to:
 2. Did you try to directly control the human?
 3. Was watching combat interesting or did it feel passive?
 4. Could you understand differences between Punch/Kick/Block/Dodge through behavior?
-5. Did choosing Provoke feel meaningfully different from Leave?
+5. Did choosing to provoke a pair feel meaningfully different from walking past it?
 6. Did you care about losing carried loot?
 7. Did protected dog storage matter after defeat?
 8. Did any opponent surprise you?

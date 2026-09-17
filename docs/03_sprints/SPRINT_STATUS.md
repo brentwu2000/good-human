@@ -72,5 +72,6 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 - Map: 4 pairs in `Actors`. The 3 ordinary pairs are shuffled over 3 spots each run; the Old Master is fixed under the big tree.
 - Placeholder balance (40 seeds): player wins roughly 85% vs Jogger, 70% vs Delivery Worker, 70% vs Gym Regular, ~0% vs Old Master. Player HP resets each fight.
 - Debug panel: put dog at next pair, force win / force lose.
+- Owner decisions (2026-09-17): Sprint 02 Codex blind QA not run for now (tasks stay REVIEW, not DONE); player HP resets per fight and the bag stays usable during combat for now; Patch 01's ADR-007 renumbered to ADR-008 (ADR-007 = Portrait).
 - P1-019 deferred with P0-019 (owner decision 2026-09-17: Android not validated for now).
 - Builds: owner/debug `build/windows/GoodHuman.exe`; blind QA release `build/windows_qa/GoodHuman.exe`. Blind QA brief: `docs/07_qa/SPRINT_02_QA_BRIEF.md` (its Provoke-vs-Leave question now means provoking vs walking past).

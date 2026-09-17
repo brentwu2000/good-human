@@ -1,6 +1,6 @@
 class_name RunManager
 extends Node
-## Scene-scoped controller for one walk (NOT an autoload, ADR-002).
+## Scene-scoped controller for one walk (NOT an autoload, ADR-001).
 ## Owns time, seed/RNG, run inventories, searched points and extraction state.
 
 signal run_started(run_seed: int)

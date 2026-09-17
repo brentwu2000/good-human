@@ -1,4 +1,5 @@
-# ADR-007 — Seamless Real-Time Combat
+# ADR-008 — Seamless Real-Time Combat
+> Delivered as ADR-007 in Update 002 Patch 01; renumbered because ADR-007 is Portrait 720×1280 in DECISIONS.md.
 ## Status
 ACCEPTED
 ## Decision
