@@ -39,7 +39,9 @@ func _ready() -> void:
 	shape.rotation_degrees.x = 90.0
 	shape.position.y = 0.3
 	add_child(shape)
-	_visual = Greybox.dog(Color(0.78, 0.55, 0.32))
+	# Player dog is a compact Shiba-like silhouette: curled tail, pointed ears,
+	# cream muzzle and teal harness remain readable in the low chase camera.
+	_visual = Greybox.dog(Color(0.78, 0.55, 0.32), 1.0, 1)
 	add_child(_visual)
 	_detector = Area3D.new()
 	_detector.collision_layer = 0

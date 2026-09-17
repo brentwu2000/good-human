@@ -99,24 +99,63 @@ static func human(shirt: Color, pants: Color, hair: Color, skin: Color = Color(0
 
 
 ## Dog facing -Z. `size` 1 = medium dog.
-static func dog(color: Color, size: float = 1.0) -> Node3D:
+## Dog visual variants: 0 mix, 1 shiba, 2 pit, 3 small white, 4 black dog.
+## The integer keeps this renderer independent from EncounterData resources.
+static func dog(color: Color, size: float = 1.0, breed: int = 0) -> Node3D:
 	var root := Node3D.new()
 	var dark := color.darkened(0.25)
-	root.add_child(capsule(0.20, 0.72, color, Vector3(0, 0.42, 0), Vector3(PI / 2.0, 0, 0)))
-	root.add_child(sphere(0.23, color, Vector3(0, 0.61, -0.43)))
+	var body_radius := 0.20
+	var body_length := 0.72
+	var head_radius := 0.23
+	var leg_height := 0.24
+	var head_y := 0.61
+	if breed == 2: # Pit: broad chest, low ears, blockier head.
+		body_radius = 0.25
+		body_length = 0.78
+		head_radius = 0.27
+		leg_height = 0.22
+		head_y = 0.63
+	elif breed == 3: # Small white companion: compact and round.
+		body_radius = 0.16
+		body_length = 0.52
+		head_radius = 0.19
+		leg_height = 0.18
+		head_y = 0.54
+	elif breed == 4: # Black dog: lean, longer-legged silhouette.
+		body_radius = 0.18
+		body_length = 0.76
+		leg_height = 0.30
+		head_y = 0.67
+	root.add_child(capsule(body_radius, body_length, color, Vector3(0, 0.42, 0), Vector3(PI / 2.0, 0, 0)))
+	root.add_child(sphere(head_radius, color, Vector3(0, head_y, -0.43)))
 	root.add_child(capsule(0.075, 0.16, Color(0.15, 0.1, 0.08), Vector3(0, 0.57, -0.64), Vector3(PI / 2.0, 0, 0)))
-	root.add_child(cone(0.02, 0.10, 0.22, dark, Vector3(-0.15, 0.79, -0.43), Vector3(0.12, 0, 0.18)))
-	root.add_child(cone(0.02, 0.10, 0.22, dark, Vector3(0.15, 0.79, -0.43), Vector3(-0.12, 0, -0.18)))
+	var ear_y := 0.79 if breed != 3 else 0.70
+	var ear_radius := 0.10 if breed != 2 else 0.13
+	if breed == 2:
+		root.add_child(cone(0.08, ear_radius, 0.12, dark, Vector3(-0.15, ear_y, -0.43), Vector3(0.12, 0, 0.18)))
+		root.add_child(cone(0.08, ear_radius, 0.12, dark, Vector3(0.15, ear_y, -0.43), Vector3(-0.12, 0, -0.18)))
+	else:
+		root.add_child(cone(0.02, ear_radius, 0.22 if breed != 3 else 0.14, dark, Vector3(-0.15, ear_y, -0.43), Vector3(0.12, 0, 0.18)))
+		root.add_child(cone(0.02, ear_radius, 0.22 if breed != 3 else 0.14, dark, Vector3(0.15, ear_y, -0.43), Vector3(-0.12, 0, -0.18)))
 	root.add_child(sphere(0.032, Color(0.04, 0.03, 0.02), Vector3(-0.09, 0.68, -0.60)))
 	root.add_child(sphere(0.032, Color(0.04, 0.03, 0.02), Vector3(0.09, 0.68, -0.60)))
-	var harness := Color(0.12, 0.55, 0.48)
-	root.add_child(box(Vector3(0.44, 0.045, 0.07), harness, Vector3(0, 0.54, -0.02)))
-	root.add_child(box(Vector3(0.08, 0.28, 0.06), harness.lightened(0.12), Vector3(0, 0.58, -0.33)))
-	root.add_child(cylinder(0.13, 0.045, harness.darkened(0.20), Vector3(0, 0.68, -0.44)))
+	if breed != 3:
+		var harness := Color(0.12, 0.55, 0.48)
+		root.add_child(box(Vector3(0.44, 0.045, 0.07), harness, Vector3(0, 0.54, -0.02)))
+		root.add_child(box(Vector3(0.08, 0.28, 0.06), harness.lightened(0.12), Vector3(0, 0.58, -0.33)))
+		root.add_child(cylinder(0.13, 0.045, harness.darkened(0.20), Vector3(0, 0.68, -0.44)))
 	for x in [-0.11, 0.11]:
 		for z in [-0.25, 0.25]:
-			root.add_child(capsule(0.045, 0.24, dark, Vector3(x, 0.15, z)))
-	root.add_child(capsule(0.035, 0.30, dark, Vector3(0, 0.58, 0.42), Vector3(PI / 2.0, 0, 0.28)))
+			root.add_child(capsule(0.045, leg_height, dark, Vector3(x, leg_height * 0.55, z)))
+	var tail_height := 0.30 if breed != 3 else 0.20
+	var tail_rotation := Vector3(PI / 2.0, 0, 0.28)
+	if breed == 1: # Shiba curl: an upright angled tail instead of a straight stick.
+		root.add_child(capsule(0.045, tail_height, dark, Vector3(0.02, 0.70, 0.38), Vector3(0.65, 0, 0.35)))
+		root.add_child(sphere(0.07, dark, Vector3(0.08, 0.82, 0.30)))
+	elif breed != 3:
+		root.add_child(capsule(0.035, tail_height, dark, Vector3(0, 0.58, 0.42), tail_rotation))
+	if breed == 3:
+		root.add_child(sphere(0.12, color.lightened(0.12), Vector3(0, 0.76, 0.38)))
 	for x in [-0.04, 0.04]:
 		root.add_child(sphere(0.035, Color(0.10, 0.07, 0.05), Vector3(x, 0.07, -0.33)))
 	root.scale = Vector3.ONE * size

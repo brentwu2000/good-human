@@ -62,7 +62,7 @@ func setup(data: EncounterData) -> void:
 	human_puppet.show_hp(false)
 	if _dog != null:
 		_dog.queue_free()
-	_dog = Greybox.dog(encounter.dog_color, encounter.dog_scale)
+	_dog = Greybox.dog(encounter.dog_color, encounter.dog_scale, encounter.dog_breed)
 	add_child(_dog)
 	_name_label.text = "%s和%s" % [encounter.human.display_name, encounter.dog_name]
 	_place_dog()

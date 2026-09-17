@@ -12,5 +12,6 @@ human = ExtResource("2_human")
 dog_name = "小柴"
 dog_color = Color(0.85, 0.55, 0.25, 1)
 dog_scale = 0.9
+dog_breed = 1
 intro_text = "一個慢跑的人牽著柴犬停下來，原地踏步看著你們。"
 reward_table = ExtResource("3_reward")

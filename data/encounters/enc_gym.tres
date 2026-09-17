@@ -12,5 +12,6 @@ human = ExtResource("2_human")
 dog_name = "比特"
 dog_color = Color(0.5, 0.5, 0.55, 1)
 dog_scale = 1.25
+dog_breed = 2
 intro_text = "健身房門口的壯漢和他的比特犬，兩個都在瞪你們。"
 reward_table = ExtResource("3_reward")

@@ -9,6 +9,7 @@ States: RESEARCH / CANDIDATE / IN_PROGRESS / REVIEW / APPROVED / REJECTED
 | ART-033 | 3D Dog/Owner Leash Readability | P0 | REVIEW |
 | ART-034 | 3D Environment Starter Kit | P1 | IN_PROGRESS |
 | ART-035 | 3D Encounter Presentation | P1 | TODO |
+| ART-036 | 3D Dog Breed Variants | P0 | REVIEW |
 
 ## Sprint 04 Dog Agency design handoff
 
