@@ -18,8 +18,8 @@ Claude Code owns gameplay engineering. Codex owns the art pipeline. Missing fina
 ## ADR-006 — Codex performs independent QA
 After each playable sprint, Codex uses a fresh context and tests without reading implementation details first.
 
-## ADR-010 — Portrait 720×1280, Mobile renderer
-> Renumbered from ADR-007 (2026-09-17) so update packages keep ADR-007 = seamless combat and ADR-008 = behavior-driven training.
+## ADR-L01 — Portrait 720×1280, Mobile renderer
+> Local decision. Renumbered (was ADR-007, then ADR-010) so numbered ADRs stay reserved for update packages (ADR-007 seamless combat, ADR-008 training, ADR-009 dog desires, ADR-010 camera evaluation).
 The game is portrait (base viewport 720×1280, `canvas_items` stretch, `expand` aspect) for single-hand play. Renderer is Godot Mobile. Art and UI are produced for this frame.
 
 ## ADR-007 — Seamless real-time combat
@@ -30,3 +30,6 @@ Human growth comes from meaningful dog behavior in normal runs, not a minigame o
 
 ## ADR-009 — Dog desires, not quest checklists
 Short-term progression is framed as optional dog desires, discoveries and causal threads that persist and fork, not generic quest checklists. Full record: `ADR_009_DOG_DESIRES_NOT_QUEST_CHECKLISTS.md`.
+
+## ADR-010 — Camera perspective under evaluation (PROPOSED)
+Prototype dog-height and hybrid cameras against the current 3/4 top-down view before any production change. Full record: `ADR_010_CAMERA_PERSPECTIVE_UNDER_EVALUATION.md`.

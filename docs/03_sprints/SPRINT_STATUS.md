@@ -72,7 +72,7 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 - Map: 4 pairs in `Actors`. The 3 ordinary pairs are shuffled over 3 spots each run; the Old Master is fixed under the big tree.
 - Placeholder balance (40 seeds): player wins roughly 85% vs Jogger, 70% vs Delivery Worker, 70% vs Gym Regular, ~0% vs Old Master. Player HP resets each fight.
 - Debug panel: put dog at next pair, force win / force lose.
-- Owner decisions (2026-09-17): Sprint 02 Codex blind QA not run for now (tasks stay REVIEW, not DONE); player HP resets per fight and the bag stays usable during combat for now; ADR numbering follows the update packages: ADR-007 = seamless combat, ADR-008 = behavior-driven training, Portrait renumbered to ADR-010.
+- Owner decisions (2026-09-17): Sprint 02 Codex blind QA not run for now (tasks stay REVIEW, not DONE); player HP resets per fight and the bag stays usable during combat for now; ADR numbering follows the update packages (ADR-007 seamless combat, ADR-008 training, ADR-009 desires, ADR-010 camera); the local Portrait decision is ADR-L01.
 - P1-019 deferred with P0-019 (owner decision 2026-09-17: Android not validated for now).
 - Builds: owner/debug `build/windows/GoodHuman.exe`; blind QA release `build/windows_qa/GoodHuman.exe`. Blind QA brief: `docs/07_qa/SPRINT_02_QA_BRIEF.md` (question 5 updated to provoking vs walking past).
 
@@ -152,3 +152,25 @@ Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_
 - Desires can be ignored: non-persistent ones fade at walk end; persistent ones sleep (DORMANT) and are listed at Home ("狗狗還掛念著").
 - UI: dog-voiced list under the timer, popups for new/follow-up/resolved thoughts, nose arrow to the current target, ❗ on wanted pairs; Home shows threads and discovery counts. Debug panel shows active desires/flags, complete current, reset goals.
 - Placeholder art: scent cue text, squirrel emoji, rival pair uses the fighter puppet. Codex desire icons (`assets/ui/desires`, `ui/desire`) were in progress and not committed by Claude.
+
+## P-01 — DOG EYE CAMERA (prototype)
+Isolated greybox experiment. Sprint 04 production is paused until the Camera Gate review.
+
+| ID | Task | Status |
+|---|---|---|
+| CAM-001 | isolated 3D greybox | TODO |
+| CAM-002 | dog/human/leash proxies | TODO |
+| CAM-003 | A top-down baseline | TODO |
+| CAM-004 | B dog-height chase | TODO |
+| CAM-005 | C hybrid profiles | TODO |
+| CAM-006 | collision/smoothing | TODO |
+| CAM-007 | walk/sprint | TODO |
+| CAM-008 | sniff/search | TODO |
+| CAM-009 | squirrel chase | TODO |
+| CAM-010 | seamless fight proxy | TODO |
+| CAM-011 | dog movement/disengage | TODO |
+| CAM-012 | mobile framing | TODO |
+| CAM-013 | runtime tuning/debug | TODO |
+| CAM-014 | A/B/C build | TODO |
+| CAM-015 | blind QA | TODO |
+| CAM-016 | Camera Gate decision | TODO |
