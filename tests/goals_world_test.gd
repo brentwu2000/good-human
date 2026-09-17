@@ -40,9 +40,9 @@ func _run() -> void:
 
 	# --- Walk 1: a reason to walk, pointing somewhere in the world ------------------
 	check(director.active_desires().size() == 1 and director.active_desires()[0].id == &"desire_strange_scent", "walk starts with the strange scent desire")
-	var hud_list := (p.hud as DesireHUD).get_node("%DesireList") as Label
+	var card := (p.hud as DesireHUD).get_node("%DesireCard") as DesireCard
 	await _physics(2)
-	check(hud_list.visible and hud_list.text.contains("味道"), "HUD shows what the dog wants")
+	check(card.visible and (card.get_node("%DesireText") as Label).text.contains("味道"), "HUD card shows what the dog wants")
 	var scent_park := _cue(&"scent_park")
 	var scent_alley := _cue(&"scent_alley")
 	check(scent_park.visible and scent_park.active, "world cue: park scent appears")
