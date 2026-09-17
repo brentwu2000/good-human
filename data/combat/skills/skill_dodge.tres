@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CombatSkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+id = &"skill_dodge"
+animation_key = &"dodge"
+display_name = "閃避"
+effect = 2
+condition = 1
+priority = 25
+cooldown = 5.0
+preferred_range = 0.0
+windup = 0.0
+active_time = 0.4
+recovery = 0.2
+power = 0.0
+stagger = 0.0
+damage_reduction = 0.0
+reposition_distance = 70.0

@@ -43,14 +43,14 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 
 | ID | Task | Status |
 |---|---|---|
-| P1-001 | Combat foundation | TODO |
-| P1-002 | Human combat stats | TODO |
-| P1-003 | Combat skill data model | TODO |
-| P1-004 | Punch | TODO |
-| P1-005 | Kick | TODO |
-| P1-006 | Block | TODO |
-| P1-007 | Dodge | TODO |
-| P1-008 | Condition + priority AI | TODO |
+| P1-001 | Combat foundation | REVIEW |
+| P1-002 | Human combat stats | REVIEW |
+| P1-003 | Combat skill data model | REVIEW |
+| P1-004 | Punch | REVIEW |
+| P1-005 | Kick | REVIEW |
+| P1-006 | Block | REVIEW |
+| P1-007 | Dodge | REVIEW |
+| P1-008 | Condition + priority AI | REVIEW |
 | P1-009 | Combat presentation | TODO |
 | P1-010 | Encounter trigger | TODO |
 | P1-011 | Provoke / Leave | TODO |

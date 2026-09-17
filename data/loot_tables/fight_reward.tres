@@ -1,0 +1,50 @@
+[gd_resource type="Resource" script_class="LootTableData" load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://resources/loot_table_data.gd" id="1_table"]
+[ext_resource type="Script" path="res://resources/loot_entry.gd" id="2_entry"]
+[ext_resource type="Resource" path="res://data/items/sports_drink.tres" id="3_sports_drink"]
+[ext_resource type="Resource" path="res://data/items/bandage.tres" id="4_bandage"]
+[ext_resource type="Resource" path="res://data/items/hand_grip.tres" id="5_hand_grip"]
+[ext_resource type="Resource" path="res://data/items/jump_rope.tres" id="6_jump_rope"]
+[ext_resource type="Resource" path="res://data/items/boxing_gloves.tres" id="7_boxing_gloves"]
+
+[sub_resource type="Resource" id="Entry_sports_drink"]
+script = ExtResource("2_entry")
+item = ExtResource("3_sports_drink")
+weight = 30
+min_quantity = 1
+max_quantity = 2
+
+[sub_resource type="Resource" id="Entry_bandage"]
+script = ExtResource("2_entry")
+item = ExtResource("4_bandage")
+weight = 25
+min_quantity = 1
+max_quantity = 2
+
+[sub_resource type="Resource" id="Entry_hand_grip"]
+script = ExtResource("2_entry")
+item = ExtResource("5_hand_grip")
+weight = 20
+min_quantity = 1
+max_quantity = 1
+
+[sub_resource type="Resource" id="Entry_jump_rope"]
+script = ExtResource("2_entry")
+item = ExtResource("6_jump_rope")
+weight = 15
+min_quantity = 1
+max_quantity = 1
+
+[sub_resource type="Resource" id="Entry_boxing_gloves"]
+script = ExtResource("2_entry")
+item = ExtResource("7_boxing_gloves")
+weight = 10
+min_quantity = 1
+max_quantity = 1
+
+[resource]
+script = ExtResource("1_table")
+id = &"fight_reward"
+entries = Array[ExtResource("2_entry")]([SubResource("Entry_sports_drink"), SubResource("Entry_bandage"), SubResource("Entry_hand_grip"), SubResource("Entry_jump_rope"), SubResource("Entry_boxing_gloves")])
+nothing_weight = 0

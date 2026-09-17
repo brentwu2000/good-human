@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EncounterData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/encounter_data.gd" id="1_enc"]
+[ext_resource type="Resource" path="res://data/combat/fighters/opp03_gym.tres" id="2_human"]
+[ext_resource type="Resource" path="res://data/loot_tables/fight_reward.tres" id="3_reward"]
+
+[resource]
+script = ExtResource("1_enc")
+id = &"enc_gym"
+tier = 0
+human = ExtResource("2_human")
+dog_name = "比特"
+dog_color = Color(0.5, 0.5, 0.55, 1)
+dog_scale = 1.25
+intro_text = "健身房門口的壯漢和他的比特犬，兩個都在瞪你們。"
+reward_table = ExtResource("3_reward")

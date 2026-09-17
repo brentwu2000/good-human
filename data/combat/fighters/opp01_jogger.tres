@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="FighterData" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://resources/fighter_data.gd" id="1_fighter"]
+[ext_resource type="Script" path="res://resources/combat_stats.gd" id="2_stats"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_punch.tres" id="3_punch"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_kick.tres" id="4_kick"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_block.tres" id="5_block"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_dodge.tres" id="6_dodge"]
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="7_skill"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+script = ExtResource("2_stats")
+strength = 5
+endurance = 3
+agility = 9
+will = 4
+
+[resource]
+script = ExtResource("1_fighter")
+id = &"opp01_jogger"
+display_name = "慢跑的人"
+stats = SubResource("Resource_stats")
+skills = Array[ExtResource("7_skill")]([ExtResource("3_punch"), ExtResource("4_kick"), ExtResource("5_block"), ExtResource("6_dodge")])
+skin_color = Color(0.9, 0.72, 0.55, 1)
+hair_color = Color(0.1, 0.1, 0.1, 1)
+shirt_color = Color(0.3, 0.75, 0.9, 1)
+pants_color = Color(0.15, 0.15, 0.2, 1)
+body_scale = Vector2(0.9, 1.05)
+stoop = 0.0

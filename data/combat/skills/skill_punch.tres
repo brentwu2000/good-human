@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CombatSkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+id = &"skill_punch"
+animation_key = &"punch"
+display_name = "出拳"
+effect = 0
+condition = 0
+priority = 10
+cooldown = 0.0
+preferred_range = 70.0
+windup = 0.25
+active_time = 0.0
+recovery = 0.3
+power = 1.0
+stagger = 0.0
+damage_reduction = 0.0
+reposition_distance = 0.0
