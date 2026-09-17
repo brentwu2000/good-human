@@ -26,7 +26,7 @@ func _ready() -> void:
 	rig.coordinator = coordinator
 	rig.view_changed.connect(_on_view_changed)
 	_build_view_button()
-	rig.set_view(CameraRig3D.View.TOP_DOWN)
+	rig.set_view(CameraRig3D.View.DOG)
 	run_manager.run_started.connect(func(_s: int) -> void: human.say("好，出去散步吧！"))
 	run_manager.loot_gained.connect(_on_loot_gained)
 
@@ -88,8 +88,9 @@ func _build_street() -> void:
 	add_child(Greybox.box(Vector3(64, 0.02, 7), Color(0.3, 0.3, 0.32), Vector3(0, 0.01, -2)))
 	for x in range(-28, 29, 4):
 		add_child(Greybox.box(Vector3(1.6, 0.03, 0.15), Color(0.9, 0.9, 0.85), Vector3(x, 0.02, -2)))
-	add_child(Greybox.solid_box(Vector3(64, 0.15, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.075, 3)))
-	add_child(Greybox.solid_box(Vector3(64, 0.15, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.075, -7)))
+	# Low curbs: actors can step onto the sidewalks.
+	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, 3)))
+	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, -7)))
 	for i in 5:
 		add_child(Greybox.solid_box(Vector3(9, 6, 6), Color(0.62 + 0.05 * (i % 2), 0.55, 0.5), Vector3(-24.0 + i * 12.0, 3, 8.5), fade_top))
 	for x in [-19.0, -9.0, 9.0, 19.0]:

@@ -37,14 +37,14 @@ fighter = ExtResource("4_player")
 [node name="SearchPoints" type="Node3D" parent="."]
 
 [node name="trash_street_east" type="Node3D" parent="SearchPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.15, 3.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.05, 3.3)
 script = ExtResource("5_search")
 search_id = &"trash_street_east"
 display_label = "垃圾桶"
 loot_table = ExtResource("6_trash")
 
 [node name="mailbox_street" type="Node3D" parent="SearchPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.15, 3.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.05, 3.4)
 script = ExtResource("5_search")
 search_id = &"mailbox_street"
 display_label = "信箱"
@@ -52,7 +52,7 @@ loot_table = ExtResource("6_trash")
 color = Color(0.8, 0.3, 0.3, 1)
 
 [node name="trash_far_side" type="Node3D" parent="SearchPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.15, -6.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.05, -6.8)
 script = ExtResource("5_search")
 search_id = &"trash_far_side"
 display_label = "垃圾桶"
@@ -85,7 +85,7 @@ color = Color(0.8, 0.5, 0.2, 1)
 [node name="ExtractionPoints" type="Node3D" parent="."]
 
 [node name="bus_stop" type="Node3D" parent="ExtractionPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.15, 3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.05, 3)
 script = ExtResource("8_extract")
 extraction_id = &"bus_stop"
 display_label = "🚌 公車站"
@@ -109,7 +109,7 @@ spot_id = &"pair_park"
 encounter = ExtResource("10_delivery")
 
 [node name="pair_street" type="Node3D" parent="Encounters"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.15, -6.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.05, -6.8)
 script = ExtResource("9_pair")
 spot_id = &"pair_street"
 encounter = ExtResource("14_gym")

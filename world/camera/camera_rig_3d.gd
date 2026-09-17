@@ -12,18 +12,24 @@ enum View { TOP_DOWN, DOG }
 
 const PROFILES: Dictionary = {
 	View.TOP_DOWN: {"pivot": 0.5, "pitch": -72.0, "distance": 18.0, "fov": 42.0},
-	View.DOG: {"pivot": 0.85, "pitch": -10.0, "distance": 3.0, "fov": 70.0},
+	# Same framing as P-01 "B" (low chase camera behind the dog).
+	View.DOG: {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0},
 }
 ## B pulls back to keep both humans in view during a fight.
 const DOG_COMBAT: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.5, "fov": 64.0}
 const VIEW_NAMES: Array[String] = ["俯視", "狗視角"]
 
-@export var view: View = View.TOP_DOWN
+@export var view: View = View.DOG
 @export var smoothing: float = 6.0
 @export var yaw_follow_speed: float = 2.2
 @export var collision_margin: float = 0.25
-## When a wall pulls the camera closer than this, it rises instead.
-@export var collision_min_distance: float = 1.8
+## Dog view: a wall may pull the camera in down to this distance; anything
+## closer fades instead, so the camera stays low behind the dog.
+@export var collision_min_distance: float = 1.2
+## Dog view: the camera swings behind the dog only while the stick points
+## within this angle (deg) of forward, so sideways input doesn't spin the dog
+## and the camera in circles.
+@export var follow_max_angle: float = 50.0
 ## Top-down cutaway: buildings whose center is this close to the dog fade.
 @export var top_down_cutaway_radius: float = 11.0
 
@@ -87,8 +93,12 @@ func _update(delta: float, instant: bool) -> void:
 
 	if view == View.TOP_DOWN:
 		yaw = 0.0
-	elif dog.planar_speed() > 0.5:
-		yaw = lerp_angle(yaw, dog.heading(), 1.0 if instant else minf(yaw_follow_speed * delta, 1.0))
+	elif instant:
+		pass
+	elif dog.planar_speed() > 0.5 and _stick_points_forward() and absf(angle_difference(yaw, dog.heading())) <= deg_to_rad(follow_max_angle):
+		# Only ease in behind a dog that is already heading roughly away from
+		# the camera; chasing a dog mid-turn would swing the controls around.
+		yaw = lerp_angle(yaw, dog.heading(), minf(yaw_follow_speed * delta, 1.0))
 	dog.camera_yaw = yaw
 
 	var focus := dog.global_position + Vector3(0, current["pivot"], 0)
@@ -126,12 +136,15 @@ func _place_camera(from: Vector3, to: Vector3) -> Vector3:
 				fade_now[body] = true
 			exclude.append(hit["rid"])
 			continue
-		collided = true
 		var point: Vector3 = hit["position"]
-		result = point + (from - point).normalized() * collision_margin
-		var shortfall := collision_min_distance - result.distance_to(from)
-		if shortfall > 0.0:
-			result.y += shortfall * 1.5
+		var pulled := point + (from - point).normalized() * collision_margin
+		if pulled.distance_to(from) < collision_min_distance:
+			# Too close to stay behind the wall: see through it instead.
+			fade_now[body] = true
+			exclude.append(hit["rid"])
+			continue
+		collided = true
+		result = pulled
 		break
 	if view == View.TOP_DOWN:
 		for node in get_tree().get_nodes_in_group(Greybox.FADE_TOP_DOWN_GROUP):
@@ -147,6 +160,13 @@ func _place_camera(from: Vector3, to: Vector3) -> Vector3:
 			Greybox.set_faded(body, true)
 	_faded = fade_now
 	return result
+
+
+func _stick_points_forward() -> bool:
+	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if input.y >= -0.1:
+		return false
+	return rad_to_deg(atan2(absf(input.x), -input.y)) <= follow_max_angle
 
 
 ## The leashed owner walks behind the dog, right where a chase camera looks.

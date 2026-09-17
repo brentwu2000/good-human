@@ -37,8 +37,10 @@ func _run() -> void:
 	var coordinator := map.coordinator
 	coordinator.time_scale = 25.0
 	check(run.is_running() and run.dog_actor == dog, "3D walk running with the 3D dog")
-	check_eq(rig.view, CameraRig3D.View.TOP_DOWN, "starts in the top-down view")
-	check(rig.is_dog_visible(), "top-down: dog visible")
+	check_eq(rig.view, CameraRig3D.View.DOG, "starts in the dog view")
+	check(rig.is_dog_visible(), "dog view: dog visible at start")
+	check(rig.global_position.y - dog.global_position.y < 1.6, "dog view starts low behind the dog")
+	rig.set_view(CameraRig3D.View.TOP_DOWN)
 
 	# --- Movement is camera-relative in both views ------------------------------
 	var start := dog.global_position
@@ -79,11 +81,25 @@ func _run() -> void:
 	await _physics(2)
 	check(not rig.collided, "top-down never pulls the camera in")
 	check(rig._faded.keys().any(func(n: Node) -> bool: return n.is_in_group(Greybox.FADE_TOP_DOWN_GROUP)), "top-down: house in front of the dog fades")
-	# Dog view: the same wall pulls the camera in.
+	# Dog view: a wall behind the dog pulls the camera in but keeps it low.
+	dog.global_position = Vector3(-12, 0.1, 3.3)
 	dog.facing = Vector3.FORWARD
 	rig.set_view(CameraRig3D.View.DOG)
 	await _physics(2)
 	check(rig.collided and rig.is_dog_visible(), "dog view: wall pulls camera in, dog still visible")
+	check(rig.global_position.y - dog.global_position.y < 1.6, "dog view stays low near walls")
+	# Right against the wall the camera looks through it instead of climbing.
+	dog.global_position = Vector3(-12, 0.1, 4.8)
+	rig.snap()
+	await _physics(2)
+	check(not rig.collided and rig._faded.size() > 0 and rig.global_position.y - dog.global_position.y < 1.6, "dog view: too close to a wall, the wall fades")
+
+	# Sideways input does not swing the camera around.
+	dog.global_position = Vector3(0, 0.1, 2.5)
+	dog.velocity = Vector3.ZERO
+	rig.yaw = 0.0
+	await _hold(&"move_right", 40)
+	check(absf(rig.yaw) < 0.05, "dog view: walking sideways keeps the camera still")
 	rig.set_view(CameraRig3D.View.TOP_DOWN)
 
 	# --- Search ------------------------------------------------------------------
