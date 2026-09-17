@@ -24,6 +24,7 @@ var _popups: Array[Dictionary] = []
 var _popup_left: float = 0.0
 
 @onready var _list: Label = %DesireList
+@onready var _card: DesireCard = %DesireCard
 @onready var _popup: Label = %DesirePopup
 @onready var _arrow: Label = %HintArrow
 
@@ -31,6 +32,7 @@ var _popup_left: float = 0.0
 func _ready() -> void:
 	_popup.hide()
 	_arrow.hide()
+	_card.hide()
 	director.desire_started.connect(_on_started)
 	director.desire_completed.connect(func(d: DesireData) -> void: _queue("✔ " + (d.complete_text if not d.complete_text.is_empty() else d.dog_text), Color(0.6, 1.0, 0.6)))
 	director.desire_failed.connect(_on_failed)
@@ -70,8 +72,21 @@ func _update_list() -> void:
 	var lines: Array[String] = []
 	for desire in director.active_desires():
 		lines.append(line_for(desire))
+	# The first active desire is the primary dog thought. Emergent thoughts are
+	# announced as popups; keeping one card prevents a quest-log silhouette.
+	var primary: DesireData = null
+	if not director.active_desires().is_empty():
+		primary = director.active_desires()[0]
+	if primary == null:
+		_card.hide()
+	else:
+		if primary.layer == DesireData.Layer.THREAD:
+			_card.present_thread(primary)
+		else:
+			_card.present(primary)
+	# Keep the old text node updated but hidden for compatibility/debug tooling.
 	_list.text = "\n".join(lines)
-	_list.visible = not lines.is_empty()
+	_list.visible = false
 
 
 func _queue(text: String, color: Color) -> void:

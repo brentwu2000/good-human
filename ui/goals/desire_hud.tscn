@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/goals/desire_hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://ui/desire/desire_card.tscn" id="2_card"]
 
 [node name="DesireHUD" type="CanvasLayer"]
 layer = 2
@@ -17,6 +18,13 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
+
+[node name="DesireCard" parent="." instance=ExtResource("2_card")]
+unique_name_in_owner = true
+offset_left = 20.0
+offset_top = 204.0
+offset_right = 700.0
+offset_bottom = 346.0
 
 [node name="DesirePopup" type="Label" parent="."]
 unique_name_in_owner = true

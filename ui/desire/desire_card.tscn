@@ -1,0 +1,82 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/desires/icon_strange_scent.svg" id="1_icon"]
+[ext_resource type="Script" path="res://ui/desire/desire_card.gd" id="2_script"]
+
+[sub_resource type="StyleBoxFlat" id="Card"]
+bg_color = Color(0.094, 0.137, 0.137, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.45, 0.78, 0.69, 0.72)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_left = 20.0
+content_margin_top = 16.0
+content_margin_right = 22.0
+content_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxFlat" id="IconWell"]
+bg_color = Color(0.04, 0.075, 0.075, 0.8)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
+[node name="DesireCard" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 142)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Card")
+script = ExtResource("2_script")
+
+[node name="Layout" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="IconWell" type="PanelContainer" parent="Layout"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("IconWell")
+
+[node name="DesireIcon" type="TextureRect" parent="Layout/IconWell"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("1_icon")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="Copy" type="VBoxContainer" parent="Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ThoughtLabel" type="Label" parent="Layout/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.71, 0.34, 1)
+theme_override_font_sizes/font_size = 18
+text = "狗狗現在想……"
+
+[node name="DesireText" type="Label" parent="Layout/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.94, 0.87, 1)
+theme_override_font_sizes/font_size = 26
+text = "那個味道，到底是從哪裡來的？"
+autowrap_mode = 3
+
+[node name="HintText" type="Label" parent="Layout/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.56, 0.78, 0.72, 1)
+theme_override_font_sizes/font_size = 18
+text = "空氣裡還留著一點陌生氣味"
+autowrap_mode = 3
