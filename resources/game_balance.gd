@@ -23,5 +23,7 @@ extends Resource
 @export_range(0.0, 1.0) var damage_variance: float = 0.15
 ## Chance an idle fighter hesitates for one decision (keeps fights from being scripted).
 @export_range(0.0, 1.0) var hesitation_chance: float = 0.15
+## Once engaged, the player's human breaks away when the dog is this far away.
+@export var disengage_distance: float = 480.0
 ## Fights longer than this end as ABORTED.
 @export var combat_max_duration: float = 90.0

@@ -4,7 +4,7 @@ extends Control
 ## Hidden by default (blind QA): open with F1, or tap the run timer 5 times quickly.
 
 @export var run_manager: RunManager
-var encounter_controller: EncounterController
+var combat_coordinator: CombatCoordinator
 
 @onready var _info_label: Label = %InfoLabel
 @onready var _body: Control = %Body
@@ -24,9 +24,9 @@ func _ready() -> void:
 	_bind(%ClearBagButton, func() -> void: run_manager.human_run_inventory.clear())
 	_bind(%ExtractButton, func() -> void: run_manager.extract(&"debug"))
 	_bind(%FailButton, func() -> void: run_manager.fail_run())
-	_bind(%NextEncounterButton, func() -> void: _with_encounters(func(c: EncounterController) -> void: c.debug_goto_next_encounter()))
-	_bind(%WinFightButton, func() -> void: _with_encounters(func(c: EncounterController) -> void: c.debug_force_result(CombatSimulation.Result.VICTORY)))
-	_bind(%LoseFightButton, func() -> void: _with_encounters(func(c: EncounterController) -> void: c.debug_force_result(CombatSimulation.Result.DEFEAT)))
+	_bind(%NextEncounterButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_goto_next_pair()))
+	_bind(%WinFightButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_force_result(CombatSimulation.Result.VICTORY)))
+	_bind(%LoseFightButton, func() -> void: _with_combat(func(c: CombatCoordinator) -> void: c.debug_force_result(CombatSimulation.Result.DEFEAT)))
 
 
 func _process(_delta: float) -> void:
@@ -43,9 +43,9 @@ func toggle() -> void:
 	_body.visible = not _body.visible
 
 
-func _with_encounters(action: Callable) -> void:
-	if encounter_controller != null:
-		action.call(encounter_controller)
+func _with_combat(action: Callable) -> void:
+	if combat_coordinator != null:
+		action.call(combat_coordinator)
 
 
 func _bind(button: Button, action: Callable) -> void:

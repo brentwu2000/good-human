@@ -9,8 +9,6 @@ signal loot_blocked(item: ItemData, quantity: int)
 signal search_empty(point: SearchPoint)
 signal extraction_unlocked(point: ExtractionPoint)
 signal run_ended(result: RunResult)
-## An encounter (decision or fight) pauses the walk timer and world interaction.
-signal encounter_state_changed(active: bool)
 
 enum RunStatus { NOT_STARTED, RUNNING, EXTRACTED, FAILED }
 
@@ -31,7 +29,6 @@ var searched_points: Dictionary[StringName, bool] = {}
 var extraction_states: Dictionary[StringName, bool] = {}
 var run_status: RunStatus = RunStatus.NOT_STARTED
 var run_result: RunResult
-var encounter_active: bool = false
 
 var _extraction_points: Array[ExtractionPoint] = []
 var _all_extractions_forced: bool = false
@@ -49,7 +46,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if run_status != RunStatus.RUNNING or encounter_active:
+	if run_status != RunStatus.RUNNING:
 		return
 	elapsed_time += delta
 	_update_extractions()
@@ -68,7 +65,6 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	searched_points.clear()
 	run_result = null
 	_all_extractions_forced = false
-	set_encounter_active(false)
 
 	_extraction_points.clear()
 	extraction_states.clear()
@@ -126,14 +122,7 @@ func resolve_search(point: SearchPoint, stack: ItemStack) -> ItemStack:
 	return ItemStack.new(stack.item, left)
 
 
-# --- Encounters -------------------------------------------------------------
-
-func set_encounter_active(value: bool) -> void:
-	if encounter_active == value:
-		return
-	encounter_active = value
-	encounter_state_changed.emit(value)
-
+# --- Combat outcomes -------------------------------------------------------------
 
 ## Victory reward: one roll with the run RNG into the human bag. Whatever does
 ## not fit is left behind. Returns the rolled stack (null = nothing).
@@ -182,7 +171,6 @@ func _lose_run(outcome: RunResult.Outcome, defeated_by: String) -> void:
 	if not is_running():
 		return
 	run_status = RunStatus.FAILED
-	set_encounter_active(false)
 	var result := _build_result(outcome, &"")
 	result.defeated_by = defeated_by
 	result.to_stash = dog_safe_inventory.get_stacks()
@@ -217,7 +205,7 @@ func _end_run(result: RunResult) -> void:
 
 
 func _on_dog_interact_requested(target: Interactable) -> void:
-	if is_running() and not encounter_active and target != null and target.can_interact(self):
+	if is_running() and target != null and target.can_interact(self):
 		target.interact(self)
 
 

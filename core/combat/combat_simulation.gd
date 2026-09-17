@@ -1,7 +1,8 @@
 class_name CombatSimulation
 extends RefCounted
 ## Autonomous 1v1 human fight on a line. Pure logic: no nodes, no input, so it
-## can be stepped headless. Presentation listens to `combat_event`.
+## can be stepped headless. In the Run World the line runs between the two
+## humans' positions (see Engagement); presentation listens to `combat_event`.
 ## Each fighter picks skills with a condition + priority evaluator.
 
 ## kind: skill_started, hit, blocked, dodged, missed, staggered, defeated.
@@ -10,12 +11,14 @@ extends RefCounted
 signal combat_event(kind: StringName, fighter: int, skill: CombatSkillData, amount: float)
 signal finished(result: Result)
 
-enum Result { NONE, VICTORY, DEFEAT, ABORTED }
+## DISENGAGED = the player's side broke away; ABORTED = took too long.
+enum Result { NONE, VICTORY, DEFEAT, DISENGAGED, ABORTED }
 
 const PLAYER: int = 0
 const OPPONENT: int = 1
 const START_DISTANCE: float = 220.0
-const ARENA_HALF_WIDTH: float = 260.0
+## How far either human may drift from the engagement origin.
+const MAX_DRIFT: float = 600.0
 ## Extra reach so an attack started in range still lands after tiny movement.
 const REACH_TOLERANCE: float = 12.0
 
@@ -27,12 +30,12 @@ var _balance: GameBalance
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
-func _init(player: FighterData, opponent: FighterData, rng_seed: int, balance: GameBalance = null) -> void:
+func _init(player: FighterData, opponent: FighterData, rng_seed: int, balance: GameBalance = null, start_distance: float = START_DISTANCE) -> void:
 	_balance = balance if balance != null else DataRegistry.balance
 	_rng.seed = rng_seed
 	fighters = [CombatFighter.new(player, PLAYER, _balance), CombatFighter.new(opponent, OPPONENT, _balance)]
-	fighters[PLAYER].position = -START_DISTANCE / 2.0
-	fighters[OPPONENT].position = START_DISTANCE / 2.0
+	fighters[PLAYER].position = -start_distance / 2.0
+	fighters[OPPONENT].position = start_distance / 2.0
 
 
 func is_finished() -> bool:
@@ -69,6 +72,11 @@ func run_to_end(delta: float = 1.0 / 30.0) -> Result:
 
 func abort() -> void:
 	_finish(Result.ABORTED)
+
+
+## The player's human broke away to follow the dog.
+func disengage() -> void:
+	_finish(Result.DISENGAGED)
 
 
 ## Debug hook: end immediately as if one side was knocked out.
@@ -226,7 +234,7 @@ func _tick_cooldowns(fighter: CombatFighter, delta: float) -> void:
 
 func _move(fighter: CombatFighter, amount: float) -> void:
 	var target := _other(fighter)
-	var next := clampf(fighter.position + amount, -ARENA_HALF_WIDTH, ARENA_HALF_WIDTH)
+	var next := clampf(fighter.position + amount, -MAX_DRIFT, MAX_DRIFT)
 	# Never walk through the opponent.
 	if fighter.side == PLAYER:
 		next = minf(next, target.position - 30.0)

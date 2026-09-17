@@ -1,7 +1,7 @@
 class_name FighterPuppet
 extends Node2D
-## Placeholder human figure for encounters and fights. Presentation only:
-## it plays what CombatArena tells it and never decides anything.
+## Placeholder human figure used by the owner and opponent pairs. Presentation
+## only: it plays what CombatCoordinator tells it and never decides anything.
 
 const HIT_COLOR: Color = Color(1.0, 0.35, 0.3)
 
@@ -160,6 +160,19 @@ func set_beaten(beaten: bool) -> void:
 
 func is_down() -> bool:
 	return _down
+
+
+## Back on their feet (after a fight or a new walk).
+func revive() -> void:
+	_down = false
+	modulate = Color.WHITE
+	if _pose_tween != null:
+		_pose_tween.kill()
+	_reset_pose()
+
+
+func shout(text: String, color: Color = Color.WHITE) -> void:
+	_popup_text(text, color)
 
 
 func _reset_pose() -> void:

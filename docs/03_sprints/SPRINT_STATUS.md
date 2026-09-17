@@ -51,25 +51,26 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 | P1-006 | Block | REVIEW |
 | P1-007 | Dodge | REVIEW |
 | P1-008 | Condition + priority AI | REVIEW |
-| P1-009 | Combat presentation | IN_PROGRESS |
-| P1-010 | Encounter trigger | IN_PROGRESS |
-| P1-011 | Provoke / Leave | IN_PROGRESS |
+| P1-009 | Combat presentation | REVIEW |
+| P1-010 | Encounter trigger | REVIEW |
+| P1-011 | Provoke / Leave | REVIEW |
 | P1-012 | Ordinary opponents | REVIEW |
-| P1-013 | Old Master encounter | IN_PROGRESS |
-| P1-014 | Victory reward | IN_PROGRESS |
-| P1-015 | Defeat resolution | IN_PROGRESS |
+| P1-013 | Old Master encounter | REVIEW |
+| P1-014 | Victory reward | REVIEW |
+| P1-015 | Defeat resolution | REVIEW |
 | P1-016 | Loss / dog-safe preservation | REVIEW |
-| P1-017 | Minimal hospital/result | IN_PROGRESS |
-| P1-018 | Debug/test hooks | IN_PROGRESS |
+| P1-017 | Minimal hospital/result | REVIEW |
+| P1-018 | Debug/test hooks | REVIEW |
 | P1-019 | Android combat validation | TODO |
-| P1-020 | Sprint 02 QA readiness | IN_PROGRESS |
+| P1-020 | Sprint 02 QA readiness | REVIEW |
 
 ## Sprint 02 Engineering Notes (Claude)
-- Validation: `tests/run_all.sh` (10 headless scene tests). `combat_sim_test` = stats, 4 skills, AI, win-rate bands; `encounter_flow_test` = Required Flow through real scenes (Leave, 3 fights, Old Master defeat, hospital result, loss rules).
-- Architecture: `CombatSimulation` (pure logic, seeded from run RNG) / `CombatArena` (presentation) / `EncounterController` (flow) / `RunManager.grant_reward` + `defeat_run` (run rules). Nothing added to DogController except an input lock.
-- Map: 4 pair spots. The 3 ordinary pairs (Jogger, Delivery Worker, Gym Regular) are shuffled over 3 spots each run; the Old Master is fixed under the big tree in the park.
-- During an encounter the walk timer pauses, the dog cannot move and the bag cannot be opened (no moving loot into safe slots mid-fight).
-- Placeholder balance (combat_sim_test, 40 seeds): player wins roughly 85% vs Jogger, 70% vs Delivery Worker, 70% vs Gym Regular, ~0% vs Old Master. Player HP resets each fight. Values live in `data/game_balance` and `data/combat`.
-- Debug panel: teleport to next pair, force win / force lose.
+- Reworked for Patch 01 / seamless real-time combat: removed the arena teleport, Provoke/Leave modal, walk-timer pause, dog input lock and bag lock.
+- Validation: `tests/run_all.sh` (10 headless scene tests). `combat_sim_test` = stats, 4 skills, AI, win-rate bands; `combat_world_test` = in-world provoke, dog free during combat, spatial disengagement, 3 fights, Old Master defeat, hospital result, loss rules.
+- Architecture: `CombatSimulation` (pure logic, seeded from run RNG) laid along the line between the two humans by `Engagement`; `CombatCoordinator` (scene-scoped node, list of engagements) drives actors; `RunManager.grant_reward` / `defeat_run` apply run rules. Player human `HumanFollower` has FOLLOW / COMBAT / DOWN; DogController is unchanged.
+- Flow: dog interacts with a pair (prompt 😤 挑釁) → humans fight where they stand → dog stays controllable, timer keeps running → victory (reward roll, owner follows again) / defeat (owner DOWN ~1.6 s → run ends as DEFEATED, hospital result) / dog runs further than `disengage_distance` (GameBalance, 480) → DISENGAGED, owner follows, pair walks back and can be provoked again. Walking past a pair is avoidance.
+- Map: 4 pairs in `Actors`. The 3 ordinary pairs are shuffled over 3 spots each run; the Old Master is fixed under the big tree.
+- Placeholder balance (40 seeds): player wins roughly 85% vs Jogger, 70% vs Delivery Worker, 70% vs Gym Regular, ~0% vs Old Master. Player HP resets each fight.
+- Debug panel: put dog at next pair, force win / force lose.
 - P1-019 deferred with P0-019 (owner decision 2026-09-17: Android not validated for now).
-- Builds: owner/debug `build/windows/GoodHuman.exe`; blind QA release `build/windows_qa/GoodHuman.exe`. Sprint 02 blind QA brief: `docs/07_qa/SPRINT_02_QA_BRIEF.md`.
+- Builds: owner/debug `build/windows/GoodHuman.exe`; blind QA release `build/windows_qa/GoodHuman.exe`. Blind QA brief: `docs/07_qa/SPRINT_02_QA_BRIEF.md` (its Provoke-vs-Leave question now means provoking vs walking past).

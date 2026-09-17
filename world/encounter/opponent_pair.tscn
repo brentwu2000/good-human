@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://world/encounter/opponent_pair.gd" id="1_pair"]
+[ext_resource type="PackedScene" path="res://actors/fighter/fighter_puppet.tscn" id="2_human"]
+[ext_resource type="PackedScene" path="res://actors/fighter/dog_puppet.tscn" id="3_dog"]
+[ext_resource type="Script" path="res://core/interaction/interaction_area.gd" id="4_area"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 90.0
+
+[node name="OpponentPair" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_pair")
+
+[node name="Human" parent="." instance=ExtResource("2_human")]
+unique_name_in_owner = true
+
+[node name="DogPuppet" parent="." instance=ExtResource("3_dog")]
+unique_name_in_owner = true
+position = Vector2(50, -2)
+
+[node name="NameLabel" type="Label" parent="."]
+unique_name_in_owner = true
+offset_left = -120.0
+offset_top = 12.0
+offset_right = 120.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 1, 1, 0.85)
+horizontal_alignment = 1
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_area")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("CircleShape2D_area")

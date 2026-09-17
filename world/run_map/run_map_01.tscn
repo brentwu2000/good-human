@@ -9,10 +9,8 @@
 [ext_resource type="Resource" path="res://data/loot_tables/residential_trash.tres" id="7_trash"]
 [ext_resource type="Resource" path="res://data/loot_tables/park_search.tres" id="8_park"]
 [ext_resource type="PackedScene" path="res://actors/human/human_follower.tscn" id="9_human"]
-[ext_resource type="PackedScene" path="res://world/encounter/encounter_point.tscn" id="10_encounter"]
-[ext_resource type="Script" path="res://core/encounter/encounter_controller.gd" id="11_controller"]
-[ext_resource type="PackedScene" path="res://ui/encounter/encounter_ui.tscn" id="12_encounter_ui"]
-[ext_resource type="Resource" path="res://data/combat/fighters/player_human.tres" id="13_player"]
+[ext_resource type="PackedScene" path="res://world/encounter/opponent_pair.tscn" id="10_pair"]
+[ext_resource type="Script" path="res://core/combat/combat_coordinator.gd" id="11_coordinator"]
 [ext_resource type="Script" path="res://resources/encounter_data.gd" id="14_encounter_data"]
 [ext_resource type="Resource" path="res://data/encounters/enc_jogger.tres" id="15_jogger"]
 [ext_resource type="Resource" path="res://data/encounters/enc_delivery.tres" id="16_delivery"]
@@ -456,30 +454,27 @@ display_label = "🚪 北門"
 unlock_time = 300.0
 unlock_message = "🚪 北門現在可以撤離"
 
-[node name="EncounterPoints" type="Node2D" parent="."]
+[node name="Actors" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="pair_alley" parent="EncounterPoints" instance=ExtResource("10_encounter")]
+[node name="pair_alley" parent="Actors" instance=ExtResource("10_pair")]
 position = Vector2(-1450, -3700)
 spot_id = &"pair_alley"
 facing = 1.0
 
-[node name="pair_main_path" parent="EncounterPoints" instance=ExtResource("10_encounter")]
+[node name="pair_main_path" parent="Actors" instance=ExtResource("10_pair")]
 position = Vector2(200, -5600)
 spot_id = &"pair_main_path"
 
-[node name="pair_park_east" parent="EncounterPoints" instance=ExtResource("10_encounter")]
+[node name="pair_park_east" parent="Actors" instance=ExtResource("10_pair")]
 position = Vector2(1300, -11200)
 spot_id = &"pair_park_east"
 
-[node name="pair_big_tree" parent="EncounterPoints" instance=ExtResource("10_encounter")]
+[node name="pair_big_tree" parent="Actors" instance=ExtResource("10_pair")]
 position = Vector2(-1550, -11750)
 spot_id = &"pair_big_tree"
 fixed_encounter = ExtResource("18_old_master")
 facing = 1.0
-
-[node name="Actors" type="Node2D" parent="."]
-y_sort_enabled = true
 
 [node name="Dog" parent="Actors" instance=ExtResource("2_dog")]
 position = Vector2(0, 300)
@@ -492,17 +487,12 @@ dog = NodePath("../Dog")
 script = ExtResource("3_run")
 dog = NodePath("../Actors/Dog")
 
-[node name="EncounterController" type="Node" parent="." node_paths=PackedStringArray("run_manager", "human", "ui", "world")]
-script = ExtResource("11_controller")
+[node name="CombatCoordinator" type="Node" parent="." node_paths=PackedStringArray("run_manager", "human")]
+script = ExtResource("11_coordinator")
 run_manager = NodePath("../RunManager")
 human = NodePath("../Actors/Human")
-ui = NodePath("../EncounterUI")
-world = NodePath("../Actors")
-player_fighter = ExtResource("13_player")
 ordinary_pool = Array[ExtResource("14_encounter_data")]([ExtResource("15_jogger"), ExtResource("16_delivery"), ExtResource("17_gym")])
 
-[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "encounter_controller") instance=ExtResource("6_hud")]
+[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator") instance=ExtResource("6_hud")]
 run_manager = NodePath("../RunManager")
-encounter_controller = NodePath("../EncounterController")
-
-[node name="EncounterUI" parent="." instance=ExtResource("12_encounter_ui")]
+combat_coordinator = NodePath("../CombatCoordinator")

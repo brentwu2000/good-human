@@ -19,4 +19,5 @@ move_speed_per_agility = 8.0
 stability_per_will = 1.0
 damage_variance = 0.15
 hesitation_chance = 0.15
+disengage_distance = 480.0
 combat_max_duration = 90.0
