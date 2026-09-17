@@ -39,6 +39,8 @@ Claude owns engineering status. Codex QA does not change implementation task sta
 ## Sprint 02 — FIGHT
 Do not begin until Sprint 01 is implementation-complete and has completed independent Codex QA.
 
+> Owner decision (2026-09-17): start Sprint 02 now. Sprint 01 is implementation-complete (REVIEW); its Codex blind QA remains deferred and P0-019 Android stays deferred.
+
 | ID | Task | Status |
 |---|---|---|
 | P1-001 | Combat foundation | TODO |
