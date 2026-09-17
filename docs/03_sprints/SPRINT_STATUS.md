@@ -102,4 +102,16 @@ Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_
 | P2-017 | Visible growth effect 3 | REVIEW |
 | P2-018 | Training result presentation | REVIEW |
 | P2-019 | Debug tools | REVIEW |
-| P2-020 | Sprint 03 QA readiness | TODO |
+| P2-020 | Sprint 03 QA readiness | REVIEW |
+
+## Sprint 03 Engineering Notes (Claude)
+- Validation: `tests/run_all.sh` (12 headless scene tests). `training_core_test` = tracker anti-farming, conversion, resolver, perks, traits, persistence; `training_world_test` = all five tags from world behaviour through real scenes, extraction/defeat conversion, result/Home wording, trained vs untrained owner behaviour, debug tools.
+- Pipeline (ADR-008): world moment → `TrainingObserver` → `RunManager.record_training` → `TrainingTracker` (run-scoped) → `RunTrainingSummary` on the RunResult → `Game.finish_run` → `GrowthResolver` → `HumanGrowth` (save: `human.growth_data`). All numbers in `data/training/training_balance.tres`; events in `data/training/events`, perks in `data/training/perks`.
+- Behaviours that train: dragging the owner at speed, escaping a fight (RUN); walking with 6+ bag slots, pulling while the owner is stopped (STRAIN); provoking (Old Master counts double), lingering near the Old Master, escaping while hurt (COURAGE); lingering near any pair ~3 s (SOCIAL); long walk, pushing through exhaustion, hard win, defeat (ENDURE).
+- Anti-farming: per-event cooldown, once per pair per walk, repeat diminishing ×0.7, per-tag run cap 12.
+- Conversion: extraction 100%, defeat 50%, other failure 50%.
+- Visible growth (`OwnerBehavior`, no stats UI): stumbling when dragged (RUN), exhaustion stop length and frequency (ENDURE), hanging back near pairs (COURAGE), heavy-bag slowdown (STRAIN), greeting pairs (SOCIAL perk). Growth also adds small combat stat bonuses; appearance never changes.
+- Perks (8, 2 hidden): 被迫晨跑, 死都不放牽繩, 見怪不怪, 社恐改善中, 這狗到底要跑去哪, 今天也活下來了 (needs a defeat), hidden 巷口熟面孔, 越挫越勇.
+- Player-facing text describes experiences; raw tags/growth only in the debug panel (+ train all +3, full growth, reset growth).
+- Note: the untrained owner now stumbles/hangs back/tires by default, so walks feel slower than Sprint 02 until trained. Values are placeholders.
+- `HumanFollower` only gained `speed_multiplier` / `hold_time` hooks; Codex art integration in that file was left uncommitted and untouched.
