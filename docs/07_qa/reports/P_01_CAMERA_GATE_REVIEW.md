@@ -52,4 +52,4 @@ Mobile renderer, portrait 3D: low-poly budgets, limited real-time shadows, simpl
 3. Art pipeline switch (Codex): 3D style target, dog/owner models, environment kit.
 4. Android performance check before content expansion.
 
-Decision: **pending owner approval** of the migration and staging.
+Decision: **APPROVED by owner (2026-09-17)** — move to 3D, starting with the P-02 vertical slice (`docs/03_sprints/P_02_3D_VERTICAL_SLICE.md`).

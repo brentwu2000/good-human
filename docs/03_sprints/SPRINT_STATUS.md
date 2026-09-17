@@ -186,3 +186,21 @@ Isolated greybox experiment. Sprint 04 production is paused until the Camera Gat
 - `p01_camera_test`: all variants keep the dog visible while walking, C context switching, wall collision, owner fade, seamless fight + disengage, squirrel.
 - CAM-015 (blind QA) and CAM-016 (Camera Gate decision) are for Codex/owner.
 - Camera Gate (2026-09-17): owner prefers free switching between A and B in the game. Recorded with a 2D→3D impact estimate in `docs/07_qa/reports/P_01_CAMERA_GATE_REVIEW.md`; migration not started, ADR-010 stays PROPOSED until the owner approves. CAM-015 blind QA not run.
+
+## P-02 — 3D VERTICAL SLICE
+Owner approved the move to 3D (2026-09-17). Plan: `docs/03_sprints/P_02_3D_VERTICAL_SLICE.md`.
+
+| ID | Task | Status |
+|---|---|---|
+| V3D-001 | Run systems accept 3D world objects | TODO |
+| V3D-002 | Dog 3D controller (camera-relative) | TODO |
+| V3D-003 | Owner 3D follower + leash | TODO |
+| V3D-004 | 3D interaction (Interactable3D) | TODO |
+| V3D-005 | 3D search + extraction points | TODO |
+| V3D-006 | Street + park slice level | TODO |
+| V3D-007 | Camera rig A/B switch | TODO |
+| V3D-008 | Occlusion: collision, owner fade, building fade | TODO |
+| V3D-009 | Seamless 3D fight (one pair) | TODO |
+| V3D-010 | Home entry + run flow | TODO |
+| V3D-011 | Scene test | TODO |
+| V3D-012 | Build for owner playtest | TODO |
