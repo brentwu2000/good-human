@@ -24,6 +24,11 @@ func _ready() -> void:
 	rig.coordinator = coordinator
 	rig.snap_behind_dog()
 	_build_bark_button()
+	var agency := get_node_or_null("DogAgency")
+	var hud := get_node_or_null("RunHUD")
+	if agency != null and hud != null:
+		agency.outcome.connect(func(text: String, positive: bool) -> void:
+			hud.show_toast(text, Color(0.6, 1.0, 0.7) if positive else Color(1.0, 0.75, 0.6)))
 	run_manager.run_started.connect(func(_s: int) -> void: human.say("好，出去散步吧！"))
 	run_manager.loot_gained.connect(_on_loot_gained)
 

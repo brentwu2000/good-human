@@ -24,6 +24,8 @@ var ready_at: float = 0.0
 var cooldowns: Dictionary[StringName, float] = {}
 ## Dog agency (Sprint 04): no decisions until this simulation time (bark).
 var distracted_until: float = -1.0
+## Hits against this fighter before this time exploit an opening (bark).
+var exposed_until: float = -1.0
 ## A leash pull moved this fighter out of the way until this time.
 var pulled_until: float = -1.0
 ## Skill usage count, for tests / debug.

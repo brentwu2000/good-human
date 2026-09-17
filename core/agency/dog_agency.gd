@@ -2,17 +2,21 @@ class_name DogAgency
 extends Node
 ## Sprint 04 (ADR-011): the dog stays meaningfully active during seamless
 ## fights through its body in the world, not QTE prompts.
-## - Bark: an attention event. Near the fight, from a useful side and facing
-##   the opponent, it makes the opponent look away (an opening). From behind
-##   the owner it startles the owner instead. Repeats quickly lose effect.
+## - Bark: an attention event. Near the fight and roughly facing the opponent,
+##   from anywhere not hidden behind the owner, it makes the opponent look away:
+##   the owner seizes the opening at once for extra damage. Right behind the
+##   owner it startles the owner instead. Quick repeats lose effect.
 ## - Leash pull: running away past the leash length yanks the owner. Pulling
-##   away from the opponent moves them (out of an incoming attack if timed);
-##   pulling sideways or towards the fight knocks them off balance; a strong
-##   sustained pull drags them out of the fight.
+##   away or sideways repositions them (dodging an attack being wound up);
+##   only dragging them towards the opponent makes them stumble; a strong
+##   sustained pull away drags them out of the fight.
+## Every consequence is announced (`outcome`) so players can learn it.
 ## Hidden numbers are debug-only. Training goes through TrainingObserver.
 
 signal barked(result: StringName)
 signal pulled(result: StringName)
+## Player-facing consequence, so cause and effect can be learned.
+signal outcome(text: String, positive: bool)
 ## For TrainingObserver: a meaningful dog-agency moment.
 signal training_moment(event_id: StringName, key: StringName)
 
@@ -20,26 +24,29 @@ enum BarkResult { NONE, DISTRACTED, IGNORED, STARTLED_OWNER, UNHEARD, SOCIAL }
 
 const BARK_COOLDOWN: float = 0.6
 ## Meters.
-const BARK_RANGE: float = 5.0
+const BARK_RANGE: float = 6.0
 ## Dog must roughly face the opponent (degrees).
-const BARK_FACING_ANGLE: float = 75.0
-## At the opponent, dog and owner must be at least this far apart (degrees):
-## a bark from the owner's side isn't "useful direction".
-const BARK_SIDE_ANGLE: float = 50.0
+const BARK_FACING_ANGLE: float = 110.0
+## Seen from the opponent, a dog within this angle of the owner is "behind the
+## owner" (degrees): the bark isn't useful there.
+const BARK_SIDE_ANGLE: float = 25.0
+## ...and only startles the owner when the dog is this close to them (m).
+const BARK_STARTLE_DISTANCE: float = 1.5
 const BARK_DISTRACT_SECONDS: float = 0.9
 const BARK_OWNER_STARTLE_SECONDS: float = 0.4
 ## Each bark in this window halves the next one's effect.
-const BARK_RESIST_WINDOW: float = 6.0
+const BARK_RESIST_WINDOW: float = 4.0
 const BARK_MIN_EFFECT: float = 0.3
 const PULL_COOLDOWN: float = 1.0
 ## Meters past the leash length before a pull happens.
 const PULL_SLACK: float = 0.3
 const PULL_MIN_DOG_SPEED: float = 1.0
-## Share of the pull that must point away from the opponent to be a good pull.
+## Pulls pointing towards the opponent below this share (dragging the owner
+## into the fight) make them stumble; everything else repositions.
+const PULL_INTO_FIGHT_SHARE: float = -0.3
+## A drag-out needs the pull to point mostly away from the opponent.
 const PULL_AWAY_SHARE: float = 0.5
 const PULL_DISTANCE: float = 0.7
-## Two good pulls closer than this become a stumble.
-const PULL_REPEAT_STUMBLE: float = 1.6
 const PULL_STUMBLE_SECONDS: float = 0.6
 ## Sustained strong pull (meters past the leash, seconds) drags the owner out.
 const DRAG_OUT_EXTRA: float = 1.5
@@ -58,7 +65,6 @@ var recent_barks: Array[float] = []
 var _time: float = 0.0
 var _bark_ready_at: float = 0.0
 var _pull_ready_at: float = 0.0
-var _last_good_pull: float = -INF
 var _drag_out_time: float = 0.0
 
 
@@ -72,7 +78,6 @@ func _reset() -> void:
 	recent_barks.clear()
 	_bark_ready_at = 0.0
 	_pull_ready_at = 0.0
-	_last_good_pull = -INF
 	_drag_out_time = 0.0
 
 
@@ -106,19 +111,27 @@ func _bark_in_fight() -> BarkResult:
 	var opponent_position := opponent.human_global_position()
 	var to_opponent := _flat(opponent_position - dog.global_position)
 	if to_opponent.length() > BARK_RANGE or rad_to_deg(dog.facing.angle_to(to_opponent.normalized())) > BARK_FACING_ANGLE:
+		outcome.emit("…太遠或沒對著對手叫", false)
 		return BarkResult.UNHEARD
 	var at_opponent := rad_to_deg(_flat(dog.global_position - opponent_position).angle_to(_flat(human.global_position - opponent_position)))
 	if at_opponent < BARK_SIDE_ANGLE:
-		# From behind your own human: they're the one who jumps.
-		engagement.simulation.distract(CombatSimulation.PLAYER, BARK_OWNER_STARTLE_SECONDS)
-		human.say("哇！你叫什麼啦！", Color(1.0, 0.8, 0.6), 1.0)
-		return BarkResult.STARTLED_OWNER
+		if _flat(dog.global_position - human.global_position).length() <= BARK_STARTLE_DISTANCE:
+			# Right behind your own human: they're the one who jumps.
+			engagement.simulation.distract(CombatSimulation.PLAYER, BARK_OWNER_STARTLE_SECONDS)
+			human.say("哇！你叫什麼啦！", Color(1.0, 0.8, 0.6), 1.0)
+			outcome.emit("✘ 在主人背後叫，嚇到自己人了", false)
+			return BarkResult.STARTLED_OWNER
+		outcome.emit("…主人擋住了，對方沒注意到", false)
+		return BarkResult.UNHEARD
 	var effect := _bark_effect()
 	if effect < BARK_MIN_EFFECT:
 		opponent.human_puppet.shout("（不理你）", Color(0.8, 0.8, 0.8))
+		outcome.emit("…叫太多次，對方不理你了", false)
 		return BarkResult.IGNORED
 	engagement.simulation.distract(CombatSimulation.OPPONENT, BARK_DISTRACT_SECONDS * effect)
 	opponent.human_puppet.shout("什麼？！", Color(1.0, 0.9, 0.5))
+	human.say("好機會！", Color(0.7, 1.0, 0.7), 0.8)
+	outcome.emit("✦ 對手分心了！主人抓到破綻", true)
 	training_moment.emit(&"agency_bark_distract", opponent.spot_id)
 	return BarkResult.DISTRACTED
 
@@ -167,6 +180,7 @@ func _update_leash(delta: float) -> void:
 		if _drag_out_time >= DRAG_OUT_SECONDS:
 			_drag_out_time = 0.0
 			last_pull = &"escaped"
+			outcome.emit("✦ 把主人拖出戰鬥了", true)
 			training_moment.emit(&"agency_pull_escape", engagement.pair.spot_id)
 			pulled.emit(last_pull)
 			engagement.simulation.disengage()
@@ -178,19 +192,19 @@ func _update_leash(delta: float) -> void:
 		return
 	_pull_ready_at = _time + PULL_COOLDOWN
 	var sim := engagement.simulation
-	if away_share < PULL_AWAY_SHARE or _time - _last_good_pull < PULL_REPEAT_STUMBLE:
+	if away_share < PULL_INTO_FIGHT_SHARE:
 		sim.stumble(CombatSimulation.PLAYER, PULL_STUMBLE_SECONDS)
 		human.say("別扯啦！", Color(1.0, 0.7, 0.6), 0.9)
 		last_pull = &"stumbled"
+		outcome.emit("✘ 把主人往對手身上扯，踉蹌了", false)
 		training_moment.emit(&"agency_bad_pull", engagement.pair.spot_id)
+	elif sim.pull(CombatSimulation.PLAYER, PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER):
+		human.say("哇！差點被打到！", Color(0.7, 1.0, 0.8), 1.0)
+		last_pull = &"saved"
+		outcome.emit("✦ 把主人拉開，躲過一招！", true)
+		training_moment.emit(&"agency_pull_save", engagement.pair.spot_id)
 	else:
-		_last_good_pull = _time
-		if sim.pull(CombatSimulation.PLAYER, PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER):
-			human.say("哇！差點被打到！", Color(0.7, 1.0, 0.8), 1.0)
-			last_pull = &"saved"
-			training_moment.emit(&"agency_pull_save", engagement.pair.spot_id)
-		else:
-			last_pull = &"repositioned"
+		last_pull = &"repositioned"
 	pulled.emit(last_pull)
 
 

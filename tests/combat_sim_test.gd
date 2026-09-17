@@ -186,6 +186,36 @@ func _test_dog_agency_hooks() -> void:
 		sim.step(1.0 / 60.0)
 	check(them.uses.is_empty(), "distracted opponent starts nothing")
 
+	# The owner exploits the opening: attacks right away for extra damage.
+	sim = _duel(60.0)
+	var opener := sim.fighters[CombatSimulation.PLAYER]
+	var exposed := sim.fighters[CombatSimulation.OPPONENT]
+	opener.data = _attacks_only(PLAYER)
+	exposed.data = _attacks_only(JOGGER)
+	opener.ready_at = sim.time + 5.0
+	kinds = _collect(sim)
+	sim.distract(CombatSimulation.OPPONENT, 0.9)
+	check(opener.ready_at <= sim.time, "owner is ready to seize the opening")
+	_step_until(sim, func() -> bool: return kinds.has(&"opening"))
+	check(kinds.has(&"opening"), "hit on a distracted opponent is an opening")
+
+	# Well-timed barks win fights the owner would often lose.
+	var plain_wins := 0
+	var bark_wins := 0
+	for i in 40:
+		if CombatSimulation.new(PLAYER, GYM, 3000 + i).run_to_end() == CombatSimulation.Result.VICTORY:
+			plain_wins += 1
+		var barked := CombatSimulation.new(PLAYER, GYM, 3000 + i)
+		var next_bark := 1.0
+		while not barked.is_finished():
+			barked.step(1.0 / 30.0)
+			if barked.time >= next_bark:
+				barked.distract(CombatSimulation.OPPONENT, 0.9)
+				next_bark += 2.5
+		if barked.result == CombatSimulation.Result.VICTORY:
+			bark_wins += 1
+	check(bark_wins >= plain_wins + 6, "barking helps the owner win (%d -> %d of 40)" % [plain_wins, bark_wins])
+
 	# Pull out of an incoming attack: it misses.
 	sim = _duel(60.0)
 	var me := sim.fighters[CombatSimulation.PLAYER]

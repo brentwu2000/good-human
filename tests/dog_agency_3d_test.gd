@@ -111,10 +111,20 @@ func _run() -> void:
 	check(human.global_position.distance_to(opponent_pos) > owner_before.distance_to(opponent_pos), "owner moved away from the opponent")
 	check_eq(_count(&"agency_pull_save"), 1, "STRAIN: pulled out of a punch")
 
-	# Bad pull: sideways, after the cooldown.
+	# Pulling again right away in a good direction is not punished.
+	them.phase = CombatFighter.Phase.IDLE
+	them.action = null
 	await _wait_seconds(1.1)
 	await _pull(side, human.max_length + 0.6, 3)
-	check_eq(agency.last_pull, &"stumbled", "sideways pull makes the owner stumble")
+	check_eq(agency.last_pull, &"repositioned", "sideways pull just repositions")
+	check_eq(_count(&"agency_bad_pull"), 0, "no stumble for sideways pulls")
+
+	# Bad pull: dragging the owner towards the opponent.
+	await _wait_seconds(1.1)
+	var towards := pair.human_global_position() - human.global_position
+	towards.y = 0.0
+	await _pull(towards.normalized(), human.max_length + 0.6, 3)
+	check_eq(agency.last_pull, &"stumbled", "pulling the owner into the opponent makes them stumble")
 	check_eq(_count(&"agency_bad_pull"), 1, "ENDURE: stumbling from your own dog")
 
 	# Drag out: long hard pull away ends the fight before the normal distance.

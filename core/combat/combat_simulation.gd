@@ -6,7 +6,7 @@ extends RefCounted
 ## Each fighter picks skills with a condition + priority evaluator.
 
 ## kind: skill_started, hit, blocked, dodged, missed, staggered, defeated,
-## distracted, pulled, stumbled (dog agency).
+## distracted, opening (a hit on a distracted fighter), pulled, stumbled.
 ## `fighter` is the side the event is about (the attacker for hit/blocked/
 ## dodged/missed, the victim for staggered/defeated).
 signal combat_event(kind: StringName, fighter: int, skill: CombatSkillData, amount: float)
@@ -20,6 +20,8 @@ const OPPONENT: int = 1
 const START_DISTANCE: float = 220.0
 ## How far either human may drift from the engagement origin.
 const MAX_DRIFT: float = 600.0
+## Damage multiplier for hits on a distracted (exposed) fighter.
+const OPENING_DAMAGE: float = 1.6
 ## Extra reach so an attack started in range still lands after tiny movement.
 const REACH_TOLERANCE: float = 12.0
 
@@ -96,16 +98,20 @@ func force_result(value: Result) -> void:
 # --- Dog agency (Sprint 04) ---------------------------------------------------
 # The dog never commands attacks; it changes the situation the humans react to.
 
-## A bark makes `side` look away: no decisions for `seconds`, and a wind-up in
-## progress is lost (an opening for the other human).
+## A bark makes `side` look away: no decisions for `seconds`, a wind-up in
+## progress is lost, and the other human seizes the opening right away with
+## extra damage (OPENING_DAMAGE).
 func distract(side: int, seconds: float) -> void:
 	var fighter := fighters[side]
 	if is_finished() or fighter.is_defeated() or seconds <= 0.0:
 		return
 	fighter.distracted_until = maxf(fighter.distracted_until, time + seconds)
+	fighter.exposed_until = maxf(fighter.exposed_until, time + seconds + 0.3)
 	fighter.ready_at = maxf(fighter.ready_at, time + seconds)
-	if fighter.is_winding_up_attack():
+	if fighter.is_winding_up_attack() or fighter.is_guarding() or fighter.is_evading():
 		_enter(fighter, CombatFighter.Phase.RECOVERY, fighter.action.recovery)
+	var other := _other(fighter)
+	other.ready_at = minf(other.ready_at, time)
 	combat_event.emit(&"distracted", side, null, seconds)
 
 
@@ -247,6 +253,9 @@ func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 		return
 	var variance := 1.0 + _rng.randf_range(-_balance.damage_variance, _balance.damage_variance)
 	var damage := attacker.attack * skill.power * variance
+	if time < target.exposed_until and not target.is_guarding():
+		damage *= OPENING_DAMAGE
+		combat_event.emit(&"opening", attacker.side, skill, damage)
 	if target.is_guarding():
 		damage *= 1.0 - target.action.damage_reduction
 		target.hp -= damage
