@@ -11,7 +11,7 @@ Codex owns the art pipeline and later performs independent QA. Do not replace fi
 - Platform: mobile-first 2D
 - Player identity: the dog
 - Current phase: MVP
-- Current sprint: `docs/03_sprints/P_02_3D_VERTICAL_SLICE.md` (3D migration, owner-approved)
+- Current sprint: `docs/03_sprints/P_03_3D_CONTENT_PORT.md` (3D migration, owner-approved)
 
 ## Read Order
 Before coding:

@@ -212,3 +212,19 @@ Owner approved the move to 3D (2026-09-17). Plan: `docs/03_sprints/P_02_3D_VERTI
 - New 3D code: `DogController3D`, `HumanFollower3D` (+ leash, growth hooks), `Interactable3D`/`InteractionArea3D`, `SearchPoint3D`, `ExtractionPoint3D`, `OpponentPair3D`, `FighterPuppet3D`, `CombatCoordinator3D` (1 m = 100 simulation units, disengage 9 m), `CameraRig3D`, `RunMap3D` + `run_map_3d_01.tscn`, `Greybox` primitives.
 - Camera (owner after playing: dog view only, top-down removed): low chase camera with P-01 "B" framing; movement is relative to the camera; the camera eases behind the dog only while the stick points forward and the dog already faces away (sideways input no longer spins it); walls pull the camera in down to 1.2 m, closer walls fade instead of lifting it; the owner and foliage fade while blocking; fights pull back to frame both humans.
 - Not in the slice yet: training/goal world observers, owner behaviour traits, squirrel/scents/places, rival and Old Master, debug combat buttons (the 2D debug panel's combat hooks don't target the 3D coordinator), full neighbourhood, 3D art, Android performance.
+
+## P-03 — 3D CONTENT PORT
+Owner approved 2026-09-17. Plan: `docs/03_sprints/P_03_3D_CONTENT_PORT.md`.
+
+| ID | Task | Status |
+|---|---|---|
+| V3C-001 | Observers work in 2D and 3D | IN_PROGRESS |
+| V3C-002 | Owner behaviour traits in 3D | TODO |
+| V3C-003 | Training events in 3D | TODO |
+| V3C-004 | 3D combat coordinator parity | TODO |
+| V3C-005 | Dog desires + desire HUD in 3D | TODO |
+| V3C-006 | Scent cues, squirrel, places in 3D | TODO |
+| V3C-007 | Rival and Old Master in 3D | TODO |
+| V3C-008 | Debug panel in 3D | TODO |
+| V3C-009 | Scene tests | TODO |
+| V3C-010 | Build for owner playtest | TODO |
