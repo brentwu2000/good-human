@@ -9,6 +9,8 @@ const HINT_SECONDS: float = 12.0
 const HINT_MOVE_DISTANCE: float = 250.0
 
 @export var run_manager: RunManager
+## Optional; enables the encounter debug buttons.
+@export var encounter_controller: EncounterController
 
 var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
@@ -33,6 +35,7 @@ func _ready() -> void:
 	_toast_label.hide()
 	if _debug_panel != null:
 		_debug_panel.run_manager = run_manager
+		_debug_panel.encounter_controller = encounter_controller
 		_time_label.gui_input.connect(_on_time_label_input)
 	_hint_label.text = controls_hint()
 
@@ -41,6 +44,7 @@ func _ready() -> void:
 	run_manager.loot_blocked.connect(_on_loot_blocked)
 	run_manager.search_empty.connect(_on_search_empty)
 	run_manager.extraction_unlocked.connect(_on_extraction_unlocked)
+	run_manager.encounter_state_changed.connect(_on_encounter_state_changed)
 	if run_manager.dog != null:
 		run_manager.dog.focus_changed.connect(_on_focus_changed)
 	_on_focus_changed(null)
@@ -55,6 +59,9 @@ func _process(delta: float) -> void:
 
 
 func toggle_inventory() -> void:
+	# No bag shuffling (e.g. into dog safe slots) during an encounter.
+	if run_manager.encounter_active and not _inventory_panel.visible:
+		return
 	if _inventory_panel.visible:
 		_inventory_panel.close()
 	else:
@@ -96,6 +103,17 @@ func _on_time_label_input(event: InputEvent) -> void:
 		_debug_panel.toggle()
 
 
+func _on_encounter_state_changed(active: bool) -> void:
+	if active:
+		if _inventory_panel.visible:
+			_inventory_panel.close()
+		_touch_controls.hide()
+		_hint_label.hide()
+	else:
+		_touch_controls.show()
+	_bag_button.disabled = active
+
+
 func _on_inventory_closed() -> void:
 	_touch_controls.show()
 
@@ -104,8 +122,9 @@ func _on_run_started(_run_seed: int) -> void:
 	_inventory_panel.setup(run_manager.human_run_inventory, run_manager.dog_safe_inventory)
 	if run_manager.dog != null:
 		_dog_start = run_manager.dog.global_position
-	run_manager.human_run_inventory.changed.connect(_update_bag_button)
-	run_manager.dog_safe_inventory.changed.connect(_update_bag_button)
+	for inventory in [run_manager.human_run_inventory, run_manager.dog_safe_inventory]:
+		if not inventory.changed.is_connected(_update_bag_button):
+			inventory.changed.connect(_update_bag_button)
 	_update_bag_button()
 
 

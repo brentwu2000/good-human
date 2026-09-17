@@ -9,6 +9,8 @@ signal loot_blocked(item: ItemData, quantity: int)
 signal search_empty(point: SearchPoint)
 signal extraction_unlocked(point: ExtractionPoint)
 signal run_ended(result: RunResult)
+## An encounter (decision or fight) pauses the walk timer and world interaction.
+signal encounter_state_changed(active: bool)
 
 enum RunStatus { NOT_STARTED, RUNNING, EXTRACTED, FAILED }
 
@@ -29,6 +31,7 @@ var searched_points: Dictionary[StringName, bool] = {}
 var extraction_states: Dictionary[StringName, bool] = {}
 var run_status: RunStatus = RunStatus.NOT_STARTED
 var run_result: RunResult
+var encounter_active: bool = false
 
 var _extraction_points: Array[ExtractionPoint] = []
 var _all_extractions_forced: bool = false
@@ -46,7 +49,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if run_status != RunStatus.RUNNING:
+	if run_status != RunStatus.RUNNING or encounter_active:
 		return
 	elapsed_time += delta
 	_update_extractions()
@@ -65,6 +68,7 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	searched_points.clear()
 	run_result = null
 	_all_extractions_forced = false
+	set_encounter_active(false)
 
 	_extraction_points.clear()
 	extraction_states.clear()
@@ -122,6 +126,31 @@ func resolve_search(point: SearchPoint, stack: ItemStack) -> ItemStack:
 	return ItemStack.new(stack.item, left)
 
 
+# --- Encounters -------------------------------------------------------------
+
+func set_encounter_active(value: bool) -> void:
+	if encounter_active == value:
+		return
+	encounter_active = value
+	encounter_state_changed.emit(value)
+
+
+## Victory reward: one roll with the run RNG into the human bag. Whatever does
+## not fit is left behind. Returns the rolled stack (null = nothing).
+func grant_reward(table: LootTableData) -> ItemStack:
+	if not is_running() or table == null:
+		return null
+	var stack := table.roll(run_rng)
+	if stack == null:
+		return null
+	var left := human_run_inventory.add_item(stack.item, stack.quantity)
+	if stack.quantity - left > 0:
+		loot_gained.emit(stack.item, stack.quantity - left)
+	if left > 0:
+		loot_blocked.emit(stack.item, left)
+	return stack
+
+
 # --- Extraction ---------------------------------------------------------------
 
 func is_extraction_available(extraction_id: StringName) -> bool:
@@ -140,10 +169,22 @@ func extract(extraction_id: StringName) -> void:
 
 ## Run failure: unprotected human inventory is lost; Dog Safe Inventory is kept.
 func fail_run() -> void:
+	_lose_run(RunResult.Outcome.FAILED, "")
+
+
+## The player's human was knocked out: same loss rules as a failed run, plus
+## the hospital result. Permanent progression (stash, save) is untouched.
+func defeat_run(defeated_by: String) -> void:
+	_lose_run(RunResult.Outcome.DEFEATED, defeated_by)
+
+
+func _lose_run(outcome: RunResult.Outcome, defeated_by: String) -> void:
 	if not is_running():
 		return
 	run_status = RunStatus.FAILED
-	var result := _build_result(RunResult.Outcome.FAILED, &"")
+	set_encounter_active(false)
+	var result := _build_result(outcome, &"")
+	result.defeated_by = defeated_by
 	result.to_stash = dog_safe_inventory.get_stacks()
 	result.lost = human_run_inventory.get_stacks()
 	_end_run(result)
@@ -176,7 +217,7 @@ func _end_run(result: RunResult) -> void:
 
 
 func _on_dog_interact_requested(target: Interactable) -> void:
-	if is_running() and target != null and target.can_interact(self):
+	if is_running() and not encounter_active and target != null and target.can_interact(self):
 		target.interact(self)
 
 

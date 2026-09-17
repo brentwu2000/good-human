@@ -19,9 +19,16 @@ func show_result(result: RunResult) -> void:
 		_items_label.text = ""
 		return
 
-	_title_label.text = "🏠 平安回家！" if result.is_success() else "😵 散步失敗……"
 	var seconds := int(result.elapsed_time)
 	_summary_label.text = "散步時間 %02d:%02d\nSeed %d" % [seconds / 60, seconds % 60, result.run_seed]
+	match result.outcome:
+		RunResult.Outcome.EXTRACTED:
+			_title_label.text = "🏠 平安回家！"
+		RunResult.Outcome.DEFEATED:
+			_title_label.text = "🏥 主人被送去醫院了……"
+			_summary_label.text = "被%s打倒了，休息一下就會好。\n狗狗安全口袋裡的東西保住了。\n%s" % [result.defeated_by, _summary_label.text]
+		_:
+			_title_label.text = "😵 散步失敗……"
 
 	var lines: Array[String] = []
 	lines.append("帶回來的東西（$%d）：" % _value_of(result.to_stash))

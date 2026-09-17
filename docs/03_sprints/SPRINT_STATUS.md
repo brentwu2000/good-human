@@ -51,15 +51,15 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 | P1-006 | Block | REVIEW |
 | P1-007 | Dodge | REVIEW |
 | P1-008 | Condition + priority AI | REVIEW |
-| P1-009 | Combat presentation | TODO |
-| P1-010 | Encounter trigger | TODO |
-| P1-011 | Provoke / Leave | TODO |
-| P1-012 | Ordinary opponents | TODO |
-| P1-013 | Old Master encounter | TODO |
-| P1-014 | Victory reward | TODO |
-| P1-015 | Defeat resolution | TODO |
-| P1-016 | Loss / dog-safe preservation | TODO |
-| P1-017 | Minimal hospital/result | TODO |
-| P1-018 | Debug/test hooks | TODO |
+| P1-009 | Combat presentation | REVIEW |
+| P1-010 | Encounter trigger | REVIEW |
+| P1-011 | Provoke / Leave | REVIEW |
+| P1-012 | Ordinary opponents | REVIEW |
+| P1-013 | Old Master encounter | REVIEW |
+| P1-014 | Victory reward | REVIEW |
+| P1-015 | Defeat resolution | REVIEW |
+| P1-016 | Loss / dog-safe preservation | REVIEW |
+| P1-017 | Minimal hospital/result | REVIEW |
+| P1-018 | Debug/test hooks | REVIEW |
 | P1-019 | Android combat validation | TODO |
 | P1-020 | Sprint 02 QA readiness | TODO |

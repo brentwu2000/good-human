@@ -15,6 +15,8 @@ var facing: Vector2 = Vector2.RIGHT
 ## Passed to Interactable.can_interact(); set by the run (RunManager).
 var interaction_context: Object
 var focused: Interactable
+## Off while an encounter takes over (the dog stays put and watches).
+var input_enabled: bool = true
 
 @onready var _visual: Node2D = $Visual
 @onready var _detector: Area2D = $InteractionDetector
@@ -22,13 +24,15 @@ var focused: Interactable
 
 func _physics_process(delta: float) -> void:
 	# Keyboard and the mobile joystick both feed the same Input Map actions.
-	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var direction := Vector2.ZERO
+	if input_enabled:
+		direction = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var rate := acceleration if direction != Vector2.ZERO else friction
 	velocity = velocity.move_toward(direction * move_speed, rate * delta)
 	move_and_slide()
 	_update_facing(direction)
 	_update_focus()
-	if focused != null and Input.is_action_just_pressed("interact"):
+	if input_enabled and focused != null and Input.is_action_just_pressed("interact"):
 		interact_requested.emit(focused)
 
 
