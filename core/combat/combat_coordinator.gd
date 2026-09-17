@@ -1,6 +1,6 @@
 class_name CombatCoordinator
 extends Node
-## Scene-scoped coordinator of live fights in the Run World (ADR-008 seamless
+## Scene-scoped coordinator of live fights in the Run World (ADR-007 seamless
 ## real-time combat). Not a battle mode: nothing is paused, the dog stays free
 ## and the camera stays with the dog. Tracks a list of engagements so more
 ## than one conflict can exist later; Sprint 02 only starts fights for the

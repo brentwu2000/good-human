@@ -18,8 +18,12 @@ Claude Code owns gameplay engineering. Codex owns the art pipeline. Missing fina
 ## ADR-006 — Codex performs independent QA
 After each playable sprint, Codex uses a fresh context and tests without reading implementation details first.
 
-## ADR-007 — Portrait 720×1280, Mobile renderer
+## ADR-010 — Portrait 720×1280, Mobile renderer
+> Renumbered from ADR-007 (2026-09-17) so update packages keep ADR-007 = seamless combat and ADR-008 = behavior-driven training.
 The game is portrait (base viewport 720×1280, `canvas_items` stretch, `expand` aspect) for single-hand play. Renderer is Godot Mobile. Art and UI are produced for this frame.
 
-## ADR-008 — Seamless real-time combat
-No separate Battle Scene: encounters, human combat, dog control and disengagement all happen in the Run World. Full record: `ADR_008_SEAMLESS_REALTIME_COMBAT.md`.
+## ADR-007 — Seamless real-time combat
+No separate Battle Scene: encounters, human combat, dog control and disengagement all happen in the Run World. Full record: `ADR_007_SEAMLESS_REALTIME_COMBAT.md`.
+
+## ADR-008 — Behavior-driven human training
+Human growth comes from meaningful dog behavior in normal runs, not a minigame or XP screen. Full record: `ADR_008_BEHAVIOR_DRIVEN_TRAINING.md`.

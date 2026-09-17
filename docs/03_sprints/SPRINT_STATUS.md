@@ -72,6 +72,32 @@ Do not begin until Sprint 01 is implementation-complete and has completed indepe
 - Map: 4 pairs in `Actors`. The 3 ordinary pairs are shuffled over 3 spots each run; the Old Master is fixed under the big tree.
 - Placeholder balance (40 seeds): player wins roughly 85% vs Jogger, 70% vs Delivery Worker, 70% vs Gym Regular, ~0% vs Old Master. Player HP resets each fight.
 - Debug panel: put dog at next pair, force win / force lose.
-- Owner decisions (2026-09-17): Sprint 02 Codex blind QA not run for now (tasks stay REVIEW, not DONE); player HP resets per fight and the bag stays usable during combat for now; Patch 01's ADR-007 renumbered to ADR-008 (ADR-007 = Portrait).
+- Owner decisions (2026-09-17): Sprint 02 Codex blind QA not run for now (tasks stay REVIEW, not DONE); player HP resets per fight and the bag stays usable during combat for now; ADR numbering follows the update packages: ADR-007 = seamless combat, ADR-008 = behavior-driven training, Portrait renumbered to ADR-010.
 - P1-019 deferred with P0-019 (owner decision 2026-09-17: Android not validated for now).
-- Builds: owner/debug `build/windows/GoodHuman.exe`; blind QA release `build/windows_qa/GoodHuman.exe`. Blind QA brief: `docs/07_qa/SPRINT_02_QA_BRIEF.md` (its Provoke-vs-Leave question now means provoking vs walking past).
+- Builds: owner/debug `build/windows/GoodHuman.exe`; blind QA release `build/windows_qa/GoodHuman.exe`. Blind QA brief: `docs/07_qa/SPRINT_02_QA_BRIEF.md` (question 5 updated to provoking vs walking past).
+
+## Sprint 03 — TRAIN
+Do not begin until the Phase 2 Vertical Slice Gate (`docs/07_qa/PHASE2_VERTICAL_SLICE_GATE.md`) is reviewed.
+
+| ID | Task | Status |
+|---|---|---|
+| P2-001 | TrainingEvent model | TODO |
+| P2-002 | TrainingTracker | TODO |
+| P2-003 | RUN generation | TODO |
+| P2-004 | STRAIN generation | TODO |
+| P2-005 | COURAGE generation | TODO |
+| P2-006 | SOCIAL generation | TODO |
+| P2-007 | ENDURE generation | TODO |
+| P2-008 | Anti-farming rules | TODO |
+| P2-009 | RunTrainingSummary | TODO |
+| P2-010 | Training conversion | TODO |
+| P2-011 | Defeat partial conversion | TODO |
+| P2-012 | Persistent Growth data | TODO |
+| P2-013 | GrowthResolver | TODO |
+| P2-014 | Prototype perks | TODO |
+| P2-015 | Visible growth effect 1 | TODO |
+| P2-016 | Visible growth effect 2 | TODO |
+| P2-017 | Visible growth effect 3 | TODO |
+| P2-018 | Training result presentation | TODO |
+| P2-019 | Debug tools | TODO |
+| P2-020 | Sprint 03 QA readiness | TODO |
