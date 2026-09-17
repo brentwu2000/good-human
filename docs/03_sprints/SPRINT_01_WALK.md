@@ -13,8 +13,8 @@ Home → go out → move dog → search → loot → inventory → dog safe slot
 - Human run inventory: 8 slots
 - Dog safe inventory: 2 slots
 - Home stash: 30 slots
-- Extraction A: bus stop, unlock at 3:00 (tuned from 5:00 after owner playtest)
-- Extraction B: north exit, unlock at 5:00 (tuned from 8:00 after owner playtest)
+- Extraction A: bus stop, unlock at 1:00 (validation pacing 2026-09-17; was 3:00, originally 5:00)
+- Extraction B: north exit, unlock at 2:00 (validation pacing 2026-09-17; was 5:00, originally 8:00)
 - Run seed
 - Debug panel
 
@@ -33,7 +33,7 @@ Home → go out → move dog → search → loot → inventory → dog safe slot
 4. Search trash and obtain an item.
 5. Search another point and obtain a valuable item.
 6. Move valuable item to Dog Safe Inventory.
-7. Reach 3:00.
+7. Reach 1:00.
 8. Bus extraction opens.
 9. Ignore it and continue searching.
 10. Obtain another valuable item.

@@ -6,6 +6,9 @@ extends "res://tests/test_case.gd"
 
 const TEST_SAVE: String = "user://tests/training_world_save.json"
 const SEED: int = 777
+## Open street strip near the spawn point.
+const STREET_Y: float = 0.0
+const STREET_HALF: float = 560.0
 
 var _tree: SceneTree
 
@@ -54,8 +57,8 @@ func _run() -> void:
 	var exhausted: Array[int] = [0]
 	behavior.exhausted.connect(func() -> void: exhausted[0] += 1)
 	behavior.exertion = 0.99
-	await _drag(dog, human, Vector2.DOWN, 1.0)
-	check(exhausted[0] == 1 and human.hold_time > 1.0, "visible 2: untrained owner stops to catch breath for a while")
+	await _drag(dog, human, Vector2.DOWN, 0.3)
+	check(exhausted[0] == 1 and human.hold_time > balance.recovery_trained + 0.3, "visible 2: untrained owner stops to catch breath for a while")
 	check_eq(_count(run, &"endure_exhausted"), 1, "ENDURE: pushed through exhaustion")
 	await _hold_until_free(human)
 	parts.observer._walk_distance = TrainingObserver.LONG_WALK_DISTANCE - 5.0
@@ -107,6 +110,7 @@ func _run() -> void:
 
 	# --- Extraction converts everything; result describes it in words -----------
 	run.debug_unlock_all_extractions()
+	check(run.is_running(), "still walking before extraction (status %d)" % run.run_status)
 	run.extract(&"bus_stop")
 	await _wait_for_scene(Game.RUN_RESULT_SCENE)
 	for tag in TrainingEventData.Tag.values():
@@ -162,7 +166,7 @@ func _run() -> void:
 
 	# --- Defeat keeps half ------------------------------------------------------
 	run.start_run(SEED + 1)
-	human.global_position = Vector2(-1500, 300)
+	human.global_position = Vector2(-STREET_HALF, STREET_Y)
 	dog.global_position = human.global_position + Vector2(100, 0)
 	await _physics(2)
 	await _drag(dog, human, Vector2.RIGHT, 3.8)
@@ -193,10 +197,18 @@ func _parts() -> Dictionary:
 	}
 
 
-## Keeps the dog running ahead of the owner so the leash stays taut.
-func _drag(dog: DogController, human: HumanFollower, direction: Vector2, seconds: float) -> void:
+## Keeps the dog running ahead of the owner so the leash stays taut, back and
+## forth along the open street at the start of the (small validation) map.
+func _drag(dog: DogController, human: HumanFollower, _direction: Vector2, seconds: float) -> void:
+	if absf(human.global_position.y - STREET_Y) > 40.0 or absf(human.global_position.x) > STREET_HALF:
+		human.global_position = Vector2(-STREET_HALF, STREET_Y)
+	var direction := Vector2.RIGHT
 	var frames := int(seconds * Engine.physics_ticks_per_second)
 	for i in frames:
+		if human.global_position.x > STREET_HALF:
+			direction = Vector2.LEFT
+		elif human.global_position.x < -STREET_HALF:
+			direction = Vector2.RIGHT
 		dog.global_position = human.global_position + direction * 165.0
 		dog.velocity = Vector2.ZERO
 		await _tree.physics_frame

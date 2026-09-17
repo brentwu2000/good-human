@@ -9,8 +9,8 @@ extends Resource
 
 @export_group("Combat")
 ## Derived combat values (CombatStats). Keep formulas here, not in skills.
-@export var hp_base: float = 40.0
-@export var hp_per_endurance: float = 6.0
+@export var hp_base: float = 24.0
+@export var hp_per_endurance: float = 3.6
 @export var attack_base: float = 4.0
 @export var attack_per_strength: float = 1.5
 @export var action_interval_base: float = 1.2
@@ -24,6 +24,6 @@ extends Resource
 ## Chance an idle fighter hesitates for one decision (keeps fights from being scripted).
 @export_range(0.0, 1.0) var hesitation_chance: float = 0.15
 ## Once engaged, the player's human breaks away when the dog is this far away.
-@export var disengage_distance: float = 480.0
+@export var disengage_distance: float = 400.0
 ## Fights longer than this end as ABORTED.
 @export var combat_max_duration: float = 90.0

@@ -5,21 +5,21 @@ extends Node
 ## behaviour into training; interactables and actors stay unaware of it.
 
 ## Continuous dragging needed for one "dragged" moment.
-const DRAG_SECONDS: float = 3.0
+const DRAG_SECONDS: float = 2.0
 ## A brief slowdown (stumble, breather, corner) does not break a drag.
 const DRAG_GRACE: float = 0.4
 ## Owner distance walked with a heavy bag for one moment.
-const HEAVY_BAG_DISTANCE: float = 700.0
+const HEAVY_BAG_DISTANCE: float = 400.0
 ## Owner held in place while the dog keeps pulling.
 const TUG_SECONDS: float = 0.6
 ## Owner distance per long-walk moment.
-const LONG_WALK_DISTANCE: float = 3000.0
+const LONG_WALK_DISTANCE: float = 1500.0
 ## Dog staying near a pair counts as lingering.
-const LINGER_DISTANCE: float = 200.0
-const LINGER_SECONDS: float = 3.0
+const LINGER_DISTANCE: float = 180.0
+const LINGER_SECONDS: float = 2.0
 const ESCAPE_HURT_RATIO: float = 0.6
 const HARD_FIGHT_HP_RATIO: float = 0.4
-const HARD_FIGHT_SECONDS: float = 20.0
+const HARD_FIGHT_SECONDS: float = 12.0
 ## Minimum gap between owner remarks about training.
 const LINE_GAP: float = 6.0
 

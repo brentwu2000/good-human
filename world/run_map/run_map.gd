@@ -1,7 +1,7 @@
 extends Node2D
 ## Greybox run map root: camera bounds and owner reactions to run events.
 
-@export var map_bounds: Rect2 = Rect2(-2000, -14600, 4000, 15400)
+@export var map_bounds: Rect2 = Rect2(-800, -5840, 1600, 6160)
 @export var dog: DogController
 @export var human: HumanFollower
 @export var run_manager: RunManager

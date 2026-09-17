@@ -9,7 +9,7 @@ const GROUP: StringName = &"search_points"
 @export var search_id: StringName
 @export var display_label: String = "搜索點"
 @export var loot_table: LootTableData
-@export_range(0.1, 10.0) var search_duration: float = 1.5
+@export_range(0.1, 10.0) var search_duration: float = 1.0
 @export var one_time: bool = true
 ## Walking further than this from the point cancels the search.
 @export var cancel_distance: float = 140.0

@@ -12,8 +12,8 @@ signal hesitated(pair: OpponentPair)
 
 ## Faster than this share of walk_speed counts as being dragged.
 const DRAGGED_SPEED_RATIO: float = 1.05
-const STUMBLE_HOLD: float = 0.5
-const MEET_DISTANCE: float = 260.0
+const STUMBLE_HOLD: float = 0.35
+const MEET_DISTANCE: float = 200.0
 const EXERTION_DECAY: float = 0.08
 const EXERTION_AFTER_REST: float = 0.25
 
@@ -73,11 +73,13 @@ func _physics_process(delta: float) -> void:
 		exertion = EXERTION_AFTER_REST
 		human.hold_time = traits.recovery_time
 		human.say("呼…呼…讓我喘一下…", Color(0.85, 0.85, 1.0), traits.recovery_time)
+		human.play_growth_behavior(&"recovery", _recovery_improved(), traits.recovery_time)
 		exhausted.emit()
 	elif dragged_time >= traits.stumble_after:
 		dragged_time = 0.0
 		human.hold_time = STUMBLE_HOLD
 		human.say("哇啊！", Color(1.0, 0.8, 0.6), 0.8)
+		human.play_growth_behavior(&"leash", _stumble_improved(), STUMBLE_HOLD)
 		stumbled.emit()
 
 
@@ -97,4 +99,20 @@ func _check_pairs() -> void:
 			human.say("要…要過去喔？", Color(0.9, 0.9, 0.9), traits.hesitation_time)
 		elif traits.greets:
 			human.say("你好～今天天氣不錯喔", Color(0.7, 1.0, 0.8))
+		human.play_growth_behavior(&"threat", _hesitation_improved(), maxf(traits.hesitation_time, 0.45))
 		hesitated.emit(pair)
+
+
+func _stumble_improved() -> bool:
+	var balance := DataRegistry.training
+	return traits.stumble_after >= (balance.stumble_after_untrained + balance.stumble_after_trained) * 0.5
+
+
+func _recovery_improved() -> bool:
+	var balance := DataRegistry.training
+	return traits.recovery_time <= (balance.recovery_untrained + balance.recovery_trained) * 0.5
+
+
+func _hesitation_improved() -> bool:
+	var balance := DataRegistry.training
+	return traits.hesitation_time <= (balance.hesitation_untrained + balance.hesitation_trained) * 0.5
