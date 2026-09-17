@@ -11,7 +11,7 @@ const VARIANT_NAMES: Array[String] = ["A 3/4 俯視", "B 狗高度追隨", "C �
 ## pivot = look height above the dog, pitch = boom angle (deg, down negative),
 ## distance = boom length (m), fov = vertical FOV, follow = yaw follows dog.
 const PROFILES: Dictionary = {
-	&"A": {"pivot": 0.5, "pitch": -58.0, "distance": 17.0, "fov": 42.0, "follow": false},
+	&"A": {"pivot": 0.5, "pitch": -72.0, "distance": 18.0, "fov": 42.0, "follow": false, "collide": false},
 	&"B": {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0, "follow": true},
 	&"C_EXPLORE": {"pivot": 0.9, "pitch": -13.0, "distance": 3.4, "fov": 68.0, "follow": true},
 	&"C_SPRINT": {"pivot": 1.2, "pitch": -18.0, "distance": 5.0, "fov": 76.0, "follow": true},
@@ -115,7 +115,9 @@ func _update(delta: float, instant: bool) -> void:
 	var pitch := deg_to_rad(current["pitch"])
 	var boom: Vector3 = Vector3(0, -sin(pitch), cos(pitch)).rotated(Vector3.UP, yaw) * float(current["distance"])
 	var desired: Vector3 = _focus + boom
-	global_position = _resolve_collision(_focus, desired)
+	# The top-down reference view has no occlusion, like the current 2D game.
+	collided = false
+	global_position = _resolve_collision(_focus, desired) if target.get("collide", true) else desired
 	if global_position.distance_to(_focus) > 0.01:
 		look_at(_focus, Vector3.UP)
 	camera.fov = current["fov"]

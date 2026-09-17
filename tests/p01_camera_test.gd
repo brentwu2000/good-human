@@ -24,6 +24,7 @@ func _run() -> void:
 	await _test_collision()
 	await _test_fight_and_disengage()
 	await _test_squirrel()
+	await _test_background_life()
 	finish()
 
 
@@ -118,6 +119,18 @@ func _test_squirrel() -> void:
 		world.dog.global_position = squirrel.global_position + Vector3(0, 0.2, 1.5)
 		await get_tree().physics_frame
 	check_eq(squirrel.state, ProtoSquirrel.State.TREED, "chased squirrel goes up a tree")
+
+
+func _test_background_life() -> void:
+	var dogs := world.life.filter(func(n: ProtoNpc) -> bool: return n.has_dog)
+	check(world.life.size() >= 10 and dogs.size() >= 6, "street and park have people and dogs (%d people, %d dogs)" % [world.life.size(), dogs.size()])
+	var walker := world.life[0]
+	var start := walker.global_position
+	await _physics(60)
+	check(walker.global_position.distance_to(start) > 0.3, "walkers stroll their routes")
+	world.dog.global_position = walker.global_position + Vector3(1.0, 0.2, 0)
+	await _physics(3)
+	check(walker.is_noticing(), "people and their dogs notice the player's dog")
 
 
 func _hold(action: StringName, frames: int) -> void:

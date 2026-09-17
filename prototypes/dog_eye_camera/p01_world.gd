@@ -14,6 +14,8 @@ var opponent: ProtoOpponent
 var squirrel: ProtoSquirrel
 var search_spot: ProtoSearchSpot
 var rig: ProtoCameraRig
+## Background people and dogs.
+var life: Array[ProtoNpc] = []
 
 var _info: Label
 var _hint: Label
@@ -24,6 +26,7 @@ func _ready() -> void:
 	_build_street()
 	_build_park()
 	_spawn_actors()
+	_spawn_life()
 	_build_ui()
 	set_variant(ProtoCameraRig.Variant.A_TOP_DOWN)
 	print("P-01 DOG EYE CAMERA greybox ready")
@@ -150,6 +153,52 @@ func _spawn_actors() -> void:
 	rig.opponent = opponent
 
 
+## People and dogs going about their day on the street and in the park.
+func _spawn_life() -> void:
+	const WALK := ProtoNpc.Activity.WALK
+	const STAND := ProtoNpc.Activity.STAND
+	const SIT := ProtoNpc.Activity.SIT
+	var specs: Array[Dictionary] = [
+		# Street: near sidewalk.
+		{"activity": WALK, "route": [Vector3(-20, 0.15, 2.2), Vector3(20, 0.15, 2.2)], "shirt": Color(0.3, 0.6, 0.45), "dog": Color(0.95, 0.95, 0.92), "dog_size": 0.6, "remark": "哇，好可愛的狗"},
+		{"activity": WALK, "route": [Vector3(18, 0.15, 3.9), Vector3(-18, 0.15, 3.9)], "shirt": Color(0.6, 0.4, 0.6), "hair": Color(0.85, 0.85, 0.85), "height": 0.9, "speed": 0.8, "remark": "乖～乖～"},
+		# Street: far sidewalk.
+		{"activity": WALK, "route": [Vector3(-22, 0.15, -6.5), Vector3(22, 0.15, -6.5)], "shirt": Color(0.2, 0.2, 0.25), "dog": Color(0.35, 0.22, 0.12), "dog_size": 1.3, "remark": "別靠太近喔"},
+		{"activity": WALK, "route": [Vector3(15, 0.15, -7.6), Vector3(-10, 0.15, -7.6)], "shirt": Color(0.95, 0.5, 0.2), "height": 0.7, "speed": 1.6, "remark": "狗狗！"},
+		{"activity": STAND, "position": Vector3(-6, 0.15, -6.9), "shirt": Color(0.5, 0.5, 0.8), "dog": Color(0.85, 0.65, 0.35), "dog_size": 0.85, "remark": "你家的是什麼狗？"},
+		{"activity": STAND, "position": Vector3(-4.9, 0.15, -6.4), "shirt": Color(0.8, 0.3, 0.35), "hair": Color(0.1, 0.1, 0.1), "remark": ""},
+		# Path to the park: a jogger.
+		{"activity": WALK, "route": [Vector3(1.6, 0, -9), Vector3(1.6, 0, -27)], "shirt": Color(0.2, 0.7, 0.9), "speed": 3.0, "pause": 0.3, "dog": Color(0.9, 0.55, 0.25), "dog_size": 0.9},
+		# Park.
+		{"activity": STAND, "position": Vector3(-4, 0, -48), "shirt": Color(0.9, 0.85, 0.3), "dog": Color(0.95, 0.8, 0.5), "dog_size": 1.1, "roam": 3.0, "remark": "牠很友善的！"},
+		{"activity": SIT, "position": Vector3(-2, 0.3, -35.6), "shirt": Color(0.55, 0.55, 0.5), "hair": Color(0.8, 0.8, 0.8), "height": 0.95, "remark": "今天天氣真好"},
+		{"activity": WALK, "route": [Vector3(8, 0, -30), Vector3(10, 0, -44), Vector3(0, 0, -52), Vector3(-9, 0, -40)], "shirt": Color(0.7, 0.2, 0.3), "dog": Color(0.98, 0.98, 0.98), "dog_size": 0.55, "remark": "小白，不要叫"},
+		{"activity": STAND, "position": Vector3(12, 0, -36), "shirt": Color(0.3, 0.35, 0.5), "dog": Color(0.2, 0.2, 0.22), "dog_size": 1.0},
+		{"activity": STAND, "position": Vector3(12.9, 0, -35.4), "shirt": Color(0.9, 0.9, 0.9), "height": 0.95},
+	]
+	for spec in specs:
+		var npc := ProtoNpc.new()
+		npc.activity = spec["activity"]
+		var route: Array[Vector3] = []
+		route.assign(spec.get("route", []))
+		npc.route = route
+		npc.position = spec.get("position", Vector3.ZERO)
+		npc.shirt = spec.get("shirt", npc.shirt)
+		npc.hair = spec.get("hair", npc.hair)
+		npc.height = spec.get("height", 1.0)
+		npc.walk_speed = spec.get("speed", 1.3)
+		npc.pause_seconds = spec.get("pause", 1.5)
+		npc.remark = spec.get("remark", "")
+		if spec.has("dog"):
+			npc.has_dog = true
+			npc.dog_color = spec["dog"]
+			npc.dog_size = spec.get("dog_size", 1.0)
+			npc.dog_roam = spec.get("roam", 0.0)
+		npc.player_dog = dog
+		add_child(npc)
+		life.append(npc)
+
+
 # --- UI -------------------------------------------------------------------------
 
 func _build_ui() -> void:
@@ -184,7 +233,7 @@ func _build_ui() -> void:
 	_hint.add_theme_font_size_override("font_size", 20)
 	_hint.add_theme_color_override("font_outline_color", Color.BLACK)
 	_hint.add_theme_constant_override("outline_size", 6)
-	_hint.text = "WASD／搖桿移動・Shift 或推到底衝刺・E 聞垃圾桶／挑釁\n1/2/3 切換鏡頭　公園裡有松鼠和一組人狗"
+	_hint.text = "WASD／搖桿移動・Shift 或推到底衝刺・E 聞垃圾桶／挑釁\n1/2/3 切換鏡頭　街上和公園有路人和狗，靠近看看"
 	layer.add_child(_hint)
 
 

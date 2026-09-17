@@ -69,6 +69,23 @@ static func human(shirt: Color, pants: Color, hair: Color, scale_y: float = 1.0)
 	return root
 
 
+## Greybox dog: body, head, nose, ears, tail, legs. `size` 1 = medium dog.
+static func dog(color: Color, size: float = 1.0) -> Node3D:
+	var root := Node3D.new()
+	var dark := color.darkened(0.25)
+	root.add_child(box(Vector3(0.34, 0.3, 0.72), color, Vector3(0, 0.4, 0)))
+	root.add_child(box(Vector3(0.28, 0.28, 0.3), color, Vector3(0, 0.62, -0.44)))
+	root.add_child(box(Vector3(0.12, 0.1, 0.14), Color(0.15, 0.1, 0.08), Vector3(0, 0.56, -0.64)))
+	for x in [-0.1, 0.1]:
+		root.add_child(box(Vector3(0.07, 0.12, 0.05), dark, Vector3(x, 0.8, -0.4)))
+	root.add_child(box(Vector3(0.06, 0.06, 0.28), dark, Vector3(0, 0.55, 0.44)))
+	for x in [-0.11, 0.11]:
+		for z in [-0.25, 0.25]:
+			root.add_child(box(Vector3(0.08, 0.26, 0.08), dark, Vector3(x, 0.13, z)))
+	root.scale = Vector3.ONE * size
+	return root
+
+
 static func label(text: String, height: float, font_size: int = 48, color: Color = Color.WHITE) -> Label3D:
 	var l := Label3D.new()
 	l.text = text
@@ -78,5 +95,7 @@ static func label(text: String, height: float, font_size: int = 48, color: Color
 	l.outline_size = 12
 	l.modulate = color
 	l.no_depth_test = true
-	l.pixel_size = 0.006
+	# Same on-screen size at any distance (close chase cameras made it huge).
+	l.fixed_size = true
+	l.pixel_size = 0.001
 	return l
