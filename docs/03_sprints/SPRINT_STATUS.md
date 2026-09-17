@@ -158,19 +158,30 @@ Isolated greybox experiment. Sprint 04 production is paused until the Camera Gat
 
 | ID | Task | Status |
 |---|---|---|
-| CAM-001 | isolated 3D greybox | TODO |
-| CAM-002 | dog/human/leash proxies | TODO |
-| CAM-003 | A top-down baseline | TODO |
-| CAM-004 | B dog-height chase | TODO |
-| CAM-005 | C hybrid profiles | TODO |
-| CAM-006 | collision/smoothing | TODO |
-| CAM-007 | walk/sprint | TODO |
-| CAM-008 | sniff/search | TODO |
-| CAM-009 | squirrel chase | TODO |
-| CAM-010 | seamless fight proxy | TODO |
-| CAM-011 | dog movement/disengage | TODO |
-| CAM-012 | mobile framing | TODO |
-| CAM-013 | runtime tuning/debug | TODO |
-| CAM-014 | A/B/C build | TODO |
+| CAM-001 | isolated 3D greybox | REVIEW |
+| CAM-002 | dog/human/leash proxies | REVIEW |
+| CAM-003 | A top-down baseline | REVIEW |
+| CAM-004 | B dog-height chase | REVIEW |
+| CAM-005 | C hybrid profiles | REVIEW |
+| CAM-006 | collision/smoothing | REVIEW |
+| CAM-007 | walk/sprint | REVIEW |
+| CAM-008 | sniff/search | REVIEW |
+| CAM-009 | squirrel chase | REVIEW |
+| CAM-010 | seamless fight proxy | REVIEW |
+| CAM-011 | dog movement/disengage | REVIEW |
+| CAM-012 | mobile framing | REVIEW |
+| CAM-013 | runtime tuning/debug | REVIEW |
+| CAM-014 | A/B/C build | REVIEW |
 | CAM-015 | blind QA | TODO |
 | CAM-016 | Camera Gate decision | TODO |
+
+## P-01 Engineering Notes (Claude)
+- Build: `build/p01_camera/GoodHumanP01Camera.exe` (export preset "Windows P-01 Camera", feature tag `p01_camera` overrides the main scene). The game builds are unchanged; the QA release preset excludes `prototypes/*`.
+- Code: `prototypes/dog_eye_camera/` only (3D primitives, no final art). Production scenes do not reference it. Added Input Map actions `sprint` (Shift; full joystick push also sprints) and `proto_cam_a/b/c` (1/2/3).
+- Greybox: street with road markings, sidewalks, house fronts, blocks, path to a park entrance gate, trees, bushes, bench, searchable trash can, dog + owner + leash, opponent pair (外送員和阿黑), squirrel.
+- Cameras (`ProtoCameraRig`: pivot + boom + smoothing + ray collision): A 3/4 top-down (fixed yaw, high/far); B dog-height chase (yaw follows the dog); C hybrid with framing contexts EXPLORE / SPRINT (farther, higher, wider) / SNIFF (lower, closer) / COMBAT_READABILITY (farther, higher, frames dog + fight). Contexts only change framing.
+- Tested actions: walk, sprint and drag the owner, sniff the trash can, chase the squirrel up a tree, provoke the pair, fight in place, move around the fight, run 9 m away to disengage.
+- Runtime tuning: on-screen buttons (A/B/C, height, distance, pitch, FOV ±, reset tuning, restart) and an overlay with variant, context, height, distance, pitch, FOV, dog speed, owner distance, opponent distance and disengage distance.
+- Early engineering observations for the Camera Gate (not QA): in B, and in C's close framings, the leashed owner walks between the dog and the camera and blocks the view; the prototype fades the owner while it blocks (standard chase-cam fix). Close walls pull the camera in; below 1.8 m it rises so the dog stays in frame. A shows the most surroundings but the dog is small in portrait.
+- `p01_camera_test`: all variants keep the dog visible while walking, C context switching, wall collision, owner fade, seamless fight + disengage, squirrel.
+- CAM-015 (blind QA) and CAM-016 (Camera Gate decision) are for Codex/owner.
