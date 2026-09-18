@@ -14,5 +14,21 @@
 | D-09 | Smell/Search Compatibility | Design | TODO | none |
 | D-10 | Design Decision Pack | Design | BLOCKED | Camera Gate |
 
+## Sprint 05 — GREED / TERRITORY
+Installed from Update 007 (2026-09-18). Design starts now; it does not wait for Sprint 05 engineering.
+
+| ID | Deliverable | Owner | Status | Dependency |
+|---|---|---|---|---|
+| D5-01 | Landmark | Design/Codex ART | TODO | none |
+| D5-02 | Scent ownership | Design/Codex ART | TODO | none |
+| D5-03 | Mark interaction | Design/Codex ART | TODO | none |
+| D5-04 | Greed storyboard | Design | TODO | none |
+| D5-05 | Risk HUD | Design | TODO | none |
+| D5-06 | Rival pair | Design/Codex ART | TODO | none |
+| D5-07 | Territory variants | Design/Codex ART | TODO | none |
+| D5-08 | Reward reveal | Design/Codex ART | TODO | none |
+| D5-09 | Target Screenshot 04 | Design/Codex ART | TODO | none |
+| D5-10 | Decision Pack | Design | BLOCKED | prior D5 work / Gate |
+
 ## Rule
 Design does not wait idle for engineering. Explore both camera families where needed, then collapse to one direction after P-01.

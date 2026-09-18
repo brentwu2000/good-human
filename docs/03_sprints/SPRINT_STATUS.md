@@ -272,3 +272,31 @@ Camera Gate decided before install (ADR-010: dog-height camera only), so the cam
 - Owner feedback (2026-09-18): "轉向的部分還需要調整，實測搖桿拉左上，會往左邊轉，但是轉到一個角度後就不會轉了". Cause: the previous fix froze the stick's control frame at the moment it was pushed, so a held diagonal turned the dog once (45°) and then ran straight while the camera settled behind it — the turn visibly stopped. Now the stick still answers the view exactly as it was pushed (so pointing somewhere sends the dog there at once), but while held its frame follows the turning view at `control_follow_rate` (1.2/s, slower than the camera's 2.4/s follow); the two rates settle into a steady arc instead of either straightening out or spinning. Measured: holding up-left turns ~41°/s then ~36°/s (a circle in ~10 s); a full sideways push turns harder, ~42°/s then ~88°/s. `run_3d_slice_test` now checks that a held direction keeps turning across successive windows, that a diagonal curves more gently than a full sideways push, and that "up" afterwards follows the new view.
 - Balance pass (2026-09-18) after the note above that the positive effect might be too strong. Measured over 200 seeds per opponent it was worse than "too strong": any steady bark rhythm won 198-200/200, and a player who pulled on every wind-up won 200/200 against every opponent including the Old Master, while pulling blindly *lost* fights (Gym 161 → 78). Causes: a bark deleted the opponent's committed attack and handed the owner a free turn, so against a slow heavy fighter it removed most of their few hits; a pull granted a guaranteed dodge at no cost; and a pull with nothing to dodge still shoved the owner out of their own range. Changes: an attack can only be called off in the first half of its wind-up (`COMMIT_SHARE`), a bark never advances the owner's turn — the opening is a damage window instead (`OPENING_DAMAGE` 1.6 → 1.4, `OPENING_GRACE` 1.2 s), opponents habituate over a fight (`BARK_HABITUATION` 0.75 per bark heard, resistance window 4 → 8 s, distraction 0.9 → 0.7 s), a pull that saves costs the owner 1.5 s of their own tempo and its cooldown is 1 → 3 s, and a pull with nothing to dodge now does nothing at all instead of losing ground. Measured after: baseline 167/163/161 of 200 (jogger/delivery/gym); spamming or mistiming ≈ baseline; well-paced barking 193/191/186; pulling on every wind-up 198/200/193; both together 198/200/199 — a perfect player's ceiling, not a default. The Old Master stays 0/200 in every mode. `combat_sim_test` now models the real resistance curve and checks paced > spammed and that good barking does not decide every fight.
 - Owner feedback (2026-09-18): "轉方向的時候視角沒有跟著轉，例如我要往右邊，拉了以後鏡頭還是往前". The previous fix deliberately ignored sideways input. Now the camera follows the dog in any direction (weighted by speed, gentler when running back towards the camera), and the stick's control frame is latched to the camera yaw when pushed (re-latched on release or when the stick is steered more than 45°), so the turning view doesn't curve the dog's path. `run_3d_slice_test`: pushing right runs straight right and the view turns right; up after that follows the new view.
+
+## Sprint 05 — GREED / TERRITORY
+Installed from Update 007 (2026-09-18). Design starts now; engineering begins only after Core Experience Gate 02 (P3-016) is reviewed and passed, or explicitly approved with changes.
+
+| ID | Task | Status |
+|---|---|---|
+| P4-001 | Run value/risk | TODO |
+| P4-002 | SAFE/UNBANKED presentation | TODO |
+| P4-003 | Post-extraction temptation hooks | TODO |
+| P4-004 | Temptation data | TODO |
+| P4-005 | Territory state/data | TODO |
+| P4-006 | Banyan landmark | TODO |
+| P4-007 | Mark Territory | TODO |
+| P4-008 | Resident rival | TODO |
+| P4-009 | Claim progression | TODO |
+| P4-010 | Extraction resolution | TODO |
+| P4-011 | Persistence | TODO |
+| P4-012 | Territory reward | TODO |
+| P4-013 | GOALS integration | TODO |
+| P4-014 | TRAIN/DOG AGENCY compatibility | TODO |
+| P4-015 | Debug/telemetry | TODO |
+| P4-016 | Blind QA | TODO |
+| P4-017 | Gate | TODO |
+
+## Sprint 05 Engineering Notes (Claude)
+- Not started: P3-016 Core Experience Gate 02 is still TODO and gates this sprint.
+- Scope reminders from the update: reuse the Run World, seamless combat, GOALS, TRAIN and DOG AGENCY. No global territory simulation, passive-income empire, dozens of capture points, PvP, daily decay or generic map capture. One territory (the Big Banyan Tree).
+- ADR-012 (territory is relationship, not empire) and ADR-013 (greed is voluntary) are installed in `docs/99_notes`.
