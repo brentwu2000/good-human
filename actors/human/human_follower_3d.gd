@@ -25,6 +25,11 @@ var puppet: FighterPuppet3D
 var _bubble: Label3D
 var _bubble_left: float = 0.0
 var _leash_mesh: ImmediateMesh
+var _leash_material: StandardMaterial3D
+
+const LEASH_TEAL := Color(0.12, 0.55, 0.48)
+const LEASH_TENSION := Color(0.95, 0.66, 0.28)
+const LEASH_WIDTH: float = 0.042
 
 
 func _ready() -> void:
@@ -47,7 +52,9 @@ func _ready() -> void:
 	_leash_mesh = ImmediateMesh.new()
 	var leash := MeshInstance3D.new()
 	leash.mesh = _leash_mesh
-	leash.material_override = Greybox.material(Color(0.85, 0.2, 0.2))
+	_leash_material = Greybox.material(LEASH_TEAL)
+	_leash_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	leash.material_override = _leash_material
 	leash.top_level = true
 	add_child(leash)
 
@@ -138,12 +145,21 @@ func say(text: String, color: Color = Color.WHITE, seconds: float = 1.6) -> void
 func _draw_leash() -> void:
 	var hand := global_position + Vector3(0, 1.0, 0)
 	var collar := dog.collar_position()
-	var sag := 0.4 if state != State.FOLLOW else clampf(1.0 - hand.distance_to(collar) / max_length, 0.0, 1.0) * 0.5
+	var distance := hand.distance_to(collar)
+	var sag := 0.4 if state != State.FOLLOW else clampf(1.0 - distance / max_length, 0.0, 1.0) * 0.5
+	var tension := clampf(inverse_lerp(slack_length, max_length, distance), 0.0, 1.0)
+	_leash_material.albedo_color = LEASH_TEAL.lerp(LEASH_TENSION, smoothstep(0.72, 1.0, tension))
+	var direction := collar - hand
+	direction.y = 0.0
+	var side := direction.normalized().cross(Vector3.UP) * (LEASH_WIDTH * 0.5)
+	if side.length_squared() < 0.0001:
+		side = Vector3.RIGHT * (LEASH_WIDTH * 0.5)
 	_leash_mesh.clear_surfaces()
-	_leash_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	_leash_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in 9:
 		var t := i / 8.0
 		var p := hand.lerp(collar, t)
 		p.y -= sin(t * PI) * sag
-		_leash_mesh.surface_add_vertex(p)
+		_leash_mesh.surface_add_vertex(p - side)
+		_leash_mesh.surface_add_vertex(p + side)
 	_leash_mesh.surface_end()

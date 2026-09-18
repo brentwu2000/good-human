@@ -114,7 +114,12 @@ func _build_park() -> void:
 	add_child(Greybox.box(Vector3(62, 0.03, 50), Color(0.36, 0.55, 0.33), Vector3(0, 0.02, -45)))
 	add_child(EnvironmentKit.park_gate(Vector3(0, 0, -20)))
 	for p: Vector3 in [Vector3(-8, 0, -28), Vector3(10, 0, -31), Vector3(-7, 0, -43), Vector3(13, 0, -50), Vector3(-13, 0, -54), Vector3(4, 0, -58)]:
-		add_child(EnvironmentKit.tree(p, 1.0 + 0.08 * fposmod(absf(p.x), 3.0)))
+		if p == Vector3(-13, 0, -54):
+			var banyan := BanyanLandmark3D.build(BanyanLandmark3D.TerritoryState.DISCOVERED)
+			banyan.position = p
+			add_child(banyan)
+		else:
+			add_child(EnvironmentKit.tree(p, 1.0 + 0.08 * fposmod(absf(p.x), 3.0)))
 	for p: Vector3 in [Vector3(-3, 0, -30), Vector3(6, 0, -26), Vector3(-11, 0, -37), Vector3(9, 0, -41)]:
 		add_child(EnvironmentKit.bush(p))
 	add_child(EnvironmentKit.bench(Vector3(-2, 0, -36)))
