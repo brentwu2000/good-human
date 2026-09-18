@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1280" viewBox="0 0 1440 1280">
+  <defs>
+    <style>
+      .title{font:700 30px sans-serif;fill:#f5ead5}.label{font:600 21px sans-serif;fill:#f5ead5}.note{font:17px sans-serif;fill:#b9b7ad}.screen{fill:#27322f;stroke:#6d7771;stroke-width:3}.safe{fill:none;stroke:#81918b;stroke-width:2;stroke-dasharray:10 9}.ui{fill:#141a18;fill-opacity:.78;stroke:#e8ddc8;stroke-width:2}.amber{fill:#d99a43;stroke:#ffcf73;stroke-width:3}.teal{fill:none;stroke:#47ae91;stroke-width:7}.ghost{fill:none;stroke:#f5ead5;stroke-opacity:.3;stroke-width:4}.dog{fill:#c47945}.human{fill:#d7a37b}.selected{fill:none;stroke:#ffcf73;stroke-width:5}</style>
+  </defs>
+  <rect width="1440" height="1280" fill="#171d1b"/>
+  <text x="52" y="58" class="title">GOOD HUMAN! — MOBILE HUD EXPLORATION</text>
+  <text x="52" y="91" class="note">Sprint 04 D-07 · 720×1280 portrait logic shown as three half-scale studies</text>
+
+  <g transform="translate(45 130)">
+    <text x="0" y="0" class="title">A · SPLIT CORNERS</text>
+    <text x="0" y="31" class="note">3/4 top-down comparison</text>
+    <rect x="0" y="55" width="420" height="746" rx="26" class="screen"/>
+    <rect x="24" y="82" width="372" height="68" rx="18" class="ui"/>
+    <rect x="38" y="170" width="344" height="478" class="safe"/>
+    <ellipse cx="212" cy="490" rx="32" ry="47" class="dog"/>
+    <rect x="196" y="322" width="34" height="94" rx="15" class="human"/>
+    <path d="M212 446 Q175 415 213 390" class="teal"/>
+    <circle cx="105" cy="680" r="68" class="ghost"/>
+    <circle cx="105" cy="680" r="26" class="ghost"/>
+    <path d="M315 625 h54 q18 0 18 18 v54 q0 18-18 18 h-54 q-18 0-18-18 v-54 q0-18 18-18z" class="ui"/>
+    <text x="306" y="674" class="label">ACTION</text>
+    <text x="0" y="842" class="note">One changing action saves space,</text>
+    <text x="0" y="867" class="note">but merges Bark and Interact meaning.</text>
+  </g>
+
+  <g transform="translate(510 130)">
+    <text x="0" y="0" class="title">B · PAIRED ACTIONS</text>
+    <text x="0" y="31" class="note">Hybrid camera comparison</text>
+    <rect x="0" y="55" width="420" height="746" rx="26" class="screen"/>
+    <rect x="24" y="82" width="372" height="68" rx="18" class="ui"/>
+    <rect x="38" y="170" width="344" height="478" class="safe"/>
+    <ellipse cx="212" cy="520" rx="34" ry="50" class="dog"/>
+    <rect x="194" y="342" width="38" height="104" rx="16" class="human"/>
+    <path d="M212 474 Q180 445 213 414" class="teal"/>
+    <circle cx="105" cy="680" r="68" class="ghost"/>
+    <circle cx="105" cy="680" r="26" class="ghost"/>
+    <circle cx="326" cy="592" r="45" class="amber"/>
+    <text x="298" y="600" class="label">BARK</text>
+    <rect x="274" y="653" width="108" height="94" rx="28" class="ui"/>
+    <text x="284" y="709" class="label">SNIFF</text>
+    <text x="0" y="842" class="note">Clear separation, but reads like</text>
+    <text x="0" y="867" class="note">a compact RPG skill stack.</text>
+  </g>
+
+  <g transform="translate(975 130)">
+    <text x="0" y="0" class="title">C · CONTEXTUAL</text>
+    <text x="0" y="31" class="note">Selected dog-height chase HUD</text>
+    <rect x="0" y="55" width="420" height="746" rx="26" class="screen"/>
+    <rect x="-7" y="48" width="434" height="760" rx="32" class="selected"/>
+    <rect x="24" y="82" width="372" height="68" rx="18" class="ui"/>
+    <text x="44" y="125" class="label">03:42</text><text x="280" y="125" class="label">BAG 5/8</text>
+    <rect x="38" y="170" width="344" height="478" class="safe"/>
+    <ellipse cx="212" cy="536" rx="38" ry="57" class="dog"/>
+    <rect x="192" y="342" width="42" height="116" rx="17" class="human"/>
+    <path d="M212 482 Q177 448 213 425" class="teal"/>
+    <circle cx="105" cy="680" r="68" class="ghost"/>
+    <circle cx="105" cy="680" r="26" class="ghost"/>
+    <circle cx="300" cy="610" r="38" class="amber"/>
+    <path d="M282 602 l-18-12 M300 584 v-22 M318 602 l18-12" fill="none" stroke="#fff1cc" stroke-width="5" stroke-linecap="round"/>
+    <path d="M299 656 h63 l20 20v60 l-20 20h-63 l-20-20v-60z" class="ui"/>
+    <text x="295" y="714" class="label">SNIFF</text>
+    <text x="0" y="842" class="note">Bark stays quiet and distinct.</text>
+    <text x="0" y="867" class="note">Interact appears only near a target.</text>
+  </g>
+
+  <g transform="translate(52 1055)">
+    <text x="0" y="0" class="label">SELECTED RULES</text>
+    <text x="0" y="38" class="note">Movement always available · Bark is dog agency, not attack · Interact is contextual · leash tension stays in world space</text>
+    <text x="0" y="70" class="note">No combat bar · no numeric leash meter · no disabled action clutter · preserve centre for dog, owner, leash and encounters</text>
+  </g>
+</svg>

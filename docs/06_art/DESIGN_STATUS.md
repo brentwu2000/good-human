@@ -9,7 +9,7 @@
 | D-04 | Combat Readability A + B/C | Design/Codex ART | REVIEW | none |
 | D-05 | Opponent Dog Reactions | Design/Codex ART | REVIEW | none |
 | D-06 | Owner Reaction Sheet | Design/Codex ART | REVIEW | none |
-| D-07 | Mobile HUD Exploration | Design | TODO | P-01 affects final |
+| D-07 | Mobile HUD Exploration | Design/Codex ART | REVIEW | Camera Gate accepted: dog-height chase |
 | D-08 | Target Screenshot 03 | Design/Codex ART | REVIEW | may explore B/C first |
 | D-09 | Smell/Search Compatibility | Design/Codex ART | REVIEW | none |
 | D-10 | Design Decision Pack | Design | BLOCKED | Camera Gate |
