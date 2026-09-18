@@ -15,6 +15,9 @@ const RETURN_SPEED: float = 1.6
 @export var fixed_encounter: EncounterData
 ## Only present once the dog has discovered this goal flag (empty = always).
 @export var required_flag: StringName
+## Gone once this flag is set, so the same dog is never in two places at once
+## (Sprint 05: 阿黑 stops loitering in the alley once he is back at his tree).
+@export var retired_by_flag: StringName
 
 var encounter: EncounterData
 
@@ -77,7 +80,9 @@ func setup(data: EncounterData) -> void:
 
 ## In the world this walk (has a pair and any required discovery).
 func is_present() -> bool:
-	return encounter != null and Game.goal_progress.has_flag(required_flag)
+	if encounter == null or not Game.goal_progress.has_flag(required_flag):
+		return false
+	return retired_by_flag.is_empty() or not Game.goal_progress.flags.has(retired_by_flag)
 
 
 func refresh_presence() -> void:

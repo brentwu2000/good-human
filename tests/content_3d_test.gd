@@ -42,8 +42,10 @@ func _run() -> void:
 	# --- Content present ------------------------------------------------------------
 	var pairs := coordinator.get_pairs()
 	var present := pairs.filter(func(p: OpponentPair3D) -> bool: return p.is_present())
-	check_eq(pairs.size(), 5, "five pair spots in 3D")
-	check_eq(present.size(), 4, "rival hidden at first")
+	# 3 shuffled ordinary spots, the Old Master, the rival's alley meeting and
+	# his home at the banyan (Sprint 05) — the last two are never both present.
+	check_eq(pairs.size(), 6, "six pair spots in 3D")
+	check_eq(present.size(), 4, "neither the rival's alley meeting nor his tree is present at first")
 	var ids: Dictionary = {}
 	for p: OpponentPair3D in present:
 		ids[p.encounter.id] = true

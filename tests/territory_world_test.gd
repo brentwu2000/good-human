@@ -69,10 +69,42 @@ func _run() -> void:
 	check_eq(smelled.size(), 1, "and only understood once")
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CONTESTED, "state holds")
 
+	# P4-007: marking is the dog's own move, and only where it understands.
+	var marks: Array[TerritoryData] = []
+	banyan.marked.connect(func(t: TerritoryData) -> void: marks.append(t))
+	check(banyan.can_interact(run), "a place the dog understands can be marked")
+	check(banyan.get_prompt(run).contains("做記號"), "and says so in the dog's terms")
+	banyan.interact(run)
+	check_eq(marks.size(), 1, "the dog marks it")
+	check(banyan.marked_this_walk, "this walk now counts for the place")
+	check(progress.last_event(&"banyan").contains("我的味道"), "the place remembers being marked")
+	check_eq(progress.claim_progress(&"banyan"), 0, "marking alone earns nothing — getting home does")
+	check(not banyan.can_interact(run), "and it cannot be marked twice on one walk")
+
+	# P4-008: the resident lives here, but only once the dog has met him, and
+	# he is never in two places at once.
+	var resident: OpponentPair3D = null
+	var alley: OpponentPair3D = null
+	for pair in map.coordinator.get_pairs():
+		if pair.spot_id == &"banyan_resident":
+			resident = pair
+		elif pair.spot_id == &"pair_rival":
+			alley = pair
+	check(resident != null and alley != null, "the rival has a home and a first meeting place")
+	check(not resident.is_present(), "he is not at the tree before the dog has met him")
+	Game.goal_progress.set_flag(&"rival_revealed")
+	check(alley.is_present() and not resident.is_present(), "revealed: he is in the alley, not at the tree")
+	Game.goal_progress.set_flag(&"rival_beaten")
+	check(resident.is_present(), "settled: he has gone home to his tree")
+	check(not alley.is_present(), "and is no longer loitering in the alley")
+	check_eq(resident.encounter, alley.encounter, "it is the same dog and the same person")
+	check_eq(DataRegistry.get_territory(&"banyan").resident_spot, resident.spot_id, "the territory knows who lives there")
+
 	# The landmark shows what the dog remembers, walk after walk.
 	run.start_run(1234)
 	await _physics(5)
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CONTESTED, "a new walk does not reset the place")
+	check(not banyan.marked_this_walk, "but a new walk has to be earned again")
 	finish()
 
 

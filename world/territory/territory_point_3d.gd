@@ -1,5 +1,5 @@
 class_name TerritoryPoint3D
-extends Node3D
+extends Interactable3D
 ## Sprint 05 (P4-006): the Big Banyan Tree as a place in the world.
 ##
 ## It owns no rules. It reads TerritoryProgress to decide which of the landmark
@@ -8,11 +8,15 @@ extends Node3D
 ## near the tree (discovering the place) and staying long enough to take in what
 ## it smells of (learning that another dog lives here).
 ##
-## Marking, challenging, claiming and rewards are not here — a landmark should
-## not be able to change a walk on its own.
+## Marking it (P4-007) is the dog's own move: it costs nothing, risks nothing
+## and grants nothing by itself. It only makes this walk count for the place,
+## so the claim is still settled by getting home (P4-009/P4-010).
+##
+## Claim progress and rewards are not decided here.
 
 signal discovered(territory: TerritoryData)
 signal rival_scent_found(territory: TerritoryData)
+signal marked(territory: TerritoryData)
 
 const GROUP: StringName = &"territory_points"
 ## Meters. Close enough to see it is a landmark.
@@ -21,6 +25,9 @@ const NOTICE_RADIUS: float = 6.0
 const SCENT_RADIUS: float = 3.0
 const SCENT_SECONDS: float = 1.5
 
+## Meters: how close the dog has to be to leave its own mark.
+const MARK_RADIUS: float = 2.2
+
 @export var territory_id: StringName = &"banyan"
 @export var run_manager: RunManager
 ## The dog, in this walk's world.
@@ -28,6 +35,9 @@ const SCENT_SECONDS: float = 1.5
 
 var data: TerritoryData
 var landmark: Node3D
+## Set when the dog marks the place on this walk; the claim is settled on the
+## way home, not here.
+var marked_this_walk: bool = false
 
 var _presentation: TerritoryPresentation3D
 var _near_seconds: float = 0.0
@@ -44,7 +54,38 @@ func _ready() -> void:
 		push_error("TerritoryPoint3D: unknown territory %s" % territory_id)
 		set_process(false)
 		return
+	prompt = "💧 做記號"
+	add_interaction_area(MARK_RADIUS)
 	_rebuild_landmark()
+	if run_manager != null:
+		run_manager.run_started.connect(func(_s: int) -> void: marked_this_walk = false)
+
+
+# --- Marking (P4-007) ---------------------------------------------------------
+
+## Only somewhere the dog has understood, once per walk, and never again once
+## the place is already its own.
+func can_interact(context: Object) -> bool:
+	var run := context as RunManager
+	if not enabled or run == null or not run.is_running() or data == null:
+		return false
+	return not marked_this_walk and state() >= TerritoryProgress.State.CONTESTED and not Game.territory_progress.is_owned(territory_id)
+
+
+func get_prompt(_context: Object) -> String:
+	return prompt
+
+
+## Leaving the dog's own scent next to the resident's. It changes nothing on
+## its own — it makes this walk one that counts for the place.
+func interact(context: Object) -> void:
+	if not can_interact(context):
+		return
+	marked_this_walk = true
+	Game.territory_progress.note_event(territory_id, data.marked_text)
+	play_recognize()
+	play_mark()
+	marked.emit(data)
 
 
 func _process(delta: float) -> void:
