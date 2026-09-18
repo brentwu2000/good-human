@@ -169,9 +169,11 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, _amou
 		&"hit":
 			actor.play_strike(skill)
 			other.play_hurt(false)
+			engagement.pair.show_combat_impact(false)
 		&"blocked":
 			actor.play_strike(skill)
 			other.play_hurt(true)
+			engagement.pair.show_combat_impact(true)
 		&"dodged":
 			actor.play_strike(skill)
 			other.play_evade()

@@ -19,9 +19,9 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	prompt = "🚪 撤離"
-	add_child(Greybox.box(Vector3(1.6, 0.05, 1.6), Color(0.3, 0.6, 0.9), Vector3(0, 0.03, 0)))
-	_marker = Greybox.cylinder(0.12, 2.4, Color(0.55, 0.55, 0.55), Vector3(0, 1.2, 0))
-	add_child(_marker)
+	var visual := ExtractionVisual3D.build(extraction_id)
+	add_child(visual)
+	_marker = visual.get_node("Beacon") as MeshInstance3D
 	_name_label = Greybox.label("", 2.8, 34)
 	add_child(_name_label)
 	add_interaction_area(1.1)

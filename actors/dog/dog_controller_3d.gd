@@ -23,6 +23,7 @@ var interaction_context: Object
 var focused: Interactable3D
 
 var _visual: Node3D
+var _motion: DogMotion3D
 var _detector: Area3D
 var _bark_label: Label3D
 var _bark_left: float = 0.0
@@ -43,6 +44,9 @@ func _ready() -> void:
 	# cream muzzle and teal harness remain readable in the low chase camera.
 	_visual = Greybox.dog(Color(0.78, 0.55, 0.32), 1.0, 1)
 	add_child(_visual)
+	_motion = DogMotion3D.new()
+	add_child(_motion)
+	_motion.bind(_visual)
 	_detector = Area3D.new()
 	_detector.collision_layer = 0
 	_detector.collision_mask = Greybox.INTERACTABLE_LAYER
@@ -74,8 +78,10 @@ func _physics_process(delta: float) -> void:
 	if planar.length() > 0.2:
 		facing = planar.normalized()
 		_visual.rotation.y = lerp_angle(_visual.rotation.y, heading(), minf(delta * 12.0, 1.0))
+	_motion.update_motion(delta, planar.length(), sprinting)
 	_update_focus()
 	if focused != null and Input.is_action_just_pressed("interact"):
+		_motion.play_sniff()
 		interact_requested.emit(focused)
 
 

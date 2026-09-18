@@ -9,7 +9,7 @@ signal sniffed(cue: ScentCue3D)
 
 var active: bool = false
 
-var _swirl: Label3D
+var _swirl: Node3D
 var _time: float = 0.0
 
 
@@ -19,7 +19,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	prompt = "👃 追味道"
-	_swirl = Greybox.label("〰？〰", 0.9, 48, Color(0.85, 0.6, 1.0), 40.0)
+	_swirl = GoalVisual3D.scent()
 	add_child(_swirl)
 	add_interaction_area(1.0)
 	set_active(false)
@@ -44,5 +44,10 @@ func _process(delta: float) -> void:
 	if not active:
 		return
 	_time += delta
-	_swirl.position.y = 0.9 + sin(_time * 2.5) * 0.15
-	_swirl.modulate.a = 0.6 + sin(_time * 4.0) * 0.4
+	_swirl.position.y = 0.08 + sin(_time * 2.5) * 0.06
+	_swirl.rotation.y = _time * 0.45
+	_swirl.scale = Vector3.ONE * (0.92 + sin(_time * 4.0) * 0.08)
+	for i in _swirl.get_child_count() - 1:
+		var wisp := _swirl.get_child(i) as Node3D
+		if wisp != null:
+			wisp.position.z = sin(_time * 2.0 + i * 1.8) * 0.08

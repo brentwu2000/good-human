@@ -18,7 +18,7 @@ func apply(fighter: FighterData) -> void:
 	data = fighter
 	if _body != null:
 		_body.queue_free()
-	_body = Greybox.human(fighter.shirt_color, fighter.pants_color, fighter.hair_color, fighter.skin_color)
+	_body = HumanModular3D.build(fighter)
 	_body.scale = Vector3(fighter.body_scale.x, fighter.body_scale.y, fighter.body_scale.x)
 	add_child(_body)
 	if _hp_label == null:

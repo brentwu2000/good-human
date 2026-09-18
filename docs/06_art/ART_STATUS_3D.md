@@ -7,9 +7,14 @@ States: RESEARCH / CANDIDATE / IN_PROGRESS / REVIEW / APPROVED / REJECTED
 | ART-031 | 3D Dog Playable Visual Prototype | P0 | REVIEW |
 | ART-032 | 3D Owner Playable Visual Prototype | P0 | REVIEW |
 | ART-033 | 3D Dog/Owner Leash Readability | P0 | REVIEW |
-| ART-034 | 3D Environment Starter Kit | P1 | IN_PROGRESS |
-| ART-035 | 3D Encounter Presentation | P1 | TODO |
+| ART-034 | 3D Environment Starter Kit | P1 | REVIEW |
+| ART-035 | 3D Encounter Presentation | P1 | REVIEW |
 | ART-036 | 3D Dog Breed Variants | P0 | REVIEW |
+| ART-037 | 3D Dog Core Motion | P0 | REVIEW |
+| ART-038 | 3D Human Modular Base | P0 | REVIEW |
+| ART-039 | 3D Search Props | P1 | REVIEW |
+| ART-040 | 3D Extraction Visuals | P1 | REVIEW |
+| ART-041 | 3D Goal World Cues | P1 | REVIEW |
 
 ## Sprint 04 Dog Agency design handoff
 

@@ -35,9 +35,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	_body = Node3D.new()
-	_body.add_child(Greybox.box(Vector3(0.18, 0.2, 0.32), Color(0.55, 0.35, 0.2), Vector3(0, 0.12, 0)))
-	_body.add_child(Greybox.box(Vector3(0.12, 0.3, 0.12), Color(0.6, 0.4, 0.25), Vector3(0, 0.3, 0.18)))
+	_body = GoalVisual3D.squirrel()
 	add_child(_body)
 	_label = Greybox.label("", 0.9, 36, Color(1, 0.9, 0.5))
 	add_child(_label)

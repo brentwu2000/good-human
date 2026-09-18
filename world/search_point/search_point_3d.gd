@@ -33,8 +33,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	prompt = "👃 聞聞看"
-	_visual = Node3D.new()
-	_visual.add_child(Greybox.cylinder(0.32, 0.8, color, Vector3(0, 0.4, 0)))
+	_visual = SearchProp3D.build(search_id, color)
 	add_child(_visual)
 	_name_label = Greybox.label(display_label, 1.15, 30)
 	add_child(_name_label)

@@ -21,3 +21,11 @@ extends Resource
 @export var body_scale: Vector2 = Vector2.ONE
 ## Forward lean in radians (older people stoop).
 @export var stoop: float = 0.0
+
+@export_group("3D Modular Appearance")
+## Authored appearance-only values. Never derive these from combat stats.
+@export_enum("Short", "Bob", "Curly", "Cap", "Bun") var hair_style: int = 0
+@export_enum("Overshirt", "Hoodie", "Work Jacket", "Tee", "Cardigan") var top_style: int = 0
+@export_enum("Straight", "Cuffed", "Wide") var bottom_style: int = 0
+@export_enum("None", "Glasses", "Messenger Bag", "Tote Bag", "Backpack") var accessory_style: int = 0
+@export var shoe_color: Color = Color(0.12, 0.14, 0.16)

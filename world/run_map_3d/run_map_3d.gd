@@ -5,6 +5,8 @@ extends Node3D
 ## script builds the greybox geometry and wires the dog camera. Geometry is
 ## placeholder until the 3D art kit exists.
 
+const EnvironmentKit = preload("res://assets/environment/starter_kit/environment_kit_3d.gd")
+
 @export var dog: DogController3D
 @export var human: HumanFollower3D
 @export var run_manager: RunManager
@@ -92,12 +94,15 @@ func _build_street() -> void:
 	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, 3)))
 	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, -7)))
 	for i in 5:
-		add_child(Greybox.solid_box(Vector3(9, 6, 6), Color(0.62 + 0.05 * (i % 2), 0.55, 0.5), Vector3(-24.0 + i * 12.0, 3, 8.5)))
+		add_child(EnvironmentKit.building(Vector3(9, 6, 6), Color(0.62 + 0.05 * (i % 2), 0.55, 0.5), Vector3(-24.0 + i * 12.0, 3, 8.5), i))
 	# West blocks leave a 3 m alley at x = -14.5.
 	for x in [-20.0, -9.0, 9.0, 19.0]:
-		add_child(Greybox.solid_box(Vector3(8, 5, 10), Color(0.55, 0.5, 0.48), Vector3(x, 2.5, -13.5)))
+		add_child(EnvironmentKit.building(Vector3(8, 5, 10), Color(0.55, 0.5, 0.48), Vector3(x, 2.5, -13.5), int(absf(x))))
 	add_child(Greybox.box(Vector3(3, 0.02, 10), Color(0.4, 0.37, 0.33), Vector3(-14.5, 0.02, -13.5)))
 	add_child(Greybox.box(Vector3(6, 0.02, 12), Color(0.62, 0.58, 0.5), Vector3(0, 0.02, -14)))
+	for x in [-27.0, -15.0, -3.0, 9.0, 21.0]:
+		add_child(EnvironmentKit.lamp(Vector3(x, 0.05, 4.0)))
+	add_child(EnvironmentKit.bus_stop(Vector3(20, 0.05, 3.0)))
 	# Map edges.
 	for x in [-32.0, 32.0]:
 		add_child(Greybox.solid_box(Vector3(1, 3, 120), Color(0.4, 0.4, 0.42), Vector3(x, 1.5, -30)))
@@ -107,12 +112,12 @@ func _build_street() -> void:
 
 func _build_park() -> void:
 	add_child(Greybox.box(Vector3(62, 0.03, 50), Color(0.36, 0.55, 0.33), Vector3(0, 0.02, -45)))
-	for x in [-3.2, 3.2]:
-		add_child(Greybox.solid_box(Vector3(0.5, 2.6, 0.5), Color(0.5, 0.45, 0.4), Vector3(x, 1.3, -20)))
-	add_child(Greybox.box(Vector3(7, 0.4, 0.4), Color(0.45, 0.35, 0.3), Vector3(0, 2.8, -20)))
+	add_child(EnvironmentKit.park_gate(Vector3(0, 0, -20)))
 	for p: Vector3 in [Vector3(-8, 0, -28), Vector3(10, 0, -31), Vector3(-7, 0, -43), Vector3(13, 0, -50), Vector3(-13, 0, -54), Vector3(4, 0, -58)]:
-		add_child(Greybox.tree(p))
+		add_child(EnvironmentKit.tree(p, 1.0 + 0.08 * fposmod(absf(p.x), 3.0)))
 	for p: Vector3 in [Vector3(-3, 0, -30), Vector3(6, 0, -26), Vector3(-11, 0, -37), Vector3(9, 0, -41)]:
-		var bush := Greybox.solid_box(Vector3(1.6, 1.2, 1.6), Color(0.3, 0.5, 0.25), p + Vector3(0, 0.6, 0), Greybox.FADE_GROUP)
-		add_child(bush)
-	add_child(Greybox.solid_box(Vector3(2.2, 0.5, 0.7), Color(0.55, 0.38, 0.25), Vector3(-2, 0.25, -36)))
+		add_child(EnvironmentKit.bush(p))
+	add_child(EnvironmentKit.bench(Vector3(-2, 0, -36)))
+	add_child(EnvironmentKit.bin(Vector3(2.4, 0, -36), EnvironmentKit.TEAL))
+	for p: Vector3 in [Vector3(-5, 0, -24), Vector3(7, 0, -39), Vector3(-9, 0, -49)]:
+		add_child(EnvironmentKit.lamp(p))

@@ -21,6 +21,7 @@ var encounter: EncounterData
 var state: State = State.IDLE
 var coordinator: CombatCoordinator3D
 var human_puppet: FighterPuppet3D
+var presentation: EncounterPresentation3D
 
 var _dog: Node3D
 var _name_label: Label3D
@@ -46,6 +47,8 @@ func _ready() -> void:
 	add_child(_name_label)
 	_dog_label = Greybox.label("", 1.0, 36, Color(1.0, 0.9, 0.5))
 	add_child(_dog_label)
+	presentation = EncounterPresentation3D.new()
+	add_child(presentation)
 	add_interaction_area(1.2)
 	setup(fixed_encounter)
 
@@ -53,6 +56,8 @@ func _ready() -> void:
 func setup(data: EncounterData) -> void:
 	encounter = data
 	state = State.IDLE
+	if presentation != null:
+		presentation.set_visual_state(EncounterPresentation3D.VisualState.IDLE)
 	visible = is_present()
 	if encounter == null:
 		return
@@ -87,6 +92,8 @@ func set_hinted(value: bool) -> void:
 		_name_label.modulate = Color(1.0, 0.85, 0.4)
 	else:
 		_name_label.modulate = Color(0.6, 0.6, 0.6) if state == State.BEATEN else Color.WHITE
+	if presentation != null and state == State.IDLE:
+		presentation.set_visual_state(EncounterPresentation3D.VisualState.HINTED if value else EncounterPresentation3D.VisualState.IDLE)
 
 
 func is_idle() -> bool:
@@ -117,6 +124,8 @@ func set_human_global_position(value: Vector3) -> void:
 func begin_combat() -> void:
 	state = State.COMBAT
 	human_puppet.show_hp(true)
+	if presentation != null:
+		presentation.set_visual_state(EncounterPresentation3D.VisualState.COMBAT)
 
 
 func end_combat(result: CombatSimulation.Result) -> void:
@@ -125,8 +134,17 @@ func end_combat(result: CombatSimulation.Result) -> void:
 		state = State.BEATEN
 		human_puppet.set_beaten(true)
 		_name_label.modulate = Color(0.6, 0.6, 0.6)
+		if presentation != null:
+			presentation.set_visual_state(EncounterPresentation3D.VisualState.BEATEN)
 	else:
 		state = State.RETURNING
+		if presentation != null:
+			presentation.set_visual_state(EncounterPresentation3D.VisualState.IDLE)
+
+
+func show_combat_impact(blocked: bool = false) -> void:
+	if presentation != null:
+		presentation.pulse_impact(blocked)
 
 
 func is_beaten() -> bool:

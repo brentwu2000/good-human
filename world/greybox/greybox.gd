@@ -24,12 +24,12 @@ static func box(size: Vector3, color: Color, position: Vector3 = Vector3.ZERO, r
 	return _instance(mesh, color, position, rotation)
 
 
-static func cylinder(radius: float, height: float, color: Color, position: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+static func cylinder(radius: float, height: float, color: Color, position: Vector3 = Vector3.ZERO, rotation: Vector3 = Vector3.ZERO) -> MeshInstance3D:
 	var mesh := CylinderMesh.new()
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
 	mesh.height = height
-	return _instance(mesh, color, position)
+	return _instance(mesh, color, position, rotation)
 
 
 static func sphere(radius: float, color: Color, position: Vector3 = Vector3.ZERO) -> MeshInstance3D:
@@ -126,9 +126,15 @@ static func dog(color: Color, size: float = 1.0, breed: int = 0) -> Node3D:
 		body_length = 0.76
 		leg_height = 0.30
 		head_y = 0.67
-	root.add_child(capsule(body_radius, body_length, color, Vector3(0, 0.42, 0), Vector3(PI / 2.0, 0, 0)))
-	root.add_child(sphere(head_radius, color, Vector3(0, head_y, -0.43)))
-	root.add_child(capsule(0.075, 0.16, Color(0.15, 0.1, 0.08), Vector3(0, 0.57, -0.64), Vector3(PI / 2.0, 0, 0)))
+	var body := capsule(body_radius, body_length, color, Vector3(0, 0.42, 0), Vector3(PI / 2.0, 0, 0))
+	body.name = "Body"
+	root.add_child(body)
+	var head := sphere(head_radius, color, Vector3(0, head_y, -0.43))
+	head.name = "Head"
+	root.add_child(head)
+	var muzzle := capsule(0.075, 0.16, Color(0.15, 0.1, 0.08), Vector3(0, 0.57, -0.64), Vector3(PI / 2.0, 0, 0))
+	muzzle.name = "Muzzle"
+	root.add_child(muzzle)
 	var ear_y := 0.79 if breed != 3 else 0.70
 	var ear_radius := 0.10 if breed != 2 else 0.13
 	if breed == 2:
@@ -144,16 +150,26 @@ static func dog(color: Color, size: float = 1.0, breed: int = 0) -> Node3D:
 		root.add_child(box(Vector3(0.44, 0.045, 0.07), harness, Vector3(0, 0.54, -0.02)))
 		root.add_child(box(Vector3(0.08, 0.28, 0.06), harness.lightened(0.12), Vector3(0, 0.58, -0.33)))
 		root.add_child(cylinder(0.13, 0.045, harness.darkened(0.20), Vector3(0, 0.68, -0.44)))
+	var leg_index := 0
 	for x in [-0.11, 0.11]:
 		for z in [-0.25, 0.25]:
-			root.add_child(capsule(0.045, leg_height, dark, Vector3(x, leg_height * 0.55, z)))
+			var leg := capsule(0.045, leg_height, dark, Vector3(x, leg_height * 0.55, z))
+			leg.name = "Leg_%d" % leg_index
+			root.add_child(leg)
+			leg_index += 1
 	var tail_height := 0.30 if breed != 3 else 0.20
 	var tail_rotation := Vector3(PI / 2.0, 0, 0.28)
 	if breed == 1: # Shiba curl: an upright angled tail instead of a straight stick.
-		root.add_child(capsule(0.045, tail_height, dark, Vector3(0.02, 0.70, 0.38), Vector3(0.65, 0, 0.35)))
-		root.add_child(sphere(0.07, dark, Vector3(0.08, 0.82, 0.30)))
+		var tail_base := capsule(0.045, tail_height, dark, Vector3(0.02, 0.70, 0.38), Vector3(0.65, 0, 0.35))
+		tail_base.name = "Tail_0"
+		root.add_child(tail_base)
+		var tail_tip := sphere(0.07, dark, Vector3(0.08, 0.82, 0.30))
+		tail_tip.name = "Tail_1"
+		root.add_child(tail_tip)
 	elif breed != 3:
-		root.add_child(capsule(0.035, tail_height, dark, Vector3(0, 0.58, 0.42), tail_rotation))
+		var tail := capsule(0.035, tail_height, dark, Vector3(0, 0.58, 0.42), tail_rotation)
+		tail.name = "Tail_0"
+		root.add_child(tail)
 	if breed == 3:
 		root.add_child(sphere(0.12, color.lightened(0.12), Vector3(0, 0.76, 0.38)))
 	for x in [-0.04, 0.04]:
