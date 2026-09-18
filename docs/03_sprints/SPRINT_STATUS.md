@@ -347,3 +347,28 @@ Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog sta
 - Still to do here: owner condition read through behaviour rather than an HP bar (D4/P02-008), dog instinct and owner↔dog acknowledgement (D4/P02-009/010), debug (011) and the blind comparison (012). Adoption depends on the P-02 playtest and the blind comparison (D4/P02-012, `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`); ADR-014 stays PROPOSED until then.
 - The Gate 02 feel pass already landed (hitstop, camera shake, damage-scaled impact) and is complementary: it is the moment of contact, this patch is the framing and the emotional curve around it.
 - Audio is still absent project-wide and still needs an ownership call; `COMBAT_EMOTIONAL_FEEDBACK` assumes an audio duck on SNAP, which cannot exist yet.
+
+## P-03 STREET BRAWL (Update 006 Patch 02)
+Installed 2026-09-18, after the owner played the P-02 framing and said it looked no different from an ordinary walk. The storyboard (`docs/06_art/dog_agency/P03_STREET_BRAWL_STORYBOARD.png`) answers why: the intended Combat Snap **drops the camera into the dog's eyes (first person)**, not a third-person shot that looks at the owner. "Explore as the dog. Fight through the dog's eyes."
+
+P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated; Sprint 05 design may continue. ADR-015 (Dog POV) is the primary candidate; ADR-014 / P-02 (owner-focused third person, already built) is retained as the comparison baseline.
+
+| ID | Task | Status |
+|---|---|---|
+| P03-E01 | Physical human combat state/motion | TODO |
+| P03-E02 | Punch/Kick/Block/Dodge + reactions/down | TODO |
+| P03-E03 | Combat spacing, approach/circle/reset | TODO |
+| P03-E04 | Dog POV combat camera | TODO |
+| P03-E05 | Dynamic CombatCenter + soft auto framing | TODO |
+| P03-E06 | Third-person → POV → third-person | TODO |
+| P03-E07 | Bark attention reaction visible in-world | TODO |
+| P03-E08 | Leash Pull visible result | TODO |
+| P03-E09 | Combat Atmosphere Director hooks | TODO |
+| P03-E10 | Hide combat log, keep debug panel | TODO |
+| P03-E11 | Victory/defeat resolution beat | TODO |
+| P03-E12 | Capture build/video for QA | TODO |
+
+## P-03 Engineering Notes (Claude)
+- Execution order is set by the patch and is not mine to reorder: physical combat motion first, then the Dog POV camera, then visible Bark/Pull results, then atmosphere, then resolution. The reason is stated plainly in `HUMAN_COMBAT_MOTION.md` and matches what I found during the Gate 02 feel pass — "damage events without physical motion cannot validate combat camera, dog intervention or atmosphere". Today two humans stand still and exchange HP with a 0.25 m slide; no camera can rescue that.
+- Exit gate: the team must be able to watch an encounter **with the combat text hidden** and still read the fight, the dog's intervention and the escalation. Text-only combat is explicitly unacceptable.
+- The atmosphere director assumes audio (ducking ambience, impact, dog breathing, low-frequency pulse before the first strike). The project still has none, and this now blocks P03-E09.

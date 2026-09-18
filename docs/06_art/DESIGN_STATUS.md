@@ -43,5 +43,21 @@ Installed 2026-09-18. Start immediately; D4-17 uses the P-02 captures.
 | D4-16 | Victory/Defeat Release | Design/Codex ART | TODO | none |
 | D4-17 | Combat Camera Prototype Review | Design/Codex ART | TODO | P-02 captures |
 
+## P-03 Street Brawl (Update 006 Patch 02)
+Installed 2026-09-18. D01–D09 can run in parallel; D10 uses implementation captures.
+
+| ID | Deliverable | Owner | Status | Dependency |
+|---|---|---|---|---|
+| P03-D01 | Combat mood target | Design/Codex ART | TODO | none |
+| P03-D02 | Tension/confrontation storyboard | Design/Codex ART | TODO | none |
+| P03-D03 | Dog POV composition sheet | Design/Codex ART | TODO | none |
+| P03-D04 | Human motion silhouettes | Design/Codex ART | TODO | none |
+| P03-D05 | Hit/impact language | Design/Codex ART | TODO | none |
+| P03-D06 | Owner HEALTHY/HURT/CRITICAL/DOWN | Design/Codex ART | TODO | none |
+| P03-D07 | Dog instinct feedback | Design/Codex ART | TODO | none |
+| P03-D08 | NPC/world reaction sheet | Design/Codex ART | TODO | none |
+| P03-D09 | Victory/defeat emotional beat | Design/Codex ART | TODO | none |
+| P03-D10 | Review implementation captures | Design/Codex ART | TODO | implementation captures |
+
 ## Rule
 Design does not wait idle for engineering. Explore both camera families where needed, then collapse to one direction after P-01.
