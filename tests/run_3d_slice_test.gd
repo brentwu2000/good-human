@@ -179,30 +179,18 @@ func _run() -> void:
 		check(framing["fov"] < walk_framing["fov"], "context %d narrows the lens (%.0f < %.0f)" % [fight_context, framing["fov"], walk_framing["fov"]])
 	check(CameraRig3D.CONTEXT_FRAMING[CameraRig3D.Context.ACTIVE]["distance"] < CameraRig3D.CONTEXT_FRAMING[CameraRig3D.Context.TENSION]["distance"], "and it keeps closing in as the fight starts")
 
-	# D4/P02-001: the two jobs come apart — the boom still hangs behind the dog,
-	# but the camera is now looking at the owner, not at the dog.
-	# The fight is already held still, so the framing can be read without it
-	# ending. Put the dog where the feature matters: off to the side, away from
-	# its human. (Standing on top of the owner, looking at one is looking at
-	# the other.)
+	# D4/P02-001/002 are now the *build-up* shot only: ADR-015 replaced the
+	# owner-focused third person with dog POV once blows land, and P-02 is kept
+	# as the comparison baseline. So this checks the chase shot where it is
+	# still in force — during TENSION, with the dog off to one side.
 	await _physics(2)
 	dog.global_position = human.global_position + Vector3(3.0, 0, 1.5)
 	dog.velocity = Vector3.ZERO
-	# Tell the camera a blow has landed so it plays ACTIVE. TENSION deliberately
-	# keeps the owner only half the subject; the owner-focus promise is about
-	# the fight proper. The fight itself stays frozen so the framing can settle.
-	coordinator.blows_landed = 1
+	coordinator.blows_landed = 0
 	await _physics(60)
-	check_eq(rig.context, CameraRig3D.Context.ACTIVE, "blows landing moves the camera into the fight")
-	# Compare both at the height the camera actually frames people at, otherwise
-	# the dog's feet read as "further from the aim" for free.
-	var eye := Vector3(0, rig.current["pivot"], 0)
-	var to_owner := (human.global_position + eye) - rig.global_position
-	var to_dog := (dog.global_position + eye) - rig.global_position
-	var aim := -rig.global_basis.z
-	check(aim.dot(to_owner.normalized()) > aim.dot(to_dog.normalized()), "the camera looks at the owner rather than the dog")
-	check(rig.is_dog_visible(), "and the dog is still on screen")
-	check(rig._focus.distance_to(dog.global_position + Vector3(0, rig.current["pivot"], 0)) < 0.6, "the boom still hangs behind the dog")
+	check_eq(rig.context, CameraRig3D.Context.TENSION, "the build-up is still the chase shot")
+	check(rig.is_dog_visible(), "the dog is on screen while the fight builds")
+	check(rig._focus.distance_to(dog.global_position + Vector3(0, rig.current["pivot"], 0)) < 0.6, "the boom hangs behind the dog")
 	# A tight shot only works while the dog is near the fight: it gives ground
 	# for a dog that has run off, rather than framing every fight for that case.
 	var strayed := rig._boom_distance()

@@ -25,7 +25,10 @@ extends Node3D
 ## RELEASE  — it is over. Holds the beat, then blends back out to EXPLORE.
 enum Context { EXPLORE, TENSION, ACTIVE, CRISIS, RELEASE }
 
-const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0, "focus": 0.0}
+## `pov` is how far the camera has moved inside the dog's head (ADR-015): 0 is
+## the third-person chase shot, 1 is first person at dog eye height. The
+## transition is always a blend, never a cut.
+const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0, "focus": 0.0, "pov": 0.0}
 ## A fight must read as a push-IN against the walking shot, so every combat
 ## context is closer and narrower than EXPLORE, not further away. (The first
 ## pass measured itself against the old 7.5 m pull-back instead of against
@@ -33,10 +36,10 @@ const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov"
 ## a fight looked like an ordinary walk.)
 const CONTEXT_FRAMING: Dictionary = {
 	Context.EXPLORE: FRAMING,
-	Context.TENSION: {"pivot": 0.95, "pitch": -11.0, "distance": 2.35, "fov": 62.0, "focus": 0.50},
-	Context.ACTIVE: {"pivot": 1.00, "pitch": -12.0, "distance": 2.00, "fov": 54.0, "focus": 0.92},
-	Context.CRISIS: {"pivot": 0.95, "pitch": -10.0, "distance": 1.75, "fov": 46.0, "focus": 1.00},
-	Context.RELEASE: {"pivot": 1.00, "pitch": -14.0, "distance": 3.10, "fov": 66.0, "focus": 0.60},
+	Context.TENSION: {"pivot": 0.95, "pitch": -11.0, "distance": 2.35, "fov": 62.0, "focus": 0.50, "pov": 0.0},
+	Context.ACTIVE: {"pivot": 1.00, "pitch": -12.0, "distance": 2.00, "fov": 66.0, "focus": 1.00, "pov": 1.0},
+	Context.CRISIS: {"pivot": 0.95, "pitch": -10.0, "distance": 1.75, "fov": 58.0, "focus": 1.00, "pov": 1.0},
+	Context.RELEASE: {"pivot": 1.00, "pitch": -14.0, "distance": 3.10, "fov": 66.0, "focus": 0.60, "pov": 0.0},
 }
 ## A tight shot only works while the dog is near the fight. Past this far from
 ## the owner (m) the boom gives ground so the fight stays in the picture, at
@@ -49,6 +52,17 @@ const CRISIS_CONDITION: float = 0.34
 ## The push into a fight is deliberate (0.5-1.0 s), not a cut; everything else
 ## settles at the usual rate.
 @export var snap_smoothing: float = 2.2
+## The Combat Snap into first person (D4: 0.35-0.8 s). Blended, never cut.
+@export var pov_snap_rate: float = 3.4
+## CombatCenter: the point the POV camera watches, between the two humans and
+## biased towards the owner (tunable, as the spec asks).
+@export_range(0.0, 1.0) var combat_center_owner_bias: float = 0.62
+## Radians per second the POV aim may turn. Capped to keep first person
+## readable rather than nauseating.
+@export var pov_turn_rate: float = 3.0
+## The aim ignores movement of the fight inside this angle (radians), so it does
+## not make constant micro-corrections.
+@export var pov_dead_zone: float = 0.05
 
 ## ADR-014 / D4/P02-001: during a fight the two jobs of the camera come apart.
 ## The dog stays the FollowAnchor — the camera still hangs behind the dog and
@@ -120,6 +134,9 @@ var _shake_time: float = 0.0
 var _look_offset: Vector3 = Vector3.ZERO
 var _has_look: bool = false
 var context: Context = Context.EXPLORE
+## 0..1 blend into the dog's eyes, eased separately from the rest of the framing.
+var pov: float = 0.0
+var _pov_aim: Vector3 = Vector3.ZERO
 ## Control frame for the stick (see header).
 var _control_yaw: float = 0.0
 var _stick_held: bool = false
@@ -145,6 +162,7 @@ func snap_behind_dog() -> void:
 	yaw = dog.heading()
 	_control_yaw = yaw
 	_has_look = false
+	_pov_aim = Vector3.ZERO
 	snap()
 
 
@@ -204,23 +222,76 @@ func _update(delta: float, instant: bool) -> void:
 	var anchor := dog.global_position + Vector3(0, current["pivot"], 0)
 	_focus = anchor if instant or _focus == Vector3.ZERO else _focus.lerp(anchor, t)
 
+	# The Combat Snap (ADR-015): the camera moves into the dog's head. Eased on
+	# its own rate so it is always a transition, never a cut.
+	# Read from the context itself, not the blended framing: `pov` has its own
+	# snap rate and must not be smoothed twice.
+	var pov_target: float = CONTEXT_FRAMING[context].get("pov", 0.0)
+	pov = pov_target if instant else lerpf(pov, pov_target, 1.0 - exp(-pov_snap_rate * delta))
+	dog.set_first_person(pov > 0.85)
+
 	var pitch := deg_to_rad(current["pitch"])
 	var boom: Vector3 = Vector3(0, -sin(pitch), cos(pitch)).rotated(Vector3.UP, yaw) * _boom_distance()
-	var desired: Vector3 = _focus + boom
-	global_position = _place_camera(_focus, desired)
+	var chase := _place_camera(_focus, _focus + boom)
+	global_position = chase.lerp(dog.eye_position(), pov) if pov > 0.001 else chase
 
+	var look_point := _aim_point(delta, instant)
+	if global_position.distance_to(look_point) > 0.01:
+		look_at(look_point, Vector3.UP)
+	_apply_shake(delta)
+	camera.fov = current["fov"]
+	_update_owner_fade()
+
+
+## Where the camera is pointed. Out of first person this is the chase
+## composition; inside it, the fight itself, tracked softly.
+func _aim_point(delta: float, instant: bool) -> Vector3:
 	var target_offset := _keep_dog_in_frame(_composed_look(_focus)) - _focus
 	if instant or not _has_look:
 		_look_offset = target_offset
 		_has_look = true
 	else:
 		_look_offset = _look_offset.lerp(target_offset, 1.0 - exp(-focus_rate * delta))
-	var look_point := _focus + _look_offset
-	if global_position.distance_to(look_point) > 0.01:
-		look_at(look_point, Vector3.UP)
-	_apply_shake(delta)
-	camera.fov = current["fov"]
-	_update_owner_fade()
+	var chase_point := _focus + _look_offset
+	if pov <= 0.001:
+		return chase_point
+	return chase_point.lerp(_tracked_combat_center(delta, instant), pov)
+
+
+## P03-E05: CombatCenter — a point between the two humans, biased towards the
+## owner. The aim follows it with a dead zone and a capped turn rate, so first
+## person tracks the fight without micro-correcting or whipping around.
+func _tracked_combat_center(delta: float, instant: bool) -> Vector3:
+	var eye := dog.eye_position()
+	var target := combat_center()
+	if instant or _pov_aim == Vector3.ZERO:
+		_pov_aim = target
+		return target
+	var to_target := (target - eye).normalized()
+	var to_current := (_pov_aim - eye).normalized()
+	if to_target.length() < 0.01 or to_current.length() < 0.01:
+		return target
+	var angle := to_current.angle_to(to_target)
+	if angle <= pov_dead_zone:
+		return _pov_aim
+	# Turn towards it, never faster than the cap.
+	var step := minf(angle - pov_dead_zone, pov_turn_rate * delta)
+	var axis := to_current.cross(to_target)
+	var direction := to_target if axis.length() < 0.0001 else to_current.rotated(axis.normalized(), step)
+	_pov_aim = eye + direction * eye.distance_to(target)
+	return _pov_aim
+
+
+## The point the fight is happening at: between the two humans, weighted towards
+## the owner so the player's human is the one being watched.
+func combat_center() -> Vector3:
+	var head := Vector3(0, 1.1, 0)
+	if owner_actor == null:
+		return dog.global_position + head
+	var owner_point := owner_actor.global_position + head
+	if coordinator == null or coordinator.pair == null:
+		return owner_point
+	return coordinator.pair.human_global_position().lerp(owner_point, combat_center_owner_bias) + head
 
 
 ## The context distance, given ground only when the dog has strayed from its
@@ -260,6 +331,9 @@ func _composed_look(anchor: Vector3) -> Vector3:
 ## slide off the screen, and the player is still steering it. Swings the aim
 ## back towards the dog rather than clipping it, so the motion stays smooth.
 func _keep_dog_in_frame(look_target: Vector3) -> Vector3:
+	# Inside the dog's head there is no dog to keep in frame.
+	if pov > 0.5:
+		return look_target
 	# Measured against the dog itself, not the smoothed pivot the boom hangs
 	# from: a wall can pull the camera in and the pivot sits above the dog, so
 	# the pivot is not a safe stand-in for "where the dog is on screen".

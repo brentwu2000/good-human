@@ -358,9 +358,9 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 | P03-E01 | Physical human combat state/motion | REVIEW |
 | P03-E02 | Punch/Kick/Block/Dodge + reactions/down | TODO |
 | P03-E03 | Combat spacing, approach/circle/reset | TODO |
-| P03-E04 | Dog POV combat camera | TODO |
-| P03-E05 | Dynamic CombatCenter + soft auto framing | TODO |
-| P03-E06 | Third-person → POV → third-person | TODO |
+| P03-E04 | Dog POV combat camera | REVIEW |
+| P03-E05 | Dynamic CombatCenter + soft auto framing | REVIEW |
+| P03-E06 | Third-person → POV → third-person | REVIEW |
 | P03-E07 | Bark attention reaction visible in-world | TODO |
 | P03-E08 | Leash Pull visible result | TODO |
 | P03-E09 | Combat Atmosphere Director hooks | TODO |
@@ -375,4 +375,7 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 - Circling without touching the rules: the simulation stays one-dimensional and keeps owning distance and every outcome, while the *line* the two of them stand on turns slowly in the world (`ORBIT_SPEED`), and only while neither is committed to anything. Two people circling each other is presentation; who can reach whom is not. This also means the balance measured in the Gate 02 pass is untouched.
 - `play_evade()` and `play_miss()` were text-only, which the patch names as unacceptable — a dodge is now a body moving out of the way and a miss overreaches. Also fixed `set_guard`, which assigned `position.z` to itself when guarding ended, so a guard never actually dropped.
 - `combat_motion_3d_test` asserts the requirement as stated: over a real fight both humans travel more than half a metre, the fight passes through several different body states, and attacks are telegraphed — the cue the dog's intervention depends on.
+- P03-E04/E05/E06 (owner after E01: "有好一點，但是視角還是需要處理，更有帶入戰鬥感"): once blows land the camera moves into the dog's head — `pov` blends the rig from the chase position to `DogController3D.eye_position()` at its own snap rate, the dog's own mesh is hidden above 0.85 so it does not fill the lens, and RELEASE blends back out. Nothing cuts. The aim tracks `combat_center()` — a point between the two humans biased towards the owner (`combat_center_owner_bias` 0.62, exposed for tuning as the spec asks) — with a dead zone so it does not micro-correct and a capped turn rate so first person stays readable rather than nauseating. `_keep_dog_in_frame` is skipped in POV: inside the dog's head there is no dog to keep in frame.
+- Consequence worth stating plainly: adopting ADR-015 means ADR-014's owner-focused third person is **no longer the combat shot**. It survives only as the build-up (TENSION) and the exhale (RELEASE), and as the comparison baseline the patch asks us to keep. The P-02 world assertions in `run_3d_slice_test` were moved to TENSION accordingly, because in ACTIVE they no longer described any moment that exists.
+- One bug worth remembering: `pov` was read from the blended `current` framing, which never lerped it because "pov" was missing from the per-key list — so the snap silently never happened and the tests passed for the wrong reason (the dog was "still on screen" because the camera had never left). It now reads the context's own value, since `pov` already has its own rate and must not be smoothed twice.
 - The atmosphere director assumes audio (ducking ambience, impact, dog breathing, low-frequency pulse before the first strike). The project still has none, and this now blocks P03-E09.

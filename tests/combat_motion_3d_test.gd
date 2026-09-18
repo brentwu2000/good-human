@@ -72,7 +72,58 @@ func _run() -> void:
 	var moving_states := states.has(int(CombatMotion3D.State.APPROACH)) or states.has(int(CombatMotion3D.State.CIRCLE))
 	check(moving_states, "they close the distance or work for an angle, rather than only trading blows")
 
+	await _test_dog_pov(map, coordinator, dog, human, pair)
 	finish()
+
+
+## P03-E04/E05/E06: the Combat Snap drops the camera into the dog's eyes, tracks
+## the fight from there, and comes back out afterwards (ADR-015).
+func _test_dog_pov(map: RunMap3D, coordinator: CombatCoordinator3D, dog: DogController3D, human: HumanFollower3D, pair: OpponentPair3D) -> void:
+	var rig := map.rig
+	if not coordinator.is_fighting():
+		dog.global_position = pair.global_position + Vector3(1.0, 0.1, 1.0)
+		await _physics(6)
+		pair.interact(map.run_manager)
+		await _physics(6)
+	check(coordinator.is_fighting(), "a fight to watch")
+	coordinator.time_scale = 0.0
+
+	# Before the first blow the camera is still the chase shot.
+	coordinator.blows_landed = 0
+	await _physics(60)
+	check_eq(rig.context, CameraRig3D.Context.TENSION, "tension first")
+	check(rig.pov < 0.2, "the dog is still on screen while the fight builds (pov %.2f)" % rig.pov)
+	var chase_position := rig.global_position
+
+	# The snap: blows land, and the camera moves into the dog's head.
+	coordinator.blows_landed = 1
+	await _physics(90)
+	check_eq(rig.context, CameraRig3D.Context.ACTIVE, "blows landing means the fight proper")
+	check(rig.pov > 0.9, "the camera is looking through the dog's eyes (pov %.2f)" % rig.pov)
+	check(rig.global_position.distance_to(dog.eye_position()) < 0.25, "and it sits at the dog's eye, not behind it")
+	check(rig.global_position.distance_to(chase_position) > 0.5, "which is somewhere else entirely from the chase shot")
+	check(not dog._visual.visible, "the dog's own body is not filling the lens")
+
+	# It watches the fight, biased towards the owner, without being told to.
+	var centre := rig.combat_center()
+	var owner_head := human.global_position + Vector3(0, 1.1, 0)
+	var opponent_head := pair.human_global_position() + Vector3(0, 1.1, 0)
+	check(centre.distance_to(owner_head) < centre.distance_to(opponent_head), "the fight is watched from the owner's side")
+	var aim := -rig.global_basis.z
+	check(aim.dot((centre - rig.global_position).normalized()) > 0.9, "the camera is pointed at the fight")
+
+	# The snap is a blend, not a cut: it never jumps.
+	coordinator.blows_landed = 0
+	var largest := 0.0
+	var previous := rig.global_position
+	for i in 90:
+		await _tree.physics_frame
+		largest = maxf(largest, rig.global_position.distance_to(previous))
+		previous = rig.global_position
+	check(largest < 0.3, "coming back out is a blend, not a cut (largest step %.3f m)" % largest)
+	check(rig.pov < 0.2, "and the camera is back behind the dog")
+	check(dog._visual.visible, "which means the dog can be seen again")
+	coordinator.time_scale = 25.0
 
 
 ## The states the spec asks for, and the reaction hold that makes a hit read.

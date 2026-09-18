@@ -85,6 +85,20 @@ func _physics_process(delta: float) -> void:
 		interact_requested.emit(focused)
 
 
+## P03-E04: while the camera is inside the dog's head, its own body would fill
+## the lens. The collision shape and every rule are untouched — this hides a
+## mesh, nothing else.
+func set_first_person(value: bool) -> void:
+	if _visual != null:
+		_visual.visible = not value
+
+
+## Where the camera sits when it is looking through this dog's eyes: eye height,
+## a little forward of centre.
+func eye_position() -> Vector3:
+	return global_position + Vector3(0, 0.42, 0) + facing * 0.18
+
+
 ## Bark body language (DogAgency decides what it does).
 func play_bark() -> void:
 	_bark_label.text = "汪！"
