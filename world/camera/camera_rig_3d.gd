@@ -18,6 +18,25 @@ const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov"
 ## Pulled back to keep the dog and both humans in view during a fight.
 const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.5, "fov": 64.0}
 
+## ADR-014 / D4/P02-001: during a fight the two jobs of the camera come apart.
+## The dog stays the FollowAnchor — the camera still hangs behind the dog and
+## the player still steers relative to the view — while the owner becomes the
+## FocusAnchor, the thing the camera is actually looking at. The dog drifts to
+## the lower foreground instead of owning the centre of the screen.
+##
+## D4/P02-002: the aim is soft. The owner only pulls the look point by the part
+## of their offset that lies outside a dead-zone, so small shuffling during a
+## fight does not drag the camera around. It is composition, never a lock-on.
+## Meters of owner movement the aim simply ignores. Small: this is here to
+## swallow shuffling, not to suppress the focus shift itself.
+@export var focus_dead_zone: float = 0.35
+## How much of the owner's offset beyond that the aim takes up (0..1). High
+## enough that the owner really is the subject, short of 1.0 so the framing
+## never snaps rigidly onto them.
+@export var focus_weight: float = 0.9
+## The aim eases towards its target at this rate, so a snap is interpolation.
+@export var focus_rate: float = 3.2
+
 @export var smoothing: float = 6.0
 ## Auto-follow rate at full speed (per second, exponential).
 @export var follow_rate: float = 2.4
@@ -57,6 +76,8 @@ var _faded: Dictionary[Node, bool] = {}
 var _manual_hold: float = 0.0
 var _trauma: float = 0.0
 var _shake_time: float = 0.0
+## Where the camera is currently looking, eased towards the composed target.
+var _look: Vector3 = Vector3.ZERO
 ## Control frame for the stick (see header).
 var _control_yaw: float = 0.0
 var _stick_held: bool = false
@@ -81,6 +102,7 @@ func add_trauma(weight: float) -> void:
 func snap_behind_dog() -> void:
 	yaw = dog.heading()
 	_control_yaw = yaw
+	_look = Vector3.ZERO
 	snap()
 
 
@@ -111,21 +133,43 @@ func _update(delta: float, instant: bool) -> void:
 		_update_yaw(delta)
 	_update_control_frame(delta, instant)
 
-	var focus := dog.global_position + Vector3(0, current["pivot"], 0)
-	if is_combat_framing():
-		var fight := (owner_actor.global_position + coordinator.pair.human_global_position()) / 2.0
-		focus = focus.lerp(fight + Vector3(0, current["pivot"], 0), 0.5)
-	_focus = focus if instant or _focus == Vector3.ZERO else _focus.lerp(focus, t)
+	# FollowAnchor: the boom always hangs behind the dog, in a fight or not.
+	var anchor := dog.global_position + Vector3(0, current["pivot"], 0)
+	_focus = anchor if instant or _focus == Vector3.ZERO else _focus.lerp(anchor, t)
+
+	var look_target := _composed_look(_focus)
+	if instant or _look == Vector3.ZERO:
+		_look = look_target
+	else:
+		_look = _look.lerp(look_target, 1.0 - exp(-focus_rate * delta))
 
 	var pitch := deg_to_rad(current["pitch"])
 	var boom: Vector3 = Vector3(0, -sin(pitch), cos(pitch)).rotated(Vector3.UP, yaw) * float(current["distance"])
 	var desired: Vector3 = _focus + boom
 	global_position = _place_camera(_focus, desired)
-	if global_position.distance_to(_focus) > 0.01:
-		look_at(_focus, Vector3.UP)
+	if global_position.distance_to(_look) > 0.01:
+		look_at(_look, Vector3.UP)
 	_apply_shake(delta)
 	camera.fov = current["fov"]
 	_update_owner_fade()
+
+
+## FocusAnchor (D4/P02-001) with a soft dead-zone (D4/P02-002). Out of combat
+## the camera simply looks where it hangs. In a fight it looks at the owner —
+## but only by the part of their offset that leaves the dead-zone, and only by
+## `focus_weight` of that, so the composition breathes instead of locking on.
+## The opponent is a secondary pull, so the fight stays framed as a pair.
+func _composed_look(anchor: Vector3) -> Vector3:
+	if not is_combat_framing() or owner_actor == null:
+		return anchor
+	var subject := owner_actor.global_position + Vector3(0, current["pivot"], 0)
+	if coordinator.pair != null:
+		subject = subject.lerp(coordinator.pair.human_global_position() + Vector3(0, current["pivot"], 0), 0.3)
+	var offset := subject - anchor
+	var distance := offset.length()
+	if distance <= focus_dead_zone:
+		return anchor
+	return anchor + offset.normalized() * (distance - focus_dead_zone) * focus_weight
 
 
 ## Shakes the camera node after it has been placed and aimed, so collision and

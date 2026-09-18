@@ -323,8 +323,8 @@ Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog sta
 
 | ID | Task | Status |
 |---|---|---|
-| D4/P02-001 | Follow Dog + Focus Owner camera | TODO |
-| D4/P02-002 | Soft focus / dead-zone | TODO |
+| D4/P02-001 | Follow Dog + Focus Owner camera | REVIEW |
+| D4/P02-002 | Soft focus / dead-zone | REVIEW |
 | D4/P02-003 | Tension/Snap transition | TODO |
 | D4/P02-004 | Active combat framing | TODO |
 | D4/P02-005 | Crisis framing | TODO |
@@ -337,6 +337,8 @@ Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog sta
 | D4/P02-012 | Blind comparison QA | TODO |
 
 ## P-02 Combat Experience Engineering Notes (Claude)
-- Not started. Adoption depends on the P-02 playtest and the blind comparison (D4/P02-012, `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`); ADR-014 stays PROPOSED until then.
+- D4/P02-001/002: the camera's two jobs now come apart during a fight. The boom still hangs behind the dog (FollowAnchor, so steering and the turning rules are untouched), but what it looks at is composed separately (FocusAnchor): the owner, pulled 30% towards the opponent so the fight frames as a pair. The aim is soft — it takes `focus_weight` (0.9) of only the part of the offset outside `focus_dead_zone` (0.35 m) and eases there at `focus_rate`, so it is composition rather than a lock-on and a snap is interpolation. Replaced the old rule that lerped the whole focus point halfway to the midpoint of the two humans.
+- Two things the tests forced out that are worth keeping in mind. First, the dead-zone was initially 0.9 m at 0.65 weight, which made the focus shift nearly invisible at realistic owner distances — the dead-zone is for swallowing shuffling, not for suppressing the feature. Second, when the dog is standing on top of its owner, looking at one *is* looking at the other, so the composition correctly does nothing; the framing only means something once the dog roams, which is exactly the situation ADR-014 is about.
+- Still to do here: the five presentation contexts and the emotional curve (D4/P02-003..007), owner condition read through behaviour rather than an HP bar (D4/P02-008), dog instinct and owner↔dog acknowledgement (D4/P02-009/010), debug (011) and the blind comparison (012). Adoption depends on the P-02 playtest and the blind comparison (D4/P02-012, `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`); ADR-014 stays PROPOSED until then.
 - The Gate 02 feel pass already landed (hitstop, camera shake, damage-scaled impact) and is complementary: it is the moment of contact, this patch is the framing and the emotional curve around it.
 - Audio is still absent project-wide and still needs an ownership call; `COMBAT_EMOTIONAL_FEEDBACK` assumes an audio duck on SNAP, which cannot exist yet.

@@ -167,6 +167,38 @@ func _run() -> void:
 	await _physics(2)
 	check(rig.is_combat_framing(), "camera pulls back to frame the fight")
 
+	# D4/P02-001: the two jobs come apart — the boom still hangs behind the dog,
+	# but the camera is now looking at the owner, not at the dog.
+	# Hold the fight still so the framing can be read without it ending, and put
+	# the dog where the feature matters: off to the side, away from its human.
+	# (Standing on top of the owner, looking at one is looking at the other.)
+	coordinator.time_scale = 0.0
+	await _physics(2)
+	dog.global_position = human.global_position + Vector3(3.0, 0, 1.5)
+	dog.velocity = Vector3.ZERO
+	await _physics(40)
+	var to_owner := human.global_position - rig.global_position
+	var to_dog := dog.global_position - rig.global_position
+	var aim := -rig.global_basis.z
+	check(aim.normalized().dot(to_owner.normalized()) > aim.normalized().dot(to_dog.normalized()), "the camera looks at the owner rather than the dog")
+	check(rig.is_dog_visible(), "and the dog is still on screen")
+	check(rig._focus.distance_to(dog.global_position + Vector3(0, rig.current["pivot"], 0)) < 0.6, "the boom still hangs behind the dog")
+
+	# D4/P02-002: soft composition, not a lock-on. The owner's position during a
+	# fight belongs to the coordinator, so this reads the composition itself.
+	var composed := rig._composed_look(rig._focus)
+	var subject_gap := rig._focus.distance_to(human.global_position + Vector3(0, rig.current["pivot"], 0))
+	var aim_gap := rig._focus.distance_to(composed)
+	check(aim_gap > 0.0, "the aim leaves the dog for the owner")
+	check(aim_gap < subject_gap, "but never all the way onto them (no lock-on)")
+	# Anything inside the dead-zone is simply ignored, so shuffling never drags
+	# the view around.
+	var real_dead_zone := rig.focus_dead_zone
+	rig.focus_dead_zone = subject_gap + 5.0
+	check_eq(rig._composed_look(rig._focus), rig._focus, "movement inside the dead-zone does not move the camera")
+	rig.focus_dead_zone = real_dead_zone
+	coordinator.time_scale = 25.0
+
 	# Gate 02 feel pass: a landed punch reads as contact, and a heavy one reads
 	# heavier than a jab. Presentation only — the simulation still decides.
 	check(coordinator._impact_weight(1.0) < coordinator._impact_weight(CombatCoordinator3D.HEAVY_DAMAGE), "a heavy hit weighs more than a jab")
