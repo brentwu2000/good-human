@@ -28,7 +28,7 @@ Installed from Update 007 (2026-09-18). Design starts now; it does not wait for 
 | D5-07 | Territory variants | Design/Codex ART | REVIEW | none |
 | D5-08 | Reward reveal | Design/Codex ART | REVIEW | none |
 | D5-09 | Target Screenshot 04 | Design/Codex ART | REVIEW | none |
-| D5-10 | Decision Pack | Design | BLOCKED | prior D5 work / Gate |
+| D5-10 | Decision Pack | Design/Codex ART | REVIEW | Gate sign-off pending |
 
 ## Rule
 Design does not wait idle for engineering. Explore both camera families where needed, then collapse to one direction after P-01.
