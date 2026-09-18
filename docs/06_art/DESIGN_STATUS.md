@@ -35,7 +35,7 @@ Installed 2026-09-18. Start immediately; D4-17 uses the P-02 captures.
 
 | ID | Deliverable | Owner | Status | Dependency |
 |---|---|---|---|---|
-| D4-11 | Combat Focus Composition | Design/Codex ART | TODO | none |
+| D4-11 | Combat Focus Composition | Design/Codex ART | REVIEW | none |
 | D4-12 | Combat Snap Storyboard | Design/Codex ART | TODO | none |
 | D4-13 | Owner Condition Readability | Design/Codex ART | TODO | none |
 | D4-14 | Dog Instinct Feedback | Design/Codex ART | TODO | none |
