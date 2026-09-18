@@ -33,6 +33,9 @@ const HITSTOP_LIGHT: float = 0.06
 const HITSTOP_HEAVY: float = 0.16
 ## Damage at or above this is a heavy hit (an opening, or a kick that connects).
 const HEAVY_DAMAGE: float = 9.0
+## After a fight resolves the world holds the beat before letting go, so a win
+## or a loss lands instead of snapping straight back to walking (D4/P02-006).
+const RELEASE_SECONDS: float = 1.4
 
 var last_result: CombatSimulation.Result = CombatSimulation.Result.NONE
 ## Active fight or null.
@@ -45,6 +48,10 @@ var _accumulator: float = 0.0
 var _defeat_left: float = -1.0
 var _defeated_by: String = ""
 var _hitstop_left: float = 0.0
+## Facts about the current fight, for presentation to read. The camera decides
+## what to do with them; the coordinator never frames anything itself.
+var blows_landed: int = 0
+var release_left: float = 0.0
 var _base_fighter: FighterData
 
 
@@ -123,6 +130,8 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	opponent.begin_combat()
 	opponent.human_puppet.shout("你家的狗在叫什麼？！", Color(1.0, 0.8, 0.5))
 	human.say("欸欸欸，不是我…", Color(1.0, 0.9, 0.6))
+	blows_landed = 0
+	release_left = 0.0
 	sim.combat_event.connect(_on_combat_event)
 	sim.finished.connect(_on_finished)
 	_sync()
@@ -130,6 +139,7 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 
 
 func _process(delta: float) -> void:
+	release_left = maxf(release_left - delta, 0.0)
 	if _defeat_left >= 0.0:
 		_defeat_left -= delta * time_scale
 		if _defeat_left < 0.0:
@@ -160,9 +170,21 @@ func _impact_weight(damage: float) -> float:
 
 ## Freezes the fight for a beat and shakes the view, scaled by the hit.
 func _punch_landed(weight: float) -> void:
+	blows_landed += 1
 	_hitstop_left = maxf(_hitstop_left, lerpf(HITSTOP_LIGHT, HITSTOP_HEAVY, weight))
 	if camera != null:
 		camera.add_trauma(weight)
+
+
+## How the player's human is doing, 0..1, or -1 when there is no fight. Read by
+## presentation so the owner's state can be shown through them rather than a bar.
+func owner_condition() -> float:
+	return engagement.simulation.fighters[CombatSimulation.PLAYER].hp_ratio() if engagement != null else -1.0
+
+
+## True while the owner is down and the dog can still move around them.
+func is_owner_down() -> bool:
+	return _defeat_left >= 0.0
 
 
 func _world_position(side: int) -> Vector3:
@@ -229,6 +251,7 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 	engagement = null
 	last_result = result
 	_hitstop_left = 0.0
+	release_left = RELEASE_SECONDS
 	opponent.end_combat(result)
 	match result:
 		CombatSimulation.Result.VICTORY:

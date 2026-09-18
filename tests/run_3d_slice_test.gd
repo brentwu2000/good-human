@@ -162,17 +162,19 @@ func _run() -> void:
 
 	# --- Fight: disengage, then victory -------------------------------------------
 	var pair := map.get_node("Encounters/pair_park") as OpponentPair3D
+	coordinator.time_scale = 0.0
 	await _interact_at(dog, human, pair)
 	check(coordinator.is_fighting() and human.state == HumanFollower3D.State.COMBAT, "provoke starts a fight in place")
 	await _physics(2)
-	check(rig.is_combat_framing(), "camera pulls back to frame the fight")
+	check(rig.is_combat_framing(), "camera reframes for the fight")
+	check_eq(rig.context, CameraRig3D.Context.TENSION, "before the first blow it is tension, not action")
 
 	# D4/P02-001: the two jobs come apart — the boom still hangs behind the dog,
 	# but the camera is now looking at the owner, not at the dog.
-	# Hold the fight still so the framing can be read without it ending, and put
-	# the dog where the feature matters: off to the side, away from its human.
-	# (Standing on top of the owner, looking at one is looking at the other.)
-	coordinator.time_scale = 0.0
+	# The fight is already held still, so the framing can be read without it
+	# ending. Put the dog where the feature matters: off to the side, away from
+	# its human. (Standing on top of the owner, looking at one is looking at
+	# the other.)
 	await _physics(2)
 	dog.global_position = human.global_position + Vector3(3.0, 0, 1.5)
 	dog.velocity = Vector3.ZERO
@@ -181,6 +183,8 @@ func _run() -> void:
 	var to_dog := dog.global_position - rig.global_position
 	var aim := -rig.global_basis.z
 	check(aim.normalized().dot(to_owner.normalized()) > aim.normalized().dot(to_dog.normalized()), "the camera looks at the owner rather than the dog")
+	var cam_to_dog := (dog.global_position + Vector3(0, 0.4, 0)) - rig.camera.global_position
+	var cam_aim := -rig.camera.global_basis.z
 	check(rig.is_dog_visible(), "and the dog is still on screen")
 	check(rig._focus.distance_to(dog.global_position + Vector3(0, rig.current["pivot"], 0)) < 0.6, "the boom still hangs behind the dog")
 
@@ -226,7 +230,11 @@ func _run() -> void:
 	dog.global_position = human.global_position + Vector3(0, 0, CombatCoordinator3D.DISENGAGE_DISTANCE + 2.0)
 	await _physics(3)
 	check_eq(coordinator.last_result, CombatSimulation.Result.DISENGAGED, "running away disengages")
-	check(human.is_following() and not rig.is_combat_framing(), "owner follows again, normal framing")
+	check(human.is_following(), "owner follows again")
+	# D4/P02-006: it is over, but the camera holds the beat before letting go.
+	check_eq(rig.context, CameraRig3D.Context.RELEASE, "the camera holds the resolution beat")
+	await _wait_until(func() -> bool: return rig.context == CameraRig3D.Context.EXPLORE, 300)
+	check(not rig.is_combat_framing(), "and then blends back to walking")
 	await _wait_until(func() -> bool: return pair.state == OpponentPair3D.State.IDLE, 600)
 
 	human.fighter = OLD_MASTER

@@ -325,11 +325,11 @@ Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog sta
 |---|---|---|
 | D4/P02-001 | Follow Dog + Focus Owner camera | REVIEW |
 | D4/P02-002 | Soft focus / dead-zone | REVIEW |
-| D4/P02-003 | Tension/Snap transition | TODO |
-| D4/P02-004 | Active combat framing | TODO |
-| D4/P02-005 | Crisis framing | TODO |
-| D4/P02-006 | Victory release | TODO |
-| D4/P02-007 | Defeat owner-down beat | TODO |
+| D4/P02-003 | Tension/Snap transition | REVIEW |
+| D4/P02-004 | Active combat framing | REVIEW |
+| D4/P02-005 | Crisis framing | REVIEW |
+| D4/P02-006 | Victory release | REVIEW |
+| D4/P02-007 | Defeat owner-down beat | REVIEW |
 | D4/P02-008 | Owner condition feedback | TODO |
 | D4/P02-009 | Dog instinct feedback | TODO |
 | D4/P02-010 | Owner↔dog acknowledgement | TODO |
@@ -339,6 +339,8 @@ Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog sta
 ## P-02 Combat Experience Engineering Notes (Claude)
 - D4/P02-001/002: the camera's two jobs now come apart during a fight. The boom still hangs behind the dog (FollowAnchor, so steering and the turning rules are untouched), but what it looks at is composed separately (FocusAnchor): the owner, pulled 30% towards the opponent so the fight frames as a pair. The aim is soft — it takes `focus_weight` (0.9) of only the part of the offset outside `focus_dead_zone` (0.35 m) and eases there at `focus_rate`, so it is composition rather than a lock-on and a snap is interpolation. Replaced the old rule that lerped the whole focus point halfway to the midpoint of the two humans.
 - Two things the tests forced out that are worth keeping in mind. First, the dead-zone was initially 0.9 m at 0.65 weight, which made the focus shift nearly invisible at realistic owner distances — the dead-zone is for swallowing shuffling, not for suppressing the feature. Second, when the dog is standing on top of its owner, looking at one *is* looking at the other, so the composition correctly does nothing; the framing only means something once the dog roams, which is exactly the situation ADR-014 is about.
-- Still to do here: the five presentation contexts and the emotional curve (D4/P02-003..007), owner condition read through behaviour rather than an HP bar (D4/P02-008), dog instinct and owner↔dog acknowledgement (D4/P02-009/010), debug (011) and the blind comparison (012). Adoption depends on the P-02 playtest and the blind comparison (D4/P02-012, `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`); ADR-014 stays PROPOSED until then.
+- D4/P02-003..007: the five framing contexts (EXPLORE / TENSION / ACTIVE / CRISIS / RELEASE) in `CONTEXT_FRAMING`, each a destination the camera eases towards — nothing cuts and nothing changes a rule. The coordinator now reports the facts (`blows_landed`, `owner_condition()`, `is_owner_down()`, `release_left`) and the camera alone decides the framing. TENSION holds before the first blow, ACTIVE tightens once they land, CRISIS tightens further below 34% owner health and also covers the owner-down beat so the camera stays with them while the dog can still move, and RELEASE holds 1.4 s after a fight resolves before blending back to walking.
+- Three real mistakes the tests forced out, all worth remembering. (1) I applied the slow push-in rate to the camera's *position* follow as well as its framing; the rig fell 4.4 m behind the dog. A deliberate push-in is camera language — how fast the rig follows the thing the player is steering must never be slowed. (2) Smoothing the aim as a world-space point is unstable: when the camera travels far it flies past the point and the aim goes wild (measured 64° off the dog). The composition is now stored as an offset from the anchor instead. (3) Tightening the shot pushed the dog off screen, exactly the QA failure mode — `_keep_dog_in_frame` now swings the aim back so the dog never leaves a share of the half-FOV, measured against the dog itself rather than the smoothed pivot, which sits above it and moves when a wall pulls the camera in.
+- Still to do here: owner condition read through behaviour rather than an HP bar (D4/P02-008), dog instinct and owner↔dog acknowledgement (D4/P02-009/010), debug (011) and the blind comparison (012). Adoption depends on the P-02 playtest and the blind comparison (D4/P02-012, `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`); ADR-014 stays PROPOSED until then.
 - The Gate 02 feel pass already landed (hitstop, camera shake, damage-scaled impact) and is complementary: it is the moment of contact, this patch is the framing and the emotional curve around it.
 - Audio is still absent project-wide and still needs an ownership call; `COMBAT_EMOTIONAL_FEEDBACK` assumes an audio duck on SNAP, which cannot exist yet.

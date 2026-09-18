@@ -14,9 +14,30 @@ extends Node3D
 ## Players can also turn the camera by dragging on the right side of the
 ## screen, right mouse drag, or the arrow keys.
 
-const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0}
-## Pulled back to keep the dog and both humans in view during a fight.
-const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.5, "fov": 64.0}
+## D4/P02-003..007: the emotional curve of a fight, as framing only. Each
+## context is a destination the camera eases towards; nothing here ever cuts,
+## and nothing here changes a rule. `focus` is how strongly the owner is the
+## subject (see `_composed_look`).
+## EXPLORE  — walking. The camera looks where it hangs; the dog is the subject.
+## TENSION  — provoked, before the first blow. The push-in starts.
+## ACTIVE   — blows landing. Tighter and lower; the dog sits in the foreground.
+## CRISIS   — the owner is in trouble. Tighter still, and firmly on them.
+## RELEASE  — it is over. Holds the beat, then blends back out to EXPLORE.
+enum Context { EXPLORE, TENSION, ACTIVE, CRISIS, RELEASE }
+
+const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0, "focus": 0.0}
+const CONTEXT_FRAMING: Dictionary = {
+	Context.EXPLORE: FRAMING,
+	Context.TENSION: {"pivot": 1.15, "pitch": -16.0, "distance": 5.0, "fov": 68.0, "focus": 0.55},
+	Context.ACTIVE: {"pivot": 1.30, "pitch": -20.0, "distance": 4.6, "fov": 62.0, "focus": 0.90},
+	Context.CRISIS: {"pivot": 1.20, "pitch": -16.0, "distance": 4.0, "fov": 56.0, "focus": 1.00},
+	Context.RELEASE: {"pivot": 1.25, "pitch": -20.0, "distance": 5.4, "fov": 67.0, "focus": 0.70},
+}
+## The owner is in trouble below this share of their health.
+const CRISIS_CONDITION: float = 0.34
+## The push into a fight is deliberate (0.5-1.0 s), not a cut; everything else
+## settles at the usual rate.
+@export var snap_smoothing: float = 2.2
 
 ## ADR-014 / D4/P02-001: during a fight the two jobs of the camera come apart.
 ## The dog stays the FollowAnchor — the camera still hangs behind the dog and
@@ -30,12 +51,16 @@ const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.
 ## Meters of owner movement the aim simply ignores. Small: this is here to
 ## swallow shuffling, not to suppress the focus shift itself.
 @export var focus_dead_zone: float = 0.35
-## How much of the owner's offset beyond that the aim takes up (0..1). High
-## enough that the owner really is the subject, short of 1.0 so the framing
-## never snaps rigidly onto them.
+## How much of the owner's offset beyond that the aim takes up at full focus
+## (0..1). High enough that the owner really is the subject, short of 1.0 so
+## the framing never snaps rigidly onto them. Scaled by the context's `focus`.
 @export var focus_weight: float = 0.9
 ## The aim eases towards its target at this rate, so a snap is interpolation.
 @export var focus_rate: float = 3.2
+## Share of the half-FOV the dog is allowed to sit from the centre of the
+## screen. The owner is the subject, but never at the cost of losing the dog off
+## the edge — the player is still steering it.
+@export_range(0.1, 0.95) var dog_frame_margin: float = 0.62
 
 @export var smoothing: float = 6.0
 ## Auto-follow rate at full speed (per second, exponential).
@@ -76,8 +101,12 @@ var _faded: Dictionary[Node, bool] = {}
 var _manual_hold: float = 0.0
 var _trauma: float = 0.0
 var _shake_time: float = 0.0
-## Where the camera is currently looking, eased towards the composed target.
-var _look: Vector3 = Vector3.ZERO
+## The composition: how far the aim currently sits from the dog. Kept as an
+## offset from the anchor rather than a world point, because a world point the
+## camera then flies past sends the aim wild.
+var _look_offset: Vector3 = Vector3.ZERO
+var _has_look: bool = false
+var context: Context = Context.EXPLORE
 ## Control frame for the stick (see header).
 var _control_yaw: float = 0.0
 var _stick_held: bool = false
@@ -102,7 +131,7 @@ func add_trauma(weight: float) -> void:
 func snap_behind_dog() -> void:
 	yaw = dog.heading()
 	_control_yaw = yaw
-	_look = Vector3.ZERO
+	_has_look = false
 	snap()
 
 
@@ -112,7 +141,22 @@ func snap() -> void:
 
 
 func is_combat_framing() -> bool:
-	return coordinator != null and coordinator.is_fighting()
+	return context != Context.EXPLORE
+
+
+## Which beat of the fight the framing should be playing. Read from what the
+## coordinator reports; the camera never decides anything about the fight.
+func _desired_context() -> Context:
+	if coordinator == null:
+		return Context.EXPLORE
+	if coordinator.is_fighting():
+		if coordinator.owner_condition() >= 0.0 and coordinator.owner_condition() <= CRISIS_CONDITION:
+			return Context.CRISIS
+		return Context.ACTIVE if coordinator.blows_landed > 0 else Context.TENSION
+	# The owner is down but the dog can still move around them: stay with them.
+	if coordinator.is_owner_down():
+		return Context.CRISIS
+	return Context.RELEASE if coordinator.release_left > 0.0 else Context.EXPLORE
 
 
 func _physics_process(delta: float) -> void:
@@ -122,12 +166,22 @@ func _physics_process(delta: float) -> void:
 
 
 func _update(delta: float, instant: bool) -> void:
-	var target: Dictionary = COMBAT_FRAMING if is_combat_framing() else FRAMING
+	var was := context
+	context = _desired_context()
+	var target: Dictionary = CONTEXT_FRAMING[context]
+	# Going into a fight is a push-in the player can feel; coming out and every
+	# other change settles at the ordinary rate.
+	var entering := was == Context.EXPLORE and context != Context.EXPLORE
+	# The push-in is deliberate, but only as camera language. How fast the rig
+	# follows the dog is never slowed: lagging behind the thing the player is
+	# steering reads as broken, not as tension.
+	var rate := snap_smoothing if entering or context == Context.TENSION else smoothing
+	var framing_t := 1.0 if instant or current.is_empty() else 1.0 - exp(-rate * delta)
 	var t := 1.0 if instant or current.is_empty() else 1.0 - exp(-smoothing * delta)
 	if current.is_empty():
 		current = target.duplicate()
-	for key: String in ["pivot", "pitch", "distance", "fov"]:
-		current[key] = lerpf(current[key], target[key], t)
+	for key: String in ["pivot", "pitch", "distance", "fov", "focus"]:
+		current[key] = lerpf(current.get(key, target[key]), target[key], framing_t)
 
 	if not instant:
 		_update_yaw(delta)
@@ -137,18 +191,20 @@ func _update(delta: float, instant: bool) -> void:
 	var anchor := dog.global_position + Vector3(0, current["pivot"], 0)
 	_focus = anchor if instant or _focus == Vector3.ZERO else _focus.lerp(anchor, t)
 
-	var look_target := _composed_look(_focus)
-	if instant or _look == Vector3.ZERO:
-		_look = look_target
-	else:
-		_look = _look.lerp(look_target, 1.0 - exp(-focus_rate * delta))
-
 	var pitch := deg_to_rad(current["pitch"])
 	var boom: Vector3 = Vector3(0, -sin(pitch), cos(pitch)).rotated(Vector3.UP, yaw) * float(current["distance"])
 	var desired: Vector3 = _focus + boom
 	global_position = _place_camera(_focus, desired)
-	if global_position.distance_to(_look) > 0.01:
-		look_at(_look, Vector3.UP)
+
+	var target_offset := _keep_dog_in_frame(_composed_look(_focus)) - _focus
+	if instant or not _has_look:
+		_look_offset = target_offset
+		_has_look = true
+	else:
+		_look_offset = _look_offset.lerp(target_offset, 1.0 - exp(-focus_rate * delta))
+	var look_point := _focus + _look_offset
+	if global_position.distance_to(look_point) > 0.01:
+		look_at(look_point, Vector3.UP)
 	_apply_shake(delta)
 	camera.fov = current["fov"]
 	_update_owner_fade()
@@ -160,16 +216,39 @@ func _update(delta: float, instant: bool) -> void:
 ## `focus_weight` of that, so the composition breathes instead of locking on.
 ## The opponent is a secondary pull, so the fight stays framed as a pair.
 func _composed_look(anchor: Vector3) -> Vector3:
-	if not is_combat_framing() or owner_actor == null:
+	var focus: float = current.get("focus", 0.0) * focus_weight
+	if focus <= 0.0 or owner_actor == null:
 		return anchor
 	var subject := owner_actor.global_position + Vector3(0, current["pivot"], 0)
-	if coordinator.pair != null:
+	if coordinator != null and coordinator.pair != null:
 		subject = subject.lerp(coordinator.pair.human_global_position() + Vector3(0, current["pivot"], 0), 0.3)
 	var offset := subject - anchor
 	var distance := offset.length()
 	if distance <= focus_dead_zone:
 		return anchor
-	return anchor + offset.normalized() * (distance - focus_dead_zone) * focus_weight
+	return anchor + offset.normalized() * (distance - focus_dead_zone) * focus
+
+
+## The owner may pull the aim only so far: past `max_focus_angle` the dog would
+## slide off the screen, and the player is still steering it. Swings the aim
+## back towards the dog rather than clipping it, so the motion stays smooth.
+func _keep_dog_in_frame(look_target: Vector3) -> Vector3:
+	# Measured against the dog itself, not the smoothed pivot the boom hangs
+	# from: a wall can pull the camera in and the pivot sits above the dog, so
+	# the pivot is not a safe stand-in for "where the dog is on screen".
+	var to_dog := (dog.global_position + Vector3(0, 0.4, 0)) - global_position
+	var to_look := look_target - global_position
+	if to_dog.length() < 0.01 or to_look.length() < 0.01:
+		return look_target
+	# Derived from the framing in use, so tightening the shot tightens this too.
+	var limit := deg_to_rad(float(current["fov"]) * 0.5) * dog_frame_margin
+	var angle := to_dog.angle_to(to_look)
+	if angle <= limit:
+		return look_target
+	var axis := to_dog.cross(to_look)
+	if axis.length() < 0.0001:
+		return look_target
+	return global_position + to_dog.normalized().rotated(axis.normalized(), limit) * to_look.length()
 
 
 ## Shakes the camera node after it has been placed and aimed, so collision and
