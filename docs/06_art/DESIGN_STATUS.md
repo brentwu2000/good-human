@@ -27,7 +27,7 @@ Installed from Update 007 (2026-09-18). Design starts now; it does not wait for 
 | D5-06 | Rival pair | Design/Codex ART | REVIEW | none |
 | D5-07 | Territory variants | Design/Codex ART | REVIEW | none |
 | D5-08 | Reward reveal | Design/Codex ART | REVIEW | none |
-| D5-09 | Target Screenshot 04 | Design/Codex ART | TODO | none |
+| D5-09 | Target Screenshot 04 | Design/Codex ART | REVIEW | none |
 | D5-10 | Decision Pack | Design | BLOCKED | prior D5 work / Gate |
 
 ## Rule
