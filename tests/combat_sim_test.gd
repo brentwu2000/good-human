@@ -175,18 +175,33 @@ func _test_force_result() -> void:
 
 
 func _test_dog_agency_hooks() -> void:
-	# Bark: opponent loses its wind-up and makes no decisions for a while.
+	# Bark: an opponent still winding up drops the attack and decides nothing.
 	var sim := _duel(60.0)
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(them, KICK)
 	var kinds := _collect(sim)
 	sim.distract(CombatSimulation.OPPONENT, 0.8)
-	check(kinds.has(&"distracted") and them.phase == CombatFighter.Phase.RECOVERY, "bark cancels the opponent's wind-up")
+	check(kinds.has(&"distracted") and them.phase == CombatFighter.Phase.RECOVERY, "bark cancels a fresh wind-up")
 	for i in 30:
 		sim.step(1.0 / 60.0)
 	check(them.uses.is_empty(), "distracted opponent starts nothing")
 
-	# The owner exploits the opening: attacks right away for extra damage.
+	# ...but an attack they have already committed to still comes.
+	sim = _duel(60.0)
+	them = sim.fighters[CombatSimulation.OPPONENT]
+	_start_attack(them, KICK)
+	them.phase_time_left = KICK.windup * CombatSimulation.COMMIT_SHARE * 0.5
+	sim.distract(CombatSimulation.OPPONENT, 0.8)
+	check(them.phase == CombatFighter.Phase.WINDUP, "a bark too late cannot call off a committed attack")
+
+	# A worn-out bark only turns their head.
+	sim = _duel(60.0)
+	them = sim.fighters[CombatSimulation.OPPONENT]
+	_start_attack(them, KICK)
+	sim.distract(CombatSimulation.OPPONENT, CombatSimulation.DISTRACT_STRONG - 0.05)
+	check(them.phase == CombatFighter.Phase.WINDUP, "a weak bark does not cancel anything")
+
+	# The opening is worth extra damage, but the owner is never handed a turn.
 	sim = _duel(60.0)
 	var opener := sim.fighters[CombatSimulation.PLAYER]
 	var exposed := sim.fighters[CombatSimulation.OPPONENT]
@@ -195,26 +210,18 @@ func _test_dog_agency_hooks() -> void:
 	opener.ready_at = sim.time + 5.0
 	kinds = _collect(sim)
 	sim.distract(CombatSimulation.OPPONENT, 0.9)
-	check(opener.ready_at <= sim.time, "owner is ready to seize the opening")
+	check(opener.ready_at > sim.time, "a bark does not hand the owner a free turn")
+	opener.ready_at = sim.time
 	_step_until(sim, func() -> bool: return kinds.has(&"opening"))
-	check(kinds.has(&"opening"), "hit on a distracted opponent is an opening")
+	check(kinds.has(&"opening"), "a hit inside the opening is worth more")
 
-	# Well-timed barks win fights the owner would often lose.
-	var plain_wins := 0
-	var bark_wins := 0
-	for i in 40:
-		if CombatSimulation.new(PLAYER, GYM, 3000 + i).run_to_end() == CombatSimulation.Result.VICTORY:
-			plain_wins += 1
-		var barked := CombatSimulation.new(PLAYER, GYM, 3000 + i)
-		var next_bark := 1.0
-		while not barked.is_finished():
-			barked.step(1.0 / 30.0)
-			if barked.time >= next_bark:
-				barked.distract(CombatSimulation.OPPONENT, 0.9)
-				next_bark += 2.5
-		if barked.result == CombatSimulation.Result.VICTORY:
-			bark_wins += 1
-	check(bark_wins >= plain_wins + 6, "barking helps the owner win (%d -> %d of 40)" % [plain_wins, bark_wins])
+	# Barking at a useful rhythm swings fights; spamming it does not.
+	var plain_wins := _bark_wins(0.0)
+	var paced_wins := _bark_wins(6.0)
+	var spam_wins := _bark_wins(1.0)
+	check(paced_wins >= plain_wins + 4, "paced barking helps the owner win (%d -> %d of 40)" % [plain_wins, paced_wins])
+	check(paced_wins < 40, "even good barking does not decide every fight (%d of 40)" % paced_wins)
+	check(spam_wins < paced_wins, "spamming barks wears out, pacing them does not (%d vs %d of 40)" % [spam_wins, paced_wins])
 
 	# Pull out of an incoming attack: it misses.
 	sim = _duel(60.0)
@@ -229,9 +236,20 @@ func _test_dog_agency_hooks() -> void:
 	_step_until(sim, func() -> bool: return kinds.has(&"dodged") or kinds.has(&"hit") or kinds.has(&"missed"))
 	check_eq(me.hp, me.max_hp, "pulled owner takes no damage")
 
-	# Pull with nothing incoming just repositions.
+	# Pull with nothing incoming costs nothing and gains nothing.
 	sim = _duel(60.0)
+	me = sim.fighters[CombatSimulation.PLAYER]
+	var standing := me.position
 	check(not sim.pull(CombatSimulation.PLAYER, 20.0), "pull without an attack is only a reposition")
+	check_eq(me.position, standing, "a mistimed pull does not cost the owner ground")
+
+	# A pull that saves them does cost tempo: they have to set their feet again.
+	sim = _duel(60.0)
+	me = sim.fighters[CombatSimulation.PLAYER]
+	them = sim.fighters[CombatSimulation.OPPONENT]
+	_start_attack(them, KICK)
+	check(sim.pull(CombatSimulation.PLAYER, 20.0), "pull during a wind-up saves the owner")
+	check(me.ready_at >= sim.time + CombatSimulation.PULL_RECOVERY, "a save costs the owner their own tempo")
 
 	# Bad pull: stumble, no attacks for a while.
 	sim = _duel(60.0)
@@ -243,6 +261,31 @@ func _test_dog_agency_hooks() -> void:
 
 
 # --- helpers ---------------------------------------------------------------
+
+## Wins out of 40 seeds with a bark every `interval` seconds (0 = no dog),
+## worn down by DogAgency's real resistance and habituation.
+func _bark_wins(interval: float) -> int:
+	var wins := 0
+	for i in 40:
+		var sim := CombatSimulation.new(PLAYER, GYM, 3000 + i)
+		var next_bark := 1.0
+		var recent: Array[float] = []
+		var heard := 0
+		while not sim.is_finished():
+			sim.step(1.0 / 30.0)
+			if interval <= 0.0 or sim.time < next_bark:
+				continue
+			next_bark += interval
+			while not recent.is_empty() and sim.time - recent[0] > DogAgency.BARK_RESIST_WINDOW:
+				recent.pop_front()
+			var effect: float = pow(0.5, recent.size()) * pow(DogAgency.BARK_HABITUATION, heard)
+			recent.append(sim.time)
+			heard += 1
+			if effect >= DogAgency.BARK_MIN_EFFECT:
+				sim.distract(CombatSimulation.OPPONENT, DogAgency.BARK_DISTRACT_SECONDS * effect)
+		if sim.result == CombatSimulation.Result.VICTORY:
+			wins += 1
+	return wins
 
 func _duel(gap: float) -> CombatSimulation:
 	var sim := CombatSimulation.new(PLAYER, JOGGER, 5, balance)

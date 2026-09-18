@@ -114,13 +114,13 @@ func _run() -> void:
 	# Pulling again right away in a good direction is not punished.
 	them.phase = CombatFighter.Phase.IDLE
 	them.action = null
-	await _wait_seconds(1.1)
+	await _wait_seconds(DogAgency.PULL_COOLDOWN + 0.1)
 	await _pull(side, human.max_length + 0.6, 3)
 	check_eq(agency.last_pull, &"repositioned", "sideways pull just repositions")
 	check_eq(_count(&"agency_bad_pull"), 0, "no stumble for sideways pulls")
 
 	# Bad pull: dragging the owner towards the opponent.
-	await _wait_seconds(1.1)
+	await _wait_seconds(DogAgency.PULL_COOLDOWN + 0.1)
 	var towards := pair.human_global_position() - human.global_position
 	towards.y = 0.0
 	await _pull(towards.normalized(), human.max_length + 0.6, 3)
@@ -128,7 +128,7 @@ func _run() -> void:
 	check_eq(_count(&"agency_bad_pull"), 1, "ENDURE: stumbling from your own dog")
 
 	# Drag out: long hard pull away ends the fight before the normal distance.
-	await _wait_seconds(1.1)
+	await _wait_seconds(DogAgency.PULL_COOLDOWN + 0.1)
 	away = (human.global_position - pair.human_global_position())
 	away.y = 0.0
 	await _pull(away.normalized(), human.max_length + DogAgency.DRAG_OUT_EXTRA + 0.3, int((DogAgency.DRAG_OUT_SECONDS + 0.3) * 60))

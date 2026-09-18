@@ -32,12 +32,20 @@ const BARK_FACING_ANGLE: float = 110.0
 const BARK_SIDE_ANGLE: float = 25.0
 ## ...and only startles the owner when the dog is this close to them (m).
 const BARK_STARTLE_DISTANCE: float = 1.5
-const BARK_DISTRACT_SECONDS: float = 0.9
+const BARK_DISTRACT_SECONDS: float = 0.7
 const BARK_OWNER_STARTLE_SECONDS: float = 0.4
-## Each bark in this window halves the next one's effect.
-const BARK_RESIST_WINDOW: float = 4.0
+## Each bark in this window halves the next one's effect, so only the first of
+## a burst is a full distraction and the third is ignored. Wait it out and the
+## next bark lands fully again.
+const BARK_RESIST_WINDOW: float = 8.0
+## On top of that, an opponent gets used to a dog over one fight: every bark
+## they have already heard shrinks the next one. Waiting does not undo this, so
+## a fight allows a handful of useful barks, not an endless stream.
+const BARK_HABITUATION: float = 0.75
 const BARK_MIN_EFFECT: float = 0.3
-const PULL_COOLDOWN: float = 1.0
+## A yank is a rescue, not a stance: the owner has to find their feet again
+## before the leash can save them a second time.
+const PULL_COOLDOWN: float = 3.0
 ## Meters past the leash length before a pull happens.
 const PULL_SLACK: float = 0.3
 const PULL_MIN_DOG_SPEED: float = 1.0
@@ -61,6 +69,8 @@ var last_bark: BarkResult = BarkResult.NONE
 var last_pull: StringName = &""
 ## Times of recent barks (resistance).
 var recent_barks: Array[float] = []
+## Barks the current opponent has already heard (habituation).
+var barks_heard: int = 0
 
 var _time: float = 0.0
 var _bark_ready_at: float = 0.0
@@ -70,12 +80,14 @@ var _drag_out_time: float = 0.0
 
 func _ready() -> void:
 	run_manager.run_started.connect(func(_s: int) -> void: _reset())
+	coordinator.engagement_started.connect(func(_e: Engagement3D) -> void: barks_heard = 0)
 
 
 func _reset() -> void:
 	last_bark = BarkResult.NONE
 	last_pull = &""
 	recent_barks.clear()
+	barks_heard = 0
 	_bark_ready_at = 0.0
 	_pull_ready_at = 0.0
 	_drag_out_time = 0.0
@@ -148,12 +160,15 @@ func _bark_in_world() -> BarkResult:
 	return BarkResult.SOCIAL if answered else BarkResult.UNHEARD
 
 
-## 1.0 for a fresh bark, halved for each bark in the resistance window.
+## 1.0 for the first bark of a fight, halved for each bark still in the
+## resistance window and shrunk once more for every bark this opponent has
+## already heard.
 func _bark_effect() -> float:
 	while not recent_barks.is_empty() and _time - recent_barks[0] > BARK_RESIST_WINDOW:
 		recent_barks.pop_front()
-	var effect := pow(0.5, recent_barks.size())
+	var effect := pow(0.5, recent_barks.size()) * pow(BARK_HABITUATION, barks_heard)
 	recent_barks.append(_time)
+	barks_heard += 1
 	return effect
 
 
@@ -217,4 +232,4 @@ func debug_text() -> String:
 	var tension := 0.0
 	if human != null and dog != null:
 		tension = _flat(dog.global_position - human.global_position).length() / human.max_length
-	return "Agency: bark %s  resist %d  pull %s  leash %.2f" % [BarkResult.keys()[last_bark], recent_barks.size(), last_pull, tension]
+	return "Agency: bark %s  resist %d  heard %d  pull %s  leash %.2f" % [BarkResult.keys()[last_bark], recent_barks.size(), barks_heard, last_pull, tension]

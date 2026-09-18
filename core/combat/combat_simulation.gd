@@ -21,9 +21,21 @@ const START_DISTANCE: float = 220.0
 ## How far either human may drift from the engagement origin.
 const MAX_DRIFT: float = 600.0
 ## Damage multiplier for hits on a distracted (exposed) fighter.
-const OPENING_DAMAGE: float = 1.6
+const OPENING_DAMAGE: float = 1.4
+## The opening stays open this long after the target stops looking away, so the
+## other human's next attack lands on it without being handed a free turn.
+const OPENING_GRACE: float = 1.2
+## A distraction at least this long is a full one: the target can still drop
+## what it was doing. Shorter ones only make it look away.
+const DISTRACT_STRONG: float = 0.5
+## An attack can only be called off while this much of its wind-up is left:
+## once they have committed, the swing comes anyway.
+const COMMIT_SHARE: float = 0.5
 ## Extra reach so an attack started in range still lands after tiny movement.
 const REACH_TOLERANCE: float = 12.0
+## Yanked off balance, even usefully, they need this long to set their feet
+## again — so dodging on the leash trades the owner's own tempo for safety.
+const PULL_RECOVERY: float = 1.5
 
 var fighters: Array[CombatFighter] = []
 var result: Result = Result.NONE
@@ -98,35 +110,48 @@ func force_result(value: Result) -> void:
 # --- Dog agency (Sprint 04) ---------------------------------------------------
 # The dog never commands attacks; it changes the situation the humans react to.
 
-## A bark makes `side` look away: no decisions for `seconds`, a wind-up in
-## progress is lost, and the other human seizes the opening right away with
-## extra damage (OPENING_DAMAGE).
+## A bark makes `side` look away: no decisions for `seconds`, and hits land on
+## the opening (OPENING_DAMAGE). A full-strength one (DISTRACT_STRONG) also
+## costs them the action they were in and lets the other human pounce at once;
+## a worn-out bark only turns their head, so repeat barking cannot stun-lock.
 func distract(side: int, seconds: float) -> void:
 	var fighter := fighters[side]
 	if is_finished() or fighter.is_defeated() or seconds <= 0.0:
 		return
 	fighter.distracted_until = maxf(fighter.distracted_until, time + seconds)
-	fighter.exposed_until = maxf(fighter.exposed_until, time + seconds + 0.3)
-	fighter.ready_at = maxf(fighter.ready_at, time + seconds)
-	if fighter.is_winding_up_attack() or fighter.is_guarding() or fighter.is_evading():
-		_enter(fighter, CombatFighter.Phase.RECOVERY, fighter.action.recovery)
-	var other := _other(fighter)
-	other.ready_at = minf(other.ready_at, time)
+	fighter.exposed_until = maxf(fighter.exposed_until, time + seconds + OPENING_GRACE)
+	# A full-strength bark also costs them what they were doing — for as long as
+	# they looked away, not for their own recovery, so slow heavy fighters are
+	# not perma-cancelled. An attack they have already committed to still lands.
+	# The other human is never handed a free turn: their ordinary next attack is
+	# simply worth more while the opening lasts.
+	if seconds >= DISTRACT_STRONG and _can_be_called_off(fighter):
+		_enter(fighter, CombatFighter.Phase.RECOVERY, seconds)
 	combat_event.emit(&"distracted", side, null, seconds)
 
 
+## Guard and evade break at any time; an attack only before it is committed.
+func _can_be_called_off(fighter: CombatFighter) -> bool:
+	if fighter.is_guarding() or fighter.is_evading():
+		return true
+	return fighter.is_winding_up_attack() and fighter.phase_time_left > fighter.action.windup * COMMIT_SHARE
+
+
 ## The leash yanks `side` away from the opponent by `amount` units. Returns
-## true when it pulled them out of an incoming attack.
+## true when it pulled them out of an incoming attack. With nothing to dodge
+## they just brace against the leash, so a mistimed pull costs nothing but the
+## chance — only pulling them into the opponent (`stumble`) is punished.
 func pull(side: int, amount: float) -> bool:
 	var fighter := fighters[side]
 	if is_finished() or fighter.is_defeated():
 		return false
 	var attacker := _other(fighter)
 	var saved := attacker.is_winding_up_attack()
-	_move(fighter, -amount * _toward_opponent(fighter))
 	if saved:
-		# Out of the way until that attack has landed.
+		# Out of the way until that attack has landed, then back on their feet.
+		_move(fighter, -amount * _toward_opponent(fighter))
 		fighter.pulled_until = time + attacker.phase_time_left + 0.05
+		fighter.ready_at = maxf(fighter.ready_at, fighter.pulled_until + PULL_RECOVERY)
 	combat_event.emit(&"pulled", side, null, amount)
 	return saved
 
