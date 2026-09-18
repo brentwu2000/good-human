@@ -34,6 +34,8 @@ var run_rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var human_run_inventory: Inventory
 var dog_safe_inventory: Inventory
 var searched_points: Dictionary[StringName, bool] = {}
+## Territory ids the dog marked on this walk (Sprint 05).
+var marked_territories: Dictionary[StringName, bool] = {}
 ## extraction_id -> available
 var extraction_states: Dictionary[StringName, bool] = {}
 var run_status: RunStatus = RunStatus.NOT_STARTED
@@ -84,6 +86,7 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	human_run_inventory.clear()
 	dog_safe_inventory.clear()
 	searched_points.clear()
+	marked_territories.clear()
 	training.reset()
 	run_result = null
 	_all_extractions_forced = false
@@ -175,6 +178,13 @@ func record_training(data: TrainingEventData, key: StringName = &"", source: Str
 	return training.record(TrainingEvent.new(data, key, elapsed_time, source, context, scale))
 
 
+## The dog left its own scent on a place. Recorded, not resolved: a mark only
+## becomes claim progress if this walk gets home (P4-010).
+func record_territory_mark(territory_id: StringName) -> void:
+	if is_running() and not territory_id.is_empty():
+		marked_territories[territory_id] = true
+
+
 # --- Combat outcomes -------------------------------------------------------------
 
 ## Victory reward: one roll with the run RNG into the human bag. Whatever does
@@ -255,6 +265,7 @@ func _build_result(outcome: RunResult.Outcome, extraction_id: StringName) -> Run
 	var value := run_value()
 	result.safe_value = value.safe_value
 	result.unbanked_value = value.unbanked_value
+	result.marked_territories.assign(marked_territories.keys())
 	result.first_extraction_time = first_extraction_time
 	result.value_at_first_extraction = value_at_first_extraction.total() if value_at_first_extraction != null else 0
 	return result

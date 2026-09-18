@@ -56,6 +56,8 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 		if left > 0:
 			result.stash_overflow.append(ItemStack.new(stack.item, left))
 
+	_resolve_territories(result)
+
 	var stats: Dictionary = SaveManager.data["statistics"]
 	stats["runs"] = int(stats["runs"]) + 1
 	if result.is_success():
@@ -71,6 +73,27 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 	last_run_result = result
 	if show_result:
 		_change_scene(RUN_RESULT_SCENE)
+
+
+## Sprint 05 P4-009/P4-010: a place the dog marked moves forward only when the
+## walk got home. A walk that ended badly loses nothing it had already earned —
+## territory never decays (ADR-012), it just does not advance today.
+func _resolve_territories(result: RunResult) -> void:
+	if not result.is_success():
+		return
+	for id in result.marked_territories:
+		var data := DataRegistry.get_territory(id)
+		if data == null:
+			continue
+		var completed := territory_progress.add_claim(id, data.claim_target)
+		result.territory_claims[id] = territory_progress.claim_progress(id)
+		if not completed:
+			territory_progress.note_event(id, data.marked_text)
+			continue
+		result.territories_claimed.append(id)
+		territory_progress.note_event(id, data.claimed_text)
+		if not data.owned_flag.is_empty():
+			goal_progress.set_flag(data.owned_flag)
 
 
 func _change_scene(path: String) -> void:

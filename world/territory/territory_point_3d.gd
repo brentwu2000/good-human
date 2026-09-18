@@ -82,6 +82,8 @@ func interact(context: Object) -> void:
 	if not can_interact(context):
 		return
 	marked_this_walk = true
+	var run := context as RunManager
+	run.record_territory_mark(territory_id)
 	Game.territory_progress.note_event(territory_id, data.marked_text)
 	play_recognize()
 	play_mark()

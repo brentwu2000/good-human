@@ -32,6 +32,14 @@ var first_extraction_time: float = -1.0
 var value_at_first_extraction: int = 0
 
 
+## --- Territory (Sprint 05 P4-009/P4-010) ---
+## Places the dog marked on this walk. They only count if it got home.
+var marked_territories: Array[StringName] = []
+## Filled in by Game: places this walk moved forward, and any it completed.
+var territory_claims: Dictionary[StringName, int] = {}
+var territories_claimed: Array[StringName] = []
+
+
 ## How long the player chose to stay on after they could have gone home.
 func seconds_after_extraction() -> float:
 	return 0.0 if first_extraction_time < 0.0 else maxf(elapsed_time - first_extraction_time, 0.0)

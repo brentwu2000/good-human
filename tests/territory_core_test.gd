@@ -11,6 +11,7 @@ func _ready() -> void:
 	_test_claim_needs_walks_that_came_home()
 	_test_round_trip()
 	_test_bad_save_data()
+	_test_claim_resolution()
 	finish()
 
 
@@ -72,3 +73,67 @@ func _test_bad_save_data() -> void:
 	check_eq(progress.claim_progress(BANYAN), 0, "negative progress is ignored")
 	progress.deserialize({"states": {"banyan": 4}})
 	check(progress.is_owned(BANYAN), "a real saved state is restored")
+
+
+## P4-009/P4-010: a marked place moves forward only when the walk got home, and
+## a bad walk never loses what the dog already earned.
+func _test_claim_resolution() -> void:
+	var original_path := SaveManager.save_path
+	var original_data: Dictionary = SaveManager.data.duplicate(true)
+	var original_goals := Game.goal_progress.serialize()
+	var original_territories := Game.territory_progress.serialize()
+	SaveManager.save_path = "user://tests/territory_claim_save.json"
+	DirAccess.make_dir_recursive_absolute(SaveManager.save_path.get_base_dir())
+	Game.territory_progress.clear()
+	Game.goal_progress.clear()
+	var data := DataRegistry.get_territory(BANYAN)
+
+	# Marked, but the walk ended badly: nothing gained, nothing lost.
+	Game.territory_progress.advance_to(BANYAN, TerritoryProgress.State.CONTESTED)
+	Game.finish_run(_walk(RunResult.Outcome.DEFEATED, [BANYAN]), false)
+	check_eq(Game.territory_progress.claim_progress(BANYAN), 0, "a walk that did not get home earns no claim")
+	check_eq(Game.territory_progress.state_of(BANYAN), TerritoryProgress.State.CONTESTED, "and takes nothing away")
+
+	# Got home without marking: the place is not advanced by simply extracting.
+	Game.finish_run(_walk(RunResult.Outcome.EXTRACTED, []), false)
+	check_eq(Game.territory_progress.claim_progress(BANYAN), 0, "getting home alone does not claim a place")
+
+	# Marked and got home: this one counts.
+	var first := _walk(RunResult.Outcome.EXTRACTED, [BANYAN])
+	Game.finish_run(first, false)
+	check_eq(Game.territory_progress.claim_progress(BANYAN), 1, "marked and got home: one step")
+	check_eq(first.territory_claims.get(BANYAN, 0), 1, "the result reports the progress")
+	check(first.territories_claimed.is_empty(), "but the place is not the dog's yet")
+	check_eq(Game.territory_progress.state_of(BANYAN), TerritoryProgress.State.CLAIMING, "the dog is working on it")
+
+	# A defeat in between keeps what was earned.
+	Game.finish_run(_walk(RunResult.Outcome.DEFEATED, [BANYAN]), false)
+	check_eq(Game.territory_progress.claim_progress(BANYAN), 1, "a bad walk never takes progress back")
+
+	Game.finish_run(_walk(RunResult.Outcome.EXTRACTED, [BANYAN]), false)
+	var third := _walk(RunResult.Outcome.EXTRACTED, [BANYAN])
+	Game.finish_run(third, false)
+	check(Game.territory_progress.is_owned(BANYAN), "the third walk home makes it the dog's place")
+	check(third.territories_claimed.has(BANYAN), "the result says so, once")
+	check(Game.goal_progress.flags.has(data.owned_flag), "owning it sets the flag other content reads")
+	check(Game.territory_progress.last_event(BANYAN).contains("我的地方"), "and the place remembers it in the dog's words")
+
+	# It cannot be claimed again.
+	var extra := _walk(RunResult.Outcome.EXTRACTED, [BANYAN])
+	Game.finish_run(extra, false)
+	check(extra.territories_claimed.is_empty(), "an owned place is not claimed a second time")
+	check_eq(Game.territory_progress.claim_progress(BANYAN), data.claim_target, "and progress does not keep counting")
+
+	if FileAccess.file_exists(SaveManager.save_path):
+		DirAccess.remove_absolute(SaveManager.save_path)
+	SaveManager.save_path = original_path
+	SaveManager.data = original_data
+	Game.goal_progress.deserialize(original_goals)
+	Game.territory_progress.deserialize(original_territories)
+
+
+func _walk(outcome: RunResult.Outcome, marked: Array[StringName]) -> RunResult:
+	var result := RunResult.new()
+	result.outcome = outcome
+	result.marked_territories = marked
+	return result

@@ -100,11 +100,28 @@ func _run() -> void:
 	check_eq(resident.encounter, alley.encounter, "it is the same dog and the same person")
 	check_eq(DataRegistry.get_territory(&"banyan").resident_spot, resident.spot_id, "the territory knows who lives there")
 
+	check(run.marked_territories.has(&"banyan"), "the walk is carrying the mark")
+
 	# The landmark shows what the dog remembers, walk after walk.
 	run.start_run(1234)
 	await _physics(5)
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CONTESTED, "a new walk does not reset the place")
 	check(not banyan.marked_this_walk, "but a new walk has to be earned again")
+	check(run.marked_territories.is_empty(), "and starts with nothing marked")
+
+	# P4-010: mark it again, then actually walk home. The scene changes, so this
+	# is the last thing the walk does.
+	banyan.interact(run)
+	check(run.marked_territories.has(&"banyan"), "marked again on the new walk")
+	run.debug_unlock_all_extractions()
+	await _physics(2)
+	run.extract(&"bus_stop")
+	await _wait_for_scene(Game.RUN_RESULT_SCENE)
+	var result := Game.last_run_result
+	check(result != null and result.marked_territories.has(&"banyan"), "the result carries what the dog marked")
+	check_eq(result.territory_claims.get(&"banyan", 0), 1, "getting home turned the mark into progress")
+	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CLAIMING, "the dog is working on the place")
+	check(not progress.is_owned(&"banyan"), "one walk home is not ownership")
 	finish()
 
 
