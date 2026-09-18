@@ -152,7 +152,10 @@ func pull(side: int, amount: float) -> bool:
 		_move(fighter, -amount * _toward_opponent(fighter))
 		fighter.pulled_until = time + attacker.phase_time_left + 0.05
 		fighter.ready_at = maxf(fighter.ready_at, fighter.pulled_until + PULL_RECOVERY)
-	combat_event.emit(&"pulled", side, null, amount)
+	# Report how far they were actually moved, not how far was asked for: with
+	# nothing to dodge they brace against the leash and do not move at all, and
+	# presentation has to be able to tell those apart.
+	combat_event.emit(&"pulled", side, null, amount if saved else 0.0)
 	return saved
 
 

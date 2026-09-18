@@ -361,8 +361,8 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 | P03-E04 | Dog POV combat camera | REVIEW |
 | P03-E05 | Dynamic CombatCenter + soft auto framing | REVIEW |
 | P03-E06 | Third-person → POV → third-person | REVIEW |
-| P03-E07 | Bark attention reaction visible in-world | TODO |
-| P03-E08 | Leash Pull visible result | TODO |
+| P03-E07 | Bark attention reaction visible in-world | REVIEW |
+| P03-E08 | Leash Pull visible result | REVIEW |
 | P03-E09 | Combat Atmosphere Director hooks | TODO |
 | P03-E10 | Hide combat log, keep debug panel | TODO |
 | P03-E11 | Victory/defeat resolution beat | TODO |
@@ -380,4 +380,7 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 - One bug worth remembering: `pov` was read from the blended `current` framing, which never lerped it because "pov" was missing from the per-key list — so the snap silently never happened and the tests passed for the wrong reason (the dog was "still on screen" because the camera had never left). It now reads the context's own value, since `pov` already has its own rate and must not be smoothed twice.
 - Owner feedback (2026-09-19): "第一人稱沒錯，但是玩家的方向沒有跟著攝影機，導致不自覺的向後退". Cause: the stick was still read against the boom yaw. In first person the boom hangs behind the player's eyes and means nothing, so pushing forward walked somewhere other than into the screen — and because the camera was turned towards the fight, "forward" pointed partly away from it. Added `view_yaw()`: the direction the player is actually looking along, which is the boom out of POV and the camera's own aim inside it, and moved the control-frame update to the end of `_update` so it reads this frame's aim rather than last frame's. `combat_motion_3d_test` now holds a real stick press in first person and checks the dog walks into the screen.
 - That test also caught `combat_center()` adding head height twice, so the POV camera was watching a point ~2.2 m up — above both fighters' heads. Fixed, and the test now pins the watched point to head height.
+- P03-E07/E08: the simulation has always emitted `distracted`, `pulled` and `stumbled`, and the 3D coordinator handled **none** of them — so barking and pulling produced no body motion at all, only a shout and a HUD toast. That is exactly the "text-only combat" the patch rules unacceptable, and it mattered far more once the camera moved inside the dog's head, where a toast is the only thing left. Now a bark turns the opponent's head and body towards the dog and opens their guard for as long as they are looking away (`play_distracted`, and `face_towards` yields to it); a pull that catches a wind-up yanks the owner bodily backwards; a bad pull throws them sideways off balance, deliberately uglier so a mistake looks like a mistake.
+- `pull()` was emitting the requested distance whether or not anything happened, so presentation could not tell a real save from a wasted tug. It now reports how far the fighter actually moved — 0 when they simply braced against the leash.
+- Test-timing lessons from this pass, both of which made checks pass alone and fail in the suite: a yank is a ~0.09 s tween, so sample the peak across the movement instead of one frame of it; and a STAGGER hold is shorter than the sampling window, so record that it happened *while* it happens rather than asking once it is over.
 - The atmosphere director assumes audio (ducking ambience, impact, dog breathing, low-frequency pulse before the first strike). The project still has none, and this now blocks P03-E09.

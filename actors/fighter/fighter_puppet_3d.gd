@@ -18,6 +18,10 @@ var _time: float = 0.0
 var motion: CombatMotion3D = CombatMotion3D.new()
 var _guarding: bool = false
 var _footwork: float = 0.0
+## P03-E07: while this is running the fighter is looking at whatever pulled
+## their attention (the dog), not at the person they are fighting.
+var _look_away_left: float = 0.0
+var _look_away_point: Vector3 = Vector3.ZERO
 
 
 func apply(fighter: FighterData) -> void:
@@ -38,15 +42,17 @@ func apply(fighter: FighterData) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	_look_away_left = maxf(_look_away_left - delta, 0.0)
 	_popup_left -= delta
 	if _popup != null and _popup_left <= 0.0:
 		_popup.text = ""
 
 
 func face_towards(point: Vector3) -> void:
-	var d := point - global_position
+	var target := _look_away_point if _look_away_left > 0.0 else point
+	var d := target - global_position
 	if Vector2(d.x, d.z).length() > 0.01:
-		rotation.y = atan2(-d.x, -d.z)
+		rotation.y = lerp_angle(rotation.y, atan2(-d.x, -d.z), 0.35)
 
 
 func show_hp(value: bool) -> void:
@@ -130,6 +136,54 @@ func play_hurt(blocked: bool, weight: float = 0.5) -> void:
 	if weight >= 0.75 and not blocked:
 		tween.parallel().tween_property(_body, "rotation:x", -0.22, 0.06)
 		tween.tween_property(_body, "rotation:x", 0.0, 0.24)
+
+
+## P03-E07: a bark landed. They turn to look at it and their guard opens — the
+## opening the owner is about to use has to be visible, not just announced.
+func play_distracted(towards: Vector3, seconds: float) -> void:
+	_look_away_point = towards
+	_look_away_left = maxf(seconds, 0.25)
+	shout("什麼？！", Color(1.0, 0.9, 0.5))
+	if _body == null or _down:
+		return
+	var tween := _new_tween()
+	tween.tween_property(_body, "rotation:x", -0.16, 0.1)
+	tween.parallel().tween_property(_body, "position:z", -0.08, 0.1)
+	tween.tween_interval(maxf(seconds - 0.3, 0.05))
+	tween.tween_property(_body, "rotation:x", 0.0, 0.2)
+	tween.parallel().tween_property(_body, "position:z", 0.0, 0.2)
+
+
+## P03-E08: the leash yanked them. `saved` is a clean pull out of an attack;
+## otherwise it is just a shove in that direction.
+func play_pulled(saved: bool) -> void:
+	if _body == null or _down:
+		return
+	var back := 0.42 if saved else 0.2
+	var tween := _new_tween()
+	tween.tween_property(_body, "position:z", back, 0.09).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(_body, "rotation:x", 0.2, 0.09)
+	tween.tween_property(_body, "position:z", 0.0, 0.28)
+	tween.parallel().tween_property(_body, "rotation:x", 0.0, 0.28)
+
+
+## P03-E08: dragged the wrong way and off balance. Deliberately uglier than a
+## pull — a bad pull should look like a mistake.
+func play_stumble() -> void:
+	if _body == null or _down:
+		return
+	var tween := _new_tween()
+	tween.tween_property(_body, "rotation:z", 0.4, 0.12)
+	tween.parallel().tween_property(_body, "position:x", 0.28, 0.12)
+	tween.parallel().tween_property(_body, "position:y", -0.1, 0.12)
+	tween.tween_property(_body, "rotation:z", 0.0, 0.34)
+	tween.parallel().tween_property(_body, "position:x", 0.0, 0.34)
+	tween.parallel().tween_property(_body, "position:y", 0.0, 0.34)
+
+
+## True while this fighter is looking away from the fight (P03-E07).
+func is_distracted() -> bool:
+	return _look_away_left > 0.0
 
 
 ## A dodge is a body moving out of the way, not a word on the screen.

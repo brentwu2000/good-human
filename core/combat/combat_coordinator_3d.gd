@@ -275,6 +275,17 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 		&"missed":
 			actor.play_strike(skill)
 			actor.play_miss()
+		&"distracted":
+			# P03-E07: a bark landed. They turn to look at the dog and open up,
+			# so the opening the owner is about to take is visible in the world.
+			actor.play_distracted(dog.global_position, amount)
+		&"pulled":
+			# P03-E08: the leash yanked the owner. `amount` is how far.
+			actor.play_pulled(amount > 0.0)
+			actor.motion.react(false)
+		&"stumbled":
+			actor.play_stumble()
+			actor.motion.react(true)
 		&"opening":
 			# The dog made this happen: the biggest hit of the fight should
 			# look like the biggest hit of the fight.

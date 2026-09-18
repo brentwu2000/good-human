@@ -73,7 +73,68 @@ func _run() -> void:
 	check(moving_states, "they close the distance or work for an angle, rather than only trading blows")
 
 	await _test_dog_pov(map, coordinator, dog, human, pair)
+	await _test_intervention_is_visible(map, coordinator, dog, human, pair)
 	finish()
+
+
+## P03-E07/E08: from inside the dog's head, the player has to be able to SEE
+## that barking and pulling did something. Text on the screen does not count.
+func _test_intervention_is_visible(map: RunMap3D, coordinator: CombatCoordinator3D, dog: DogController3D, human: HumanFollower3D, pair: OpponentPair3D) -> void:
+	if not coordinator.is_fighting():
+		dog.global_position = pair.global_position + Vector3(1.0, 0.1, 1.0)
+		await _physics(6)
+		pair.interact(map.run_manager)
+		await _physics(6)
+	check(coordinator.is_fighting(), "a fight to intervene in")
+	coordinator.time_scale = 0.0
+	var sim := coordinator.engagement.simulation
+	var theirs := pair.human_puppet
+	var ours := human.puppet
+
+	# A bark turns the opponent's head away from the fight, towards the dog.
+	dog.global_position = pair.human_global_position() + Vector3(2.5, 0.1, 0.0)
+	await _physics(4)
+	check(not theirs.is_distracted(), "they are watching the person they are fighting")
+	var facing_before := theirs.rotation.y
+	sim.distract(CombatSimulation.OPPONENT, 0.9)
+	await _physics(20)
+	check(theirs.is_distracted(), "the bark takes their attention")
+	check(absf(angle_difference(theirs.rotation.y, facing_before)) > 0.1, "and their body turns towards the dog")
+	var towards_dog := (dog.global_position - pair.human_global_position()).normalized()
+	var their_facing := Vector3.FORWARD.rotated(Vector3.UP, theirs.rotation.y)
+	check(their_facing.dot(towards_dog) > 0.5, "they are looking at the dog, not past it")
+	await _physics(70)
+	check(not theirs.is_distracted(), "and then they go back to the fight")
+
+	# A leash pull that saves the owner moves the owner's body.
+	var them := sim.fighters[CombatSimulation.OPPONENT]
+	them.action = preload("res://data/combat/skills/skill_kick.tres")
+	them.phase = CombatFighter.Phase.WINDUP
+	them.phase_time_left = 5.0
+	var owner_pose := ours._body.position
+	check(sim.pull(CombatSimulation.PLAYER, 20.0), "the pull catches the wind-up")
+	# The yank is fast (out in ~0.09 s, back over ~0.28 s), so sample the whole
+	# movement rather than one frame of it.
+	var yanked := 0.0
+	for i in 30:
+		await _tree.physics_frame
+		yanked = maxf(yanked, ours._body.position.distance_to(owner_pose))
+	check(yanked > 0.05, "the owner is visibly yanked (%.3f m)" % yanked)
+	await _physics(30)
+
+	# A bad pull looks like a mistake, not like a save.
+	sim.stumble(CombatSimulation.PLAYER, 0.6)
+	var lurched := 0.0
+	var staggered := false
+	for i in 30:
+		await _tree.physics_frame
+		lurched = maxf(lurched, absf(ours._body.rotation.z))
+		# The stagger hold is shorter than this window, so record it as it
+		# happens rather than asking once it is already over.
+		staggered = staggered or ours.motion.state == CombatMotion3D.State.STAGGER
+	check(lurched > 0.05, "a bad pull throws the owner off balance sideways (%.3f rad)" % lurched)
+	check(staggered, "and reads as the worse outcome while it lasts")
+	coordinator.time_scale = 25.0
 
 
 ## P03-E04/E05/E06: the Combat Snap drops the camera into the dog's eyes, tracks
