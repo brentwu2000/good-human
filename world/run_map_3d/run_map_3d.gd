@@ -24,6 +24,8 @@ func _ready() -> void:
 	rig.dog = dog
 	rig.owner_actor = human
 	rig.coordinator = coordinator
+	# The view shakes when a punch lands (Core Experience Gate 02 feel pass).
+	coordinator.camera = rig
 	rig.snap_behind_dog()
 	_build_bark_button()
 	var agency := get_node_or_null("DogAgency")

@@ -79,12 +79,18 @@ func play_strike(skill: CombatSkillData) -> void:
 	tween.tween_callback(_reset_pose)
 
 
-func play_hurt(blocked: bool) -> void:
+## `weight` is 0..1 for how hard the hit was, so a jab and a kick into an
+## opening do not knock someone back the same distance (Gate 02 feel pass).
+func play_hurt(blocked: bool, weight: float = 0.5) -> void:
 	if blocked:
 		shout("擋住！", Color(0.6, 0.85, 1.0))
+	var amount := lerpf(0.14, 0.45, clampf(weight, 0.0, 1.0))
 	var tween := _new_tween()
-	tween.tween_property(_body, "position:z", 0.25, 0.05)
-	tween.tween_property(_body, "position:z", 0.0, 0.2)
+	tween.tween_property(_body, "position:z", amount, 0.05)
+	tween.tween_property(_body, "position:z", 0.0, lerpf(0.16, 0.3, weight))
+	if weight >= 0.75 and not blocked:
+		tween.parallel().tween_property(_body, "rotation:x", -0.22, 0.06)
+		tween.tween_property(_body, "rotation:x", 0.0, 0.24)
 
 
 func play_evade() -> void:
