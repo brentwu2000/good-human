@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100">
+  <defs>
+    <style>
+      .bg{fill:#171d1b}.panel{fill:#293431;stroke:#66736d;stroke-width:3}.human{fill:#dda474;stroke:#ffe0b8;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}.limb{fill:none;stroke:#dda474;stroke-width:24;stroke-linecap:round}.shoe{stroke:#e7ddd0;stroke-width:18;stroke-linecap:round}.ground{stroke:#77817c;stroke-width:4}.axis{stroke:#f2b84b;stroke-width:3;stroke-dasharray:9 8}.title{font:700 31px sans-serif;fill:#f5ead5}.state{font:700 25px sans-serif;fill:#f5ead5}.note{font:17px sans-serif;fill:#bbbcb4}.cue{font:700 17px sans-serif;fill:#f2b84b}</style>
+  </defs>
+  <rect width="1600" height="1100" class="bg"/>
+  <text x="50" y="60" class="title">D4-13 · OWNER CONDITION READABILITY</text>
+  <text x="50" y="94" class="note">Read spine → feet → recovery → head → breath. Color and HP UI are not primary signals.</text>
+
+  <g transform="translate(50 150)">
+    <text x="0" y="0" class="state">HEALTHY</text><text x="0" y="30" class="cue">stable · even · ready</text>
+    <rect x="0" y="55" width="340" height="700" rx="24" class="panel"/><line x1="25" y1="660" x2="315" y2="660" class="ground"/>
+    <line x1="170" y1="120" x2="170" y2="650" class="axis"/>
+    <circle cx="170" cy="185" r="55" class="human"/><path d="M170 240 L170 450" class="limb"/>
+    <path d="M170 292 L100 385 M170 292 L238 374" class="limb"/>
+    <path d="M170 445 L118 635 M170 445 L222 635" class="limb"/>
+    <path d="M90 645 L130 645 M210 645 L250 645" class="shoe"/>
+    <text x="28" y="710" class="note">Head over pelvis</text><text x="28" y="735" class="note">Both feet carry weight</text>
+  </g>
+
+  <g transform="translate(430 150)">
+    <text x="0" y="0" class="state">HURT</text><text x="0" y="30" class="cue">guarded · narrowed · checking</text>
+    <rect x="0" y="55" width="340" height="700" rx="24" class="panel"/><line x1="25" y1="660" x2="315" y2="660" class="ground"/>
+    <line x1="170" y1="120" x2="170" y2="650" class="axis"/>
+    <g transform="rotate(8 170 440)"><circle cx="150" cy="195" r="55" class="human"/><path d="M150 250 L172 455" class="limb"/><path d="M157 305 L105 405 M158 305 L215 360" class="limb"/></g>
+    <path d="M172 448 L130 635 M172 448 L210 635" class="limb"/>
+    <path d="M102 645 L142 645 M198 645 L238 645" class="shoe"/>
+    <text x="28" y="710" class="note">One shoulder guards ribs</text><text x="28" y="735" class="note">Stance narrows, still grounded</text>
+  </g>
+
+  <g transform="translate(810 150)">
+    <text x="0" y="0" class="state">CRITICAL</text><text x="0" y="30" class="cue">asymmetric · catching · reacquiring</text>
+    <rect x="0" y="55" width="340" height="700" rx="24" class="panel"/><line x1="25" y1="660" x2="315" y2="660" class="ground"/>
+    <line x1="170" y1="120" x2="170" y2="650" class="axis"/>
+    <g transform="rotate(16 170 445)"><circle cx="125" cy="220" r="55" class="human"/><path d="M125 275 L175 465" class="limb"/><path d="M140 325 L95 420 M140 325 L205 385" class="limb"/></g>
+    <path d="M175 458 L115 635 M175 458 L245 605" class="limb"/>
+    <path d="M88 645 L128 645 M235 616 L272 628" class="shoe"/>
+    <path d="M245 584 Q265 600 240 622" fill="none" stroke="#f2b84b" stroke-width="4"/>
+    <text x="28" y="710" class="note">Rear foot searches twice</text><text x="28" y="735" class="note">Head dips, then finds threat</text>
+  </g>
+
+  <g transform="translate(1190 150)">
+    <text x="0" y="0" class="state">DOWN</text><text x="0" y="30" class="cue">low · broad · approachable</text>
+    <rect x="0" y="55" width="340" height="700" rx="24" class="panel"/><line x1="25" y1="660" x2="315" y2="660" class="ground"/>
+    <circle cx="92" cy="565" r="51" class="human"/>
+    <path d="M140 575 L245 610" class="limb"/><path d="M165 585 L120 640 M184 592 L235 640" class="limb"/><path d="M240 610 L292 642 M240 610 L260 655" class="limb"/>
+    <path d="M278 650 L310 650 M244 664 L278 664" class="shoe"/>
+    <path d="M70 620 Q115 650 165 620" fill="none" stroke="#47ae91" stroke-width="7" stroke-linecap="round"/>
+    <text x="28" y="710" class="note">Face/profile remains visible</text><text x="28" y="735" class="note">Dog approach lane stays open</text>
+  </g>
+
+  <g transform="translate(50 1010)">
+    <text x="0" y="0" class="cue">TRANSITION:</text><text x="145" y="0" class="note">contact recoil → balance catch → current condition recovery. DOWN overrides all.</text>
+    <text x="0" y="34" class="note">Avoid: red aura · flashing outline · skull icon · constant tremble · rigid plank fall · condition snapping during an attack</text>
+  </g>
+</svg>

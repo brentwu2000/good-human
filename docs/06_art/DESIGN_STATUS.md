@@ -37,7 +37,7 @@ Installed 2026-09-18. Start immediately; D4-17 uses the P-02 captures.
 |---|---|---|---|---|
 | D4-11 | Combat Focus Composition | Design/Codex ART | REVIEW | none |
 | D4-12 | Combat Snap Storyboard | Design/Codex ART | REVIEW | D4/P02 tension and active contexts |
-| D4-13 | Owner Condition Readability | Design/Codex ART | TODO | none |
+| D4-13 | Owner Condition Readability | Design/Codex ART | REVIEW | aligns with 34% crisis camera threshold |
 | D4-14 | Dog Instinct Feedback | Design/Codex ART | TODO | none |
 | D4-15 | Owner↔Dog Feedback | Design/Codex ART | TODO | none |
 | D4-16 | Victory/Defeat Release | Design/Codex ART | TODO | none |
