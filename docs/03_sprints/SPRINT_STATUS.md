@@ -255,7 +255,7 @@ Camera Gate decided before install (ADR-010: dog-height camera only), so the cam
 | P3-013 | Mobile input/HUD integration | REVIEW |
 | P3-014 | Debug overlay | REVIEW |
 | P3-015 | Sprint 04 QA readiness | REVIEW |
-| P3-016 | Core Experience Gate 02 | TODO |
+| P3-016 | Core Experience Gate 02 | REVIEW |
 
 ## Sprint 04 Engineering Notes (Claude)
 - Play: Home → "🐕 3D 散步（試玩）". Bark = Q or the "🐶 汪！" button above the interact button. Leash pull = run away from your fighting owner past the leash length.
@@ -265,7 +265,7 @@ Camera Gate decided before install (ADR-010: dog-height camera only), so the cam
 - Training: bark distraction (COURAGE), pull save (STRAIN), drag out (RUN), bad pull (ENDURE), with cooldowns; routed through TrainingObserver.
 - HUD fix: the "主人記住了" experience card could grow to half the screen (autowrap) and sat under the desire card; it now keeps its size and sits below the desire card.
 - Hidden numbers only in the debug panel ("Agency:" line). All tuning values are placeholders for playtesting.
-- P3-016 Core Experience Gate 02 is for the owner after playtesting.
+- P3-016 Core Experience Gate 02 reviewed 2026-09-18: **REWORK CORE EXPERIENCE** (`docs/07_qa/reports/CORE_EXPERIENCE_GATE_02_REVIEW.md`). Owner: "沒有明顯" — the identity does not come across, and all four pillars asked about (TRAIN, DOG AGENCY, GOALS, WALK/FIGHT) were reported weak. Sprint 05 engineering is paused at P4-010; nothing is reverted.
 - Owner feedback (2026-09-18): "拉繩子跟吠叫好像完全沒有正面效益，只有負面效果". Causes found: continuous pulling alternated a good pull with a forced stumble (1.0 s cooldown vs 1.6 s repeat rule); dogs naturally stand behind their owner, which was the startle zone; a successful distraction only delayed the opponent, so no benefit was visible; sideways pulls counted as bad. Changes: a distracted opponent is exposed — the owner attacks at once and the hit does ×1.6 ("破綻"); bark range 6 m, facing 110°, "behind the owner" only within 25° and startle only within 1.5 m of the owner, resistance window 4 s; pulls only stumble when dragging the owner towards the opponent, sideways/away repositions, no repeat penalty; every outcome shows a HUD toast (✦ positive / ✘ negative). Measured (200 fights each, bark every 2.5 s): Jogger 175→200, Delivery Worker 156→200, Gym Regular 163→200 wins; Old Master still wins (0–5 of 200). Positive effect may now be too strong — tune after playtest.
 - Owner feedback (2026-09-18): "轉視角有點不順". Cause: the camera followed only inside two hard 50° gates (stick direction, dog vs camera heading), so it stalled after bigger turns and then started abruptly. Now it eases behind the dog continuously, weighted by forward stick share² × speed (sideways/backwards → 0, so no spinning), and players can turn it by dragging on the right half of the screen, right mouse drag, or ←/→ (`camera_turn_left/right`); auto-follow waits 1.5 s after a manual turn. `run_3d_slice_test` checks no yaw jumps and manual turning.
 - Camera/art boundary (2026-09-18): the art commit `fb186ca` tagged every starter-kit piece, buildings included, as a `FADE_GROUP` occluder. That marker means "the camera looks through this", so a building no longer pulled the camera in: at the test spot the camera's target sits at z≈6.07 inside the building that spans z 5.5–11.5, i.e. it settles inside the wall and watches the dog through it (`run_3d_slice_test`: "wall pulls camera in, dog still visible" failed). Buildings are now solid again — the rig pulls in and only fades when pulling in would come closer than `collision_min_distance`. The kit's thin props (bush, bench, bin, gate posts, bus-stop posts, tree) keep the fade marker, which is right for them, and no geometry, colour or detail of Codex's kit was changed.
@@ -276,7 +276,9 @@ Camera Gate decided before install (ADR-010: dog-height camera only), so the cam
 ## Sprint 05 — GREED / TERRITORY
 Installed from Update 007 (2026-09-18). The update gates engineering behind Core Experience Gate 02.
 
-> Owner decision (2026-09-18): start Sprint 05 engineering now ("動工"). P3-016 Core Experience Gate 02 has not been reviewed; it stays TODO and the owner can still call it after playtesting.
+> Owner decision (2026-09-18): start Sprint 05 engineering now ("動工"), before Core Experience Gate 02.
+>
+> **PAUSED 2026-09-18 at P4-010**: Core Experience Gate 02 came back REWORK CORE EXPERIENCE. P4-001..P4-010 stay REVIEW (unverified, not known-bad, and additive); P4-011..P4-017 are not started. Do not resume until the rework direction is agreed with the owner.
 
 | ID | Task | Status |
 |---|---|---|
