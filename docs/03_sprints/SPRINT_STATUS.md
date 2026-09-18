@@ -315,3 +315,28 @@ Installed from Update 007 (2026-09-18). The update gates engineering behind Core
 - P4-007: the banyan is now an `Interactable3D` ("💧 做記號"), offered only somewhere the dog has understood (CONTESTED or further), once per walk, and never once the place is already its own. Marking costs nothing, risks nothing and grants nothing by itself — it sets `marked_this_walk`, says the dog's words and plays Codex's `play_recognize()` + `play_mark()` (D5-03). Claim progress is deliberately not touched here: a walk counts for a place only if it gets home (P4-009/P4-010), which is what keeps ownership something you take home rather than something you stand next to.
 - P4-008: D5-06 names the existing black-dog/student pair (`enc_rival`, 阿黑 + 學生) as the resident, but that pair was already placed in the alley for the Sprint 03.5 scent chain, and the same dog must not be in two places at once. Resolved with a new `retired_by_flag` on `OpponentPair3D` (symmetric to `required_flag`): the alley meeting is retired by `rival_beaten`, and the new `banyan_resident` spot requires it. So the alley is where the dog meets 阿黑, and once that is settled he has gone home to his tree, where the territory story continues — the Sprint 03.5 chain leads into Sprint 05 instead of competing with it. Note for design/owner: the Old Master still stands at the same big tree (`pair_big_tree`, ~7 m away). Both are reachable and interaction targeting is unambiguous, but two fixed pairs around one landmark is worth a look during playtest.
 - P4-009/P4-010: marks travel with the walk and are settled on the way home, following the shape training already uses — `RunManager.record_territory_mark` collects them, `RunResult.marked_territories` carries them, and `Game._resolve_territories` applies them. A place moves forward only on a successful extraction: a defeated or failed walk adds nothing and, just as importantly, takes nothing away — territory never decays (ADR-012). Getting home without marking does nothing either, so ownership needs both halves. The third marked walk home sets OWNED once, writes the territory's `owned_flag` into `goal_progress` so other content can read it, and reports itself on the RunResult (`territory_claims`, `territories_claimed`) for the result screen. An owned place cannot be claimed again and its progress stops counting. `territory_core_test` runs the whole ladder including a defeat in the middle; `territory_world_test` marks and walks home through the real 3D walk and the real result screen.
+
+## P-02 COMBAT EXPERIENCE (Update 006 Patch 01)
+Installed 2026-09-18, after Core Experience Gate 02 returned REWORK and the owner named combat ("打架很沒有感覺"). The patch's own priority line — evaluate this before committing to Sprint 05 engineering — matches the pause already in place.
+
+Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog stays the movement anchor while the player's human becomes the visual focus; the camera tightens for tension with soft composition, never a lock-on, and the dog stays controllable in the Run World.
+
+| ID | Task | Status |
+|---|---|---|
+| D4/P02-001 | Follow Dog + Focus Owner camera | TODO |
+| D4/P02-002 | Soft focus / dead-zone | TODO |
+| D4/P02-003 | Tension/Snap transition | TODO |
+| D4/P02-004 | Active combat framing | TODO |
+| D4/P02-005 | Crisis framing | TODO |
+| D4/P02-006 | Victory release | TODO |
+| D4/P02-007 | Defeat owner-down beat | TODO |
+| D4/P02-008 | Owner condition feedback | TODO |
+| D4/P02-009 | Dog instinct feedback | TODO |
+| D4/P02-010 | Owner↔dog acknowledgement | TODO |
+| D4/P02-011 | Debug/tuning | TODO |
+| D4/P02-012 | Blind comparison QA | TODO |
+
+## P-02 Combat Experience Engineering Notes (Claude)
+- Not started. Adoption depends on the P-02 playtest and the blind comparison (D4/P02-012, `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`); ADR-014 stays PROPOSED until then.
+- The Gate 02 feel pass already landed (hitstop, camera shake, damage-scaled impact) and is complementary: it is the moment of contact, this patch is the framing and the emotional curve around it.
+- Audio is still absent project-wide and still needs an ownership call; `COMBAT_EMOTIONAL_FEEDBACK` assumes an audio duck on SNAP, which cannot exist yet.

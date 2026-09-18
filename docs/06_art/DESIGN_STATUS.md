@@ -30,5 +30,18 @@ Installed from Update 007 (2026-09-18). Design starts now; it does not wait for 
 | D5-09 | Target Screenshot 04 | Design/Codex ART | REVIEW | none |
 | D5-10 | Decision Pack | Design/Codex ART | REVIEW | Gate sign-off pending |
 
+## Combat Experience (Update 006 Patch 01)
+Installed 2026-09-18. Start immediately; D4-17 uses the P-02 captures.
+
+| ID | Deliverable | Owner | Status | Dependency |
+|---|---|---|---|---|
+| D4-11 | Combat Focus Composition | Design/Codex ART | TODO | none |
+| D4-12 | Combat Snap Storyboard | Design/Codex ART | TODO | none |
+| D4-13 | Owner Condition Readability | Design/Codex ART | TODO | none |
+| D4-14 | Dog Instinct Feedback | Design/Codex ART | TODO | none |
+| D4-15 | Owner↔Dog Feedback | Design/Codex ART | TODO | none |
+| D4-16 | Victory/Defeat Release | Design/Codex ART | TODO | none |
+| D4-17 | Combat Camera Prototype Review | Design/Codex ART | TODO | P-02 captures |
+
 ## Rule
 Design does not wait idle for engineering. Explore both camera families where needed, then collapse to one direction after P-01.
