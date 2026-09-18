@@ -36,6 +36,7 @@ var _experience_tween: Tween
 @onready var _hint_label: Label = %HintLabel
 @onready var _experience_fx: PanelContainer = %ExperienceFX
 @onready var _experience_label: Label = %ExperienceLabel
+@onready var _risk_label: Label = %RiskLabel
 
 
 func _ready() -> void:
@@ -44,6 +45,7 @@ func _ready() -> void:
 	_bag_button.pressed.connect(toggle_inventory)
 	_toast_label.hide()
 	_experience_fx.hide()
+	_risk_label.hide()
 	if _debug_panel != null:
 		_debug_panel.run_manager = run_manager
 		_debug_panel.combat_coordinator = combat_coordinator
@@ -58,6 +60,7 @@ func _ready() -> void:
 	run_manager.loot_blocked.connect(_on_loot_blocked)
 	run_manager.search_empty.connect(_on_search_empty)
 	run_manager.extraction_unlocked.connect(_on_extraction_unlocked)
+	run_manager.value_changed.connect(_on_value_changed)
 	if run_manager.training != null:
 		run_manager.training.event_recorded.connect(_on_training_event_recorded)
 	if run_manager.dog_actor != null:
@@ -151,6 +154,36 @@ func _on_search_empty(_point: Node) -> void:
 
 func _on_extraction_unlocked(point: Node) -> void:
 	show_toast(point.unlock_message, Color(0.6, 1.0, 0.6), true)
+	var value := run_manager.run_value()
+	if value.unbanked_value > 0:
+		show_toast("現在回家，主人身上這些東西就安全了", Color(0.85, 0.95, 0.8))
+	_update_risk_line(value)
+
+
+func _on_value_changed(value: RunValue) -> void:
+	_update_risk_line(value)
+
+
+## P4-002: safe versus at-risk value, said the way a walk would say it
+## (RUN_TENSION_PRESENTATION). One quiet line, and only when there is something
+## worth saying — an empty-handed walk never mentions risk at all.
+func _update_risk_line(value: RunValue) -> void:
+	var balance := DataRegistry.balance
+	var text := ""
+	var color := Color(0.88, 0.86, 0.78)
+	if value.unbanked_value > 0 and run_manager.is_past_first_extraction():
+		# The greed moment: going home is possible, and it would bank this.
+		text = "現在回家，$%d 就安全了" % value.unbanked_value
+		color = Color(0.72, 0.95, 0.72)
+	elif value.unbanked_value >= balance.risk_notable_value:
+		text = "主人身上帶著 $%d" % value.unbanked_value
+	if value.is_bag_full():
+		text = "背包已經塞滿了" if text.is_empty() else text + " · 背包滿了"
+	if value.unbanked_value >= balance.risk_heavy_value:
+		color = Color(1.0, 0.82, 0.55)
+	_risk_label.text = text
+	_risk_label.modulate = color
+	_risk_label.visible = not text.is_empty()
 
 
 func _on_training_event_recorded(event: TrainingEvent) -> void:
@@ -194,10 +227,14 @@ func _on_focus_changed(target: Node) -> void:
 		_interact_button.disabled = false
 
 
+## The headline number is what the owner is carrying, because that is what a
+## defeat would take. Whatever the dog is carrying is shown as already safe.
 func _update_bag_button() -> void:
-	var bag := run_manager.human_run_inventory
-	var value := bag.total_value() + run_manager.dog_safe_inventory.total_value()
-	_bag_button.text = "🎒 %d/%d  $%d" % [bag.used_slot_count(), bag.capacity, value]
+	var value := run_manager.run_value()
+	var text := "🎒 %d/%d  $%d" % [value.unbanked_slots, value.unbanked_capacity, value.unbanked_value]
+	if value.safe_value > 0:
+		text += "  🔒$%d" % value.safe_value
+	_bag_button.text = text
 
 
 func _update_time() -> void:

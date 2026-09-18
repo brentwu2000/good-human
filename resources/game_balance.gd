@@ -7,6 +7,13 @@ extends Resource
 @export var dog_safe_slots: int = 2
 @export var home_stash_slots: int = 30
 
+@export_group("Greed / risk")
+## The owner is carrying enough for the walk to be worth protecting, so the HUD
+## starts saying so (Sprint 05, RUN_TENSION_PRESENTATION).
+@export var risk_notable_value: int = 60
+## ...and enough that going home is plainly the sensible thing to do.
+@export var risk_heavy_value: int = 160
+
 @export_group("Combat")
 ## Derived combat values (CombatStats). Keep formulas here, not in skills.
 @export var hp_base: float = 24.0

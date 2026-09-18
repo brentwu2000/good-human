@@ -281,7 +281,7 @@ Installed from Update 007 (2026-09-18). The update gates engineering behind Core
 | ID | Task | Status |
 |---|---|---|
 | P4-001 | Run value/risk | REVIEW |
-| P4-002 | SAFE/UNBANKED presentation | TODO |
+| P4-002 | SAFE/UNBANKED presentation | REVIEW |
 | P4-003 | Post-extraction temptation hooks | TODO |
 | P4-004 | Temptation data | TODO |
 | P4-005 | Territory state/data | TODO |
@@ -303,3 +303,4 @@ Installed from Update 007 (2026-09-18). The update gates engineering behind Core
 - Scope reminders from the update: reuse the Run World, seamless combat, GOALS, TRAIN and DOG AGENCY. No global territory simulation, passive-income empire, dozens of capture points, PvP, daily decay or generic map capture. One territory (the Big Banyan Tree).
 - ADR-012 (territory is relationship, not empire) and ADR-013 (greed is voluntary) are installed in `docs/99_notes`.
 - P4-001: `RunValue` (`core/run/run_value.gd`) reads the two run inventories the player is already deciding between — the dog's bag is SAFE, the owner's is UNBANKED — and reports value, slots, `at_risk_share()` and `is_bag_full()`. PERMANENT (the Home stash) is deliberately not in it: a walk never touches it. RunManager emits `value_changed` whenever the split actually moves, remembers when going home first became possible and what was at stake then (`first_extraction_time`, `value_at_first_extraction`, `is_past_first_extraction()`), and writes all of it onto the RunResult along with `lost_value` and `seconds_after_extraction()` — the evidence Gate 01 needs for "did the player choose to stay". No loss rules changed: the dog's bag still comes home, the owner's is still lost. `run_core_test` covers the split, the risk share, the update signal, the first-extraction snapshot and a defeat after staying on.
+- P4-002: the bag button used to add both bags into one number, which hid the only distinction the player is deciding about. Its headline is now what the owner carries — what a defeat takes — and whatever the dog carries is marked `🔒$N` as already safe, so moving an item into a dog slot visibly moves value from one to the other. Under it, one quiet `RiskLabel` speaks only when there is something to say (RUN_TENSION_PRESENTATION, no extraction-shooter readout): silent while the walk is worth little, "主人身上帶著 $N" past `risk_notable_value` (60), and once going home is possible the greed line "現在回家，$N 就安全了"; a full bag adds "背包滿了", and past `risk_heavy_value` (160) the line warms in colour. Unlocking the first extraction also says "現在回家，主人身上這些東西就安全了" once, and only if anything is at risk. Thresholds live in `game_balance.tres`. `golden_path_test` checks all of it through the real HUD.

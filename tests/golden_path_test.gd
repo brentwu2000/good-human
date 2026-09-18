@@ -62,6 +62,14 @@ func _run() -> void:
 	check_eq(first.run.dog_safe_inventory.count_item(&"mysterious_item"), 1, "mysterious item in dog safe slot")
 	first.hud.toggle_inventory()
 
+	# P4-002: the bag button separates what is safe from what a defeat would take.
+	var bag_button := first.hud.get_node("%BagButton") as Button
+	var risk_label := first.hud.get_node("%RiskLabel") as Label
+	var safe_value: int = DataRegistry.get_item(&"mysterious_item").value
+	check(bag_button.text.contains("🔒$%d" % safe_value), "the dog's bag reads as already safe (%s)" % bag_button.text)
+	check(not bag_button.text.contains("$%d " % (safe_value + first.run.human_run_inventory.total_value())), "the safe value is not folded into the headline")
+	check(not risk_label.visible, "a walk carrying little says nothing about risk")
+
 	# 12–15: set 04:50, reach 05:00, bus stop unlocks, north gate still locked.
 	_press(debug.get_node("%SetTimeButton"))
 	check(not first.run.is_extraction_available(&"bus_stop"), "bus stop still locked after skip")
@@ -72,10 +80,14 @@ func _run() -> void:
 	check(first.run.is_extraction_available(&"bus_stop"), "bus stop unlocks at its time")
 	check(north_gate.unlock_time > bus_stop.unlock_time, "north gate opens later")
 	check(not first.run.is_extraction_available(&"north_gate"), "north gate still locked")
+	# P4-002: once going home is possible, the walk says what that would bank.
+	check(risk_label.visible and risk_label.text.contains("現在回家"), "going home is offered in the walk's own words (%s)" % risk_label.text)
+	check(risk_label.text.contains("$%d" % first.run.human_run_inventory.total_value()), "the line names what the owner is carrying")
 
 	# 16–18: keep going, search in the park, get boxing gloves.
 	await _search(first, &"gym_equipment")
 	_press(debug.get_node("%GiveGlovesButton"))
+	check(risk_label.text.contains("$%d" % first.run.human_run_inventory.total_value()), "staying on and finding more updates what is at stake (%s)" % risk_label.text)
 
 	# 19–21: return to bus stop and extract through interaction.
 	var first_run := first.run as RunManager
