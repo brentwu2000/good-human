@@ -12,6 +12,12 @@ var _popup_left: float = 0.0
 var _pose_tween: Tween
 var _down: bool = false
 var _time: float = 0.0
+## P03-E01: the body's continuous motion. Reactions and strikes are still
+## tweened on top; this is what the fighter does the rest of the time, so a
+## human at rest in a fight is never a statue.
+var motion: CombatMotion3D = CombatMotion3D.new()
+var _guarding: bool = false
+var _footwork: float = 0.0
 
 
 func apply(fighter: FighterData) -> void:
@@ -55,8 +61,41 @@ func set_hp_ratio(ratio: float) -> void:
 
 
 func set_guard(active: bool) -> void:
-	if _body != null and not _down:
-		_body.position.z = 0.12 if active else _body.position.z
+	_guarding = active
+
+
+## Drives the body from its motion state. Called every frame by the coordinator.
+func play_motion(delta: float) -> void:
+	if _body == null or _down or _pose_tween != null and _pose_tween.is_running():
+		return
+	_footwork += delta * (7.0 if motion.state == CombatMotion3D.State.APPROACH else 4.2)
+	var bob := 0.0
+	var lean := 0.0
+	var guard := 0.06 if _guarding else 0.0
+	match motion.state:
+		CombatMotion3D.State.IDLE_COMBAT:
+			bob = sin(_footwork) * 0.012
+			lean = 0.03
+		CombatMotion3D.State.APPROACH:
+			# Weight forward and a quicker step: they are coming for you.
+			bob = absf(sin(_footwork)) * 0.035
+			lean = 0.10
+		CombatMotion3D.State.CIRCLE:
+			# Side-to-side footwork while they look for an angle.
+			bob = absf(sin(_footwork)) * 0.022
+			lean = 0.05
+			_body.position.x = sin(_footwork * 0.5) * 0.06
+		CombatMotion3D.State.RECOVER:
+			# Off balance and open — the moment a dog's bark is worth most.
+			bob = sin(_footwork * 0.6) * 0.01
+			lean = -0.08
+		_:
+			return
+	_body.position.y = bob
+	_body.rotation.x = lean
+	_body.position.z = guard
+	if motion.state != CombatMotion3D.State.CIRCLE:
+		_body.position.x = move_toward(_body.position.x, 0.0, delta * 0.4)
 
 
 func play_windup(skill: CombatSkillData) -> void:
@@ -93,12 +132,22 @@ func play_hurt(blocked: bool, weight: float = 0.5) -> void:
 		tween.tween_property(_body, "rotation:x", 0.0, 0.24)
 
 
+## A dodge is a body moving out of the way, not a word on the screen.
 func play_evade() -> void:
 	shout("閃過！", Color(0.7, 1.0, 0.7))
+	var tween := _new_tween()
+	tween.tween_property(_body, "position:x", 0.32, 0.09).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(_body, "rotation:z", 0.22, 0.09)
+	tween.tween_property(_body, "position:x", 0.0, 0.2)
+	tween.parallel().tween_property(_body, "rotation:z", 0.0, 0.2)
 
 
+## A swing that hits nothing still travels, and overreaches.
 func play_miss() -> void:
 	shout("落空", Color(0.8, 0.8, 0.8))
+	var tween := _new_tween()
+	tween.tween_property(_body, "rotation:y", 0.34, 0.1)
+	tween.tween_property(_body, "rotation:y", 0.0, 0.26)
 
 
 func play_stagger() -> void:

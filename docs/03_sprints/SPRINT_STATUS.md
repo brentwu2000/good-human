@@ -355,7 +355,7 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 
 | ID | Task | Status |
 |---|---|---|
-| P03-E01 | Physical human combat state/motion | TODO |
+| P03-E01 | Physical human combat state/motion | REVIEW |
 | P03-E02 | Punch/Kick/Block/Dodge + reactions/down | TODO |
 | P03-E03 | Combat spacing, approach/circle/reset | TODO |
 | P03-E04 | Dog POV combat camera | TODO |
@@ -371,4 +371,8 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 ## P-03 Engineering Notes (Claude)
 - Execution order is set by the patch and is not mine to reorder: physical combat motion first, then the Dog POV camera, then visible Bark/Pull results, then atmosphere, then resolution. The reason is stated plainly in `HUMAN_COMBAT_MOTION.md` and matches what I found during the Gate 02 feel pass — "damage events without physical motion cannot validate combat camera, dog intervention or atmosphere". Today two humans stand still and exchange HP with a 0.25 m slide; no camera can rescue that.
 - Exit gate: the team must be able to watch an encounter **with the combat text hidden** and still read the fight, the dog's intervention and the escalation. Text-only combat is explicitly unacceptable.
+- P03-E01: `CombatMotion3D` holds the eleven states the spec asks for and is read from the simulation every frame; `FighterPuppet3D.play_motion()` gives each one a body — squared-up breathing, weight forward while closing, side-to-side footwork while working for an angle, and an off-balance lean during RECOVER, which is the moment a bark is worth most. Reactions hold for their own beat (HIT_REACT 0.28 s, STAGGER 0.45 s) so a hit reads as a hit instead of flickering back to neutral.
+- Circling without touching the rules: the simulation stays one-dimensional and keeps owning distance and every outcome, while the *line* the two of them stand on turns slowly in the world (`ORBIT_SPEED`), and only while neither is committed to anything. Two people circling each other is presentation; who can reach whom is not. This also means the balance measured in the Gate 02 pass is untouched.
+- `play_evade()` and `play_miss()` were text-only, which the patch names as unacceptable — a dodge is now a body moving out of the way and a miss overreaches. Also fixed `set_guard`, which assigned `position.z` to itself when guarding ended, so a guard never actually dropped.
+- `combat_motion_3d_test` asserts the requirement as stated: over a real fight both humans travel more than half a metre, the fight passes through several different body states, and attacks are telegraphed — the cue the dog's intervention depends on.
 - The atmosphere director assumes audio (ducking ambience, impact, dog breathing, low-frequency pulse before the first strike). The project still has none, and this now blocks P03-E09.
