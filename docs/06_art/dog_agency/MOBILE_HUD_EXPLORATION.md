@@ -1,7 +1,8 @@
 # Sprint 04 — Mobile HUD Exploration v0.1
 
-Status: REVIEW  
-Deliverable: D-07  
+Status: REVIEW
+
+Deliverable: D-07
 Visual board: `assets/_source/design/dog_agency/mobile_hud_exploration_01.svg`
 
 ## Decision

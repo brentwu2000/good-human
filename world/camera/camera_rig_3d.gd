@@ -37,6 +37,12 @@ const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.
 ## A wall may pull the camera in down to this distance; anything closer fades
 ## instead, so the camera stays low behind the dog.
 @export var collision_min_distance: float = 1.2
+## Impact shake (Core Experience Gate 02). Trauma decays every second; the
+## offset is trauma squared, so small hits barely register and a heavy one is
+## unmistakable. It moves the view only — never the dog, the fight or the rules.
+@export var shake_decay: float = 2.4
+@export var shake_angle: float = 0.035
+@export var shake_offset: float = 0.10
 
 var dog: DogController3D
 var owner_actor: HumanFollower3D
@@ -49,6 +55,8 @@ var camera: Camera3D
 var _focus: Vector3
 var _faded: Dictionary[Node, bool] = {}
 var _manual_hold: float = 0.0
+var _trauma: float = 0.0
+var _shake_time: float = 0.0
 ## Control frame for the stick (see header).
 var _control_yaw: float = 0.0
 var _stick_held: bool = false
@@ -62,6 +70,11 @@ func _ready() -> void:
 	camera = Camera3D.new()
 	camera.current = true
 	add_child(camera)
+
+
+## A hit landed: 0..1 for how hard. Never accumulates past a full shake.
+func add_trauma(weight: float) -> void:
+	_trauma = clampf(_trauma + clampf(weight, 0.0, 1.0) * 0.6, 0.0, 1.0)
 
 
 ## Places the camera straight behind the dog's current heading.
@@ -110,8 +123,24 @@ func _update(delta: float, instant: bool) -> void:
 	global_position = _place_camera(_focus, desired)
 	if global_position.distance_to(_focus) > 0.01:
 		look_at(_focus, Vector3.UP)
+	_apply_shake(delta)
 	camera.fov = current["fov"]
 	_update_owner_fade()
+
+
+## Shakes the camera node after it has been placed and aimed, so collision and
+## framing are unaffected by it.
+func _apply_shake(delta: float) -> void:
+	if _trauma <= 0.0:
+		return
+	_trauma = maxf(_trauma - shake_decay * delta, 0.0)
+	_shake_time += delta
+	var amount := _trauma * _trauma
+	var a := sin(_shake_time * 47.0) * amount
+	var b := sin(_shake_time * 61.0 + 1.7) * amount
+	global_position += (global_basis.x * a + global_basis.y * b) * shake_offset
+	rotate_object_local(Vector3.FORWARD, a * shake_angle)
+	rotate_object_local(Vector3.RIGHT, b * shake_angle)
 
 
 func _update_yaw(delta: float) -> void:

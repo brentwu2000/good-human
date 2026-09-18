@@ -17,12 +17,22 @@ const UNITS_PER_METER: float = 100.0
 const DISENGAGE_DISTANCE: float = 9.0
 
 @export var run_manager: RunManager
+## Optional: the view shakes when a hit lands nearby.
+@export var camera: CameraRig3D
 @export var human: HumanFollower3D
 @export var dog: DogController3D
 ## Ordinary pairs shuffled over spots without a fixed encounter each walk.
 @export var ordinary_pool: Array[EncounterData] = []
 ## Tests speed fights up; 1.0 in the game.
 @export var time_scale: float = 1.0
+## Combat feel (Core Experience Gate 02: "打架很沒有感覺"). A landed hit stops
+## the fight dead for a moment so it reads as contact rather than a slide. It
+## only holds the clock — the simulation decides everything, and the pause is
+## short enough never to change who wins.
+const HITSTOP_LIGHT: float = 0.06
+const HITSTOP_HEAVY: float = 0.16
+## Damage at or above this is a heavy hit (an opening, or a kick that connects).
+const HEAVY_DAMAGE: float = 9.0
 
 var last_result: CombatSimulation.Result = CombatSimulation.Result.NONE
 ## Active fight or null.
@@ -34,6 +44,7 @@ var _axis: Vector3
 var _accumulator: float = 0.0
 var _defeat_left: float = -1.0
 var _defeated_by: String = ""
+var _hitstop_left: float = 0.0
 var _base_fighter: FighterData
 
 
@@ -129,12 +140,29 @@ func _process(delta: float) -> void:
 	if dog.global_position.distance_to(human.global_position) > DISENGAGE_DISTANCE:
 		sim.disengage()
 		return
+	if _hitstop_left > 0.0:
+		_hitstop_left -= delta
+		_sync()
+		return
 	_accumulator += delta * time_scale
 	while _accumulator >= STEP and engagement != null and not sim.is_finished():
 		_accumulator -= STEP
 		sim.step(STEP)
 	if engagement != null:
 		_sync()
+
+
+## 0..1 weight of one hit, so a jab and a kick into an opening do not land the
+## same way.
+func _impact_weight(damage: float) -> float:
+	return clampf(damage / HEAVY_DAMAGE, 0.25, 1.0)
+
+
+## Freezes the fight for a beat and shakes the view, scaled by the hit.
+func _punch_landed(weight: float) -> void:
+	_hitstop_left = maxf(_hitstop_left, lerpf(HITSTOP_LIGHT, HITSTOP_HEAVY, weight))
+	if camera != null:
+		camera.add_trauma(weight)
 
 
 func _world_position(side: int) -> Vector3:
@@ -158,7 +186,7 @@ func _sync() -> void:
 	opponent.human_puppet.set_guard(opponent_fighter.is_guarding())
 
 
-func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, _amount: float) -> void:
+func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amount: float) -> void:
 	var own := human.puppet
 	var theirs := engagement.pair.human_puppet
 	var actor := own if side == CombatSimulation.PLAYER else theirs
@@ -167,19 +195,26 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, _amou
 		&"skill_started":
 			actor.play_windup(skill)
 		&"hit":
+			var weight := _impact_weight(amount)
 			actor.play_strike(skill)
-			other.play_hurt(false)
+			other.play_hurt(false, weight)
 			engagement.pair.show_combat_impact(false)
+			_punch_landed(weight)
 		&"blocked":
 			actor.play_strike(skill)
-			other.play_hurt(true)
+			other.play_hurt(true, _impact_weight(amount) * 0.5)
 			engagement.pair.show_combat_impact(true)
+			_punch_landed(0.35)
 		&"dodged":
 			actor.play_strike(skill)
 			other.play_evade()
 		&"missed":
 			actor.play_strike(skill)
 			actor.play_miss()
+		&"opening":
+			# The dog made this happen: the biggest hit of the fight should
+			# look like the biggest hit of the fight.
+			_punch_landed(1.0)
 		&"staggered":
 			actor.play_stagger()
 		&"defeated":
@@ -193,6 +228,7 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 	var encounter := opponent.encounter
 	engagement = null
 	last_result = result
+	_hitstop_left = 0.0
 	opponent.end_combat(result)
 	match result:
 		CombatSimulation.Result.VICTORY:
