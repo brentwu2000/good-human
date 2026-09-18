@@ -69,6 +69,8 @@ func setup(data: EncounterData) -> void:
 		_dog.queue_free()
 	_dog = Greybox.dog(encounter.dog_color, encounter.dog_scale, encounter.dog_breed)
 	add_child(_dog)
+	if encounter.id == &"enc_rival":
+		BanyanRivalPair3D.decorate(human_puppet, _dog)
 	_name_label.text = "%s和%s" % [encounter.human.display_name, encounter.dog_name]
 	_place_dog()
 

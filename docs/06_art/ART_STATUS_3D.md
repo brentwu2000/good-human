@@ -15,6 +15,8 @@ States: RESEARCH / CANDIDATE / IN_PROGRESS / REVIEW / APPROVED / REJECTED
 | ART-039 | 3D Search Props | P1 | REVIEW |
 | ART-040 | 3D Extraction Visuals | P1 | REVIEW |
 | ART-041 | 3D Goal World Cues | P1 | REVIEW |
+| ART-042 | 3D Territory Interaction Presentation | P0 | REVIEW |
+| ART-043 | 3D Banyan Rival Pair Identity | P0 | REVIEW |
 
 ## Sprint 04 Dog Agency design handoff
 

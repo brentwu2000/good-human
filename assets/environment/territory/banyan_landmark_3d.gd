@@ -24,6 +24,7 @@ static func build(state: TerritoryState = TerritoryState.DISCOVERED) -> Node3D:
 	_build_canopy(root)
 	_build_hanging_roots(root)
 	_build_scent_knots(root, state)
+	root.add_child(TerritoryPresentation3D.new())
 	return root
 
 
