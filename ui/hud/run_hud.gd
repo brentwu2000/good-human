@@ -157,11 +157,30 @@ func _on_extraction_unlocked(point: Node) -> void:
 	var value := run_manager.run_value()
 	if value.unbanked_value > 0:
 		show_toast("現在回家，主人身上這些東西就安全了", Color(0.85, 0.95, 0.8))
-	_update_risk_line(value)
+	_update_risk_badge(value)
 
 
 func _on_value_changed(value: RunValue) -> void:
-	_update_risk_line(value)
+	_update_risk_badge(value)
+
+
+## D5-05 selected presentation: one quiet consequence line, never a danger bar.
+func _update_risk_badge(value: RunValue) -> void:
+	var balance := DataRegistry.balance
+	var text := ""
+	var color := Color(0.88, 0.86, 0.78)
+	if value.unbanked_value > 0 and run_manager.is_past_first_extraction():
+		text = "回家就安全 · 主人還帶著 $%d" % value.unbanked_value
+		color = Color(0.72, 0.95, 0.72)
+	elif value.unbanked_value >= balance.risk_notable_value:
+		text = "主人帶著 $%d · 倒下會失去" % value.unbanked_value
+	if value.is_bag_full():
+		text = "主人的袋子裝滿了" if text.is_empty() else text + " · 袋子已滿"
+	if value.unbanked_value >= balance.risk_heavy_value:
+		color = Color(1.0, 0.82, 0.55)
+	_risk_label.text = text
+	_risk_label.modulate = color
+	_risk_label.visible = not text.is_empty()
 
 
 ## P4-002: safe versus at-risk value, said the way a walk would say it

@@ -23,7 +23,7 @@ Installed from Update 007 (2026-09-18). Design starts now; it does not wait for 
 | D5-02 | Scent ownership | Design/Codex ART | REVIEW | none |
 | D5-03 | Mark interaction | Design/Codex ART | REVIEW | none |
 | D5-04 | Greed storyboard | Design | TODO | none |
-| D5-05 | Risk HUD | Design | TODO | none |
+| D5-05 | Risk HUD | Design/Codex ART | REVIEW | none |
 | D5-06 | Rival pair | Design/Codex ART | REVIEW | none |
 | D5-07 | Territory variants | Design/Codex ART | REVIEW | none |
 | D5-08 | Reward reveal | Design/Codex ART | REVIEW | none |

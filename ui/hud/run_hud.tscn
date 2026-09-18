@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://ui/hud/run_hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://ui/hud/touch_controls.tscn" id="2_touch"]
@@ -43,6 +43,19 @@ content_margin_top = 16.0
 content_margin_right = 24.0
 content_margin_bottom = 18.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_risk"]
+bg_color = Color(0.105, 0.135, 0.13, 0.88)
+border_width_left = 4
+border_color = Color(0.27, 0.69, 0.56, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 7.0
+content_margin_right = 16.0
+content_margin_bottom = 7.0
+
 [node name="RunHUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
@@ -84,10 +97,15 @@ text = "🎒 0/8  $0"
 unique_name_in_owner = true
 offset_left = 24.0
 offset_top = 92.0
-offset_right = 600.0
-offset_bottom = 126.0
-theme_override_font_sizes/font_size = 24
+offset_right = 560.0
+offset_bottom = 142.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.9, 0.94, 0.86, 1)
+theme_override_font_sizes/font_size = 21
+theme_override_styles/normal = SubResource("StyleBoxFlat_risk")
 text = ""
+vertical_alignment = 1
+autowrap_mode = 3
 
 [node name="ToastLabel" type="Label" parent="."]
 unique_name_in_owner = true
