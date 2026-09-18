@@ -108,9 +108,34 @@ func _test_dog_pov(map: RunMap3D, coordinator: CombatCoordinator3D, dog: DogCont
 	var centre := rig.combat_center()
 	var owner_head := human.global_position + Vector3(0, 1.1, 0)
 	var opponent_head := pair.human_global_position() + Vector3(0, 1.1, 0)
+	# The point the camera watches is at the height of the people fighting, not
+	# floating above their heads.
+	check(absf(centre.y - owner_head.y) < 0.3, "the fight is watched at head height (%.2f vs %.2f)" % [centre.y, owner_head.y])
 	check(centre.distance_to(owner_head) < centre.distance_to(opponent_head), "the fight is watched from the owner's side")
 	var aim := -rig.global_basis.z
 	check(aim.dot((centre - rig.global_position).normalized()) > 0.9, "the camera is pointed at the fight")
+
+	# Pushing forward must go where the player is looking. In first person the
+	# boom is behind their eyes and means nothing; reading the stick against it
+	# sends the dog somewhere else and the player backs away without meaning to.
+	var view := rig.view_yaw()
+	var screen_forward := Vector3.FORWARD.rotated(Vector3.UP, view)
+	check(absf(angle_difference(view, rig.yaw)) > 0.15, "in first person the view has left the boom behind")
+	var to_fight := rig.combat_center() - dog.global_position
+	to_fight.y = 0.0
+	check(screen_forward.dot(to_fight.normalized()) > 0.6, "and the view is pointed at the fight")
+	var before := dog.global_position
+	Input.action_press(&"move_up")
+	for i in 30:
+		await _tree.physics_frame
+	Input.action_release(&"move_up")
+	var travelled := dog.global_position - before
+	travelled.y = 0.0
+	check(travelled.length() > 0.2, "the dog actually moves")
+	check(travelled.normalized().dot(screen_forward) > 0.7, "pushing forward walks into the screen, not away from it")
+	dog.global_position = before
+	dog.velocity = Vector3.ZERO
+	await _physics(4)
 
 	# The snap is a blend, not a cut: it never jumps.
 	coordinator.blows_landed = 0

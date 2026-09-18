@@ -175,6 +175,19 @@ func is_combat_framing() -> bool:
 	return context != Context.EXPLORE
 
 
+## The direction the player is actually looking along. Out of first person that
+## is the boom; inside it the boom is behind their eyes and means nothing, so it
+## is where the camera is pointed. Movement is read against this, otherwise
+## pushing forward walks somewhere other than into the screen and the player
+## backs away from the fight without meaning to.
+func view_yaw() -> float:
+	if pov <= 0.5:
+		return yaw
+	var forward := -global_basis.z
+	forward.y = 0.0
+	return yaw if forward.length() < 0.01 else atan2(-forward.x, -forward.z)
+
+
 ## Which beat of the fight the framing should be playing. Read from what the
 ## coordinator reports; the camera never decides anything about the fight.
 func _desired_context() -> Context:
@@ -216,7 +229,6 @@ func _update(delta: float, instant: bool) -> void:
 
 	if not instant:
 		_update_yaw(delta)
-	_update_control_frame(delta, instant)
 
 	# FollowAnchor: the boom always hangs behind the dog, in a fight or not.
 	var anchor := dog.global_position + Vector3(0, current["pivot"], 0)
@@ -240,6 +252,9 @@ func _update(delta: float, instant: bool) -> void:
 		look_at(look_point, Vector3.UP)
 	_apply_shake(delta)
 	camera.fov = current["fov"]
+	# Last, so the stick is read against the view the player is actually looking
+	# along this frame — in first person that is the aim, not the boom.
+	_update_control_frame(delta, instant)
 	_update_owner_fade()
 
 
@@ -291,7 +306,7 @@ func combat_center() -> Vector3:
 	var owner_point := owner_actor.global_position + head
 	if coordinator == null or coordinator.pair == null:
 		return owner_point
-	return coordinator.pair.human_global_position().lerp(owner_point, combat_center_owner_bias) + head
+	return (coordinator.pair.human_global_position() + head).lerp(owner_point, combat_center_owner_bias)
 
 
 ## The context distance, given ground only when the dog has strayed from its
@@ -396,11 +411,12 @@ func _update_control_frame(delta: float, instant: bool) -> void:
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var held := input.length() >= 0.1
 	var angle := input.angle()
+	var view := view_yaw()
 	if instant or not held or not _stick_held or absf(rad_to_deg(angle_difference(_stick_angle, angle))) > relatch_angle:
-		_control_yaw = yaw
+		_control_yaw = view
 		_stick_angle = angle
 	else:
-		_control_yaw = lerp_angle(_control_yaw, yaw, 1.0 - exp(-control_follow_rate * delta))
+		_control_yaw = lerp_angle(_control_yaw, view, 1.0 - exp(-control_follow_rate * delta))
 	_stick_held = held
 	dog.camera_yaw = _control_yaw
 
