@@ -15,9 +15,13 @@ const CONCRETE := Color("#b9afa1")
 const GLASS := Color("#9cc7cf")
 
 
+## Buildings are solid volumes, not see-through occluders: one between the
+## camera and the dog pulls the camera in (and only fades once pulling in would
+## bring it closer than the rig allows). Fading them instead would let the
+## camera settle inside the building and watch the dog through the wall.
 static func building(size: Vector3, color: Color, position: Vector3, variant: int = 0) -> Node3D:
 	var root := Node3D.new()
-	var body := Greybox.solid_box(size, color, position, Greybox.FADE_GROUP)
+	var body := Greybox.solid_box(size, color, position)
 	root.add_child(body)
 	var front_z := -size.z * 0.5 - 0.035
 	var rows := maxi(1, int(size.y / 1.65))
