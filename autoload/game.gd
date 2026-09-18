@@ -14,6 +14,8 @@ var home_stash: Inventory
 var human_growth: HumanGrowth = HumanGrowth.new()
 ## The dog's desires, threads and discoveries.
 var goal_progress: GoalProgress = GoalProgress.new()
+## The places the dog keeps going back to (Sprint 05).
+var territory_progress: TerritoryProgress = TerritoryProgress.new()
 var last_run_result: RunResult
 
 
@@ -28,6 +30,7 @@ func load_profile() -> void:
 	human_growth.deserialize(human.get("growth_data", {}))
 	var dog: Dictionary = SaveManager.data["dog"]
 	goal_progress.deserialize(dog.get("goals", {}))
+	territory_progress.deserialize(dog.get("territories", {}))
 
 
 func goto_home() -> void:
@@ -62,6 +65,7 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 	SaveManager.data["stash"] = home_stash.serialize()
 	SaveManager.data["human"]["growth_data"] = human_growth.serialize()
 	SaveManager.data["dog"]["goals"] = goal_progress.serialize()
+	SaveManager.data["dog"]["territories"] = territory_progress.serialize()
 	SaveManager.save_game()
 
 	last_run_result = result

@@ -115,7 +115,13 @@ func _build_park() -> void:
 	add_child(EnvironmentKit.park_gate(Vector3(0, 0, -20)))
 	for p: Vector3 in [Vector3(-8, 0, -28), Vector3(10, 0, -31), Vector3(-7, 0, -43), Vector3(13, 0, -50), Vector3(-13, 0, -54), Vector3(4, 0, -58)]:
 		if p == Vector3(-13, 0, -54):
-			var banyan := BanyanLandmark3D.build(BanyanLandmark3D.TerritoryState.DISCOVERED)
+			# The banyan is a place, not scenery: a TerritoryPoint3D owns it and
+			# picks the landmark variant from what the dog remembers (P4-006).
+			var banyan := TerritoryPoint3D.new()
+			banyan.name = "BanyanTerritory"
+			banyan.territory_id = &"banyan"
+			banyan.run_manager = run_manager
+			banyan.dog = dog
 			banyan.position = p
 			add_child(banyan)
 		else:

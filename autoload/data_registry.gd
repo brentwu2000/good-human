@@ -7,12 +7,15 @@ const TRAINING_BALANCE_PATH: String = "res://data/training/training_balance.tres
 const TRAINING_EVENTS_DIR: String = "res://data/training/events"
 const GOAL_CATALOG_PATH: String = "res://data/goals/goal_catalog.tres"
 const TEMPTATIONS_DIR: String = "res://data/greed/temptations"
+const TERRITORIES_DIR: String = "res://data/territory"
 
 var balance: GameBalance
 var training: TrainingBalance
 var goals: GoalCatalog
 ## Reasons to stay out after going home became possible (Sprint 05).
 var temptations: Array[TemptationData] = []
+
+var _territories: Dictionary[StringName, TerritoryData] = {}
 
 var _items: Dictionary[StringName, ItemData] = {}
 var _training_events: Dictionary[StringName, TrainingEventData] = {}
@@ -25,6 +28,7 @@ func _ready() -> void:
 	_load_items()
 	_load_training_events()
 	_load_temptations()
+	_load_territories()
 
 
 func get_training_event(event_id: StringName) -> TrainingEventData:
@@ -76,6 +80,27 @@ func _load_temptations() -> void:
 		seen[data.id] = true
 		temptations.append(data)
 	temptations.sort_custom(func(a: TemptationData, b: TemptationData) -> bool: return String(a.id) < String(b.id))
+
+
+func get_territory(territory_id: StringName) -> TerritoryData:
+	return _territories.get(territory_id)
+
+
+func get_all_territories() -> Array[TerritoryData]:
+	var result: Array[TerritoryData] = []
+	result.assign(_territories.values())
+	return result
+
+
+func _load_territories() -> void:
+	for file_name in ResourceLoader.list_directory(TERRITORIES_DIR):
+		if not file_name.ends_with(".tres"):
+			continue
+		var data := load(TERRITORIES_DIR.path_join(file_name)) as TerritoryData
+		if data == null or _territories.has(data.id):
+			push_error("DataRegistry: bad or duplicate territory %s" % file_name)
+			continue
+		_territories[data.id] = data
 
 
 func _load_training_events() -> void:

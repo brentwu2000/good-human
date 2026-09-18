@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="TerritoryData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/territory_data.gd" id="1_territory"]
+
+[resource]
+script = ExtResource("1_territory")
+id = &"banyan"
+display_name = "大榕樹"
+claim_target = 3
+resident_spot = &"banyan_resident"
+place_id = &"big_tree"
+owned_flag = &"banyan_owned"
+discovered_text = "好大的一棵樹……這裡的味道好多。"
+rival_scent_text = "這裡有別的狗的味道。牠常常來。"
+marked_text = "這裡也有我的味道了。"
+claimed_text = "這裡是我的地方了。"
