@@ -24,6 +24,7 @@
 [ext_resource type="Resource" path="res://data/encounters/enc_delivery.tres" id="16_delivery"]
 [ext_resource type="Resource" path="res://data/encounters/enc_gym.tres" id="17_gym"]
 [ext_resource type="Resource" path="res://data/encounters/enc_old_master.tres" id="18_old_master"]
+[ext_resource type="Script" path="res://core/run/temptation_director.gd" id="27_temptation"]
 
 [sub_resource type="RectangleShape2D" id="Rect_BoundaryTop"]
 size = Vector2(1680, 40)
@@ -576,11 +577,17 @@ script = ExtResource("25_director")
 run_manager = NodePath("../RunManager")
 coordinator = NodePath("../CombatCoordinator")
 
-[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator", "owner_behavior", "goal_director") instance=ExtResource("6_hud")]
+[node name="TemptationDirector" type="Node" parent="." node_paths=PackedStringArray("run_manager", "coordinator")]
+script = ExtResource("27_temptation")
+run_manager = NodePath("../RunManager")
+coordinator = NodePath("../CombatCoordinator")
+
+[node name="RunHUD" parent="." node_paths=PackedStringArray("run_manager", "combat_coordinator", "owner_behavior", "goal_director", "temptation_director") instance=ExtResource("6_hud")]
 run_manager = NodePath("../RunManager")
 combat_coordinator = NodePath("../CombatCoordinator")
 owner_behavior = NodePath("../OwnerBehavior")
 goal_director = NodePath("../GoalDirector")
+temptation_director = NodePath("../TemptationDirector")
 
 [node name="DesireHUD" parent="." node_paths=PackedStringArray("director", "run_manager") instance=ExtResource("26_desire_hud")]
 director = NodePath("../GoalDirector")

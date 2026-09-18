@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TemptationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/temptation_data.gd" id="1_temptation"]
+
+[resource]
+script = ExtResource("1_temptation")
+id = &"one_more_search"
+dog_text = "那邊好像還有東西可以聞。"
+world_hint = "還有沒翻過的地方"
+needs = 3
+weight = 0.9
+cooldown = 75.0
+expiry = 35.0
+min_unbanked_value = 40

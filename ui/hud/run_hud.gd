@@ -16,6 +16,8 @@ const EXPERIENCE_SECONDS: float = 2.2
 @export var goal_director: GoalDirector
 ## Optional DogAgency (3D walk).
 @export var dog_agency: Node
+## Optional TemptationDirector (Sprint 05): reasons to stay out.
+@export var temptation_director: TemptationDirector
 
 var _toast_queue: Array[Dictionary] = []
 var _toast_time_left: float = 0.0
@@ -61,6 +63,8 @@ func _ready() -> void:
 	run_manager.search_empty.connect(_on_search_empty)
 	run_manager.extraction_unlocked.connect(_on_extraction_unlocked)
 	run_manager.value_changed.connect(_on_value_changed)
+	if temptation_director != null:
+		temptation_director.offered.connect(_on_temptation_offered)
 	if run_manager.training != null:
 		run_manager.training.event_recorded.connect(_on_training_event_recorded)
 	if run_manager.dog_actor != null:
@@ -154,10 +158,17 @@ func _on_search_empty(_point: Node) -> void:
 
 func _on_extraction_unlocked(point: Node) -> void:
 	show_toast(point.unlock_message, Color(0.6, 1.0, 0.6), true)
-	var value := run_manager.run_value()
-	if value.unbanked_value > 0:
-		show_toast("現在回家，主人身上這些東西就安全了", Color(0.85, 0.95, 0.8))
-	_update_risk_badge(value)
+	# The risk tag has something new to say now. It states the consequence and
+	# never tells the player to leave (D5-05), so there is no second nudge here.
+	_update_risk_badge(run_manager.run_value())
+
+
+## P4-003: the world is still offering something. Said in the dog's voice, with
+## no prompt and no timer — the player can simply go home instead.
+func _on_temptation_offered(temptation: TemptationData) -> void:
+	show_toast(temptation.dog_text, Color(1.0, 0.92, 0.66), true)
+	if not temptation.world_hint.is_empty():
+		show_toast("（%s）" % temptation.world_hint, Color(0.85, 0.82, 0.72))
 
 
 func _on_value_changed(value: RunValue) -> void:
@@ -176,28 +187,6 @@ func _update_risk_badge(value: RunValue) -> void:
 		text = "主人帶著 $%d · 倒下會失去" % value.unbanked_value
 	if value.is_bag_full():
 		text = "主人的袋子裝滿了" if text.is_empty() else text + " · 袋子已滿"
-	if value.unbanked_value >= balance.risk_heavy_value:
-		color = Color(1.0, 0.82, 0.55)
-	_risk_label.text = text
-	_risk_label.modulate = color
-	_risk_label.visible = not text.is_empty()
-
-
-## P4-002: safe versus at-risk value, said the way a walk would say it
-## (RUN_TENSION_PRESENTATION). One quiet line, and only when there is something
-## worth saying — an empty-handed walk never mentions risk at all.
-func _update_risk_line(value: RunValue) -> void:
-	var balance := DataRegistry.balance
-	var text := ""
-	var color := Color(0.88, 0.86, 0.78)
-	if value.unbanked_value > 0 and run_manager.is_past_first_extraction():
-		# The greed moment: going home is possible, and it would bank this.
-		text = "現在回家，$%d 就安全了" % value.unbanked_value
-		color = Color(0.72, 0.95, 0.72)
-	elif value.unbanked_value >= balance.risk_notable_value:
-		text = "主人身上帶著 $%d" % value.unbanked_value
-	if value.is_bag_full():
-		text = "背包已經塞滿了" if text.is_empty() else text + " · 背包滿了"
 	if value.unbanked_value >= balance.risk_heavy_value:
 		color = Color(1.0, 0.82, 0.55)
 	_risk_label.text = text

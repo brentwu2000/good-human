@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TemptationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/temptation_data.gd" id="1_temptation"]
+
+[resource]
+script = ExtResource("1_temptation")
+id = &"rival_after_extract"
+dog_text = "那邊那兩個人還站在那裡。"
+world_hint = "還可以去挑釁"
+needs = 2
+weight = 1.0
+cooldown = 120.0
+expiry = 40.0
+min_unbanked_value = 60

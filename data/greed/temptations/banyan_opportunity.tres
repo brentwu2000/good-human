@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TemptationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/temptation_data.gd" id="1_temptation"]
+
+[resource]
+script = ExtResource("1_temptation")
+id = &"banyan_opportunity"
+dog_text = "大榕樹那邊……那隻狗的味道又來了。"
+world_hint = "大榕樹"
+needs = 5
+weight = 1.6
+cooldown = 120.0
+expiry = 60.0
+min_unbanked_value = 0

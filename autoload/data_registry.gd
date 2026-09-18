@@ -6,10 +6,13 @@ const BALANCE_PATH: String = "res://data/game_balance/game_balance.tres"
 const TRAINING_BALANCE_PATH: String = "res://data/training/training_balance.tres"
 const TRAINING_EVENTS_DIR: String = "res://data/training/events"
 const GOAL_CATALOG_PATH: String = "res://data/goals/goal_catalog.tres"
+const TEMPTATIONS_DIR: String = "res://data/greed/temptations"
 
 var balance: GameBalance
 var training: TrainingBalance
 var goals: GoalCatalog
+## Reasons to stay out after going home became possible (Sprint 05).
+var temptations: Array[TemptationData] = []
 
 var _items: Dictionary[StringName, ItemData] = {}
 var _training_events: Dictionary[StringName, TrainingEventData] = {}
@@ -21,6 +24,7 @@ func _ready() -> void:
 	goals = load(GOAL_CATALOG_PATH) as GoalCatalog
 	_load_items()
 	_load_training_events()
+	_load_temptations()
 
 
 func get_training_event(event_id: StringName) -> TrainingEventData:
@@ -58,6 +62,20 @@ func _load_items() -> void:
 		_items[item.id] = item
 	if _items.is_empty():
 		push_error("DataRegistry: no items found in %s" % ITEMS_DIR)
+
+
+func _load_temptations() -> void:
+	var seen: Dictionary[StringName, bool] = {}
+	for file_name in ResourceLoader.list_directory(TEMPTATIONS_DIR):
+		if not file_name.ends_with(".tres"):
+			continue
+		var data := load(TEMPTATIONS_DIR.path_join(file_name)) as TemptationData
+		if data == null or seen.has(data.id):
+			push_error("DataRegistry: bad or duplicate temptation %s" % file_name)
+			continue
+		seen[data.id] = true
+		temptations.append(data)
+	temptations.sort_custom(func(a: TemptationData, b: TemptationData) -> bool: return String(a.id) < String(b.id))
 
 
 func _load_training_events() -> void:

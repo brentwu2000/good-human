@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TemptationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/temptation_data.gd" id="1_temptation"]
+
+[resource]
+script = ExtResource("1_temptation")
+id = &"special_event_nearby"
+dog_text = "松鼠！就在那邊！"
+world_hint = "松鼠"
+needs = 4
+weight = 0.8
+cooldown = 90.0
+expiry = 30.0
+min_unbanked_value = 0

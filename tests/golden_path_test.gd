@@ -81,7 +81,8 @@ func _run() -> void:
 	check(north_gate.unlock_time > bus_stop.unlock_time, "north gate opens later")
 	check(not first.run.is_extraction_available(&"north_gate"), "north gate still locked")
 	# P4-002: once going home is possible, the walk says what that would bank.
-	check(risk_label.visible and risk_label.text.contains("現在回家"), "going home is offered in the walk's own words (%s)" % risk_label.text)
+	# Wording belongs to design (D5-05); assert the meaning, not the phrasing.
+	check(risk_label.visible and risk_label.text.contains("回家"), "going home is named as the safe outcome (%s)" % risk_label.text)
 	check(risk_label.text.contains("$%d" % first.run.human_run_inventory.total_value()), "the line names what the owner is carrying")
 
 	# 16–18: keep going, search in the park, get boxing gloves.

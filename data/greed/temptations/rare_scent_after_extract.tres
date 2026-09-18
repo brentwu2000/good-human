@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TemptationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/temptation_data.gd" id="1_temptation"]
+
+[resource]
+script = ExtResource("1_temptation")
+id = &"rare_scent_after_extract"
+dog_text = "那個味道還在……還沒去聞過。"
+world_hint = "還有沒追過的氣味"
+needs = 1
+weight = 1.2
+cooldown = 90.0
+expiry = 45.0
+min_unbanked_value = 40
