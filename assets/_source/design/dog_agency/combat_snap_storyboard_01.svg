@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1280" viewBox="0 0 1800 1280">
+  <defs>
+    <style>
+      .bg{fill:#171d1b}.panel{fill:#293431;stroke:#68746e;stroke-width:3}.owner{fill:#e4aa78;stroke:#ffe0b8;stroke-width:3}.opp{fill:#b9685a;stroke:#ef9b86;stroke-width:3}.dog{fill:#c27843;stroke:#f2bf84;stroke-width:3}.leash{fill:none;stroke:#47ae91;stroke-width:7;stroke-linecap:round}.ground{stroke:#78817d;stroke-width:3}.title{font:700 30px sans-serif;fill:#f5ead5}.beat{font:700 23px sans-serif;fill:#f5ead5}.note{font:17px sans-serif;fill:#bbbcb4}.time{font:700 17px sans-serif;fill:#f2b84b}.focus{fill:none;stroke:#f2b84b;stroke-width:2;stroke-dasharray:9 8}.impact{stroke:#e6785f;stroke-width:6;stroke-linecap:round}.arrow{fill:none;stroke:#aeb7b2;stroke-width:3;marker-end:url(#head)}</style>
+    <marker id="head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#aeb7b2"/></marker>
+  </defs>
+  <rect width="1800" height="1280" class="bg"/>
+  <text x="50" y="58" class="title">D4-12 · COMBAT SNAP — CONTINUOUS ESCALATION, NOT A CUTSCENE</text>
+  <text x="50" y="92" class="note">Explore → Tension → Active → first contact · dog control stays live · first-hit FX begin only at physical contact</text>
+
+  <!-- panel 1 -->
+  <g transform="translate(50 145)">
+    <text x="0" y="0" class="beat">1 · WALK</text><text x="220" y="0" class="time">0.00 s</text>
+    <rect x="0" y="25" width="530" height="390" rx="20" class="panel"/><line x1="25" y1="350" x2="505" y2="350" class="ground"/>
+    <ellipse cx="132" cy="297" rx="38" ry="52" class="dog"/><circle cx="148" cy="249" r="27" class="dog"/>
+    <ellipse cx="272" cy="235" rx="30" ry="81" class="owner"/><circle cx="272" cy="145" r="30" class="owner"/>
+    <ellipse cx="440" cy="235" rx="30" ry="81" class="opp"/><circle cx="440" cy="145" r="30" class="opp"/>
+    <path d="M150 270 Q194 335 250 250" class="leash"/>
+    <text x="20" y="445" class="note">Ordinary follow; pair remains part of the street.</text>
+  </g>
+
+  <!-- panel 2 -->
+  <g transform="translate(635 145)">
+    <text x="0" y="0" class="beat">2 · NOTICE</text><text x="220" y="0" class="time">0.18 s</text>
+    <rect x="0" y="25" width="530" height="390" rx="20" class="panel"/><line x1="25" y1="350" x2="505" y2="350" class="ground"/>
+    <ellipse cx="132" cy="297" rx="38" ry="52" class="dog"/><circle cx="165" cy="249" r="27" class="dog"/>
+    <ellipse cx="278" cy="235" rx="30" ry="81" class="owner"/><circle cx="290" cy="145" r="30" class="owner"/>
+    <ellipse cx="423" cy="235" rx="30" ry="81" class="opp"/><circle cx="411" cy="145" r="30" class="opp"/>
+    <path d="M158 270 Q205 310 255 250" class="leash"/>
+    <path d="M318 143 L375 143" class="arrow"/>
+    <text x="20" y="445" class="note">Dog orients first; human sightlines connect.</text>
+  </g>
+
+  <!-- panel 3 -->
+  <g transform="translate(1220 145)">
+    <text x="0" y="0" class="beat">3 · TENSION</text><text x="220" y="0" class="time">0.40 s</text>
+    <rect x="0" y="25" width="530" height="390" rx="20" class="panel"/><line x1="25" y1="350" x2="505" y2="350" class="ground"/>
+    <rect x="185" y="70" width="270" height="270" rx="100" class="focus"/>
+    <ellipse cx="128" cy="297" rx="38" ry="52" class="dog"/><circle cx="161" cy="249" r="27" class="dog"/>
+    <g transform="rotate(-6 287 235)"><ellipse cx="287" cy="235" rx="30" ry="81" class="owner"/><circle cx="287" cy="145" r="30" class="owner"/></g>
+    <ellipse cx="405" cy="235" rx="30" ry="81" class="opp"/><circle cx="405" cy="145" r="30" class="opp"/>
+    <path d="M156 270 Q207 286 263 250" class="leash"/>
+    <text x="20" y="445" class="note">Owner plants weight; camera begins soft push.</text>
+  </g>
+
+  <!-- panel 4 -->
+  <g transform="translate(50 690)">
+    <text x="0" y="0" class="beat">4 · TIGHTEN</text><text x="220" y="0" class="time">0.62 s</text>
+    <rect x="0" y="25" width="530" height="390" rx="20" class="panel"/><line x1="25" y1="350" x2="505" y2="350" class="ground"/>
+    <rect x="175" y="65" width="280" height="280" rx="100" class="focus"/>
+    <ellipse cx="120" cy="297" rx="38" ry="52" class="dog"/><circle cx="153" cy="249" r="27" class="dog"/>
+    <g transform="rotate(10 285 235)"><ellipse cx="285" cy="235" rx="31" ry="82" class="owner"/><circle cx="285" cy="145" r="30" class="owner"/></g>
+    <ellipse cx="396" cy="235" rx="31" ry="82" class="opp"/><circle cx="396" cy="145" r="30" class="opp"/>
+    <path d="M150 270 L260 248" class="leash"/>
+    <text x="20" y="445" class="note">Near-straight leash makes relationship pressure visible.</text>
+  </g>
+
+  <!-- panel 5 -->
+  <g transform="translate(635 690)">
+    <text x="0" y="0" class="beat">5 · COMMIT</text><text x="220" y="0" class="time">0.88 s</text>
+    <rect x="0" y="25" width="530" height="390" rx="20" class="panel"/><line x1="25" y1="350" x2="505" y2="350" class="ground"/>
+    <rect x="170" y="60" width="285" height="285" rx="100" class="focus"/>
+    <ellipse cx="112" cy="302" rx="38" ry="52" class="dog"/><circle cx="145" cy="254" r="27" class="dog"/>
+    <g transform="rotate(6 280 235)"><ellipse cx="280" cy="235" rx="31" ry="82" class="owner"/><circle cx="280" cy="145" r="30" class="owner"/></g>
+    <g transform="rotate(-12 386 235)"><ellipse cx="386" cy="235" rx="31" ry="82" class="opp"/><circle cx="386" cy="145" r="30" class="opp"/><path d="M360 205 L305 225" stroke="#ef9b86" stroke-width="18" stroke-linecap="round"/></g>
+    <path d="M142 275 L256 248" class="leash"/>
+    <text x="20" y="445" class="note">ACTIVE frame settles before the strike lands.</text>
+  </g>
+
+  <!-- panel 6 -->
+  <g transform="translate(1220 690)">
+    <text x="0" y="0" class="beat">6 · CONTACT</text><text x="220" y="0" class="time">1.08 s</text>
+    <rect x="0" y="25" width="530" height="390" rx="20" class="panel"/><line x1="25" y1="350" x2="505" y2="350" class="ground"/>
+    <rect x="165" y="55" width="295" height="290" rx="100" class="focus"/>
+    <ellipse cx="108" cy="302" rx="38" ry="52" class="dog"/><circle cx="141" cy="254" r="27" class="dog"/>
+    <g transform="rotate(14 280 235)"><ellipse cx="280" cy="235" rx="31" ry="82" class="owner"/><circle cx="280" cy="145" r="30" class="owner"/></g>
+    <g transform="rotate(-14 382 235)"><ellipse cx="382" cy="235" rx="31" ry="82" class="opp"/><circle cx="382" cy="145" r="30" class="opp"/><path d="M355 205 L305 222" stroke="#ef9b86" stroke-width="18" stroke-linecap="round"/></g>
+    <path d="M138 275 L255 250" class="leash"/>
+    <path d="M304 198 l-24-22 M311 211 l-30 0 M305 226 l-25 22" class="impact"/>
+    <text x="20" y="445" class="note">Hitstop + graded shake + knockback start here, not earlier.</text>
+  </g>
+</svg>
