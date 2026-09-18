@@ -58,7 +58,8 @@ func _run() -> void:
 	check(dog.global_position.x > start.x + 0.8, "up walks where the dog was facing")
 	check(rig.is_dog_visible(), "dog visible while walking")
 
-	# Push right: the dog runs right in a straight line and the view turns with it.
+	# Push right: the dog sets off right at once, and holding it keeps turning
+	# the view that way at a steady rate instead of stalling after one turn.
 	dog.global_position = Vector3(-8, 0.1, 0.0)
 	dog.velocity = Vector3.ZERO
 	dog.facing = Vector3.FORWARD
@@ -66,22 +67,46 @@ func _run() -> void:
 	await _physics(2)
 	var start_right := dog.global_position
 	Input.action_press(&"move_right")
-	for i in 150:
-		await _tree.physics_frame
-	var mid_z := dog.global_position.z
-	for i in 60:
-		await _tree.physics_frame
+	await _physics(30)
+	check(dog.global_position.x > start_right.x + 0.8, "pushing right sets off to the right")
+	var turns: Array[float] = []
+	for window in 3:
+		var yaw_before := rig.yaw
+		await _physics(60)
+		turns.append(angle_difference(yaw_before, rig.yaw))
 	Input.action_release(&"move_right")
-	check(dog.global_position.x > start_right.x + 8.0, "pushing right runs right")
-	check(absf(dog.global_position.z - start_right.z) < 0.6 and absf(mid_z - start_right.z) < 0.6, "held direction stays straight (no circling)")
-	check(absf(angle_difference(rig.yaw, -PI / 2.0)) < 0.35, "view turned to follow the dog to the right")
+	check(turns[1] < -0.2 and turns[2] < -0.2, "holding a direction keeps turning the view (%.2f then %.2f rad/s)" % [turns[1], turns[2]])
+	check(absf(turns[1]) < 1.7 and absf(turns[2]) < 1.7, "a held turn stays a steady arc, not a spin")
 
-	# Released and pushed up again: "up" is now the new camera direction.
+	# Up-left: the reported case. It must keep turning left, and more gently
+	# than a full sideways push, so a diagonal is a curve and not a pivot.
+	dog.global_position = Vector3(-8, 0.1, 6.0)
+	dog.velocity = Vector3.ZERO
+	dog.facing = Vector3.FORWARD
+	rig.snap_behind_dog()
+	await _physics(2)
+	Input.action_press(&"move_up")
+	Input.action_press(&"move_left")
+	await _physics(30)
+	var diagonal: Array[float] = []
+	for window in 2:
+		var yaw_before := rig.yaw
+		await _physics(60)
+		diagonal.append(angle_difference(yaw_before, rig.yaw))
+	Input.action_release(&"move_up")
+	Input.action_release(&"move_left")
+	check(diagonal[0] > 0.2 and diagonal[1] > 0.2, "holding up-left keeps turning left (%.2f then %.2f rad/s)" % [diagonal[0], diagonal[1]])
+	check(diagonal[1] < absf(turns[2]), "a diagonal curves more gently than a full sideways push")
+
+	# Released and pushed up again: "up" is wherever the camera now looks.
 	dog.velocity = Vector3.ZERO
 	await _physics(20)
+	var view_forward := Vector3(0, 0, -1).rotated(Vector3.UP, rig.yaw)
 	var before_up := dog.global_position
 	await _hold(&"move_up", 40)
-	check(dog.global_position.x > before_up.x + 1.0, "after the view turned, up goes where the camera looks")
+	var travelled := dog.global_position - before_up
+	travelled.y = 0.0
+	check(travelled.length() > 1.0 and travelled.normalized().dot(view_forward) > 0.85, "after the view turned, up goes where the camera looks")
 
 	# Turning then walking forward: the camera eases round smoothly (no jumps).
 	dog.global_position = Vector3(0, 0.1, 2.5)

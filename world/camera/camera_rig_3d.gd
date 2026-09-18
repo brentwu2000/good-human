@@ -7,8 +7,10 @@ extends Node3D
 ## gameplay.
 ## Turning: while the dog runs, the camera eases round behind it in whatever
 ## direction it goes (push right → dog turns right → view turns right).
-## To stop that from spinning the controls, the stick direction is latched to
-## the camera yaw at the moment the stick is pushed and stays until release.
+## The stick answers the view it was pushed against, then its frame follows the
+## turning view at its own slower rate, so holding a direction keeps curving
+## that way instead of locking into a straight line, while the two rates
+## together settle into a steady turn rather than a spin.
 ## Players can also turn the camera by dragging on the right side of the
 ## screen, right mouse drag, or the arrow keys.
 
@@ -27,6 +29,10 @@ const COMBAT_FRAMING: Dictionary = {"pivot": 1.4, "pitch": -28.0, "distance": 7.
 @export var drag_turn_sensitivity: float = 0.006
 ## Auto-follow waits this long after a manual turn.
 @export var manual_hold_seconds: float = 1.5
+## How fast the stick's control frame follows the turning view (per second,
+## exponential). Together with `follow_rate` this sets how tightly a held
+## direction curves: lower is straighter, higher turns harder.
+@export var control_follow_rate: float = 1.2
 @export var collision_margin: float = 0.25
 ## A wall may pull the camera in down to this distance; anything closer fades
 ## instead, so the camera stays low behind the dog.
@@ -43,11 +49,11 @@ var camera: Camera3D
 var _focus: Vector3
 var _faded: Dictionary[Node, bool] = {}
 var _manual_hold: float = 0.0
-## Control frame for the stick, latched when it is pushed (see header).
+## Control frame for the stick (see header).
 var _control_yaw: float = 0.0
 var _stick_held: bool = false
 var _stick_angle: float = 0.0
-## Steering the stick further than this (deg) re-latches to the current view.
+## Steering the stick further than this (deg) re-aims it at the current view.
 @export var relatch_angle: float = 45.0
 
 
@@ -90,7 +96,7 @@ func _update(delta: float, instant: bool) -> void:
 
 	if not instant:
 		_update_yaw(delta)
-	_update_control_frame()
+	_update_control_frame(delta, instant)
 
 	var focus := dog.global_position + Vector3(0, current["pivot"], 0)
 	if is_combat_framing():
@@ -127,17 +133,21 @@ func follow_weight() -> float:
 	return speed * lerpf(backward_follow_share, 1.0, facing_away)
 
 
-## The stick keeps the camera direction from when it was pushed while it is
-## held in roughly the same direction, so a turning camera never bends the
-## dog's path into a circle. Releasing it, or steering it more than
-## `relatch_angle`, switches to the current view.
-func _update_control_frame() -> void:
+## Pushing the stick, re-aiming it further than `relatch_angle` or releasing it
+## reads it against the view as it is right now, so the dog sets off exactly
+## where the player pointed. Held, the frame then follows the turning view at
+## `control_follow_rate` — slower than the view follows the dog — so keeping the
+## stick up-left keeps curving left instead of straightening out after the first
+## turn, and the two rates settle into a steady arc rather than a spin.
+func _update_control_frame(delta: float, instant: bool) -> void:
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var held := input.length() >= 0.1
 	var angle := input.angle()
-	if not held or not _stick_held or absf(rad_to_deg(angle_difference(_stick_angle, angle))) > relatch_angle:
+	if instant or not held or not _stick_held or absf(rad_to_deg(angle_difference(_stick_angle, angle))) > relatch_angle:
 		_control_yaw = yaw
 		_stick_angle = angle
+	else:
+		_control_yaw = lerp_angle(_control_yaw, yaw, 1.0 - exp(-control_follow_rate * delta))
 	_stick_held = held
 	dog.camera_yaw = _control_yaw
 
