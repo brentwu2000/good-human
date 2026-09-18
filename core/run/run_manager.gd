@@ -13,6 +13,8 @@ signal loot_blocked(item: ItemData, quantity: int)
 signal search_empty(point: Node)
 ## `point` is an ExtractionPoint or ExtractionPoint3D.
 signal extraction_unlocked(point: Node)
+## What the walk is worth now, split into safe and unbanked (P4-001).
+signal value_changed(value: RunValue)
 signal run_ended(result: RunResult)
 
 enum RunStatus { NOT_STARTED, RUNNING, EXTRACTED, FAILED }
@@ -37,6 +39,12 @@ var extraction_states: Dictionary[StringName, bool] = {}
 var run_status: RunStatus = RunStatus.NOT_STARTED
 var run_result: RunResult
 var training: TrainingTracker
+## When going home first became possible (-1 = not yet) and what was at stake
+## then, so the walk can tell whether the player chose to stay.
+var first_extraction_time: float = -1.0
+var value_at_first_extraction: RunValue
+
+var _last_value: RunValue
 
 var _extraction_points: Array[Node] = []
 var _all_extractions_forced: bool = false
@@ -47,6 +55,8 @@ func _ready() -> void:
 	human_run_inventory = Inventory.new(balance.human_run_slots)
 	dog_safe_inventory = Inventory.new(balance.dog_safe_slots)
 	training = TrainingTracker.new(DataRegistry.training)
+	human_run_inventory.changed.connect(_emit_value_changed)
+	dog_safe_inventory.changed.connect(_emit_value_changed)
 	if dog_actor == null:
 		dog_actor = dog
 	if dog_actor != null:
@@ -77,6 +87,9 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	training.reset()
 	run_result = null
 	_all_extractions_forced = false
+	first_extraction_time = -1.0
+	value_at_first_extraction = null
+	_last_value = null
 
 	_extraction_points.clear()
 	extraction_states.clear()
@@ -98,10 +111,31 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	run_status = RunStatus.RUNNING
 	_update_extractions()
 	run_started.emit(run_seed)
+	_emit_value_changed()
 
 
 func is_running() -> bool:
 	return run_status == RunStatus.RUNNING
+
+
+# --- Run value ----------------------------------------------------------------
+
+## What the walk is worth right now: the dog's bag is safe, the owner's is not.
+func run_value() -> RunValue:
+	return RunValue.of(dog_safe_inventory, human_run_inventory)
+
+
+## True once the player could have gone home and stayed out anyway.
+func is_past_first_extraction() -> bool:
+	return first_extraction_time >= 0.0
+
+
+func _emit_value_changed() -> void:
+	var value := run_value()
+	if value.equals(_last_value):
+		return
+	_last_value = value
+	value_changed.emit(value)
 
 
 # --- Search -----------------------------------------------------------------
@@ -194,6 +228,7 @@ func _lose_run(outcome: RunResult.Outcome, defeated_by: String) -> void:
 	result.defeated_by = defeated_by
 	result.to_stash = dog_safe_inventory.get_stacks()
 	result.lost = human_run_inventory.get_stacks()
+	result.lost_value = result.unbanked_value
 	_end_run(result)
 
 
@@ -204,6 +239,9 @@ func _update_extractions() -> void:
 		if _all_extractions_forced or elapsed_time >= point.unlock_time:
 			extraction_states[point.extraction_id] = true
 			point.set_available(true)
+			if first_extraction_time < 0.0:
+				first_extraction_time = elapsed_time
+				value_at_first_extraction = run_value()
 			extraction_unlocked.emit(point)
 
 
@@ -214,6 +252,11 @@ func _build_result(outcome: RunResult.Outcome, extraction_id: StringName) -> Run
 	result.elapsed_time = elapsed_time
 	result.extraction_id = extraction_id
 	result.training = RunTrainingSummary.from_tracker(training, outcome)
+	var value := run_value()
+	result.safe_value = value.safe_value
+	result.unbanked_value = value.unbanked_value
+	result.first_extraction_time = first_extraction_time
+	result.value_at_first_extraction = value_at_first_extraction.total() if value_at_first_extraction != null else 0
 	return result
 
 

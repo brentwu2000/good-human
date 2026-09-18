@@ -36,6 +36,7 @@ func _run() -> void:
 	_test_extraction_unlock_times()
 	await _test_extract_through_interaction()
 	_test_fail_run_keeps_safe_slots()
+	_test_run_value_split()
 	_test_second_run_resets()
 	_test_finish_run_updates_stash_and_save()
 	finish()
@@ -179,6 +180,49 @@ func _test_fail_run_keeps_safe_slots() -> void:
 	check(not result.is_success(), "failed result")
 	check_eq(_count(result.lost, &"boxing_gloves"), 1, "human bag lost on failure")
 	check_eq(_count(result.to_stash, &"mysterious_item"), 1, "safe slot kept on failure")
+
+
+## P4-001: the walk knows what is safe, what is at risk, and whether the
+## player could already have gone home.
+func _test_run_value_split() -> void:
+	run.start_run(SEED + 7)
+	var seen: Array[RunValue] = []
+	var connection := func(v: RunValue) -> void: seen.append(v)
+	run.value_changed.connect(connection)
+	check(run.run_value().is_empty(), "a fresh walk is worth nothing")
+	check_eq(run.run_value().at_risk_share(), 0.0, "an empty walk is not risky")
+	check(not run.is_past_first_extraction(), "going home is not possible yet")
+
+	var gloves := DataRegistry.get_item(&"boxing_gloves")
+	var safe_item := DataRegistry.get_item(&"mysterious_item")
+	run.debug_give_item(gloves.id, 1)
+	run.dog_safe_inventory.add_item(safe_item)
+	var value := run.run_value()
+	check_eq(value.unbanked_value, gloves.value, "the owner carries the unbanked value")
+	check_eq(value.safe_value, safe_item.value, "the dog's bag is the safe value")
+	check_eq(value.total(), gloves.value + safe_item.value, "total is both layers")
+	check(value.at_risk_share() > 0.0 and value.at_risk_share() < 1.0, "part of the walk is at risk")
+	check(seen.size() >= 2, "picking things up reports the value (%d updates)" % seen.size())
+	var before := seen.size()
+	run.debug_give_item(&"unknown_item_id", 1)
+	check_eq(seen.size(), before, "nothing picked up, nothing reported")
+	run.value_changed.disconnect(connection)
+
+	# Going home becomes possible: the walk remembers when, and what was at stake.
+	run.debug_set_time(ext_a.unlock_time)
+	check(run.is_past_first_extraction(), "going home is possible now")
+	check_eq(run.first_extraction_time, ext_a.unlock_time, "remembers when it became possible")
+	check_eq(run.value_at_first_extraction.total(), value.total(), "remembers what was at stake then")
+
+	# Staying on and then losing: only the owner's bag is taken.
+	run.debug_set_time(ext_a.unlock_time + 30.0)
+	run.defeat_run("健身常客")
+	var result := ended[-1]
+	check_eq(result.unbanked_value, gloves.value, "the result names the value at risk")
+	check_eq(result.lost_value, gloves.value, "a defeat takes the unbanked value")
+	check_eq(result.safe_value, safe_item.value, "the dog's bag still comes home")
+	check_eq(result.value_at_first_extraction, value.total(), "the result keeps what was at stake")
+	check(is_equal_approx(result.seconds_after_extraction(), 30.0), "the result knows how long the player stayed on")
 
 
 func _test_second_run_resets() -> void:

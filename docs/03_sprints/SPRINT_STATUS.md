@@ -274,11 +274,13 @@ Camera Gate decided before install (ADR-010: dog-height camera only), so the cam
 - Owner feedback (2026-09-18): "轉方向的時候視角沒有跟著轉，例如我要往右邊，拉了以後鏡頭還是往前". The previous fix deliberately ignored sideways input. Now the camera follows the dog in any direction (weighted by speed, gentler when running back towards the camera), and the stick's control frame is latched to the camera yaw when pushed (re-latched on release or when the stick is steered more than 45°), so the turning view doesn't curve the dog's path. `run_3d_slice_test`: pushing right runs straight right and the view turns right; up after that follows the new view.
 
 ## Sprint 05 — GREED / TERRITORY
-Installed from Update 007 (2026-09-18). Design starts now; engineering begins only after Core Experience Gate 02 (P3-016) is reviewed and passed, or explicitly approved with changes.
+Installed from Update 007 (2026-09-18). The update gates engineering behind Core Experience Gate 02.
+
+> Owner decision (2026-09-18): start Sprint 05 engineering now ("動工"). P3-016 Core Experience Gate 02 has not been reviewed; it stays TODO and the owner can still call it after playtesting.
 
 | ID | Task | Status |
 |---|---|---|
-| P4-001 | Run value/risk | TODO |
+| P4-001 | Run value/risk | REVIEW |
 | P4-002 | SAFE/UNBANKED presentation | TODO |
 | P4-003 | Post-extraction temptation hooks | TODO |
 | P4-004 | Temptation data | TODO |
@@ -297,6 +299,7 @@ Installed from Update 007 (2026-09-18). Design starts now; engineering begins on
 | P4-017 | Gate | TODO |
 
 ## Sprint 05 Engineering Notes (Claude)
-- Not started: P3-016 Core Experience Gate 02 is still TODO and gates this sprint.
+- Started on the owner's explicit instruction (2026-09-18) before Core Experience Gate 02 was reviewed; that gate stays TODO.
 - Scope reminders from the update: reuse the Run World, seamless combat, GOALS, TRAIN and DOG AGENCY. No global territory simulation, passive-income empire, dozens of capture points, PvP, daily decay or generic map capture. One territory (the Big Banyan Tree).
 - ADR-012 (territory is relationship, not empire) and ADR-013 (greed is voluntary) are installed in `docs/99_notes`.
+- P4-001: `RunValue` (`core/run/run_value.gd`) reads the two run inventories the player is already deciding between — the dog's bag is SAFE, the owner's is UNBANKED — and reports value, slots, `at_risk_share()` and `is_bag_full()`. PERMANENT (the Home stash) is deliberately not in it: a walk never touches it. RunManager emits `value_changed` whenever the split actually moves, remembers when going home first became possible and what was at stake then (`first_extraction_time`, `value_at_first_extraction`, `is_past_first_extraction()`), and writes all of it onto the RunResult along with `lost_value` and `seconds_after_extraction()` — the evidence Gate 01 needs for "did the player choose to stay". No loss rules changed: the dog's bag still comes home, the owner's is still lost. `run_core_test` covers the split, the risk share, the update signal, the first-extraction snapshot and a defeat after staying on.

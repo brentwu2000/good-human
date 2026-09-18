@@ -20,6 +20,22 @@ var training: RunTrainingSummary
 ## Items that did not fit in the stash (filled in by Game).
 var stash_overflow: Array[ItemStack] = []
 
+## --- Run value (Sprint 05 P4-001) ---
+## What came home safe in the dog's bag, and what the owner was carrying.
+var safe_value: int = 0
+var unbanked_value: int = 0
+## What the walk actually took away (0 unless the owner's bag was lost).
+var lost_value: int = 0
+## When going home first became possible, -1 if it never did, and what the
+## walk was worth at that moment.
+var first_extraction_time: float = -1.0
+var value_at_first_extraction: int = 0
+
+
+## How long the player chose to stay on after they could have gone home.
+func seconds_after_extraction() -> float:
+	return 0.0 if first_extraction_time < 0.0 else maxf(elapsed_time - first_extraction_time, 0.0)
+
 
 func is_success() -> bool:
 	return outcome == Outcome.EXTRACTED
