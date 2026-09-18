@@ -169,6 +169,16 @@ func _run() -> void:
 	check(rig.is_combat_framing(), "camera reframes for the fight")
 	check_eq(rig.context, CameraRig3D.Context.TENSION, "before the first blow it is tension, not action")
 
+	# The whole point of the combat framing is that it reads as a push-IN
+	# against the walking shot. Measured against EXPLORE, not against whatever
+	# the previous combat framing happened to be.
+	var walk_framing: Dictionary = CameraRig3D.CONTEXT_FRAMING[CameraRig3D.Context.EXPLORE]
+	for fight_context: int in [CameraRig3D.Context.TENSION, CameraRig3D.Context.ACTIVE, CameraRig3D.Context.CRISIS]:
+		var framing: Dictionary = CameraRig3D.CONTEXT_FRAMING[fight_context]
+		check(framing["distance"] < walk_framing["distance"], "context %d moves in closer than walking (%.2f < %.2f)" % [fight_context, framing["distance"], walk_framing["distance"]])
+		check(framing["fov"] < walk_framing["fov"], "context %d narrows the lens (%.0f < %.0f)" % [fight_context, framing["fov"], walk_framing["fov"]])
+	check(CameraRig3D.CONTEXT_FRAMING[CameraRig3D.Context.ACTIVE]["distance"] < CameraRig3D.CONTEXT_FRAMING[CameraRig3D.Context.TENSION]["distance"], "and it keeps closing in as the fight starts")
+
 	# D4/P02-001: the two jobs come apart — the boom still hangs behind the dog,
 	# but the camera is now looking at the owner, not at the dog.
 	# The fight is already held still, so the framing can be read without it
@@ -178,15 +188,30 @@ func _run() -> void:
 	await _physics(2)
 	dog.global_position = human.global_position + Vector3(3.0, 0, 1.5)
 	dog.velocity = Vector3.ZERO
-	await _physics(40)
-	var to_owner := human.global_position - rig.global_position
-	var to_dog := dog.global_position - rig.global_position
+	# Tell the camera a blow has landed so it plays ACTIVE. TENSION deliberately
+	# keeps the owner only half the subject; the owner-focus promise is about
+	# the fight proper. The fight itself stays frozen so the framing can settle.
+	coordinator.blows_landed = 1
+	await _physics(60)
+	check_eq(rig.context, CameraRig3D.Context.ACTIVE, "blows landing moves the camera into the fight")
+	# Compare both at the height the camera actually frames people at, otherwise
+	# the dog's feet read as "further from the aim" for free.
+	var eye := Vector3(0, rig.current["pivot"], 0)
+	var to_owner := (human.global_position + eye) - rig.global_position
+	var to_dog := (dog.global_position + eye) - rig.global_position
 	var aim := -rig.global_basis.z
-	check(aim.normalized().dot(to_owner.normalized()) > aim.normalized().dot(to_dog.normalized()), "the camera looks at the owner rather than the dog")
-	var cam_to_dog := (dog.global_position + Vector3(0, 0.4, 0)) - rig.camera.global_position
-	var cam_aim := -rig.camera.global_basis.z
+	check(aim.dot(to_owner.normalized()) > aim.dot(to_dog.normalized()), "the camera looks at the owner rather than the dog")
 	check(rig.is_dog_visible(), "and the dog is still on screen")
 	check(rig._focus.distance_to(dog.global_position + Vector3(0, rig.current["pivot"], 0)) < 0.6, "the boom still hangs behind the dog")
+	# A tight shot only works while the dog is near the fight: it gives ground
+	# for a dog that has run off, rather than framing every fight for that case.
+	var strayed := rig._boom_distance()
+	dog.global_position = human.global_position + Vector3(0.5, 0, 0.5)
+	await _physics(4)
+	check(rig._boom_distance() < strayed, "the shot tightens again once the dog comes back (%.2f < %.2f)" % [rig._boom_distance(), strayed])
+	check(rig._boom_distance() <= float(rig.current["distance"]) + 0.01, "close to the fight, the framing is the context's own")
+	dog.global_position = human.global_position + Vector3(3.0, 0, 1.5)
+	await _physics(20)
 
 	# D4/P02-002: soft composition, not a lock-on. The owner's position during a
 	# fight belongs to the coordinator, so this reads the composition itself.

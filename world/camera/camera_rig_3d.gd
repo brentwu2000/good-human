@@ -26,13 +26,24 @@ extends Node3D
 enum Context { EXPLORE, TENSION, ACTIVE, CRISIS, RELEASE }
 
 const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0, "focus": 0.0}
+## A fight must read as a push-IN against the walking shot, so every combat
+## context is closer and narrower than EXPLORE, not further away. (The first
+## pass measured itself against the old 7.5 m pull-back instead of against
+## walking, so it pulled back 1.8 m while narrowing 8° — the two cancelled and
+## a fight looked like an ordinary walk.)
 const CONTEXT_FRAMING: Dictionary = {
 	Context.EXPLORE: FRAMING,
-	Context.TENSION: {"pivot": 1.15, "pitch": -16.0, "distance": 5.0, "fov": 68.0, "focus": 0.55},
-	Context.ACTIVE: {"pivot": 1.30, "pitch": -20.0, "distance": 4.6, "fov": 62.0, "focus": 0.90},
-	Context.CRISIS: {"pivot": 1.20, "pitch": -16.0, "distance": 4.0, "fov": 56.0, "focus": 1.00},
-	Context.RELEASE: {"pivot": 1.25, "pitch": -20.0, "distance": 5.4, "fov": 67.0, "focus": 0.70},
+	Context.TENSION: {"pivot": 0.95, "pitch": -11.0, "distance": 2.35, "fov": 62.0, "focus": 0.50},
+	Context.ACTIVE: {"pivot": 1.00, "pitch": -12.0, "distance": 2.00, "fov": 54.0, "focus": 0.92},
+	Context.CRISIS: {"pivot": 0.95, "pitch": -10.0, "distance": 1.75, "fov": 46.0, "focus": 1.00},
+	Context.RELEASE: {"pivot": 1.00, "pitch": -14.0, "distance": 3.10, "fov": 66.0, "focus": 0.60},
 }
+## A tight shot only works while the dog is near the fight. Past this far from
+## the owner (m) the boom gives ground so the fight stays in the picture, at
+## `combat_spread` metres per metre — it widens for the player who roams instead
+## of framing every fight for the worst case.
+@export var combat_spread_from: float = 2.0
+@export var combat_spread: float = 0.8
 ## The owner is in trouble below this share of their health.
 const CRISIS_CONDITION: float = 0.34
 ## The push into a fight is deliberate (0.5-1.0 s), not a cut; everything else
@@ -59,8 +70,10 @@ const CRISIS_CONDITION: float = 0.34
 @export var focus_rate: float = 3.2
 ## Share of the half-FOV the dog is allowed to sit from the centre of the
 ## screen. The owner is the subject, but never at the cost of losing the dog off
-## the edge — the player is still steering it.
-@export_range(0.1, 0.95) var dog_frame_margin: float = 0.62
+## the edge — the player is still steering it. Deliberately generous: the
+## composition wants the dog at the edge of frame, not near the middle, and a
+## tight shot plus a centred dog leaves no room for the owner to be the subject.
+@export_range(0.1, 0.95) var dog_frame_margin: float = 0.88
 
 @export var smoothing: float = 6.0
 ## Auto-follow rate at full speed (per second, exponential).
@@ -192,7 +205,7 @@ func _update(delta: float, instant: bool) -> void:
 	_focus = anchor if instant or _focus == Vector3.ZERO else _focus.lerp(anchor, t)
 
 	var pitch := deg_to_rad(current["pitch"])
-	var boom: Vector3 = Vector3(0, -sin(pitch), cos(pitch)).rotated(Vector3.UP, yaw) * float(current["distance"])
+	var boom: Vector3 = Vector3(0, -sin(pitch), cos(pitch)).rotated(Vector3.UP, yaw) * _boom_distance()
 	var desired: Vector3 = _focus + boom
 	global_position = _place_camera(_focus, desired)
 
@@ -208,6 +221,20 @@ func _update(delta: float, instant: bool) -> void:
 	_apply_shake(delta)
 	camera.fov = current["fov"]
 	_update_owner_fade()
+
+
+## The context distance, given ground only when the dog has strayed from its
+## human, so the fight does not fall out of the picture.
+func _boom_distance() -> float:
+	var distance: float = current["distance"]
+	if context == Context.EXPLORE or owner_actor == null:
+		return distance
+	var apart := _flat_distance(dog.global_position, owner_actor.global_position)
+	return distance + maxf(apart - combat_spread_from, 0.0) * combat_spread
+
+
+func _flat_distance(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
 
 
 ## FocusAnchor (D4/P02-001) with a soft dead-zone (D4/P02-002). Out of combat

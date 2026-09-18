@@ -96,19 +96,19 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "查看倉庫"
 
-[node name="WalkButton" type="Button" parent="Margin/Layout"]
+[node name="Walk3DButton" type="Button" parent="Margin/Layout"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 96)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "出去散步"
 
-[node name="Walk3DButton" type="Button" parent="Margin/Layout"]
+[node name="WalkButton" type="Button" parent="Margin/Layout"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 96)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "🐕 3D 散步（試玩）"
+theme_override_font_sizes/font_size = 20
+text = "舊的 2D 版本（已停止開發）"
 
 [node name="ControlsLabel" type="Label" parent="Margin/Layout"]
 unique_name_in_owner = true
