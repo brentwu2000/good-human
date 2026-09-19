@@ -49,7 +49,7 @@ Installed 2026-09-18. D01–D09 can run in parallel; D10 uses implementation cap
 | ID | Deliverable | Owner | Status | Dependency |
 |---|---|---|---|---|
 | P03-D01 | Combat mood target | Design/Codex ART | REVIEW | owner storyboard style target |
-| P03-D02 | Tension/confrontation storyboard | Design/Codex ART | TODO | none |
+| P03-D02 | Tension/confrontation storyboard | Design/Codex ART | REVIEW | P03-D01 style lock |
 | P03-D03 | Dog POV composition sheet | Design/Codex ART | TODO | none |
 | P03-D04 | Human motion silhouettes | Design/Codex ART | TODO | none |
 | P03-D05 | Hit/impact language | Design/Codex ART | TODO | none |
