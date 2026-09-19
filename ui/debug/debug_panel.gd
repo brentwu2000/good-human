@@ -31,6 +31,8 @@ func _ready() -> void:
 	_bind(%FailButton, func() -> void: run_manager.fail_run())
 	_bind(%NextEncounterButton, func() -> void: _with_combat(func(c: Node) -> void: c.debug_goto_next_pair()))
 	_bind(%WinFightButton, func() -> void: _with_combat(func(c: Node) -> void: c.debug_force_result(CombatSimulation.Result.VICTORY)))
+	_bind(%CombatLogButton, _toggle_combat_log)
+	_update_combat_log_button()
 	_bind(%TrainAllButton, func() -> void: run_manager.training.debug_add_all(3.0))
 	_bind(%GrowFullButton, func() -> void: _set_growth(DataRegistry.training.trait_full_growth))
 	_bind(%ResetGrowthButton, func() -> void: _set_growth(0.0))
@@ -99,6 +101,19 @@ func _with_goals(action: Callable) -> void:
 func _with_combat(action: Callable) -> void:
 	if combat_coordinator != null:
 		action.call(combat_coordinator)
+
+
+## P03-E10: the combat log is off in normal play; this puts it back for
+## debugging without changing anything the fight does.
+func _toggle_combat_log() -> void:
+	FighterPuppet3D.show_combat_text = not FighterPuppet3D.show_combat_text
+	_update_combat_log_button()
+
+
+func _update_combat_log_button() -> void:
+	var button := get_node_or_null("%CombatLogButton") as Button
+	if button != null:
+		button.text = "戰鬥文字：開" if FighterPuppet3D.show_combat_text else "戰鬥文字：關"
 
 
 func _bind(button: Button, action: Callable) -> void:

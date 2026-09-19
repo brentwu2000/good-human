@@ -311,8 +311,13 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 		CombatSimulation.Result.VICTORY:
 			human.set_state(HumanFollower3D.State.FOLLOW)
 			var reward := run_manager.grant_reward(encounter.reward_table)
-			human.say("贏了！" + ("撿到%s" % reward.item.display_name if reward != null else ""), Color(0.6, 1.0, 0.6), 2.0)
+			# P03-E11: the resolution beat is not the reward, it is the owner
+			# turning round to the dog. Said sparingly, as the spec asks.
+			human.puppet.play_acknowledge(dog.global_position)
+			human.say("好狗狗。" + ("（撿到%s）" % reward.item.display_name if reward != null else ""), Color(0.6, 1.0, 0.6), 2.0)
 		CombatSimulation.Result.DEFEAT:
+			# The owner stays in the world and the dog can still reach them
+			# (`_defeat_left`); the camera holds on them through CRISIS.
 			human.set_state(HumanFollower3D.State.DOWN)
 			human.puppet.show_hp(false)
 			opponent.human_puppet.shout("哼。")

@@ -74,7 +74,29 @@ func _run() -> void:
 
 	await _test_dog_pov(map, coordinator, dog, human, pair)
 	await _test_intervention_is_visible(map, coordinator, dog, human, pair)
+	await _test_resolution_beat(coordinator, dog, human)
 	finish()
+
+
+## P03-E10/E11: the fight has to read with the combat log off, and winning ends
+## with the owner turning to the dog rather than with a number.
+func _test_resolution_beat(coordinator: CombatCoordinator3D, dog: DogController3D, human: HumanFollower3D) -> void:
+	check(not FighterPuppet3D.show_combat_text, "the combat log is off in normal play")
+
+	if not coordinator.is_fighting():
+		check(false, "expected a fight to finish")
+		return
+	coordinator.time_scale = 25.0
+	dog.global_position = human.global_position + Vector3(2.0, 0.1, 0.0)
+	coordinator.debug_force_result(CombatSimulation.Result.VICTORY)
+	await _physics(10)
+	check_eq(coordinator.last_result, CombatSimulation.Result.VICTORY, "the fight is won")
+	check(human.puppet.is_distracted(), "the owner turns away from the fight, to the dog")
+	var facing := Vector3.FORWARD.rotated(Vector3.UP, human.puppet.rotation.y)
+	var to_dog := dog.global_position - human.global_position
+	to_dog.y = 0.0
+	check(facing.dot(to_dog.normalized()) > 0.5, "they are looking at the dog (%.2f)" % facing.dot(to_dog.normalized()))
+	check_eq(coordinator.release_left > 0.0, true, "and the world holds the beat before walking resumes")
 
 
 ## P03-E07/E08: from inside the dog's head, the player has to be able to SEE

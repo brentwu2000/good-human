@@ -3,6 +3,12 @@ extends Node3D
 ## Greybox 3D human for the owner and opponents. Presentation only: plays what
 ## the combat coordinator tells it. Same method names as FighterPuppet.
 
+## P03-E10: the combat log is debug-only. The exit gate is that a fight reads
+## with this off, so it defaults off and the body has to carry the meaning.
+## Deliberate dialogue still goes through `shout()`; this gates only the
+## automatic annotations the puppet writes about its own mechanics.
+static var show_combat_text: bool = false
+
 var data: FighterData
 
 var _body: Node3D
@@ -105,7 +111,7 @@ func play_motion(delta: float) -> void:
 
 
 func play_windup(skill: CombatSkillData) -> void:
-	shout(skill.display_name)
+	_log(skill.display_name)
 	var tween := _new_tween()
 	match skill.animation_key:
 		&"kick":
@@ -128,7 +134,7 @@ func play_strike(skill: CombatSkillData) -> void:
 ## opening do not knock someone back the same distance (Gate 02 feel pass).
 func play_hurt(blocked: bool, weight: float = 0.5) -> void:
 	if blocked:
-		shout("擋住！", Color(0.6, 0.85, 1.0))
+		_log("擋住！", Color(0.6, 0.85, 1.0))
 	var amount := lerpf(0.14, 0.45, clampf(weight, 0.0, 1.0))
 	var tween := _new_tween()
 	tween.tween_property(_body, "position:z", amount, 0.05)
@@ -143,7 +149,7 @@ func play_hurt(blocked: bool, weight: float = 0.5) -> void:
 func play_distracted(towards: Vector3, seconds: float) -> void:
 	_look_away_point = towards
 	_look_away_left = maxf(seconds, 0.25)
-	shout("什麼？！", Color(1.0, 0.9, 0.5))
+	_log("什麼？！", Color(1.0, 0.9, 0.5))
 	if _body == null or _down:
 		return
 	var tween := _new_tween()
@@ -188,7 +194,7 @@ func is_distracted() -> bool:
 
 ## A dodge is a body moving out of the way, not a word on the screen.
 func play_evade() -> void:
-	shout("閃過！", Color(0.7, 1.0, 0.7))
+	_log("閃過！", Color(0.7, 1.0, 0.7))
 	var tween := _new_tween()
 	tween.tween_property(_body, "position:x", 0.32, 0.09).set_trans(Tween.TRANS_QUAD)
 	tween.parallel().tween_property(_body, "rotation:z", 0.22, 0.09)
@@ -198,14 +204,14 @@ func play_evade() -> void:
 
 ## A swing that hits nothing still travels, and overreaches.
 func play_miss() -> void:
-	shout("落空", Color(0.8, 0.8, 0.8))
+	_log("落空", Color(0.8, 0.8, 0.8))
 	var tween := _new_tween()
 	tween.tween_property(_body, "rotation:y", 0.34, 0.1)
 	tween.tween_property(_body, "rotation:y", 0.0, 0.26)
 
 
 func play_stagger() -> void:
-	shout("被打斷！", Color(1.0, 0.7, 0.3))
+	_log("被打斷！", Color(1.0, 0.7, 0.3))
 	var tween := _new_tween()
 	tween.tween_property(_body, "rotation:x", -0.3, 0.08)
 	tween.tween_property(_body, "rotation:x", 0.0, 0.25)
@@ -224,6 +230,24 @@ func play_victory() -> void:
 	tween.tween_property(_body, "position:y", 0.0, 0.15)
 
 
+## P03-E11 (storyboard 09/10): the owner turns to the dog and crouches to it.
+## The fight is over; the point of the beat is that it was for the dog.
+func play_acknowledge(towards: Vector3) -> void:
+	_look_away_point = towards
+	_look_away_left = 2.2
+	if _body == null or _down:
+		return
+	var tween := _new_tween()
+	tween.tween_property(_body, "position:y", 0.22, 0.14).set_trans(Tween.TRANS_BACK)
+	tween.tween_property(_body, "position:y", 0.0, 0.16)
+	# Then down onto their haunches towards the dog, and back up.
+	tween.tween_property(_body, "rotation:x", -0.34, 0.3).set_trans(Tween.TRANS_SINE)
+	tween.parallel().tween_property(_body, "position:y", -0.16, 0.3)
+	tween.tween_interval(0.7)
+	tween.tween_property(_body, "rotation:x", 0.0, 0.35)
+	tween.parallel().tween_property(_body, "position:y", 0.0, 0.35)
+
+
 func set_beaten(beaten: bool) -> void:
 	_down = beaten
 	if _pose_tween != null:
@@ -237,6 +261,13 @@ func revive() -> void:
 	if _pose_tween != null:
 		_pose_tween.kill()
 	_reset_pose()
+
+
+## An automatic note about this fighter's own mechanics: shown only when the
+## combat log is turned on in the debug panel.
+func _log(text: String, color: Color = Color(1, 1, 0.75)) -> void:
+	if show_combat_text:
+		shout(text, color)
 
 
 func shout(text: String, color: Color = Color(1, 1, 0.75)) -> void:

@@ -364,8 +364,8 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 | P03-E07 | Bark attention reaction visible in-world | REVIEW |
 | P03-E08 | Leash Pull visible result | REVIEW |
 | P03-E09 | Combat Atmosphere Director hooks | TODO |
-| P03-E10 | Hide combat log, keep debug panel | TODO |
-| P03-E11 | Victory/defeat resolution beat | TODO |
+| P03-E10 | Hide combat log, keep debug panel | REVIEW |
+| P03-E11 | Victory/defeat resolution beat | REVIEW |
 | P03-E12 | Capture build/video for QA | TODO |
 
 ## P-03 Engineering Notes (Claude)
@@ -383,4 +383,6 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 - P03-E07/E08: the simulation has always emitted `distracted`, `pulled` and `stumbled`, and the 3D coordinator handled **none** of them — so barking and pulling produced no body motion at all, only a shout and a HUD toast. That is exactly the "text-only combat" the patch rules unacceptable, and it mattered far more once the camera moved inside the dog's head, where a toast is the only thing left. Now a bark turns the opponent's head and body towards the dog and opens their guard for as long as they are looking away (`play_distracted`, and `face_towards` yields to it); a pull that catches a wind-up yanks the owner bodily backwards; a bad pull throws them sideways off balance, deliberately uglier so a mistake looks like a mistake.
 - `pull()` was emitting the requested distance whether or not anything happened, so presentation could not tell a real save from a wasted tug. It now reports how far the fighter actually moved — 0 when they simply braced against the leash.
 - Test-timing lessons from this pass, both of which made checks pass alone and fail in the suite: a yank is a ~0.09 s tween, so sample the peak across the movement instead of one frame of it; and a STAGGER hold is shorter than the sampling window, so record that it happened *while* it happens rather than asking once it is over.
+- P03-E10: the combat log is off in normal play and back on from the debug panel ("戰鬥文字"). The cut is between the puppet's *automatic* notes about its own mechanics (skill name, 擋住／閃過／落空／被打斷／什麼？！), which are the log, and deliberate dialogue from the coordinator and the map (你家的狗在叫什麼？！／好狗狗。), which is the characters talking and stays. This is the exit gate made real: with it off, the only things left are the bodies, so E01/E07/E08 have to carry the fight.
+- P03-E11: winning ends with the owner turning round to the dog and crouching to it (storyboard 09/10), not with a number — "好狗狗。" with the reward in parentheses, said sparingly as `COMBAT_EMOTIONAL_FEEDBACK` asks. Losing already left the owner down in the world with the dog still able to reach them; the camera now holds on them through CRISIS and RELEASE rather than cutting away.
 - The atmosphere director assumes audio (ducking ambience, impact, dog breathing, low-frequency pulse before the first strike). The project still has none, and this now blocks P03-E09.
