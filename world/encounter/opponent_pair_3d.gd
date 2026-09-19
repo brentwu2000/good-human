@@ -149,9 +149,9 @@ func end_combat(result: CombatSimulation.Result) -> void:
 			presentation.set_visual_state(EncounterPresentation3D.VisualState.IDLE)
 
 
-func show_combat_impact(blocked: bool = false) -> void:
+func show_combat_impact(blocked: bool = false, weight: float = 0.5, contact_world: Vector3 = Vector3.ZERO, dog_opening: bool = false) -> void:
 	if presentation != null:
-		presentation.pulse_impact(blocked)
+		presentation.pulse_impact(blocked, weight, contact_world, dog_opening)
 
 
 func is_beaten() -> bool:

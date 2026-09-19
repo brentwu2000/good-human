@@ -15,6 +15,8 @@ var _brackets := Node3D.new()
 var _impact := Node3D.new()
 var _time := 0.0
 var _impact_left := 0.0
+var _impact_duration := 0.22
+var _impact_strength := 0.5
 
 
 func _ready() -> void:
@@ -37,9 +39,11 @@ func _process(delta: float) -> void:
 	_brackets.rotation.y = sin(_time * 0.8) * 0.025
 	if _impact_left > 0.0:
 		_impact_left -= delta
-		var progress := 1.0 - _impact_left / 0.22
-		_impact.scale = Vector3.ONE * lerpf(0.35, 1.15, progress)
-		_set_alpha(_impact, (1.0 - progress) * 0.92)
+		var progress := 1.0 - _impact_left / _impact_duration
+		var start_scale := lerpf(0.22, 0.38, _impact_strength)
+		var end_scale := lerpf(0.72, 1.28, _impact_strength)
+		_impact.scale = Vector3.ONE * lerpf(start_scale, end_scale, progress)
+		_set_alpha(_impact, (1.0 - progress) * lerpf(0.58, 0.92, _impact_strength))
 		_impact.visible = true
 	else:
 		_impact.visible = false
@@ -63,11 +67,19 @@ func set_visual_state(value: VisualState) -> void:
 			_brackets.visible = false
 
 
-func pulse_impact(blocked: bool = false) -> void:
+## Contact-local accent. `weight` grades a jab through a heavy opening, while
+## `dog_opening` gives the dog-made payoff its own warm read. This is
+## presentation only; the coordinator has already received the real outcome.
+func pulse_impact(blocked: bool = false, weight: float = 0.5, contact_world: Vector3 = Vector3.ZERO, dog_opening: bool = false) -> void:
 	if visual_state != VisualState.COMBAT:
 		return
-	_set_color(_impact, TEAL if blocked else CORAL, 0.92)
-	_impact_left = 0.22
+	_impact_strength = clampf(weight, 0.0, 1.0)
+	_impact_duration = lerpf(0.12, 0.24, _impact_strength)
+	var color := TEAL if blocked else (AMBER if dog_opening else CORAL)
+	_set_color(_impact, color, lerpf(0.68, 0.92, _impact_strength))
+	if contact_world != Vector3.ZERO:
+		_impact.global_position = contact_world + Vector3(0, 1.25, 0)
+	_impact_left = _impact_duration
 	_impact.visible = true
 
 

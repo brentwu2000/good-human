@@ -181,6 +181,13 @@ func _impact_weight(damage: float) -> float:
 	return clampf(damage / HEAVY_DAMAGE, 0.25, 1.0)
 
 
+## The visual accent belongs where bodies meet, not at the encounter marker.
+func _contact_point() -> Vector3:
+	if engagement == null:
+		return Vector3.ZERO
+	return (human.global_position + engagement.pair.human_global_position()) * 0.5
+
+
 ## Freezes the fight for a beat and shakes the view, scaled by the hit.
 func _punch_landed(weight: float) -> void:
 	blows_landed += 1
@@ -262,12 +269,13 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 			actor.play_strike(skill)
 			other.play_hurt(false, weight)
 			other.motion.react(false)
-			engagement.pair.show_combat_impact(false)
+			engagement.pair.show_combat_impact(false, weight, _contact_point())
 			_punch_landed(weight)
 		&"blocked":
+			var block_weight := _impact_weight(amount) * 0.5
 			actor.play_strike(skill)
-			other.play_hurt(true, _impact_weight(amount) * 0.5)
-			engagement.pair.show_combat_impact(true)
+			other.play_hurt(true, block_weight)
+			engagement.pair.show_combat_impact(true, block_weight, _contact_point())
 			_punch_landed(0.35)
 		&"dodged":
 			actor.play_strike(skill)
@@ -288,7 +296,9 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 			actor.motion.react(true)
 		&"opening":
 			# The dog made this happen: the biggest hit of the fight should
-			# look like the biggest hit of the fight.
+			# look like the biggest hit of the fight. Replace the ordinary coral
+			# pulse from the hit event with the warm dog-agency payoff.
+			engagement.pair.show_combat_impact(false, 1.0, _contact_point(), true)
 			_punch_landed(1.0)
 		&"staggered":
 			actor.play_stagger()
