@@ -10,5 +10,6 @@
 | `P03_STREET_BRAWL_STORYBOARD.png` (in `docs/06_art/dog_agency/`, not `assets/_source/`, as Update 006 Patch 02 requires) | Twelve-beat Street Brawl storyboard: Explore → Tension → Confrontation → Combat Snap to dog-eye first person → Fight → Dog Intervention → Impact → Crisis → Resolution → Affection → Return. The concept reference for P03-D01..D10 | Supplied by the owner in Update 006 Patch 02 on 2026-09-18 | Project-supplied; no third-party source asset |
 | `p03_combat_mood_target_01.png` | P03-D01 dog-eye cinematic combat mood target | Generated with the built-in OpenAI image tool on 2026-09-18 using the owner storyboard as style/cinematography reference | Project-generated; no third-party source asset |
 | `p03_tension_confrontation_storyboard_01.png` | P03-D02 four-frame Explore-to-Combat-Snap sequence | Generated with the built-in OpenAI image tool on 2026-09-19 using the owner storyboard and P03-D01 as references | Project-generated; no third-party source asset |
+| `p03_dog_pov_composition_sheet_01.png` | P03-D03 front, left, right, behind-opponent and owner-side dog POV compositions | Generated with the built-in OpenAI image tool on 2026-09-19 using P03-D01 and P03-D02 as references | Project-generated; no third-party source asset |
 
 The image is a design reference only. No external character or environment asset was imported as final art.
