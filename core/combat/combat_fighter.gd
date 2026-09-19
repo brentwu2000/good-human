@@ -21,6 +21,10 @@ var action: CombatSkillData
 var phase_time_left: float = 0.0
 ## Attacks wait until this simulation time.
 var ready_at: float = 0.0
+## When the current attack's wind-up began. An opponent reacts to a telegraph
+## starting, not to it merely being under way, so making a telegraph longer
+## makes it readable without handing the defender a longer free window.
+var windup_started_at: float = -99.0
 var cooldowns: Dictionary[StringName, float] = {}
 ## Dog agency (Sprint 04): no decisions until this simulation time (bark).
 var distracted_until: float = -1.0

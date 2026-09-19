@@ -33,6 +33,8 @@ const DISTRACT_STRONG: float = 0.5
 const COMMIT_SHARE: float = 0.5
 ## Extra reach so an attack started in range still lands after tiny movement.
 const REACH_TOLERANCE: float = 12.0
+## How long after a telegraph starts a fighter can still answer it.
+const REACTION_WINDOW: float = 0.3
 ## Yanked off balance, even usefully, they need this long to set their feet
 ## again — so dodging on the leash trades the owner's own tempo for safety.
 const PULL_RECOVERY: float = 1.5
@@ -40,6 +42,8 @@ const PULL_RECOVERY: float = 1.5
 var fighters: Array[CombatFighter] = []
 var result: Result = Result.NONE
 var time: float = 0.0
+
+var _first_to_decide: int = 0
 
 var _balance: GameBalance
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -71,7 +75,12 @@ func step(delta: float) -> void:
 		_advance(fighter, delta)
 		if is_finished():
 			return
-	for fighter in fighters:
+	# Alternate who decides first. Deciding first means starting attacks first,
+	# and therefore being the one caught mid-attack when the other answers —
+	# a fixed order quietly hands one side the whole fight.
+	_first_to_decide = 1 - _first_to_decide
+	for i in 2:
+		var fighter: CombatFighter = fighters[(_first_to_decide + i) % 2]
 		if fighter.is_idle():
 			_decide(fighter, delta)
 	if time >= _balance.combat_max_duration:
@@ -196,7 +205,15 @@ func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
 		CombatSkillData.Condition.TARGET_IN_RANGE:
 			return time >= fighter.ready_at and distance() <= skill.preferred_range
 		CombatSkillData.Condition.INCOMING_ATTACK:
-			return target.is_winding_up_attack() and distance() <= target.action.preferred_range + REACH_TOLERANCE
+			# You react to a telegraph starting, not to it still being under
+			# way. Otherwise a longer wind-up is simply a longer free window for
+			# the defender, and making attacks readable turns every fight into a
+			# blocking contest.
+			# Strictly after it starts, never in the same step: fighters decide
+			# in order, so a same-step reaction would hand whoever decides
+			# second a free answer to everything the other one does.
+			var since := time - target.windup_started_at
+			return target.is_winding_up_attack() and since > 0.0 and since <= REACTION_WINDOW 				and distance() <= target.action.preferred_range + REACH_TOLERANCE
 	return false
 
 
@@ -230,6 +247,8 @@ func _start(fighter: CombatFighter, skill: CombatSkillData) -> void:
 	fighter.uses[skill.id] = fighter.uses.get(skill.id, 0) + 1
 	fighter.cooldowns[skill.id] = skill.cooldown
 	combat_event.emit(&"skill_started", fighter.side, skill, 0.0)
+	if skill.effect == CombatSkillData.Effect.ATTACK:
+		fighter.windup_started_at = time
 	_enter(fighter, CombatFighter.Phase.WINDUP, skill.windup)
 
 
@@ -256,10 +275,14 @@ func _phase_done(fighter: CombatFighter) -> void:
 	match fighter.phase:
 		CombatFighter.Phase.WINDUP:
 			if skill.effect == CombatSkillData.Effect.ATTACK:
+				# Damage still lands as the wind-up ends, so pull protection,
+				# opening windows and the cancel share all keep their meaning.
+				# The ACTIVE phase after it is the contact window: the strike
+				# is still out, and the body is committed to it.
 				_resolve_attack(fighter, skill)
 				if is_finished():
 					return
-				_enter(fighter, CombatFighter.Phase.RECOVERY, skill.recovery)
+				_enter(fighter, CombatFighter.Phase.ACTIVE, skill.active_time)
 			else:
 				_enter(fighter, CombatFighter.Phase.ACTIVE, skill.active_time)
 		CombatFighter.Phase.ACTIVE:
@@ -291,7 +314,10 @@ func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 	else:
 		target.hp -= damage
 		combat_event.emit(&"hit", attacker.side, skill, damage)
-		if skill.stagger > target.stability and target.phase == CombatFighter.Phase.WINDUP:
+		# Same rule a bark obeys: an attack they have already committed to still
+		# comes. Without this, longer wind-ups mean far more time spent
+		# interruptible, and whoever kicks first simply wins.
+		if skill.stagger > target.stability and _can_be_called_off(target):
 			var interrupted := target.action
 			_enter(target, CombatFighter.Phase.RECOVERY, interrupted.recovery)
 			combat_event.emit(&"staggered", target.side, interrupted, 0.0)
