@@ -17,9 +17,12 @@ States: RESEARCH / CANDIDATE / IN_PROGRESS / REVIEW / APPROVED / REJECTED
 | ART-041 | 3D Goal World Cues | P1 | REVIEW |
 | ART-042 | 3D Territory Interaction Presentation | P0 | REVIEW |
 | ART-043 | 3D Banyan Rival Pair Identity | P0 | REVIEW |
+| ART-044 | P-03 Cinematic Runtime Style Migration | P0 | IN_PROGRESS |
 
 ## Sprint 04 Dog Agency design handoff
 
 The Bark, leash tension, opponent-dog reaction, owner reaction, and seamless combat composition references are in `docs/06_art/dog_agency/`. The generated study is a reference board; it does not replace the runtime 3D models.
 
-The current 3D pass is a low-poly production prototype for the dog-height chase camera. It replaces debug boxes on the player dog and owner while keeping geometry, gameplay rules, and camera contracts unchanged.
+The current 3D pass is a low-poly functional prototype for the dog-height chase camera. It replaces debug boxes while keeping gameplay rules and camera contracts testable, but it is not the final visible style.
+
+Owner direction recorded 2026-09-19: in-game art should converge toward the supplied P-03 storyboard's grounded cinematic realism. Runtime translation requirements and the bounded vertical-slice upgrade are defined in `docs/06_art/P03_RUNTIME_STYLE_TRANSLATION.md`.

@@ -8,7 +8,7 @@ Target image: `assets/_source/design/dog_agency/p03_combat_mood_target_01.png`
 
 Match the supplied P-03 storyboard as closely as practical in cinematography, material realism, lighting and emotional weight. Exploration remains warm and grounded; combat feels immediate because ordinary humans become large from dog-eye height.
 
-The target image is a generated concept reference, not final runtime character art and not a promise of photorealistic production fidelity on every asset.
+The target image is generated concept art rather than a final runtime capture, but its grounded cinematic realism is the required direction for visible P-03 gameplay. Runtime assets may simplify hidden geometry and distant detail for performance; foreground characters, materials, lighting, camera scale and emotional behavior must visibly converge toward it.
 
 ## Visual pillars
 
