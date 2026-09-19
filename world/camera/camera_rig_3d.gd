@@ -22,8 +22,10 @@ extends Node3D
 ## TENSION  — provoked, before the first blow. The push-in starts.
 ## ACTIVE   — blows landing. Tighter and lower; the dog sits in the foreground.
 ## CRISIS   — the owner is in trouble. Tighter still, and firmly on them.
+## AFFECTION— won. Still in the dog's eyes, because being thanked is the point
+##             of the whole thing (storyboard 09/10).
 ## RELEASE  — it is over. Holds the beat, then blends back out to EXPLORE.
-enum Context { EXPLORE, TENSION, ACTIVE, CRISIS, RELEASE }
+enum Context { EXPLORE, TENSION, ACTIVE, CRISIS, AFFECTION, RELEASE }
 
 ## `pov` is how far the camera has moved inside the dog's head (ADR-015): 0 is
 ## the third-person chase shot, 1 is first person at dog eye height. The
@@ -39,6 +41,7 @@ const CONTEXT_FRAMING: Dictionary = {
 	Context.TENSION: {"pivot": 0.95, "pitch": -11.0, "distance": 2.35, "fov": 62.0, "focus": 0.50, "pov": 0.0},
 	Context.ACTIVE: {"pivot": 1.00, "pitch": -12.0, "distance": 2.00, "fov": 66.0, "focus": 1.00, "pov": 1.0},
 	Context.CRISIS: {"pivot": 0.95, "pitch": -10.0, "distance": 1.75, "fov": 58.0, "focus": 1.00, "pov": 1.0},
+	Context.AFFECTION: {"pivot": 1.00, "pitch": -10.0, "distance": 1.90, "fov": 52.0, "focus": 1.00, "pov": 1.0},
 	Context.RELEASE: {"pivot": 1.00, "pitch": -14.0, "distance": 3.10, "fov": 66.0, "focus": 0.60, "pov": 0.0},
 }
 ## A tight shot only works while the dog is near the fight. Past this far from
@@ -137,6 +140,7 @@ var context: Context = Context.EXPLORE
 ## 0..1 blend into the dog's eyes, eased separately from the rest of the framing.
 var pov: float = 0.0
 var _pov_aim: Vector3 = Vector3.ZERO
+var _first_person_view: DogFirstPersonView3D
 ## Control frame for the stick (see header).
 var _control_yaw: float = 0.0
 var _stick_held: bool = false
@@ -150,6 +154,13 @@ func _ready() -> void:
 	camera = Camera3D.new()
 	camera.current = true
 	add_child(camera)
+	# The dog's own muzzle and ears, in the lower frame while in first person.
+	var view := DogFirstPersonView3D.new()
+	camera.add_child(view)
+	view.visible = false
+	if dog != null:
+		dog.first_person_view = view
+	_first_person_view = view
 
 
 ## A hit landed: 0..1 for how hard. Never accumulates past a full shake.
@@ -197,6 +208,9 @@ func _desired_context() -> Context:
 		if coordinator.owner_condition() >= 0.0 and coordinator.owner_condition() <= CRISIS_CONDITION:
 			return Context.CRISIS
 		return Context.ACTIVE if coordinator.blows_landed > 0 else Context.TENSION
+	# Won: stay in the dog's eyes while the owner turns round to it.
+	if coordinator.is_acknowledging():
+		return Context.AFFECTION
 	# The owner is down but the dog can still move around them: stay with them.
 	if coordinator.is_owner_down():
 		return Context.CRISIS
@@ -240,6 +254,8 @@ func _update(delta: float, instant: bool) -> void:
 	# snap rate and must not be smoothed twice.
 	var pov_target: float = CONTEXT_FRAMING[context].get("pov", 0.0)
 	pov = pov_target if instant else lerpf(pov, pov_target, 1.0 - exp(-pov_snap_rate * delta))
+	if dog.first_person_view == null and _first_person_view != null:
+		dog.first_person_view = _first_person_view
 	dog.set_first_person(pov > 0.85)
 
 	var pitch := deg_to_rad(current["pitch"])
@@ -304,7 +320,8 @@ func combat_center() -> Vector3:
 	if owner_actor == null:
 		return dog.global_position + head
 	var owner_point := owner_actor.global_position + head
-	if coordinator == null or coordinator.pair == null:
+	# Being thanked is between the two of them; the beaten pair is not part of it.
+	if coordinator == null or coordinator.pair == null or context == Context.AFFECTION:
 		return owner_point
 	return (coordinator.pair.human_global_position() + head).lerp(owner_point, combat_center_owner_bias)
 

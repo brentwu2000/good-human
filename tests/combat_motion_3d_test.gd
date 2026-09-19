@@ -99,6 +99,29 @@ func _test_resolution_beat(coordinator: CombatCoordinator3D, dog: DogController3
 	check(facing.dot(to_dog.normalized()) > 0.5, "they are looking at the dog (%.2f)" % facing.dot(to_dog.normalized()))
 	check_eq(coordinator.release_left > 0.0, true, "and the world holds the beat before walking resumes")
 
+	# D4/P02-010, storyboard 09/10: the thanks happens from inside the dog's
+	# head, with the dog's own muzzle in frame for the hand to land on.
+	var rig := (_tree.current_scene as RunMap3D).rig
+	check(coordinator.is_acknowledging(), "the owner is thanking the dog")
+	check_eq(rig.context, CameraRig3D.Context.AFFECTION, "and the camera stays with the two of them")
+	# Moving into the dog's eyes is a blend, so give it the moment it takes.
+	await _wait_until(func() -> bool: return rig.pov > 0.9, 120)
+	check(rig.pov > 0.9, "still through the dog's eyes")
+	check(dog.first_person_view != null and dog.first_person_view.visible, "the dog's own muzzle is in frame")
+	# Watch the whole beat at once: the hand goes out and the head dips under it
+	# within the same couple of seconds, so sampling them in sequence misses one.
+	var reaching := Greybox.part(human.puppet._body, "ArmL")
+	var reached := 0.0
+	var dipped := 0.0
+	for i in 150:
+		await _tree.physics_frame
+		reached = maxf(reached, absf(reaching.rotation.x))
+		dipped = maxf(dipped, absf(dog.first_person_view.position.y))
+	check(reached > 0.5, "the owner reaches a hand out to the dog (%.2f rad)" % reached)
+	check(dipped > 0.01, "and the dog's head dips under it (%.3f m)" % dipped)
+	await _wait_until(func() -> bool: return rig.context == CameraRig3D.Context.EXPLORE, 400)
+	check(not dog.first_person_view.visible, "afterwards the muzzle leaves the frame with the camera")
+
 
 ## P03-E07/E08: from inside the dog's head, the player has to be able to SEE
 ## that barking and pulling did something. Text on the screen does not count.
@@ -288,6 +311,14 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	await _physics(20)
 	check(absf(arm.rotation.x) > 0.1, "the wind-up draws the arm back (%.2f rad)" % arm.rotation.x)
 	puppet._reset_pose()
+
+
+func _wait_until(done: Callable, max_frames: int) -> void:
+	for i in max_frames:
+		if done.call():
+			return
+		await _tree.physics_frame
+	check(false, "timed out waiting")
 
 
 func _physics(frames: int) -> void:

@@ -15,12 +15,19 @@ signal interact_requested(target: Node)
 @export var stick_sprint_threshold: float = 0.95
 @export var detect_radius: float = 1.3
 
+## Shared with the first-person view so the muzzle in frame is this dog's.
+const FUR_COLOR: Color = Color(0.78, 0.55, 0.32)
+
 ## Camera yaw in radians, set by CameraRig3D. 0 = forward is -Z.
 var camera_yaw: float = 0.0
 var facing: Vector3 = Vector3.FORWARD
 ## Passed to Interactable3D.can_interact(); set by RunManager.
 var interaction_context: Object
 var focused: Interactable3D
+
+## Muzzle and ears in frame while the camera is inside this dog's head. Built
+## and parented by CameraRig3D, which owns the camera it hangs from.
+var first_person_view: DogFirstPersonView3D
 
 var _visual: Node3D
 var _motion: DogMotion3D
@@ -42,7 +49,7 @@ func _ready() -> void:
 	add_child(shape)
 	# Player dog is a compact Shiba-like silhouette: curled tail, pointed ears,
 	# cream muzzle and teal harness remain readable in the low chase camera.
-	_visual = Greybox.dog(Color(0.78, 0.55, 0.32), 1.0, 1)
+	_visual = Greybox.dog(FUR_COLOR, 1.0, 1)
 	add_child(_visual)
 	_motion = DogMotion3D.new()
 	add_child(_motion)
@@ -91,6 +98,14 @@ func _physics_process(delta: float) -> void:
 func set_first_person(value: bool) -> void:
 	if _visual != null:
 		_visual.visible = not value
+	if first_person_view != null:
+		first_person_view.visible = value
+
+
+## A hand has landed on this dog's head.
+func play_petted() -> void:
+	if first_person_view != null:
+		first_person_view.play_petted()
 
 
 ## Where the camera sits when it is looking through this dog's eyes: eye height,

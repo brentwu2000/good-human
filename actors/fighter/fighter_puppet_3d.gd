@@ -293,12 +293,21 @@ func play_acknowledge(towards: Vector3) -> void:
 	var tween := _new_tween()
 	tween.tween_property(_body, "position:y", 0.22, 0.14).set_trans(Tween.TRANS_BACK)
 	tween.tween_property(_body, "position:y", 0.0, 0.16)
-	# Then down onto their haunches towards the dog, and back up.
-	tween.tween_property(_body, "rotation:x", -0.34, 0.3).set_trans(Tween.TRANS_SINE)
-	tween.parallel().tween_property(_body, "position:y", -0.16, 0.3)
-	tween.tween_interval(0.7)
-	tween.tween_property(_body, "rotation:x", 0.0, 0.35)
-	tween.parallel().tween_property(_body, "position:y", 0.0, 0.35)
+	# Down onto their haunches, and a hand out towards the dog. From inside the
+	# dog's head that hand is the whole beat (storyboard 09/10).
+	if _hips != null:
+		tween.tween_property(_hips, "position:y", Greybox.HIP_HEIGHT - 0.3, 0.3).set_trans(Tween.TRANS_SINE)
+		tween.parallel().tween_property(_hips, "rotation:x", -0.3, 0.3)
+	for leg in _legs:
+		if leg != null:
+			tween.parallel().tween_property(leg, "rotation:x", 0.7, 0.3)
+	var arm := _joint(_arms, 0)
+	if arm != null:
+		tween.parallel().tween_property(arm, "rotation:x", -1.7, 0.36).set_trans(Tween.TRANS_SINE)
+	if _head != null:
+		tween.parallel().tween_property(_head, "rotation:x", -0.2, 0.3)
+	tween.tween_interval(0.9)
+	tween.tween_callback(_reset_pose)
 
 
 func set_beaten(beaten: bool) -> void:

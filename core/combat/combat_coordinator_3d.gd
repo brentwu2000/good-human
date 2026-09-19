@@ -36,6 +36,11 @@ const HEAVY_DAMAGE: float = 9.0
 ## After a fight resolves the world holds the beat before letting go, so a win
 ## or a loss lands instead of snapping straight back to walking (D4/P02-006).
 const RELEASE_SECONDS: float = 1.4
+## Storyboard 09/10: after a win the owner turns to the dog and puts a hand on
+## it. The world holds there before letting go.
+const ACKNOWLEDGE_SECONDS: float = 1.9
+## How long into that beat the hand actually lands.
+const PET_AT: float = 0.75
 ## P03-E01/E03: two people in a fight circle each other. The simulation stays
 ## one-dimensional and keeps owning distance and every outcome; the line they
 ## stand on turns in the world while neither of them is committed to anything.
@@ -62,6 +67,8 @@ var _hitstop_left: float = 0.0
 ## what to do with them; the coordinator never frames anything itself.
 var blows_landed: int = 0
 var release_left: float = 0.0
+## Counting down while the owner is thanking the dog.
+var acknowledge_left: float = 0.0
 var _base_fighter: FighterData
 
 
@@ -144,6 +151,7 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	human.say("欸欸欸，不是我…", Color(1.0, 0.9, 0.6))
 	blows_landed = 0
 	release_left = 0.0
+	acknowledge_left = 0.0
 	sim.combat_event.connect(_on_combat_event)
 	sim.finished.connect(_on_finished)
 	_sync()
@@ -152,6 +160,12 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 
 func _process(delta: float) -> void:
 	release_left = maxf(release_left - delta, 0.0)
+	if acknowledge_left > 0.0:
+		var was := acknowledge_left
+		acknowledge_left = maxf(acknowledge_left - delta, 0.0)
+		var landed := ACKNOWLEDGE_SECONDS - PET_AT
+		if was > landed and acknowledge_left <= landed:
+			dog.play_petted()
 	if _defeat_left >= 0.0:
 		_defeat_left -= delta * time_scale
 		if _defeat_left < 0.0:
@@ -200,6 +214,11 @@ func _punch_landed(weight: float) -> void:
 ## presentation so the owner's state can be shown through them rather than a bar.
 func owner_condition() -> float:
 	return engagement.simulation.fighters[CombatSimulation.PLAYER].hp_ratio() if engagement != null else -1.0
+
+
+## True while the owner is thanking the dog (storyboard 09/10).
+func is_acknowledging() -> bool:
+	return acknowledge_left > 0.0
 
 
 ## True while the owner is down and the dog can still move around them.
@@ -324,6 +343,7 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 			# P03-E11: the resolution beat is not the reward, it is the owner
 			# turning round to the dog. Said sparingly, as the spec asks.
 			human.puppet.play_acknowledge(dog.global_position)
+			acknowledge_left = ACKNOWLEDGE_SECONDS
 			human.say("好狗狗。" + ("（撿到%s）" % reward.item.display_name if reward != null else ""), Color(0.6, 1.0, 0.6), 2.0)
 		CombatSimulation.Result.DEFEAT:
 			# The owner stays in the world and the dog can still reach them
