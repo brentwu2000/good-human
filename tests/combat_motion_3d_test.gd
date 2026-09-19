@@ -34,6 +34,7 @@ func _run() -> void:
 	var pair := map.get_node("Encounters/pair_park") as OpponentPair3D
 
 	_test_states_are_authored()
+	await _test_body_is_articulated(human.puppet)
 
 	# Start a fight and watch it as the player would.
 	dog.global_position = pair.global_position + Vector3(1.0, 0.1, 1.0)
@@ -262,6 +263,31 @@ func _test_states_are_authored() -> void:
 	motion.update(0.01, fighter, false, true)
 	check_eq(motion.state, CombatMotion3D.State.DOWN, "being defeated overrides everything")
 	check(motion.is_committed(), "and the body is not free")
+
+
+## The body has joints, and a strike moves a limb rather than sliding the whole
+## figure. Without this a fall can only ever tip the figure over like a plank.
+func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
+	var body := puppet._body
+	for joint_name: String in ["Hips", "Torso", "Head", "ArmL", "ArmR", "LegL", "LegR"]:
+		check(Greybox.part(body, joint_name) != null, "the body has a %s joint" % joint_name)
+	var head := Greybox.part(body, "Head")
+	var torso := Greybox.part(body, "Torso")
+	check(torso.is_ancestor_of(head), "the head hangs off the torso")
+	check(torso.is_ancestor_of(Greybox.part(body, "ArmR")), "and so do the arms")
+	var hips := Greybox.part(body, "Hips")
+	check(is_equal_approx(hips.position.y, Greybox.HIP_HEIGHT), "the hips sit at hip height")
+	# Art decoration added in plain world coordinates ends up on the right part,
+	# so the face and hair travel with the head instead of staying behind.
+	check(head.get_child_count() >= 4, "the head carries its own face and hair (%d pieces)" % head.get_child_count())
+
+	# A punch swings an arm; it does not just shove the whole body forward.
+	var arm := Greybox.part(body, "ArmR")
+	arm.rotation = Vector3.ZERO
+	puppet.play_windup(preload("res://data/combat/skills/skill_punch.tres"))
+	await _physics(20)
+	check(absf(arm.rotation.x) > 0.1, "the wind-up draws the arm back (%.2f rad)" % arm.rotation.x)
+	puppet._reset_pose()
 
 
 func _physics(frames: int) -> void:

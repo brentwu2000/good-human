@@ -28,6 +28,12 @@ var _footwork: float = 0.0
 ## their attention (the dog), not at the person they are fighting.
 var _look_away_left: float = 0.0
 var _look_away_point: Vector3 = Vector3.ZERO
+## Joints, so a strike is an arm and a fall is a body folding (P-03).
+var _hips: Node3D
+var _torso: Node3D
+var _head: Node3D
+var _arms: Array[Node3D] = []
+var _legs: Array[Node3D] = []
 
 
 func apply(fighter: FighterData) -> void:
@@ -35,8 +41,16 @@ func apply(fighter: FighterData) -> void:
 	if _body != null:
 		_body.queue_free()
 	_body = HumanModular3D.build(fighter)
+	# Art adds its pieces to the root in plain world coordinates; put each one
+	# on the body part it sits on so limbs carry their own clothing.
+	Greybox.bind_parts(_body)
 	_body.scale = Vector3(fighter.body_scale.x, fighter.body_scale.y, fighter.body_scale.x)
 	add_child(_body)
+	_hips = Greybox.part(_body, "Hips")
+	_torso = Greybox.part(_body, "Torso")
+	_head = Greybox.part(_body, "Head")
+	_arms = [Greybox.part(_body, "ArmL"), Greybox.part(_body, "ArmR")]
+	_legs = [Greybox.part(_body, "LegL"), Greybox.part(_body, "LegR")]
 	if _hp_label == null:
 		_hp_label = Greybox.label("", 2.25, 36, Color(1, 0.6, 0.5))
 		add_child(_hp_label)
@@ -110,23 +124,46 @@ func play_motion(delta: float) -> void:
 		_body.position.x = move_toward(_body.position.x, 0.0, delta * 0.4)
 
 
+## The telegraph: the limb that is about to strike draws back, and the body
+## turns into it. This is what the player and the dog are reading.
 func play_windup(skill: CombatSkillData) -> void:
 	_log(skill.display_name)
 	var tween := _new_tween()
 	match skill.animation_key:
 		&"kick":
-			tween.tween_property(_body, "rotation:x", 0.2, skill.windup)
+			var leg := _joint(_legs, 1)
+			if leg != null:
+				tween.tween_property(leg, "rotation:x", 0.55, skill.windup).set_trans(Tween.TRANS_SINE)
+			if _torso != null:
+				tween.parallel().tween_property(_torso, "rotation:x", 0.22, skill.windup)
+		&"block":
+			for arm in _arms:
+				if arm != null:
+					tween.parallel().tween_property(arm, "rotation:x", -1.5, 0.12)
 		&"dodge":
-			tween.tween_property(_body, "position:z", 0.4, 0.08)
+			if _torso != null:
+				tween.tween_property(_torso, "rotation:z", 0.4, 0.1)
 		_:
-			tween.tween_property(_body, "position:z", 0.12, skill.windup)
+			var arm := _joint(_arms, 1)
+			if arm != null:
+				tween.tween_property(arm, "rotation:x", 0.75, skill.windup).set_trans(Tween.TRANS_SINE)
+			if _torso != null:
+				tween.parallel().tween_property(_torso, "rotation:y", -0.25, skill.windup)
 
 
+## The strike itself: the limb swings through, the body follows it, and only
+## then does everything settle back.
 func play_strike(skill: CombatSkillData) -> void:
 	var tween := _new_tween()
-	var lunge := -0.45 if skill.animation_key == &"kick" else -0.3
-	tween.tween_property(_body, "position:z", lunge, 0.07)
-	tween.tween_interval(0.1)
+	var kick := skill.animation_key == &"kick"
+	var limb := _joint(_legs if kick else _arms, 1)
+	if limb != null:
+		tween.tween_property(limb, "rotation:x", -1.2 if kick else -1.45, 0.08).set_trans(Tween.TRANS_QUAD)
+	if _torso != null:
+		tween.parallel().tween_property(_torso, "rotation:y", 0.3, 0.08)
+		tween.parallel().tween_property(_torso, "rotation:x", -0.12 if kick else 0.0, 0.08)
+	tween.parallel().tween_property(_body, "position:z", -0.2 if kick else -0.12, 0.08)
+	tween.tween_interval(0.08)
 	tween.tween_callback(_reset_pose)
 
 
@@ -217,11 +254,27 @@ func play_stagger() -> void:
 	tween.tween_property(_body, "rotation:x", 0.0, 0.25)
 
 
+## Storyboard 08: they go down, and stay down on the ground. The legs give way
+## first and the body folds over them, rather than the whole figure tipping
+## like a board.
 func play_down() -> void:
 	_down = true
 	var tween := _new_tween()
-	tween.tween_property(_body, "rotation:x", -PI / 2.0, 0.35).set_trans(Tween.TRANS_BOUNCE)
-	tween.parallel().tween_property(_body, "position:y", 0.2, 0.35)
+	for leg in _legs:
+		if leg != null:
+			tween.parallel().tween_property(leg, "rotation:x", 1.35, 0.22).set_trans(Tween.TRANS_QUAD)
+	if _hips != null:
+		# Towards the ground, not below it: this is the joint's height, not a delta.
+		tween.parallel().tween_property(_hips, "position:y", Greybox.HIP_HEIGHT - 0.46, 0.3).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(_hips, "rotation:x", -1.15, 0.34).set_trans(Tween.TRANS_SINE)
+	if _torso != null:
+		tween.parallel().tween_property(_torso, "rotation:x", -0.35, 0.36)
+	if _head != null:
+		tween.parallel().tween_property(_head, "rotation:x", 0.55, 0.4)
+	# One arm out towards the dog, which is what frame 08 is actually about.
+	var arm := _joint(_arms, 0)
+	if arm != null:
+		tween.parallel().tween_property(arm, "rotation:x", -2.1, 0.4).set_trans(Tween.TRANS_SINE)
 
 
 func play_victory() -> void:
@@ -280,11 +333,27 @@ func set_faded(faded: bool) -> void:
 	Greybox.set_faded(_body, faded, 0.28)
 
 
+## A named limb, or null when the body has not been built with joints.
+func _joint(limbs: Array[Node3D], index: int) -> Node3D:
+	return limbs[index] if index < limbs.size() else null
+
+
 func _reset_pose() -> void:
 	if _down or _body == null:
 		return
 	_body.position = Vector3.ZERO
 	_body.rotation = Vector3(data.stoop if data != null else 0.0, 0, 0)
+	# Limbs too, or each action starts from wherever the last one left them.
+	for joint: Node3D in _arms + _legs:
+		if joint != null:
+			joint.rotation = Vector3.ZERO
+	if _torso != null:
+		_torso.rotation = Vector3.ZERO
+	if _head != null:
+		_head.rotation = Vector3.ZERO
+	if _hips != null:
+		_hips.rotation = Vector3.ZERO
+		_hips.position.y = Greybox.HIP_HEIGHT
 
 
 func _new_tween() -> Tween:

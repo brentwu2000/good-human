@@ -76,26 +76,94 @@ static func tree(position: Vector3) -> Node3D:
 	return root
 
 
+## A human built as an articulated body, not a bag of loose pieces. Every part
+## hangs off the joint it actually turns around, so a punch can be an arm and a
+## fall can be legs buckling — rotating one flat root can only ever tip a body
+## over like a plank (P-03: "傾倒").
+##
+## Joint names are stable and looked up with `part()`. Decoration added to the
+## root afterwards (hair, clothing, bags, shoes) is moved onto the right part by
+## `bind_parts()`, so art code can keep adding pieces in plain world coordinates.
+const HIP_HEIGHT: float = 0.72
+const SHOULDER_HEIGHT: float = 1.39
+const NECK_HEIGHT: float = 1.38
+
+
 static func human(shirt: Color, pants: Color, hair: Color, skin: Color = Color(0.93, 0.78, 0.64)) -> Node3D:
 	var root := Node3D.new()
 	var shoe := Color(0.10, 0.12, 0.14)
 	var shirt_shadow := shirt.darkened(0.16)
-	root.add_child(capsule(0.11, 0.66, pants, Vector3(-0.10, 0.38, 0)))
-	root.add_child(capsule(0.11, 0.66, pants, Vector3(0.10, 0.38, 0)))
-	root.add_child(box(Vector3(0.16, 0.08, 0.28), shoe, Vector3(-0.10, 0.065, -0.07)))
-	root.add_child(box(Vector3(0.16, 0.08, 0.28), shoe, Vector3(0.10, 0.065, -0.07)))
-	root.add_child(capsule(0.27, 0.58, shirt, Vector3(0, 1.12, 0)))
-	root.add_child(box(Vector3(0.20, 0.10, 0.08), shirt_shadow, Vector3(0, 1.36, -0.23)))
-	root.add_child(capsule(0.07, 0.54, skin, Vector3(-0.34, 1.12, 0), Vector3(0, 0, -0.16)))
-	root.add_child(capsule(0.07, 0.54, skin, Vector3(0.34, 1.12, 0), Vector3(0, 0, 0.16)))
-	root.add_child(cylinder(0.095, 0.12, skin, Vector3(0, 1.42, 0)))
-	root.add_child(sphere(0.19, skin, Vector3(0, 1.62, 0)))
-	root.add_child(sphere(0.20, hair, Vector3(0, 1.72, 0.025)))
-	root.add_child(sphere(0.105, hair, Vector3(0, 1.89, 0.02)))
-	root.add_child(box(Vector3(0.34, 0.42, 0.14), hair.darkened(0.35), Vector3(0, 1.12, 0.24)))
-	root.add_child(box(Vector3(0.035, 0.48, 0.035), hair.darkened(0.25), Vector3(-0.16, 1.15, 0.16), Vector3(0, 0, -0.12)))
-	root.add_child(box(Vector3(0.035, 0.48, 0.035), hair.darkened(0.25), Vector3(0.16, 1.15, 0.16), Vector3(0, 0, 0.12)))
+
+	for side in [-1.0, 1.0]:
+		var leg := _joint(root, "Leg" + ("L" if side < 0.0 else "R"), Vector3(0.10 * side, HIP_HEIGHT, 0))
+		leg.add_child(capsule(0.11, 0.66, pants, Vector3(0, 0.38 - HIP_HEIGHT, 0)))
+		leg.add_child(box(Vector3(0.16, 0.08, 0.28), shoe, Vector3(0, 0.065 - HIP_HEIGHT, -0.07)))
+
+	var hips := _joint(root, "Hips", Vector3(0, HIP_HEIGHT, 0))
+	var torso := _joint(hips, "Torso", Vector3.ZERO)
+	torso.add_child(capsule(0.27, 0.58, shirt, Vector3(0, 1.12 - HIP_HEIGHT, 0)))
+	torso.add_child(box(Vector3(0.20, 0.10, 0.08), shirt_shadow, Vector3(0, 1.36 - HIP_HEIGHT, -0.23)))
+	torso.add_child(box(Vector3(0.34, 0.42, 0.14), hair.darkened(0.35), Vector3(0, 1.12 - HIP_HEIGHT, 0.24)))
+	for side in [-1.0, 1.0]:
+		torso.add_child(box(Vector3(0.035, 0.48, 0.035), hair.darkened(0.25), Vector3(0.16 * side, 1.15 - HIP_HEIGHT, 0.16), Vector3(0, 0, -0.12 * side)))
+		var arm := _joint(torso, "Arm" + ("L" if side < 0.0 else "R"), Vector3(0.34 * side, SHOULDER_HEIGHT - HIP_HEIGHT, 0))
+		arm.add_child(capsule(0.07, 0.54, skin, Vector3(0, 1.12 - SHOULDER_HEIGHT, 0), Vector3(0, 0, -0.16 * side)))
+
+	var head := _joint(torso, "Head", Vector3(0, NECK_HEIGHT - HIP_HEIGHT, 0))
+	head.add_child(cylinder(0.095, 0.12, skin, Vector3(0, 1.42 - NECK_HEIGHT, 0)))
+	head.add_child(sphere(0.19, skin, Vector3(0, 1.62 - NECK_HEIGHT, 0)))
+	head.add_child(sphere(0.20, hair, Vector3(0, 1.72 - NECK_HEIGHT, 0.025)))
+	head.add_child(sphere(0.105, hair, Vector3(0, 1.89 - NECK_HEIGHT, 0.02)))
 	return root
+
+
+## A named joint: an empty that its pieces hang from, so rotating it turns only
+## that part of the body.
+static func _joint(parent: Node3D, joint_name: String, at: Vector3) -> Node3D:
+	var joint := Node3D.new()
+	joint.name = joint_name
+	joint.position = at
+	parent.add_child(joint)
+	return joint
+
+
+## The joint called `joint_name`, or null.
+static func part(root: Node3D, joint_name: String) -> Node3D:
+	return root.find_child(joint_name, true, false) as Node3D
+
+
+## Moves anything left sitting directly on the root onto the body part it
+## belongs to, by where it is. Art code can keep adding pieces in plain world
+## coordinates without knowing the skeleton exists.
+static func bind_parts(root: Node3D) -> void:
+	var head := part(root, "Head")
+	var torso := part(root, "Torso")
+	if head == null or torso == null:
+		return
+	for child in root.get_children():
+		var piece := child as Node3D
+		if piece == null or piece is Node3D and piece.name in ["Hips", "LegL", "LegR"]:
+			continue
+		var at := piece.position
+		var target := torso
+		if at.y >= 1.45:
+			target = head
+		elif at.y < 0.80:
+			target = part(root, "LegL" if at.x < 0.0 else "LegR")
+		if target == null:
+			continue
+		root.remove_child(piece)
+		piece.position = at - _height_of(target)
+		target.add_child(piece)
+
+
+static func _height_of(joint: Node3D) -> Vector3:
+	var offset := Vector3.ZERO
+	var node := joint
+	while node != null and node is Node3D:
+		offset += node.position
+		node = node.get_parent() as Node3D
+	return offset
 
 
 ## Dog facing -Z. `size` 1 = medium dog.
