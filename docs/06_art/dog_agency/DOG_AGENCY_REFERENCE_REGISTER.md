@@ -11,5 +11,6 @@
 | `p03_combat_mood_target_01.png` | P03-D01 dog-eye cinematic combat mood target | Generated with the built-in OpenAI image tool on 2026-09-18 using the owner storyboard as style/cinematography reference | Project-generated; no third-party source asset |
 | `p03_tension_confrontation_storyboard_01.png` | P03-D02 four-frame Explore-to-Combat-Snap sequence | Generated with the built-in OpenAI image tool on 2026-09-19 using the owner storyboard and P03-D01 as references | Project-generated; no third-party source asset |
 | `p03_dog_pov_composition_sheet_01.png` | P03-D03 front, left, right, behind-opponent and owner-side dog POV compositions | Generated with the built-in OpenAI image tool on 2026-09-19 using P03-D01 and P03-D02 as references | Project-generated; no third-party source asset |
+| `p03_human_motion_silhouettes_01.png` | P03-D04 Punch, Kick, Block, Dodge, Light Hit, Heavy Stagger and Down motion sheet | Generated with the built-in OpenAI image tool on 2026-09-19 using P03-D03 as reference | Project-generated; no third-party source asset |
 
 The image is a design reference only. No external character or environment asset was imported as final art.
