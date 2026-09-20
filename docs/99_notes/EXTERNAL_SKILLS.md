@@ -40,3 +40,15 @@ Add more:
 git clone --depth 1 https://github.com/thedivergentai/gd-agentic-skills.git
 cp -r gd-agentic-skills/skills/<skill-name> .claude/skills/
 ```
+
+## blender-codex-mcp (Codex ART, not a Claude skill)
+- Source: https://github.com/webita/blender-codex-mcp (MIT), v1.5.5, cloned to
+  `C:/Users/b/tools/blender-codex-mcp` on 2026-09-20. Outside the repo on purpose.
+- Wired as the `blender` MCP server in `~/.codex/config.toml` (backed up first;
+  the existing project trust entries were kept). Prerequisites present on this
+  machine: uv 0.12.5, Python 3.12, Blender 5.2.
+- The package bundles a Supabase client that reports tool usage; `DISABLE_TELEMETRY`
+  is set in the config and the server logs `enabled=False` on startup.
+- Remaining manual step, which cannot be scripted: install and enable `addon.py`
+  from inside Blender's preferences and press Connect. Until then the server
+  starts but reports no Blender on port 9876.

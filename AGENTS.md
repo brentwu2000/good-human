@@ -41,6 +41,27 @@ Dog/human assets require S-level final quality. A-level bases may be transformed
 4. `docs/06_art/ART_STATUS.md`
 5. `docs/06_art/ASSET_LICENSES.md`
 
+## Blender (MCP)
+A Blender bridge is wired into Codex as the `blender` MCP server, so the ART
+role can model, inspect and export without leaving the session.
+
+Before the tools work, once per machine:
+1. Blender → Edit > Preferences > Add-ons → Install → pick
+   `C:/Users/b/tools/blender-codex-mcp/addon.py`, enable "Interface: Blender Codex MCP".
+2. In the 3D viewport press N → BlenderCodexMCP tab → "Connect to MCP server".
+
+Tools: `get_scene_info`, `get_object_info`, `get_viewport_screenshot`,
+`execute_blender_code`, `blender_health_check`, `sync_camera_to_viewport`,
+`export_glb`. Usage telemetry in that package is switched off in the config.
+
+Use it for what the code-built primitives cannot do. The characters are
+currently assembled from boxes and capsules by `Greybox`/`HumanModular3D`, and
+gameplay now poses them through named joints (`Hips`, `Torso`, `Head`, `ArmL`,
+`ArmR`, `LegL`, `LegR` — see `Greybox.part()`). Anything exported to replace
+them has to keep those joint names reachable, or the combat animation stops
+working. Record any imported asset in `ASSET_LICENSES.md` as usual, and keep
+`.glb` output under the normal `assets/` folders.
+
 ## Art Output
 Production-ready files go under:
 - `assets/characters/`
