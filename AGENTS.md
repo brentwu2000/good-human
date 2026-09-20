@@ -45,14 +45,34 @@ Dog/human assets require S-level final quality. A-level bases may be transformed
 A Blender bridge is wired into Codex as the `blender` MCP server, so the ART
 role can model, inspect and export without leaving the session.
 
-Before the tools work, once per machine:
-1. Blender → Edit > Preferences > Add-ons → Install → pick
-   `C:/Users/b/tools/blender-codex-mcp/addon.py`, enable "Interface: Blender Codex MCP".
-2. In the 3D viewport press N → BlenderCodexMCP tab → "Connect to MCP server".
+The add-on is already installed and enabled in Blender 5.2 — the manual
+Preferences step that used to be described here is done. What remains is that
+the bridge only works while **Blender is actually open**, because the server
+talks to it over TCP 9876:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\Users\b\Documents\good-human-3d-pipeline\tools\scripts\start_blender_mcp.ps1
+```
+
+That launches Blender, presses Connect, restores the window and clears the
+startup popups. By hand: open Blender → N in the 3D viewport → **Blender Codex
+MCP** tab → **Connect to Codex**. Either way, call `blender_health_check` and
+see `"connected": true` before trusting anything else.
+
+Two things that look like a broken bridge and are not: a **solid black**
+`get_viewport_screenshot` means the Blender window is minimised (it grabs the
+real OS window and does not raise an error), and a dialog across the middle of
+the first screenshot of a session is Blender's splash or BlenderKit's update
+popup — two Escapes clear it.
 
 Tools: `get_scene_info`, `get_object_info`, `get_viewport_screenshot`,
 `execute_blender_code`, `blender_health_check`, `sync_camera_to_viewport`,
-`export_glb`. Usage telemetry in that package is switched off in the config.
+`export_glb`, plus Hunyuan/PolyHaven/Sketchfab helpers. Usage telemetry in that
+package is switched off in both the config and the add-on preferences.
+
+Work the loop — inspect, change, screenshot, evaluate — rather than emitting a
+wall of Blender Python and calling it done. Save a `.blend` before anything
+destructive.
 
 Use it for what the code-built primitives cannot do. The characters are
 currently assembled from boxes and capsules by `Greybox`/`HumanModular3D`, and
@@ -61,6 +81,20 @@ gameplay now poses them through named joints (`Hips`, `Torso`, `Head`, `ArmL`,
 them has to keep those joint names reachable, or the combat animation stops
 working. Record any imported asset in `ASSET_LICENSES.md` as usual, and keep
 `.glb` output under the normal `assets/` folders.
+
+## The 3D character pipeline
+Reference images → AI mesh → Blender → rig → GLB → Godot lives in a separate
+directory, `../good-human-3d-pipeline`, kept out of this repository so model
+weights and large intermediates stay out of the game's history.
+
+Read `good-human-3d-pipeline/AGENTS.md` before working there. Two constraints
+set the plan: this machine's 8 GB of VRAM makes the pipeline geometry-only (no
+texture generation), and the AI meshes land around 300k faces against an 8-20k
+triangle target, so retopology is the substance of the Blender stage rather
+than a tidy-up at the end.
+
+The specification is `.claude/GOOD_HUMAN_3D_CHARACTER_PIPELINE.md`; current
+state is `good-human-3d-pipeline/docs/INSTALL_STATUS.md`.
 
 ## Art Output
 Production-ready files go under:
