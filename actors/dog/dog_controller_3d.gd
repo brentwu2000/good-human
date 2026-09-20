@@ -17,6 +17,10 @@ signal interact_requested(target: Node)
 
 ## Shared with the first-person view so the muzzle in frame is this dog's.
 const FUR_COLOR: Color = Color(0.78, 0.55, 0.32)
+## The generated shiba, rigged and animated in the character pipeline.
+const MODEL_SCENE: PackedScene = preload("res://assets/characters/dog/models/shiba_01/shiba_01.glb")
+## The export faces +Z; every actor in this game faces -Z.
+const MODEL_YAW: float = PI
 
 ## Camera yaw in radians, set by CameraRig3D. 0 = forward is -Z.
 var camera_yaw: float = 0.0
@@ -30,7 +34,7 @@ var focused: Interactable3D
 var first_person_view: DogFirstPersonView3D
 
 var _visual: Node3D
-var _motion: DogMotion3D
+var _motion: DogModelMotion3D
 var _detector: Area3D
 var _bark_label: Label3D
 var _bark_left: float = 0.0
@@ -47,13 +51,16 @@ func _ready() -> void:
 	shape.rotation_degrees.x = 90.0
 	shape.position.y = 0.3
 	add_child(shape)
-	# Player dog is a compact Shiba-like silhouette: curled tail, pointed ears,
-	# cream muzzle and teal harness remain readable in the low chase camera.
-	_visual = Greybox.dog(FUR_COLOR, 1.0, 1)
+	# _visual is a bare pivot the facing code yaws; the model hangs off it with
+	# its own fixed correction, so turning the dog stays one rotation.
+	_visual = Node3D.new()
+	var model := MODEL_SCENE.instantiate() as Node3D
+	model.rotation.y = MODEL_YAW
+	_visual.add_child(model)
 	add_child(_visual)
-	_motion = DogMotion3D.new()
+	_motion = DogModelMotion3D.new()
 	add_child(_motion)
-	_motion.bind(_visual)
+	_motion.bind(model)
 	_detector = Area3D.new()
 	_detector.collision_layer = 0
 	_detector.collision_mask = Greybox.INTERACTABLE_LAYER
