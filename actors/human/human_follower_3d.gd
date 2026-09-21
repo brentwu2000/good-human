@@ -124,16 +124,27 @@ func set_state(value: State) -> void:
 	state = value
 	velocity = Vector3.ZERO
 	hold_time = 0.0
+	if faded:
+		# A fight can start while the owner is out of frame behind the dog.
+		faded = false
+		puppet.visible = true
 	if value == State.FOLLOW:
 		puppet.revive()
 		puppet.show_hp(false)
 
 
+## The owner walks behind the dog, which is exactly where the chase camera is.
+## When it crosses that line it leaves the frame completely: a see-through
+## person filling the middle of the screen reads worse than no person at all.
+## The leash keeps running off past the dog, and that is what tells the player
+## the owner is back there.
 func set_faded(value: bool) -> void:
-	if faded == value:
+	# Never hide a fighter. In combat the owner is the thing being watched.
+	var hidden := value and state == State.FOLLOW
+	if faded == hidden:
 		return
-	faded = value
-	puppet.set_faded(value)
+	faded = hidden
+	puppet.visible = not hidden
 
 
 func say(text: String, color: Color = Color.WHITE, seconds: float = 1.6) -> void:
