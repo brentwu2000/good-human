@@ -56,6 +56,10 @@ func _ready() -> void:
 	_visual = Node3D.new()
 	var model := MODEL_SCENE.instantiate() as Node3D
 	model.rotation.y = MODEL_YAW
+	# This body's origin is not at its feet. The capsule lies on its side, so
+	# what rests on the floor is `position.y - radius` above the origin, and a
+	# model whose own origin is at its paws would stand that far underground.
+	model.position.y = shape.position.y - capsule.radius
 	_visual.add_child(model)
 	add_child(_visual)
 	_motion = DogModelMotion3D.new()
