@@ -29,7 +29,12 @@ var _leash_material: StandardMaterial3D
 
 const LEASH_TEAL := Color(0.12, 0.55, 0.48)
 const LEASH_TENSION := Color(0.95, 0.66, 0.28)
-const LEASH_WIDTH: float = 0.042
+## Width as a fraction of the distance to the camera, so the lead keeps the
+## same thickness on screen wherever it is.
+const LEASH_SCREEN_WIDTH: float = 0.018
+## Points along the lead. One more than the old eight, so the camera-facing
+## widening has a smooth tangent to work from.
+const SEGMENTS: int = 10
 
 
 func _ready() -> void:
@@ -52,8 +57,11 @@ func _ready() -> void:
 	_leash_mesh = ImmediateMesh.new()
 	var leash := MeshInstance3D.new()
 	leash.mesh = _leash_mesh
-	_leash_material = Greybox.material(LEASH_TEAL)
+	_leash_material = Greybox.material(Color.WHITE)
 	_leash_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	# Colour and the trailing fade both ride on the vertex colours.
+	_leash_material.vertex_color_use_as_albedo = true
+	_leash_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	leash.material_override = _leash_material
 	leash.top_level = true
 	add_child(leash)
@@ -159,18 +167,41 @@ func _draw_leash() -> void:
 	var distance := hand.distance_to(collar)
 	var sag := 0.4 if state != State.FOLLOW else clampf(1.0 - distance / max_length, 0.0, 1.0) * 0.5
 	var tension := clampf(inverse_lerp(slack_length, max_length, distance), 0.0, 1.0)
-	_leash_material.albedo_color = LEASH_TEAL.lerp(LEASH_TENSION, smoothstep(0.72, 1.0, tension))
-	var direction := collar - hand
-	direction.y = 0.0
-	var side := direction.normalized().cross(Vector3.UP) * (LEASH_WIDTH * 0.5)
-	if side.length_squared() < 0.0001:
-		side = Vector3.RIGHT * (LEASH_WIDTH * 0.5)
-	_leash_mesh.clear_surfaces()
-	_leash_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
-	for i in 9:
-		var t := i / 8.0
+	var colour := LEASH_TEAL.lerp(LEASH_TENSION, smoothstep(0.72, 1.0, tension))
+
+	var points: Array[Vector3] = []
+	for i in SEGMENTS + 1:
+		var t := float(i) / SEGMENTS
 		var p := hand.lerp(collar, t)
 		p.y -= sin(t * PI) * sag
+		points.append(p)
+
+	var camera := get_viewport().get_camera_3d()
+	var eye := camera.global_position if camera != null else hand + Vector3(0, 0, 1)
+	var fallback := (collar - hand).cross(Vector3.UP)
+	fallback = fallback.normalized() if fallback.length_squared() > 0.0001 else Vector3.RIGHT
+
+	_leash_mesh.clear_surfaces()
+	_leash_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for i in points.size():
+		var p: Vector3 = points[i]
+		var tangent: Vector3 = points[mini(i + 1, points.size() - 1)] - points[maxi(i - 1, 0)]
+		var to_eye := p - eye
+		# Two things keep this reading as a lead rather than a shape. The strip
+		# widens across the view, not along a fixed sideways axis, so it holds
+		# up when the camera looks down its length — which is where the chase
+		# camera lives. And the width grows with distance, so it covers the same
+		# few pixels at both ends instead of flaring into a slab up close.
+		var half := LEASH_SCREEN_WIDTH * maxf(to_eye.length(), 0.2) * 0.5
+		var side := tangent.cross(to_eye)
+		side = side.normalized() * half if side.length_squared() > 1e-8 else fallback * half
+		# With the owner out of frame the lead would otherwise begin at a hard
+		# edge in mid-air. Fading its far end lets it trail off behind instead.
+		var shade := colour
+		if faded:
+			shade.a = smoothstep(0.0, 0.18, float(i) / SEGMENTS)
+		_leash_mesh.surface_set_color(shade)
 		_leash_mesh.surface_add_vertex(p - side)
+		_leash_mesh.surface_set_color(shade)
 		_leash_mesh.surface_add_vertex(p + side)
 	_leash_mesh.surface_end()
