@@ -14,6 +14,11 @@ enum State { FOLLOW, COMBAT, DOWN }
 @export var drag_speed: float = 6.4
 ## Snap behind the dog only when this far (stuck behind a wall).
 @export var catch_up_distance: float = 14.0
+## How far to the dog's right the owner is pulled. Walking directly behind the
+## dog puts the owner on the chase camera's own axis, where the leash points at
+## the viewer and so has no length on screen to read. Trailing off to one side
+## keeps the lead a visible diagonal, and keeps the owner out of the shot.
+@export var follow_side_offset: float = 0.7
 
 var state: State = State.FOLLOW
 ## Growth hooks (same as the 2D owner): follow speed multiplier, standing still time.
@@ -87,16 +92,31 @@ func _follow(delta: float) -> void:
 		hold_time -= delta
 	elif distance > slack_length:
 		var pull := clampf(inverse_lerp(slack_length, max_length, distance), 0.0, 1.0)
-		target = to_dog.normalized() * lerpf(walk_speed * 0.5, drag_speed, pull) * speed_multiplier
+		# The lead's tension is still measured to the dog; only the direction
+		# the owner walks is aimed beside it.
+		var toward := _follow_anchor() - global_position
+		toward.y = 0.0
+		if toward.length_squared() < 0.0001:
+			toward = to_dog
+		target = toward.normalized() * lerpf(walk_speed * 0.5, drag_speed, pull) * speed_multiplier
 	var planar := Vector3(velocity.x, 0.0, velocity.z).move_toward(target, 20.0 * delta)
 	velocity = Vector3(planar.x, velocity.y - 9.8 * delta, planar.z)
 	move_and_slide()
 	if is_on_floor():
 		velocity.y = 0.0
 	if distance > catch_up_distance:
-		global_position = dog.global_position - to_dog.normalized() * max_length
+		global_position = _follow_anchor() - to_dog.normalized() * max_length
 	if planar.length() > 0.2:
 		puppet.rotation.y = lerp_angle(puppet.rotation.y, atan2(-planar.x, -planar.z), minf(delta * 8.0, 1.0))
+
+
+## Where the owner aims: beside the dog rather than in its tracks.
+func _follow_anchor() -> Vector3:
+	var forward := Vector3(dog.facing.x, 0.0, dog.facing.z)
+	if forward.length_squared() < 0.0001:
+		return dog.global_position
+	var right := forward.normalized().cross(Vector3.UP)
+	return dog.global_position + right * follow_side_offset
 
 
 ## Movement speed on the ground plane (shared with HumanFollower).

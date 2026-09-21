@@ -484,18 +484,20 @@ func _place_camera(from: Vector3, to: Vector3) -> Vector3:
 	return result
 
 
-## The leashed owner walks behind the dog, right where the camera looks.
+## The leashed owner walks behind the dog, which from the chase camera means
+## between the player and the dog. Anywhere in that space it is in the way: on
+## the camera line it covers the dog, and off to the side it fills the edge of
+## the frame as a body part with no body attached. So the test is depth, not
+## occlusion — nearer the camera than the dog is, and it leaves the shot. The
+## leash is what says where it went.
 func _update_owner_fade() -> void:
 	if owner_actor == null:
 		return
-	var from := camera.global_position
-	var to := dog.global_position + Vector3(0, 0.4, 0)
+	var forward := -global_basis.z
 	var body := owner_actor.global_position + Vector3(0, 0.9, 0)
-	var segment := to - from
-	var t := clampf((body - from).dot(segment) / maxf(segment.length_squared(), 0.001), 0.0, 1.0)
-	var closest := from + segment * t
-	var blocking := t > 0.05 and t < 0.95 and Vector2(body.x - closest.x, body.z - closest.z).length() < 0.6
-	owner_actor.set_faded(blocking)
+	var owner_depth := (body - camera.global_position).dot(forward)
+	var dog_depth := (dog.global_position - camera.global_position).dot(forward)
+	owner_actor.set_faded(owner_depth < dog_depth - 0.1)
 
 
 func is_dog_visible() -> bool:
