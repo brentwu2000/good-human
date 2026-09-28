@@ -407,7 +407,7 @@ func _phase_done(fighter: CombatFighter) -> void:
 					_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
 
 
-## A guard until `attacker`'s current attack can no longer land.
+## Seconds until `attacker`'s current attack can no longer land.
 func _time_to_contact_end(attacker: CombatFighter) -> float:
 	var skill := attacker.action
 	match attacker.phase:
