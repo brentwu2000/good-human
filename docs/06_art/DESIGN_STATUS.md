@@ -73,3 +73,19 @@ Installed 2026-09-28. Brief: `docs/06_art/P04_COMBAT_MOTION_DESIGN_WORKSTREAM.md
 | D4-21 | Dog Physical Presence | Design/Codex ART | TODO |
 | D4-22 | Dog POV Brawl Composition | Design/Codex ART | TODO |
 | D4-23 | Combat Personality Seeds | Design/Codex ART | TODO |
+
+## Sprint 05 Execution Design (Update 008)
+Installed 2026-09-28. Brief: `docs/06_art/SPRINT05_DESIGN_EXECUTION.md`. Design may start before the P-04 Gate; engineering stays gated. Inherit P-04 Dog POV/combat direction; do not reopen combat camera design.
+
+| ID | Deliverable | Owner | Status |
+|---|---|---|---|
+| D5-01 | Big Banyan Landmark | Design/Codex ART | TODO |
+| D5-02 | Scent Ownership Language | Design/Codex ART | TODO |
+| D5-03 | Mark Territory Storyboard | Design/Codex ART | TODO |
+| D5-04 | Greed Moment | Design/Codex ART | TODO |
+| D5-05 | SAFE vs UNBANKED HUD | Design/Codex ART | TODO |
+| D5-06 | Persistent Rival Pair | Design/Codex ART | TODO |
+| D5-07 | Territory World States | Design/Codex ART | TODO |
+| D5-08 | Ownership Reward Reveal | Design/Codex ART | TODO |
+| D5-09 | Target Screenshot 04 | Design/Codex ART | TODO |
+| D5-10 | Design Decision Pack | Design/Codex ART | TODO |

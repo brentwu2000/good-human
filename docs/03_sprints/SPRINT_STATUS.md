@@ -447,3 +447,28 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - A real bug surfaced while stabilising the tests: after a win nothing turned the owner round to the dog, because only the running fight calls `face_towards`. It only looked right when the owner already faced that way, which circling (P04-02) made a coin toss. `play_acknowledge` now turns them to the dog itself.
 - Tests: `combat_contact_test` gains the hook (data, who carries it, displacement landed and blocked, the heaviest blow into an opening); `combat_motion_3d_test` checks that the hook's wind-up turns the shoulders and hips away and raises the arm, and that the strike unwinds the body through and past square.
 
+## Sprint 05 — GREED / TERRITORY EXECUTION (Update 008)
+Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION.md`; systems `docs/04_systems/GREED_TERRITORY_SYSTEM.md`; data `docs/05_data/SPRINT05_DATA.md`; gate `docs/07_qa/SPRINT05_GREED_TERRITORY_GATE.md`; ADR-017 (extraction creates choice), ADR-018 (territory requires return). P-04 stays the combat baseline: Sprint 05 consumes it and does not redesign combat.
+
+**ENGINEERING GATE:** P-04 Brawl Feel Gate PASS, or explicit owner approval with named exceptions. Design (D5-01–D5-10) may start now. Recommended engineering order: value model → extraction decision → Banyan/scent → Mark Territory → Rival Pair → persistence → extraction claim consolidation → Dog Desire → reward → blind QA/P-04 regression. Out of scope: global territory strategy, passive economy, PvP, BattleScene, combat rewrite, daily decay, giant capture UI.
+
+| ID | Task | Status |
+|---|---|---|
+| S05-01 | SAFE/UNBANKED/PERMANENT runtime | TODO |
+| S05-02 | Extraction decision presentation | TODO |
+| S05-03 | Run Tension Director | TODO |
+| S05-04 | Big Banyan integration | TODO |
+| S05-05 | Scent ownership | TODO |
+| S05-06 | MARK_TERRITORY | TODO |
+| S05-07 | Persistent Rival Pair | TODO |
+| S05-08 | Territory persistence | TODO |
+| S05-09 | Extraction-based claim consolidation | TODO |
+| S05-10 | Dog Desire integration | TODO |
+| S05-11 | Ownership reward/event | TODO |
+| S05-12 | Defeat/value verification | TODO |
+| S05-13 | P-04 regression suite | TODO |
+| S05-14 | Fresh Codex blind QA | TODO |
+
+## Sprint 05 Execution Engineering Notes (Claude)
+- Overlap to reconcile when engineering starts: the earlier Sprint 05 install (Update 007) already built P4-001..P4-010 (run value/risk, SAFE/UNBANKED presentation, temptation hooks, territory state/data, Banyan landmark, Mark Territory, resident rival, claim progression, extraction resolution), all REVIEW and paused. Most S05 tasks build on or re-verify that work rather than start from nothing; each S05 task should first check what P4-xxx already provides.
+
