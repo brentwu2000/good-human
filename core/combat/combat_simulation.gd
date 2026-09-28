@@ -10,8 +10,9 @@ extends RefCounted
 ## still and shifts its `origin`; distance and every outcome still come from
 ## positions along the line, so the rules stay one-dimensional.
 
-## kind: skill_started, hit, blocked, dodged, missed, staggered, defeated,
-## distracted, opening (a hit on a distracted fighter), pulled, stumbled.
+## kind: skill_started, strike (the attack is released), hit, blocked, dodged,
+## missed, staggered, defeated, distracted, opening (a hit on a distracted
+## fighter), pulled, stumbled.
 ## `fighter` is the side the event is about (the attacker for hit/blocked/
 ## dodged/missed, the victim for staggered/defeated).
 signal combat_event(kind: StringName, fighter: int, skill: CombatSkillData, amount: float)
@@ -180,9 +181,10 @@ func pull(side: int, amount: float) -> bool:
 	var attacker := _other(fighter)
 	var saved := attacker.is_winding_up_attack()
 	if saved:
-		# Out of the way until that attack has landed, then back on their feet.
+		# Out of the way until that attack's contact window has closed, then
+		# back on their feet.
 		_move(fighter, -amount * _toward_opponent(fighter))
-		fighter.pulled_until = time + attacker.phase_time_left + 0.05
+		fighter.pulled_until = time + _time_to_contact_end(attacker) + 0.05
 		fighter.ready_at = maxf(fighter.ready_at, fighter.pulled_until + PULL_RECOVERY)
 	# Report how far they were actually moved, not how far was asked for: with
 	# nothing to dodge they brace against the leash and do not move at all, and
@@ -350,6 +352,10 @@ func _enter(fighter: CombatFighter, phase: CombatFighter.Phase, duration: float)
 func _advance(fighter: CombatFighter, delta: float) -> void:
 	if fighter.is_idle():
 		return
+	if fighter.phase == CombatFighter.Phase.CONTACT and not fighter.connected:
+		_try_contact(fighter)
+		if is_finished() or fighter.phase != CombatFighter.Phase.CONTACT:
+			return
 	if fighter.is_evading():
 		var speed := fighter.action.reposition_distance / maxf(fighter.action.active_time, 0.01)
 		_move(fighter, -speed * delta * _toward_opponent(fighter))
@@ -363,16 +369,29 @@ func _phase_done(fighter: CombatFighter) -> void:
 	match fighter.phase:
 		CombatFighter.Phase.WINDUP:
 			if skill.effect == CombatSkillData.Effect.ATTACK:
-				# Damage still lands as the wind-up ends, so pull protection,
-				# opening windows and the cancel share all keep their meaning.
-				# The ACTIVE phase after it is the contact window: the strike
-				# is still out, and the body is committed to it.
-				_resolve_attack(fighter, skill)
-				if is_finished():
-					return
-				_enter(fighter, CombatFighter.Phase.ACTIVE, skill.active_time)
+				# P-04: released. Nothing can land until the contact window.
+				fighter.connected = false
+				combat_event.emit(&"strike", fighter.side, skill, 0.0)
+				_enter(fighter, CombatFighter.Phase.STRIKE, skill.strike_time)
 			else:
 				_enter(fighter, CombatFighter.Phase.ACTIVE, skill.active_time)
+		CombatFighter.Phase.STRIKE:
+			fighter.phase = CombatFighter.Phase.CONTACT
+			fighter.phase_time_left = maxf(skill.contact_time, 0.0)
+			_try_contact(fighter)
+			if is_finished() or fighter.phase != CombatFighter.Phase.CONTACT:
+				return
+			if fighter.phase_time_left <= 0.0:
+				_phase_done(fighter)
+		CombatFighter.Phase.CONTACT:
+			# The window closed on nobody: a whiff, and they overreach.
+			var whiffed := not fighter.connected
+			if whiffed:
+				combat_event.emit(&"missed", fighter.side, skill, 0.0)
+			_enter(fighter, CombatFighter.Phase.FOLLOW_THROUGH, skill.follow_through)
+		CombatFighter.Phase.FOLLOW_THROUGH:
+			var whiff := 0.0 if fighter.connected else skill.whiff_recovery
+			_enter(fighter, CombatFighter.Phase.RECOVERY, skill.recovery + whiff)
 		CombatFighter.Phase.ACTIVE:
 			_enter(fighter, CombatFighter.Phase.RECOVERY, skill.recovery)
 		CombatFighter.Phase.RECOVERY:
@@ -386,11 +405,34 @@ func _phase_done(fighter: CombatFighter) -> void:
 					_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
 
 
+## Seconds until `attacker`'s current attack can no longer land.
+func _time_to_contact_end(attacker: CombatFighter) -> float:
+	var skill := attacker.action
+	match attacker.phase:
+		CombatFighter.Phase.WINDUP:
+			return attacker.phase_time_left + skill.strike_time + skill.contact_time
+		CombatFighter.Phase.STRIKE:
+			return attacker.phase_time_left + skill.contact_time
+		CombatFighter.Phase.CONTACT:
+			return attacker.phase_time_left
+	return 0.0
+
+
+## P-04: an attack lands only inside its contact window, only on a body within
+## reach at that moment, and only once. Out of reach it keeps looking until the
+## window closes; the whiff is reported when it does.
+func _try_contact(attacker: CombatFighter) -> void:
+	var skill := attacker.action
+	if attacker.connected or skill == null:
+		return
+	if distance() > skill.preferred_range + REACH_TOLERANCE:
+		return
+	attacker.connected = true
+	_resolve_attack(attacker, skill)
+
+
 func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 	var target := _other(attacker)
-	if distance() > skill.preferred_range + REACH_TOLERANCE:
-		combat_event.emit(&"missed", attacker.side, skill, 0.0)
-		return
 	if target.is_evading() or time < target.pulled_until:
 		combat_event.emit(&"dodged", attacker.side, skill, 0.0)
 		return

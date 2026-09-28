@@ -315,7 +315,7 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	# A punch swings an arm; it does not just shove the whole body forward.
 	var arm := Greybox.part(body, "ArmR")
 	arm.rotation = Vector3.ZERO
-	puppet.play_windup(preload("res://data/combat/skills/skill_punch.tres"))
+	puppet.play_windup(preload("res://data/combat/skills/skill_jab.tres"))
 	await _physics(20)
 	check(absf(arm.rotation.x) > 0.1, "the wind-up draws the arm back (%.2f rad)" % arm.rotation.x)
 	puppet._reset_pose()

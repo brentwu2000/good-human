@@ -2,7 +2,9 @@ class_name CombatFighter
 extends RefCounted
 ## Runtime state of one human in a CombatSimulation.
 
-enum Phase { IDLE, WINDUP, ACTIVE, RECOVERY }
+## ACTIVE is a guard or a dodge being held. An attack runs WINDUP → STRIKE →
+## CONTACT → FOLLOW_THROUGH → RECOVERY instead (P-04).
+enum Phase { IDLE, WINDUP, ACTIVE, RECOVERY, STRIKE, CONTACT, FOLLOW_THROUGH }
 ## What their feet are doing while no action has them (P-04).
 enum Footwork { HOLD, APPROACH, CIRCLE, SIDESTEP, BACKSTEP }
 
@@ -41,6 +43,9 @@ var footwork: Footwork = Footwork.HOLD
 var lateral: float = 1.0
 var step_left: float = 0.0
 var step_speed: float = 0.0
+## The current attack has already landed (or been blocked or dodged): it
+## never lands twice.
+var connected: bool = false
 ## Skill usage count, for tests / debug.
 var uses: Dictionary[StringName, int] = {}
 
@@ -70,6 +75,11 @@ func hp_ratio() -> float:
 
 func is_winding_up_attack() -> bool:
 	return phase == Phase.WINDUP and action != null and action.effect == CombatSkillData.Effect.ATTACK
+
+
+## Released and still extended: the strike, its contact window and the follow-through.
+func is_striking() -> bool:
+	return phase in [Phase.STRIKE, Phase.CONTACT, Phase.FOLLOW_THROUGH]
 
 
 func is_guarding() -> bool:

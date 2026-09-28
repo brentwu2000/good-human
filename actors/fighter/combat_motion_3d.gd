@@ -13,7 +13,7 @@ enum State {
 	APPROACH,     ## closing the gap
 	CIRCLE,       ## in range, working for an angle
 	WINDUP,       ## committing to an attack — the dog's cue to intervene
-	ATTACK,       ## the strike itself
+	ATTACK,       ## the strike released, through its contact window
 	BLOCK,
 	DODGE,
 	HIT_REACT,
@@ -22,6 +22,7 @@ enum State {
 	RECOVER,      ## the beat after an action, open and off balance
 	SIDESTEP,     ## a quick step round the opponent (P-04)
 	BACKSTEP,     ## stepping back out of range (P-04)
+	FOLLOW_THROUGH, ## still extended after the contact window (P-04)
 }
 
 ## Reaction states hold for their own moment before the simulation takes over
@@ -61,8 +62,10 @@ func update(delta: float, fighter: CombatFighter, closing: bool, defeated: bool)
 		state = State.DODGE
 	elif fighter.phase == CombatFighter.Phase.WINDUP:
 		state = State.WINDUP
-	elif fighter.phase == CombatFighter.Phase.ACTIVE:
+	elif fighter.phase in [CombatFighter.Phase.ACTIVE, CombatFighter.Phase.STRIKE, CombatFighter.Phase.CONTACT]:
 		state = State.ATTACK
+	elif fighter.phase == CombatFighter.Phase.FOLLOW_THROUGH:
+		state = State.FOLLOW_THROUGH
 	elif fighter.phase == CombatFighter.Phase.RECOVERY:
 		state = State.RECOVER
 	elif closing:
@@ -78,4 +81,4 @@ func update(delta: float, fighter: CombatFighter, closing: bool, defeated: bool)
 
 ## True while the body is doing something the fight should not interrupt.
 func is_committed() -> bool:
-	return state in [State.WINDUP, State.ATTACK, State.HIT_REACT, State.STAGGER, State.DOWN]
+	return state in [State.WINDUP, State.ATTACK, State.FOLLOW_THROUGH, State.HIT_REACT, State.STAGGER, State.DOWN]

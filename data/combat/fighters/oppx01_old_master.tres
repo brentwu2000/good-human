@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://resources/fighter_data.gd" id="1_fighter"]
 [ext_resource type="Script" path="res://resources/combat_stats.gd" id="2_stats"]
-[ext_resource type="Resource" path="res://data/combat/skills/skill_punch.tres" id="3_punch"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_jab.tres" id="3_punch"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_kick.tres" id="4_kick"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_block.tres" id="5_block"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_dodge.tres" id="6_dodge"]

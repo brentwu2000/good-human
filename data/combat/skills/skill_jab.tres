@@ -4,17 +4,21 @@
 
 [resource]
 script = ExtResource("1_skill")
-id = &"skill_punch"
+id = &"skill_jab"
 animation_key = &"punch"
-display_name = "出拳"
+display_name = "刺拳"
 effect = 0
 condition = 0
 priority = 10
 cooldown = 0.0
 preferred_range = 70.0
-windup = 0.45
-active_time = 0.12
-recovery = 0.3
+windup = 0.4
+active_time = 0.0
+recovery = 0.22
+strike_time = 0.06
+contact_time = 0.06
+follow_through = 0.08
+whiff_recovery = 0.18
 power = 1.0
 stagger = 0.0
 damage_reduction = 0.0

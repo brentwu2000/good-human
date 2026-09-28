@@ -22,11 +22,26 @@ enum Condition {
 @export var animation_key: StringName
 
 @export_group("Timing")
-## Telegraph before the effect lands.
+## Telegraph before the strike is released.
 @export var windup: float = 0.3
-## Attack: unused. Block/Dodge: how long the guard / evasion lasts.
+## Block/Dodge: how long the guard / evasion lasts. Unused by attacks.
 @export var active_time: float = 0.0
 @export var recovery: float = 0.3
+
+## P-04 attack phases: WINDUP → STRIKE → CONTACT → FOLLOW_THROUGH → RECOVERY.
+## The tuning schema's contact_start / contact_end are `strike_time` and
+## `strike_time + contact_time`, counted from the strike's release.
+@export_subgroup("Attack phases")
+## The limb travelling out: released, not yet able to touch anyone.
+@export var strike_time: float = 0.0
+## The only time this attack can land. It lands at most once, and only on a
+## body within reach at that moment.
+@export var contact_time: float = 0.02
+## Still extended after the contact window, hit or miss.
+@export var follow_through: float = 0.0
+## Extra recovery after a swing that touched nobody: the overreach is the
+## opening a counter, a bark or a pull can use.
+@export var whiff_recovery: float = 0.0
 
 @export_group("Effect")
 ## Attack damage multiplier on the attacker's Attack.

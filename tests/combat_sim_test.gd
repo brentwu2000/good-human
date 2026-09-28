@@ -7,7 +7,7 @@ const JOGGER: FighterData = preload("res://data/combat/fighters/opp01_jogger.tre
 const DELIVERY: FighterData = preload("res://data/combat/fighters/opp02_delivery.tres")
 const GYM: FighterData = preload("res://data/combat/fighters/opp03_gym.tres")
 const OLD_MASTER: FighterData = preload("res://data/combat/fighters/oppx01_old_master.tres")
-const PUNCH: CombatSkillData = preload("res://data/combat/skills/skill_punch.tres")
+const PUNCH: CombatSkillData = preload("res://data/combat/skills/skill_jab.tres")
 const KICK: CombatSkillData = preload("res://data/combat/skills/skill_kick.tres")
 const BLOCK: CombatSkillData = preload("res://data/combat/skills/skill_block.tres")
 const DODGE: CombatSkillData = preload("res://data/combat/skills/skill_dodge.tres")
@@ -331,7 +331,7 @@ func _attacks_only(data: FighterData) -> FighterData:
 func _collect(sim: CombatSimulation) -> Array[StringName]:
 	var kinds: Array[StringName] = []
 	sim.combat_event.connect(func(kind: StringName, _f: int, _s: CombatSkillData, _a: float) -> void:
-		if kind != &"skill_started":
+		if kind != &"skill_started" and kind != &"strike":
 			kinds.append(kind))
 	return kinds
 

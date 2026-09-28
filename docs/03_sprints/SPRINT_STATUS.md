@@ -408,7 +408,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 |---|---|---|
 | P04-01 | Physical presence baseline | REVIEW |
 | P04-02 | Combat spacing/footwork | REVIEW |
-| P04-03 | Jab phases/contact | TODO |
+| P04-03 | Jab phases/contact | REVIEW |
 | P04-04 | Heavy Hook | TODO |
 | P04-05 | Kick | TODO |
 | P04-06 | Block/Dodge | TODO |
@@ -432,4 +432,10 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - Seen while testing, for P04-03..05: fighters approaching from range both open with a kick at the edge of its 1.0 m reach, so the first exchange is two simultaneous kicks from a standstill. That is the attack layer (reach and phases), not footwork, but it reads as "stationary trading" at the start of a fight.
 - Not handled yet: circling does not know about walls, benches or the dog (P04-08/P04-09); the dog still gives way when a fighter steps onto it.
 - `combat_spacing_test` (20 checks, 36 simulated fights) covers the band, never standing inside each other, every footwork kind happening, under 5 % of free time spent standing still, the line turning, resets after exchanges, and determinism. `physical_presence_test` now also checks, in the 3D walk, that the fighters' bodies never overlap and that the ground matches the simulation's distance and line.
+- P04-03: an attack is now an event with a shape, WINDUP → STRIKE → CONTACT → FOLLOW_THROUGH → RECOVERY, not a wind-up that deals damage the instant it ends. It can land only inside its contact window, only on a body within reach at that moment (checked every step of the window, so someone stepping into it is hit), and only once. A window that closes on nobody is a whiff: it keeps going through the follow-through and adds `whiff_recovery`, which is the opening a counter, bark or pull can use. The strike animation now plays when the strike is released (a new `strike` event), before anyone knows whether it lands; contact events only add the other body's answer.
+- The punch is now the Jab (`skill_jab.tres`, 刺拳): wind-up 0.40, strike 0.06, contact 0.06, follow-through 0.08, recovery 0.22, whiff +0.18. That is 0.82 s from start to ready (the punch took 0.87), and it lands 0.46 s after the telegraph starts (the punch landed at 0.45). It keeps the 2D sprite's `punch` animation key.
+- The kick is deliberately unchanged until P04-05: it lands as its wind-up ends (0.02 s window) and stays out for the same 0.18 s as before.
+- The leash now protects the owner until the attack's contact window closes, not just until its wind-up ends; otherwise a pull could save them from the telegraph and still leave them standing in the strike.
+- Balance (200 fights each): 169/157/122 → 160/159/137 wins against jogger/delivery/gym, fight length unchanged, Old Master still 0/200. The Gym Regular moved most (61 % → 68.5 %), because a whiffed kick-then-jab now costs the whiffer more. All balance bands hold.
+- `combat_contact_test` (26 checks): phase order, nothing lands during the wind-up, landing inside the window, landing once however long the window is, whiff and its extra recovery, stepping into an open window, blocking inside it, the pull covering it, and across 20 real fights no outcome ever arriving before its strike.
 

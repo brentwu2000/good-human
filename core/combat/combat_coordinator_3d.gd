@@ -263,24 +263,25 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 	match kind:
 		&"skill_started":
 			actor.play_windup(skill)
+		&"strike":
+			# P-04: the limb goes out when the strike is released, before
+			# anyone knows whether it lands. Contact events only add the
+			# other body's answer.
+			actor.play_strike(skill)
 		&"hit":
 			var weight := _impact_weight(amount)
-			actor.play_strike(skill)
 			other.play_hurt(false, weight)
 			other.motion.react(false)
 			engagement.pair.show_combat_impact(false, weight, _contact_point())
 			_punch_landed(weight)
 		&"blocked":
 			var block_weight := _impact_weight(amount) * 0.5
-			actor.play_strike(skill)
 			other.play_hurt(true, block_weight)
 			engagement.pair.show_combat_impact(true, block_weight, _contact_point())
 			_punch_landed(0.35)
 		&"dodged":
-			actor.play_strike(skill)
 			other.play_evade()
 		&"missed":
-			actor.play_strike(skill)
 			actor.play_miss()
 		&"distracted":
 			# P03-E07: a bark landed. They turn to look at the dog and open up,
