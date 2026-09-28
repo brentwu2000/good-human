@@ -22,6 +22,10 @@ After each playable sprint, Codex uses a fresh context and tests without reading
 > Local decision. Renumbered (was ADR-007, then ADR-010) so numbered ADRs stay reserved for update packages (ADR-007 seamless combat, ADR-008 training, ADR-009 dog desires, ADR-010 camera evaluation).
 The game is portrait (base viewport 720×1280, `canvas_items` stretch, `expand` aspect) for single-hand play. Renderer is Godot Mobile. Art and UI are produced for this frame.
 
+## ADR-L02 — The dog changes the exchange, not the result
+> Local decision (owner, 2026-09-28, during P04-04: "狗本來就不該是左右戰鬥重點").
+Barking and leash pulls must visibly change what happens in a fight and help the owner, but they are not what decides who wins: the owner's own strength, grown through the dog's training, does (Design Principles 5 and 6). Tuning and tests hold the dog's edge to "helps, within limits" rather than requiring it to swing a large share of fights.
+
 ## ADR-007 — Seamless real-time combat
 No separate Battle Scene: encounters, human combat, dog control and disengagement all happen in the Run World. Full record: `ADR_007_SEAMLESS_REALTIME_COMBAT.md`.
 

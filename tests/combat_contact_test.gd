@@ -9,6 +9,7 @@ const JOGGER: FighterData = preload("res://data/combat/fighters/opp01_jogger.tre
 const JAB: CombatSkillData = preload("res://data/combat/skills/skill_jab.tres")
 const KICK: CombatSkillData = preload("res://data/combat/skills/skill_kick.tres")
 const BLOCK: CombatSkillData = preload("res://data/combat/skills/skill_block.tres")
+const HOOK: CombatSkillData = preload("res://data/combat/skills/skill_heavy_hook.tres")
 const STEP: float = 1.0 / 60.0
 
 
@@ -22,6 +23,8 @@ func _ready() -> void:
 	_test_pull_covers_contact()
 	_test_real_fights_order()
 	_test_motion_states()
+	_test_hook()
+	_test_opening_gets_the_heavy_blow()
 	finish()
 
 
@@ -204,3 +207,60 @@ func _run_until_idle(sim: CombatSimulation, side: int) -> void:
 		sim.step(STEP)
 		if sim.fighters[side].is_idle():
 			return
+
+
+## P04-04: the heavy hook sits between the jab and the kick, carries the
+## body with it, and only the fighters built for it throw it (owner, option A).
+func _test_hook() -> void:
+	check(HOOK.windup > JAB.windup and HOOK.windup < KICK.windup, "a hook telegraphs longer than a jab, shorter than a kick")
+	check(HOOK.power > JAB.power and HOOK.whiff_recovery > JAB.whiff_recovery, "it hits harder than a jab and costs more to miss")
+	check(HOOK.strike_time > 0.0 and HOOK.contact_time > 0.0 and HOOK.follow_through > 0.0, "it has all five phases")
+	for path: String in ["player_human", "opp03_gym", "oppx01_old_master"]:
+		var data: FighterData = load("res://data/combat/fighters/%s.tres" % path)
+		check(data.skills.has(HOOK), "%s throws hooks" % path)
+	for path: String in ["opp01_jogger", "opp02_delivery", "opp04_student"]:
+		var data: FighterData = load("res://data/combat/fighters/%s.tres" % path)
+		check(not data.skills.has(HOOK), "%s does not" % path)
+
+	var sim := _duel(60.0)
+	_start_attack(sim.fighters[CombatSimulation.PLAYER], HOOK)
+	var log := _log(sim)
+	_run_until_idle(sim, CombatSimulation.PLAYER)
+	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "a hook in reach lands")
+	check(sim.distance() >= 60.0 + HOOK.displacement - 0.01, "and moves them back (%.1f from 60)" % sim.distance())
+
+	sim = _duel(60.0)
+	var them := sim.fighters[CombatSimulation.OPPONENT]
+	_start_attack(sim.fighters[CombatSimulation.PLAYER], HOOK)
+	them.action = BLOCK
+	them.phase = CombatFighter.Phase.ACTIVE
+	them.phase_time_left = 5.0
+	_run_until_idle(sim, CombatSimulation.PLAYER)
+	var moved := sim.distance() - 60.0
+	check(moved > 0.0 and moved < HOOK.displacement, "blocked, it still moves them, less (%.1f)" % moved)
+
+
+## An opening is not the moment for a jab: someone looking at the dog or
+## recovering from a swing gets the heaviest blow available.
+func _test_opening_gets_the_heavy_blow() -> void:
+	var sim := CombatSimulation.new(PLAYER, JOGGER, 11)
+	sim.fighters[0].position = -30.0
+	sim.fighters[1].position = 30.0
+	var me := sim.fighters[CombatSimulation.PLAYER]
+	var them := sim.fighters[CombatSimulation.OPPONENT]
+	var picks := {}
+	for i in 100:
+		var skill := sim.choose_skill(me)
+		picks[skill] = picks.get(skill, 0) + 1
+	check(picks.size() > 1, "normally the choice varies (%d different)" % picks.size())
+	them.exposed_until = sim.time + 1.0
+	picks.clear()
+	for i in 100:
+		var skill := sim.choose_skill(me)
+		picks[skill] = picks.get(skill, 0) + 1
+	check(picks.size() == 1 and picks.has(KICK), "into a bark's opening: always the heaviest (kick)")
+	them.exposed_until = -1.0
+	them.action = JAB
+	them.phase = CombatFighter.Phase.RECOVERY
+	check(sim.choose_skill(me) == KICK, "into someone recovering from a swing: the heaviest too")
+

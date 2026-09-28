@@ -369,6 +369,13 @@ func play_acknowledge(towards: Vector3) -> void:
 	_look_away_left = 2.2
 	if _body == null or _down:
 		return
+	# The fight is over, so nothing else turns them any more: they turn round
+	# to the dog themselves, whichever side of them it ended up on.
+	var to_dog := towards - global_position
+	if Vector2(to_dog.x, to_dog.z).length() > 0.01:
+		var yaw := atan2(-to_dog.x, -to_dog.z)
+		var turn := create_tween()
+		turn.tween_property(self, "rotation:y", rotation.y + angle_difference(rotation.y, yaw), 0.12).set_trans(Tween.TRANS_SINE)
 	var tween := _new_tween()
 	tween.tween_property(_body, "position:y", 0.22, 0.14).set_trans(Tween.TRANS_BACK)
 	tween.tween_property(_body, "position:y", 0.0, 0.16)

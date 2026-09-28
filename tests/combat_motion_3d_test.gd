@@ -88,7 +88,12 @@ func _test_resolution_beat(coordinator: CombatCoordinator3D, dog: DogController3
 		check(false, "expected a fight to finish")
 		return
 	coordinator.time_scale = 25.0
-	dog.global_position = human.global_position + Vector3(2.0, 0.1, 0.0)
+	# On the owner's far side from the opponent: with fighters circling (P-04)
+	# a fixed offset can land inside the opponent, and the dog is then pushed
+	# out of their body after the owner has already turned to where it was.
+	var away_from_them := human.global_position - coordinator.engagement.pair.human_global_position()
+	away_from_them.y = 0.0
+	dog.global_position = human.global_position + away_from_them.normalized() * 2.0 + Vector3(0, 0.1, 0)
 	coordinator.debug_force_result(CombatSimulation.Result.VICTORY)
 	await _physics(10)
 	check_eq(coordinator.last_result, CombatSimulation.Result.VICTORY, "the fight is won")
@@ -323,6 +328,23 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	puppet.play_windup(preload("res://data/combat/skills/skill_jab.tres"))
 	await _physics(20)
 	check(absf(arm.rotation.x) > 0.1, "the wind-up draws the arm back (%.2f rad)" % arm.rotation.x)
+	puppet._reset_pose()
+	var jab_turn := absf(torso.rotation.y)
+
+	# P04-04: a hook loads the whole upper body — shoulders and hips turn away
+	# and the arm comes up and out — so it reads from across a street.
+	var hook: CombatSkillData = preload("res://data/combat/skills/skill_heavy_hook.tres")
+	puppet.play_windup(hook)
+	await _physics(int(hook.windup * 60.0) + 2)
+	check(torso.rotation.y > 0.4, "a hook wind-up turns the shoulders away (%.2f rad)" % torso.rotation.y)
+	check(hips.rotation.y > 0.15, "and the hips with them (%.2f rad)" % hips.rotation.y)
+	check(arm.rotation.z > 0.8, "and the arm comes up and out to the side (%.2f rad)" % arm.rotation.z)
+	check(torso.rotation.y > jab_turn + 0.2, "far more than a jab's wind-up")
+	puppet.play_strike(hook)
+	await _physics(int((hook.strike_time + hook.contact_time) * 60.0) + 1)
+	check(torso.rotation.y < -0.3, "the strike unwinds the body through and past square (%.2f rad)" % torso.rotation.y)
+	check(arm.rotation.x < -0.8, "and the arm sweeps across (%.2f rad)" % arm.rotation.x)
+	await _physics(30)
 	puppet._reset_pose()
 
 

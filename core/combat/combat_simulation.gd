@@ -208,8 +208,9 @@ func stumble(side: int, seconds: float) -> void:
 
 # --- AI -----------------------------------------------------------------------
 
-## Valid skills are filtered by condition and cooldown, then the highest
-## priority wins (ties broken randomly). No valid skill → close the distance.
+## Valid skills are filtered by condition and cooldown. A valid defence with
+## the highest priority wins outright; otherwise one valid attack is picked at
+## random, weighted by priority (P-04). No valid skill → footwork.
 func choose_skill(fighter: CombatFighter) -> CombatSkillData:
 	var best: CombatSkillData = null
 	var ties := 0
@@ -223,7 +224,34 @@ func choose_skill(fighter: CombatFighter) -> CombatSkillData:
 			ties += 1
 			if _rng.randi_range(1, ties) == 1:
 				best = skill
+	# A defence answers a telegraph: the most important one wins outright. An
+	# attack is a choice among what is available, weighted by priority, so a
+	# heavy blow is a choice and not a reflex and the jab still gets thrown.
+	if best == null or best.effect != CombatSkillData.Effect.ATTACK:
+		return best
+	# An opening is not the moment for a jab: someone looking at the dog, or
+	# still recovering from a swing, gets the heaviest blow available.
+	if _is_open(_other(fighter)):
+		return best
+	var total := 0
+	var valid: Array[CombatSkillData] = []
+	for skill in fighter.data.skills:
+		if skill == null or skill.effect != CombatSkillData.Effect.ATTACK or fighter.cooldown_left(skill) > 0.0 or not _condition_met(fighter, skill):
+			continue
+		valid.append(skill)
+		total += skill.priority
+	var roll := _rng.randi_range(1, total)
+	for skill in valid:
+		roll -= skill.priority
+		if roll <= 0:
+			return skill
 	return best
+
+
+## Open to a punishing blow: distracted (a bark's opening) or caught in the
+## recovery after a swing.
+func _is_open(target: CombatFighter) -> bool:
+	return time < target.exposed_until or target.phase == CombatFighter.Phase.RECOVERY
 
 
 func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
