@@ -347,6 +347,21 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	await _physics(30)
 	puppet._reset_pose()
 
+	# P04-05: a kick chambers the leg up in front of them, then drives it out.
+	var kick: CombatSkillData = preload("res://data/combat/skills/skill_kick.tres")
+	var leg := Greybox.part(body, "LegR")
+	puppet.play_windup(kick)
+	await _physics(int(kick.windup * 60.0) + 2)
+	check(leg.rotation.x < -0.6, "a kick wind-up lifts the leg up in front (%.2f rad)" % leg.rotation.x)
+	check(torso.rotation.x > 0.15, "while the upper body leans back to balance it (%.2f rad)" % torso.rotation.x)
+	puppet.play_strike(kick)
+	await _physics(int((kick.strike_time + kick.contact_time) * 60.0) + 1)
+	check(leg.rotation.x < -1.2, "the strike drives the leg out level (%.2f rad)" % leg.rotation.x)
+	await _physics(int(kick.follow_through * 60.0) - 2)
+	check(leg.rotation.x < -1.2, "and it stays out through the follow-through")
+	await _physics(30)
+	puppet._reset_pose()
+
 
 func _wait_until(done: Callable, max_frames: int) -> void:
 	for i in max_frames:

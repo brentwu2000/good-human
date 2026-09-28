@@ -24,6 +24,7 @@ func _ready() -> void:
 	_test_real_fights_order()
 	_test_motion_states()
 	_test_hook()
+	_test_kick()
 	_test_opening_gets_the_heavy_blow()
 	finish()
 
@@ -263,4 +264,25 @@ func _test_opening_gets_the_heavy_blow() -> void:
 	them.action = JAB
 	them.phase = CombatFighter.Phase.RECOVERY
 	check(sim.choose_skill(me) == KICK, "into someone recovering from a swing: the heaviest too")
+
+
+## P04-05: the kick is the long, committed option — furthest reach, longest
+## wind-up, heaviest recovery — and it lands about when it always did.
+func _test_kick() -> void:
+	check(KICK.preferred_range > JAB.preferred_range and KICK.preferred_range > HOOK.preferred_range, "a kick reaches furthest")
+	check(KICK.windup > HOOK.windup and KICK.windup > JAB.windup, "and telegraphs longest")
+	check(KICK.recovery > HOOK.recovery and KICK.recovery > JAB.recovery, "and takes longest to recover from")
+	check(KICK.whiff_recovery > JAB.whiff_recovery, "a missed kick costs more than a missed jab")
+	check(KICK.strike_time > 0.0 and KICK.contact_time > 0.0 and KICK.follow_through > 0.0, "it has all five phases")
+	var lands_at := KICK.windup + KICK.strike_time
+	check(lands_at >= 0.7 and lands_at <= 0.85, "it lands about 0.8 s after the telegraph starts (%.2f)" % lands_at)
+	var total := KICK.windup + KICK.strike_time + KICK.contact_time + KICK.follow_through + KICK.recovery
+	var hook_total := HOOK.windup + HOOK.strike_time + HOOK.contact_time + HOOK.follow_through + HOOK.recovery
+	check(total > hook_total, "start to ready, the kick is the biggest commitment (%.2f s)" % total)
+
+	var sim := _duel(KICK.preferred_range - 5.0)
+	var log := _log(sim)
+	_start_attack(sim.fighters[CombatSimulation.PLAYER], KICK)
+	_run_until_idle(sim, CombatSimulation.PLAYER)
+	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "it lands from where a jab cannot")
 

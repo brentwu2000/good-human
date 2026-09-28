@@ -142,11 +142,16 @@ func play_windup(skill: CombatSkillData) -> void:
 	var tween := _new_tween()
 	match skill.animation_key:
 		&"kick":
+			# P04-05: the leg chambers — it comes up off the ground in front
+			# of them while the upper body leans back to balance it. Standing
+			# on one leg is the commitment the dog can read.
 			var leg := _joint(_legs, 1)
 			if leg != null:
-				tween.tween_property(leg, "rotation:x", 0.55, skill.windup).set_trans(Tween.TRANS_SINE)
+				tween.tween_property(leg, "rotation:x", -0.8, skill.windup).set_trans(Tween.TRANS_SINE)
 			if _torso != null:
 				tween.parallel().tween_property(_torso, "rotation:x", 0.22, skill.windup)
+			if _hips != null:
+				tween.parallel().tween_property(_hips, "rotation:x", 0.12, skill.windup)
 		&"block":
 			for arm in _arms:
 				if arm != null:
@@ -181,6 +186,9 @@ func play_strike(skill: CombatSkillData) -> void:
 	if skill.animation_key == &"hook":
 		_play_hook_strike(skill)
 		return
+	if skill.animation_key == &"kick":
+		_play_kick_strike(skill)
+		return
 	var tween := _new_tween()
 	var kick := skill.animation_key == &"kick"
 	var limb := _joint(_legs if kick else _arms, 1)
@@ -191,6 +199,26 @@ func play_strike(skill: CombatSkillData) -> void:
 		tween.parallel().tween_property(_torso, "rotation:x", -0.12 if kick else 0.0, 0.08)
 	tween.parallel().tween_property(_body, "position:z", -0.2 if kick else -0.12, 0.08)
 	tween.tween_interval(0.08)
+	tween.tween_callback(_reset_pose)
+
+
+## The kick extends from the chamber: the leg drives out level, the hips go
+## in behind it and the upper body leans away, and it stays out through the
+## follow-through before the foot comes back down.
+func _play_kick_strike(skill: CombatSkillData) -> void:
+	var tween := _new_tween()
+	var out := skill.strike_time + skill.contact_time
+	var leg := _joint(_legs, 1)
+	if leg != null:
+		leg.rotation.x = -0.8
+		tween.tween_property(leg, "rotation:x", -1.45, out).set_trans(Tween.TRANS_QUAD)
+	if _torso != null:
+		_torso.rotation.x = 0.22
+		tween.parallel().tween_property(_torso, "rotation:x", 0.32, out)
+	if _hips != null:
+		tween.parallel().tween_property(_hips, "rotation:x", 0.2, out)
+	tween.parallel().tween_property(_body, "position:z", -0.2, out)
+	tween.tween_interval(skill.follow_through)
 	tween.tween_callback(_reset_pose)
 
 

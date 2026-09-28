@@ -410,7 +410,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | P04-02 | Combat spacing/footwork | REVIEW |
 | P04-03 | Jab phases/contact | REVIEW |
 | P04-04 | Heavy Hook | REVIEW |
-| P04-05 | Kick | TODO |
+| P04-05 | Kick | REVIEW |
 | P04-06 | Block/Dodge | TODO |
 | P04-07 | Hit reactions/impact | TODO |
 | P04-08 | Anti-stuck/sliding | TODO |
@@ -446,6 +446,9 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - P04-04 unblocked by the owner (2026-09-28): "狗本來就不該是左右戰鬥重點". Recorded as ADR-L02 (the dog changes the exchange, not the result). The bark test now asks that paced barking helps and that its edge stays within 15 of 100 fights, instead of requiring it to swing at least a tenth of them. The option-A branch is merged: the hook for the player, the Gym Regular and the Old Master; attacks chosen by weighted priority, so the jab is thrown again; the heaviest blow into an opening (a bark, or someone recovering from a swing). Balance (200 fights): jogger 143, delivery 134, gym 105, Old Master still wins all; paced barking against the Gym Regular adds about 22 of 200.
 - A real bug surfaced while stabilising the tests: after a win nothing turned the owner round to the dog, because only the running fight calls `face_towards`. It only looked right when the owner already faced that way, which circling (P04-02) made a coin toss. `play_acknowledge` now turns them to the dog itself.
 - Tests: `combat_contact_test` gains the hook (data, who carries it, displacement landed and blocked, the heaviest blow into an opening); `combat_motion_3d_test` checks that the hook's wind-up turns the shoulders and hips away and raises the arm, and that the strike unwinds the body through and past square.
+- P04-05: the kick now runs all five phases and reads as a kick. Its wind-up chambers the leg, lifting it up in front while the upper body leans back and the hips tilt to balance it; standing on one leg is the commitment the dog can read. The strike drives the leg out level with the hips in behind it, and it stays out through the follow-through. Timing: wind-up 0.65, strike 0.12, contact 0.06, follow-through 0.14, recovery 0.60, whiff +0.20. It still lands about 0.8 s after the telegraph starts (0.77, against 0.80 before), so the dog's window is unchanged. It reaches furthest (1.0 m), telegraphs longest and is the biggest commitment of the three attacks (1.57 s start to ready).
+- The kick deliberately has no displacement. Measured: 14 units of kick knockback swings the Gym fight by 50 wins in 200 and the Jogger fight by 25, so knockback is left to P04-07 (impact) to decide as a whole.
+- Balance (200 fights): jogger 130, delivery 131, gym 103; Old Master still wins all; paced barking against the Gym Regular adds 14 of 200 (within ADR-L02). For the owner's playtest: the Student, who has the player's exact stats but no hook, now beats the player about 78 % of the time (45 of 200), and that matchup swings widely with small timing changes. It is outside the tested bands.
 
 ## Sprint 05 — GREED / TERRITORY EXECUTION (Update 008)
 Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION.md`; systems `docs/04_systems/GREED_TERRITORY_SYSTEM.md`; data `docs/05_data/SPRINT05_DATA.md`; gate `docs/07_qa/SPRINT05_GREED_TERRITORY_GATE.md`; ADR-017 (extraction creates choice), ADR-018 (territory requires return). P-04 stays the combat baseline: Sprint 05 consumes it and does not redesign combat.
