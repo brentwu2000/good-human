@@ -406,7 +406,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 
 | ID | Task | Status |
 |---|---|---|
-| P04-01 | Physical presence baseline | TODO |
+| P04-01 | Physical presence baseline | REVIEW |
 | P04-02 | Combat spacing/footwork | TODO |
 | P04-03 | Jab phases/contact | TODO |
 | P04-04 | Heavy Hook | TODO |
@@ -420,3 +420,9 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | P04-12 | Fresh Codex blind QA | TODO |
 
 ## P-04 Engineering Notes (Claude)
+- P04-01: before this, nothing in the 3D walk occupied space except the world. The dog and owner collided only with walls, and an opponent human or dog was a drawing with no body at all, so the dog walked straight through everyone. Now every primary body is solid: `PhysicalPresence3D` (an `AnimatableBody3D` riding on the node it is attached to) gives each opponent human and opponent dog a capsule no wider than what is drawn, and both the dog and owner collide with the actor layer. The dog slides round a body it clips the way it slides along a wall. Sizes and the bump response are data (`data/presence/presence.tres`, `PresenceData`, per the P-04 tuning schema).
+- Fast contact (≥ 4.5 m/s into someone, i.e. sprinting) is answered by the body, never by the fight: the person gives 8 cm away from the dog, sways and glances down, then settles (`FighterPuppet3D.play_bumped`); their dog steps back. It gives way to anything the fight is already doing with that body, and walking into someone is only a block.
+- Ownership: the combat sync still places both fighters directly, so in a fight the dog is the one that gives way. A dog left partly inside a fighter is pushed back out by the physics. Exactly dead centre it is not (no direction to push), which belongs to P04-08 anti-stuck.
+- Not in this task: human↔human separation and the opponent's knockback against the world (P04-02 / P04-07). A fighter who is down still has a standing body where they fell (P04-07 reactions).
+- `physical_presence_test` (21 checks) drives the dog through the real Input Map into each body, in and out of a fight. `combat_motion_3d_test` pushed the dog forward from a metre off the fight to check the stick direction and could now end against a fighter depending on the random orbit; it steps back first.
+

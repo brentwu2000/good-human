@@ -8,10 +8,13 @@ const TRAINING_EVENTS_DIR: String = "res://data/training/events"
 const GOAL_CATALOG_PATH: String = "res://data/goals/goal_catalog.tres"
 const TEMPTATIONS_DIR: String = "res://data/greed/temptations"
 const TERRITORIES_DIR: String = "res://data/territory"
+const PRESENCE_PATH: String = "res://data/presence/presence.tres"
 
 var balance: GameBalance
 var training: TrainingBalance
 var goals: GoalCatalog
+## Body sizes and bump response for physical presence (P-04, ADR-016).
+var presence: PresenceData
 ## Reasons to stay out after going home became possible (Sprint 05).
 var temptations: Array[TemptationData] = []
 
@@ -25,6 +28,7 @@ func _ready() -> void:
 	balance = load(BALANCE_PATH) as GameBalance
 	training = load(TRAINING_BALANCE_PATH) as TrainingBalance
 	goals = load(GOAL_CATALOG_PATH) as GoalCatalog
+	presence = load(PRESENCE_PATH) as PresenceData
 	_load_items()
 	_load_training_events()
 	_load_temptations()

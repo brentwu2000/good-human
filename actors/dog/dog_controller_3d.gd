@@ -38,11 +38,14 @@ var _motion: DogModelMotion3D
 var _detector: Area3D
 var _bark_label: Label3D
 var _bark_left: float = 0.0
+var _contact_cooldown: float = 0.0
 
 
 func _ready() -> void:
 	collision_layer = Greybox.ACTOR_LAYER
-	collision_mask = Greybox.WORLD_LAYER
+	# ADR-016: the dog is blocked by people and other dogs as well as the
+	# world, and slides round them the way it slides along a wall.
+	collision_mask = Greybox.WORLD_LAYER | Greybox.ACTOR_LAYER
 	var shape := CollisionShape3D.new()
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = 0.25
@@ -91,6 +94,7 @@ func _physics_process(delta: float) -> void:
 	var planar := Vector3(velocity.x, 0.0, velocity.z).move_toward(target, acceleration * delta)
 	velocity = Vector3(planar.x, velocity.y - 9.8 * delta, planar.z)
 	move_and_slide()
+	_report_contacts(planar, delta)
 	if is_on_floor():
 		velocity.y = 0.0
 	if planar.length() > 0.2:
@@ -145,6 +149,30 @@ func planar_speed() -> float:
 
 func collar_position() -> Vector3:
 	return global_position + Vector3(0, 0.5, 0) - facing * 0.25
+
+
+## ADR-016: running into someone is felt. The body answers with a small
+## balance or look reaction (it decides which); a slow brush is just blocked.
+## `approach` is the velocity the dog was trying to move at this frame.
+func _report_contacts(approach: Vector3, delta: float) -> void:
+	_contact_cooldown -= delta
+	var presence := DataRegistry.presence
+	if _contact_cooldown > 0.0 or presence == null:
+		return
+	for i in get_slide_collision_count():
+		var hit := get_slide_collision(i)
+		var body := hit.get_collider()
+		if body == null or not body.has_method(&"receive_dog_contact"):
+			continue
+		var into := -hit.get_normal()
+		into.y = 0.0
+		if into.length_squared() < 0.0001:
+			continue
+		var speed := approach.dot(into.normalized())
+		if speed >= presence.fast_dog_contact_speed:
+			body.call(&"receive_dog_contact", global_position, speed)
+			_contact_cooldown = presence.contact_cooldown
+			return
 
 
 func _update_focus() -> void:

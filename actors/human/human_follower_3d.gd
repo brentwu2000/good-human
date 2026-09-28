@@ -44,7 +44,10 @@ const SEGMENTS: int = 10
 
 func _ready() -> void:
 	collision_layer = Greybox.ACTOR_LAYER
-	collision_mask = Greybox.WORLD_LAYER
+	# ADR-016: the owner walks round the dog and round other people rather
+	# than through them. In a fight the combat sync places the owner, and the
+	# dog is the one that gives way.
+	collision_mask = Greybox.WORLD_LAYER | Greybox.ACTOR_LAYER
 	var shape := CollisionShape3D.new()
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = 0.25
@@ -142,6 +145,12 @@ func play_growth_behavior(effect: StringName, improved: bool, seconds: float) ->
 			tween.tween_property(puppet, "position:z", 0.25 if not improved else 0.0, 0.1)
 			tween.tween_interval(maxf(seconds - 0.2, 0.05))
 			tween.tween_property(puppet, "position:z", 0.0, 0.1)
+
+
+## The dog ran into the owner (ADR-016): a small balance check, never harm.
+func receive_dog_contact(from: Vector3, _speed: float) -> void:
+	if state != State.DOWN and puppet != null and not faded:
+		puppet.play_bumped(from)
 
 
 func is_following() -> bool:

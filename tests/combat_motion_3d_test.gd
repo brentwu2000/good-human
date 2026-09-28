@@ -231,12 +231,20 @@ func _test_dog_pov(map: RunMap3D, coordinator: CombatCoordinator3D, dog: DogCont
 	var to_fight := rig.combat_center() - dog.global_position
 	to_fight.y = 0.0
 	check(screen_forward.dot(to_fight.normalized()) > 0.6, "and the view is pointed at the fight")
+	# The fighters are bodies (ADR-016), so walking at them from a metre away
+	# can end against one of them. Step back along the view so there is room.
 	var before := dog.global_position
+	dog.global_position = before - to_fight.normalized() * 2.5
+	dog.velocity = Vector3.ZERO
+	await _physics(20)
+	view = rig.view_yaw()
+	screen_forward = Vector3.FORWARD.rotated(Vector3.UP, view)
+	var start := dog.global_position
 	Input.action_press(&"move_up")
 	for i in 30:
 		await _tree.physics_frame
 	Input.action_release(&"move_up")
-	var travelled := dog.global_position - before
+	var travelled := dog.global_position - start
 	travelled.y = 0.0
 	check(travelled.length() > 0.2, "the dog actually moves")
 	check(travelled.normalized().dot(screen_forward) > 0.7, "pushing forward walks into the screen, not away from it")

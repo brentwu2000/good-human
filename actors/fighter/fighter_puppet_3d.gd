@@ -9,6 +9,9 @@ extends Node3D
 ## automatic annotations the puppet writes about its own mechanics.
 static var show_combat_text: bool = false
 
+## A bump from the dog was answered (ADR-016). Presentation only.
+signal bumped(from: Vector3)
+
 var data: FighterData
 
 var _body: Node3D
@@ -222,6 +225,34 @@ func play_stumble() -> void:
 	tween.tween_property(_body, "rotation:z", 0.0, 0.34)
 	tween.parallel().tween_property(_body, "position:x", 0.0, 0.34)
 	tween.parallel().tween_property(_body, "position:y", 0.0, 0.34)
+
+
+## ADR-016: the dog ran into them. They give a little, away from the dog, and
+## glance down at it, then settle. Never a fall and never damage, and it gives
+## way to anything the fight is already doing with this body.
+func play_bumped(from: Vector3) -> void:
+	if _body == null or _down or motion.is_committed():
+		return
+	if _pose_tween != null and _pose_tween.is_running():
+		return
+	var presence := DataRegistry.presence
+	var shift := presence.minor_balance_shift if presence != null else 0.08
+	var settle := presence.minor_balance_seconds if presence != null else 0.35
+	var away := global_position - from
+	away.y = 0.0
+	away = away.normalized() if away.length_squared() > 0.0001 else -global_basis.z
+	# `_body` hangs off this node, so the give is expressed in its own space.
+	var local := global_basis.inverse() * away
+	var tween := _new_tween()
+	tween.tween_property(_body, "position", Vector3(local.x, 0.0, local.z) * shift, 0.07).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(_body, "rotation:z", -local.x * 0.14, 0.07)
+	if _head != null:
+		tween.parallel().tween_property(_head, "rotation:x", -0.3, 0.07)
+	tween.tween_property(_body, "position", Vector3.ZERO, settle)
+	tween.parallel().tween_property(_body, "rotation:z", 0.0, settle)
+	if _head != null:
+		tween.parallel().tween_property(_head, "rotation:x", 0.0, settle)
+	bumped.emit(from)
 
 
 ## True while this fighter is looking away from the fight (P03-E07).

@@ -27,6 +27,9 @@ var human_puppet: FighterPuppet3D
 var presentation: EncounterPresentation3D
 
 var _dog: Node3D
+## ADR-016: bodies the player's dog cannot walk through.
+var _human_presence: PhysicalPresence3D
+var _dog_presence: PhysicalPresence3D
 var _name_label: Label3D
 var _dog_label: Label3D
 var _dog_label_left: float = 0.0
@@ -66,12 +69,16 @@ func setup(data: EncounterData) -> void:
 		return
 	_name_label.modulate = Color.WHITE
 	human_puppet.apply(encounter.human)
+	_fit_human_presence()
 	human_puppet.position = Vector3.ZERO
 	human_puppet.show_hp(false)
 	if _dog != null:
 		_dog.queue_free()
 	_dog = Greybox.dog(encounter.dog_color, encounter.dog_scale, encounter.dog_breed)
 	add_child(_dog)
+	_dog_presence = PhysicalPresence3D.for_dog(DataRegistry.presence, encounter.dog_scale)
+	_dog.add_child(_dog_presence)
+	_dog_presence.dog_contact.connect(_on_dog_bumped)
 	if encounter.id == &"enc_rival":
 		BanyanRivalPair3D.decorate(human_puppet, _dog)
 	_name_label.text = "%s和%s" % [encounter.human.display_name, encounter.dog_name]
@@ -166,6 +173,23 @@ func react_to_bark(from: Vector3) -> void:
 	var towards := from - _dog.global_position
 	towards.y = 0.0
 	_dog_lunge = towards.normalized() * minf(0.8, towards.length() * 0.5) if towards.length() > 0.01 else Vector3.ZERO
+
+
+## The standing body follows the fighter's build.
+func _fit_human_presence() -> void:
+	if _human_presence != null:
+		_human_presence.queue_free()
+	_human_presence = PhysicalPresence3D.for_human(DataRegistry.presence, encounter.human.body_scale)
+	human_puppet.add_child(_human_presence)
+	_human_presence.dog_contact.connect(func(from: Vector3, _speed: float) -> void: human_puppet.play_bumped(from))
+
+
+## Their dog got run into: it steps back from the one who did it.
+func _on_dog_bumped(from: Vector3, _speed: float) -> void:
+	var away := _dog.global_position - from
+	away.y = 0.0
+	if away.length_squared() > 0.0001:
+		_dog_lunge = away.normalized() * 0.25
 
 
 func _show_dog_text(text: String) -> void:
