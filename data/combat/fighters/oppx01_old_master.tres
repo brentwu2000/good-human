@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="FighterData" load_steps=9 format=3]
+[gd_resource type="Resource" script_class="FighterData" load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://resources/fighter_data.gd" id="1_fighter"]
 [ext_resource type="Script" path="res://resources/combat_stats.gd" id="2_stats"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_jab.tres" id="3_punch"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_kick.tres" id="4_kick"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_heavy_hook.tres" id="9_hook"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_block.tres" id="5_block"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_dodge.tres" id="6_dodge"]
 [ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="7_skill"]
@@ -20,7 +21,7 @@ script = ExtResource("1_fighter")
 id = &"oppx01_old_master"
 display_name = "老爺爺"
 stats = SubResource("Resource_stats")
-skills = Array[ExtResource("7_skill")]([ExtResource("3_punch"), ExtResource("4_kick"), ExtResource("5_block"), ExtResource("6_dodge")])
+skills = Array[ExtResource("7_skill")]([ExtResource("3_punch"), ExtResource("9_hook"), ExtResource("4_kick"), ExtResource("5_block"), ExtResource("6_dodge")])
 skin_color = Color(0.9, 0.78, 0.68, 1)
 hair_color = Color(0.92, 0.92, 0.92, 1)
 shirt_color = Color(0.7, 0.68, 0.6, 1)

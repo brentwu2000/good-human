@@ -409,7 +409,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | P04-01 | Physical presence baseline | REVIEW |
 | P04-02 | Combat spacing/footwork | REVIEW |
 | P04-03 | Jab phases/contact | REVIEW |
-| P04-04 | Heavy Hook | BLOCKED |
+| P04-04 | Heavy Hook | IN_PROGRESS |
 | P04-05 | Kick | TODO |
 | P04-06 | Block/Dodge | TODO |
 | P04-07 | Hit reactions/impact | TODO |

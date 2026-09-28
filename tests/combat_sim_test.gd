@@ -9,6 +9,7 @@ const GYM: FighterData = preload("res://data/combat/fighters/opp03_gym.tres")
 const OLD_MASTER: FighterData = preload("res://data/combat/fighters/oppx01_old_master.tres")
 const PUNCH: CombatSkillData = preload("res://data/combat/skills/skill_jab.tres")
 const KICK: CombatSkillData = preload("res://data/combat/skills/skill_kick.tres")
+const HOOK: CombatSkillData = preload("res://data/combat/skills/skill_heavy_hook.tres")
 const BLOCK: CombatSkillData = preload("res://data/combat/skills/skill_block.tres")
 const DODGE: CombatSkillData = preload("res://data/combat/skills/skill_dodge.tres")
 
@@ -49,7 +50,7 @@ func _test_skill_data() -> void:
 	for skill: CombatSkillData in [PUNCH, KICK, BLOCK, DODGE]:
 		check(not String(skill.id).is_empty() and not skill.display_name.is_empty(), "%s has id and name" % skill.resource_path)
 		check(not String(skill.animation_key).is_empty(), "%s has animation key" % skill.id)
-	check_eq(PLAYER.skills.size(), 4, "player human has four skills")
+	check_eq(PLAYER.skills.size(), 5, "player human has five skills (Jab, Heavy Hook, Kick, Block, Dodge)")
 	check(KICK.power > PUNCH.power and KICK.windup > PUNCH.windup, "kick is stronger and slower than punch")
 	check(KICK.cooldown > PUNCH.cooldown, "kick has a cooldown")
 	check_eq(BLOCK.effect, CombatSkillData.Effect.BLOCK, "block effect")
@@ -62,11 +63,19 @@ func _test_ai_choices() -> void:
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	check(sim.choose_skill(me) == null, "out of range: no skill (walk closer)")
 
+	# P-04: in range, an attack is a weighted choice among what is available —
+	# priority makes the heavier options likelier, never automatic.
 	_place(sim, 60.0)
-	check(sim.choose_skill(me) == KICK, "in range: kick outranks punch")
+	var picks := _pick_counts(sim, me, 600)
+	check(picks.get(KICK, 0) > picks.get(HOOK, 0) and picks.get(HOOK, 0) > picks.get(PUNCH, 0), "in range: kick likeliest, then hook, then jab (%s)" % _names(picks))
+	check(picks.get(PUNCH, 0) > 0, "and the jab still gets thrown")
 	me.cooldowns[KICK.id] = 1.0
-	check(sim.choose_skill(me) == PUNCH, "kick on cooldown: punch")
+	picks = _pick_counts(sim, me, 300)
+	check(not picks.has(KICK) and picks.has(HOOK) and picks.has(PUNCH), "kick on cooldown: hook or jab (%s)" % _names(picks))
+	me.cooldowns[HOOK.id] = 1.0
+	check(sim.choose_skill(me) == PUNCH, "kick and hook on cooldown: the jab")
 	me.cooldowns[KICK.id] = 0.0
+	me.cooldowns[HOOK.id] = 0.0
 	_place(sim, 90.0)
 	check(sim.choose_skill(me) == KICK, "beyond punch reach: only kick is valid")
 
@@ -223,12 +232,14 @@ func _test_dog_agency_hooks() -> void:
 	var plain_wins := _bark_wins(0.0)
 	var paced_wins := _bark_wins(6.0)
 	var spam_wins := _bark_wins(1.0)
-	check(paced_wins >= plain_wins + 4, "paced barking helps the owner win (%d -> %d of 40)" % [plain_wins, paced_wins])
-	check(paced_wins < 40, "even good barking does not decide every fight (%d of 40)" % paced_wins)
+	# 100 fights: the bark's edge is about a tenth of fights, which 40 cannot
+	# tell apart from luck.
+	check(paced_wins >= plain_wins + 10, "paced barking helps the owner win (%d -> %d of 100)" % [plain_wins, paced_wins])
+	check(paced_wins < 100, "even good barking does not decide every fight (%d of 100)" % paced_wins)
 	# A fight is short enough that one strong bark is all anyone gets, whatever
 	# the rhythm — so the property worth protecting is that the extra ones are
 	# not worth anything, rather than that pacing beats spamming.
-	check(spam_wins <= paced_wins + 2, "extra barks add nothing; the first is the whole benefit (%d vs %d of 40)" % [spam_wins, paced_wins])
+	check(spam_wins <= paced_wins + 5, "extra barks add nothing; the first is the whole benefit (%d vs %d of 100)" % [spam_wins, paced_wins])
 
 	# Pull out of an incoming attack: it misses.
 	sim = _duel(60.0)
@@ -273,7 +284,7 @@ func _test_dog_agency_hooks() -> void:
 ## worn down by DogAgency's real resistance and habituation.
 func _bark_wins(interval: float) -> int:
 	var wins := 0
-	for i in 40:
+	for i in 100:
 		var sim := CombatSimulation.new(PLAYER, GYM, 3000 + i)
 		var next_bark := 1.0
 		var recent: Array[float] = []
@@ -293,6 +304,22 @@ func _bark_wins(interval: float) -> int:
 		if sim.result == CombatSimulation.Result.VICTORY:
 			wins += 1
 	return wins
+
+## How often each skill is chosen in `rolls` tries from the same situation.
+func _pick_counts(sim: CombatSimulation, fighter: CombatFighter, rolls: int) -> Dictionary:
+	var counts := {}
+	for i in rolls:
+		var skill := sim.choose_skill(fighter)
+		counts[skill] = counts.get(skill, 0) + 1
+	return counts
+
+
+func _names(counts: Dictionary) -> String:
+	var parts: Array[String] = []
+	for skill in counts:
+		parts.append("%s %d" % [skill.id if skill != null else "none", counts[skill]])
+	return ", ".join(parts)
+
 
 func _duel(gap: float) -> CombatSimulation:
 	var sim := CombatSimulation.new(PLAYER, JOGGER, 5, balance)
