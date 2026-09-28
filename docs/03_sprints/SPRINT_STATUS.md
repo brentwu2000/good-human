@@ -413,7 +413,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | P04-05 | Kick | REVIEW |
 | P04-06 | Block/Dodge | REVIEW |
 | P04-07 | Hit reactions/impact | REVIEW |
-| P04-08 | Anti-stuck/sliding | TODO |
+| P04-08 | Anti-stuck/sliding | REVIEW |
 | P04-09 | Dog POV presence test | TODO |
 | P04-10 | Bark/Pull integration | TODO |
 | P04-11 | No-HUD readability | TODO |
@@ -456,6 +456,10 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - P04-07: the reaction set is the spec's: HIT_LIGHT (was HIT_REACT), HIT_HEAVY (a hook or kick, or any hit heavy enough), STAGGER, STUMBLE (a bad leash pull, which used to borrow STAGGER) and DOWN, each holding the body for its own moment: light 0.28 s < heavy 0.40 < stagger 0.45 < stumble 0.50. Each blow is answered differently at the moment of contact: a jab snaps the head back, a hook turns the body with it and the head further, a kick folds them over it with the hips driven back. The impact happens all at once and the recovery after it; before, part of it was chained a step late.
 - Hit-stop is per attack and inside the spec's ranges: jab 0.05 s, hook 0.08, kick 0.09, a blocked blow 60 % of that, and nothing ever holds longer than 0.10 s, even the dog's biggest opening. The heavy hit-stop used to reach 0.16 s. The camera impulse and contact flash are unchanged, still scaled by the blow.
 - Not in this task: knockback checked against walls and other bodies is the same mechanism as keeping circling fighters out of walls, so it goes with P04-08. Impact audio is still missing because the project has no audio yet (the same gap blocks P03-E09).
+- P04-08: the fight now knows where people cannot stand. The simulation takes an optional `walkable` question about a ground position, and the Run World answers it with a body-sized shape query against walls, benches and trees (people and the dog are not obstacles here: the simulation keeps the fighters apart and the dog gives way). A step back, a dodge, a leash pull and a knockback all stop at a wall, so a dodge into a wall does not save anyone, which is honest. A blocked approach turns into circling round the obstacle, and circling into a wall turns them the other way, so nobody walks into a wall for ever. Someone who is already caught in something may always move, so nobody is pinned. Headless, the question is unset and every balance number is unchanged.
+- The dog is never left inside a body. Physics pushes it out of a partial overlap but has nothing to push by when it sits dead centre; there it now steps out itself (away from the body, or backwards). It only does this for a deep overlap (under 0.15 m centre to centre): a first version that also acted on mere contact shoved the dog away from anyone it leaned on, and the extraction test caught it.
+- The dog cannot jam the fight (a gate Critical Fail): fighters never stop for it, it is moved aside instead (ADR-016), and it can never end up stuck inside one.
+- Tests: `combat_spacing_test` runs 24 fights with a wall behind the player or a post between them (nobody ever stands in it, every fight still ends in a winner) and checks that a fighter who starts inside something is not pinned; `physical_presence_test` puts the dog dead centre in a fighter and checks the Run World says no where a wall is.
 
 ## Sprint 05 — GREED / TERRITORY EXECUTION (Update 008)
 Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION.md`; systems `docs/04_systems/GREED_TERRITORY_SYSTEM.md`; data `docs/05_data/SPRINT05_DATA.md`; gate `docs/07_qa/SPRINT05_GREED_TERRITORY_GATE.md`; ADR-017 (extraction creates choice), ADR-018 (territory requires return). P-04 stays the combat baseline: Sprint 05 consumes it and does not redesign combat.

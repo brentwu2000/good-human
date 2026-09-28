@@ -137,6 +137,7 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	var lateral := 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
 	var sim := CombatSimulation.new(human.fighter, opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
 	sim.set_lateral(lateral)
+	sim.walkable = _walkable
 	engagement = Engagement3D.new(sim, opponent)
 	_accumulator = 0.0
 	last_result = CombatSimulation.Result.NONE
@@ -244,6 +245,32 @@ func _update_motion(delta: float) -> void:
 		var closing := fighter.footwork == CombatFighter.Footwork.APPROACH
 		puppet.motion.update(delta, fighter, closing, fighter.is_defeated())
 		puppet.play_motion(delta)
+
+
+## P04-08: a fighter can stand at `ground` (simulation units from where the
+## fight began) when a body there would touch no wall, bench or tree. People
+## and the dog are not obstacles here: the other fighter is kept apart by the
+## simulation, and the dog gives way (ADR-016).
+func _walkable(ground: Vector2) -> bool:
+	var space := get_viewport().get_world_3d().direct_space_state if is_inside_tree() else null
+	if space == null:
+		return true
+	var at := _ground_to_world(ground)
+	var presence := DataRegistry.presence
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = presence.human_radius if presence != null else 0.24
+	capsule.height = presence.human_height if presence != null else 1.72
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = capsule
+	# Clear of the ground itself: only what they would walk into counts.
+	query.transform = Transform3D(Basis.IDENTITY, Vector3(at.x, human.global_position.y + capsule.height * 0.5 + 0.05, at.z))
+	query.collision_mask = Greybox.WORLD_LAYER
+	return space.intersect_shape(query, 1).is_empty()
+
+
+func _ground_to_world(ground: Vector2) -> Vector3:
+	var metres := ground / UNITS_PER_METER
+	return _origin + _axis * metres.x + _side_axis * metres.y
 
 
 func _world_position(side: int) -> Vector3:

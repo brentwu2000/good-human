@@ -24,6 +24,7 @@ func _ready() -> void:
 	_test_backstep_when_too_close()
 	_test_real_fights()
 	_test_deterministic()
+	_test_walls()
 	finish()
 
 
@@ -110,3 +111,37 @@ func _test_deterministic() -> void:
 	b.run_to_end(STEP)
 	check_eq(a.result, b.result, "same seed, same result")
 	check(a.world_position(0).is_equal_approx(b.world_position(0)) and is_equal_approx(a.line_angle, b.line_angle), "same seed, same footwork")
+
+
+## P04-08: with somewhere they cannot stand, nobody steps, dodges or is
+## knocked into it, and nobody is stuck against it: a wall behind one of them
+## and a post between them both still end in a winner.
+func _test_walls() -> void:
+	var wall_x := -80.0
+	var post := func(g: Vector2) -> bool: return not (absf(g.x) < 12.0 and absf(g.y) < 12.0)
+	for case: Array in [["wall behind the player", func(g: Vector2) -> bool: return g.x > wall_x], ["post between them", post]]:
+		var decided := 0
+		var inside := 0
+		for i in 12:
+			var sim := CombatSimulation.new(PLAYER, OPPONENTS[i % 3], 8000 + i, null, 120.0)
+			sim.walkable = case[1]
+			while not sim.is_finished():
+				sim.step(STEP)
+				for side in 2:
+					if not case[1].call(sim.world_position(side)):
+						inside += 1
+			if sim.result == CombatSimulation.Result.VICTORY or sim.result == CombatSimulation.Result.DEFEAT:
+				decided += 1
+		check_eq(inside, 0, "%s: nobody ever stands in it" % case[0])
+		check_eq(decided, 12, "%s: every fight still ends in a winner, nobody stuck (%d/12)" % [case[0], decided])
+
+	# Someone who starts inside something may always move out.
+	var sim := CombatSimulation.new(PLAYER, OPPONENTS[0], 1, null, 100.0)
+	sim.walkable = func(g: Vector2) -> bool: return g.x > -40.0
+	var before := sim.fighters[CombatSimulation.PLAYER].position
+	sim.fighters[CombatSimulation.OPPONENT].ready_at = 99.0
+	sim.fighters[CombatSimulation.PLAYER].ready_at = 99.0
+	for i in 30:
+		sim.step(STEP)
+	check(sim.fighters[CombatSimulation.PLAYER].position > before, "a fighter caught in something is never pinned there")
+

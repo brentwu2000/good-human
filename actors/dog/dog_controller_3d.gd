@@ -21,6 +21,12 @@ const FUR_COLOR: Color = Color(0.78, 0.55, 0.32)
 const MODEL_SCENE: PackedScene = preload("res://assets/characters/dog/models/shiba_01/shiba_01.glb")
 ## The export faces +Z; every actor in this game faces -Z.
 const MODEL_YAW: float = PI
+## How fast the dog steps out of a body it has been left inside (m/s).
+const STEP_OUT_SPEED: float = 3.0
+## Closer than this, centre to centre on the ground, physics has nothing to
+## push by; anything further out it resolves itself (and a dog merely leaning
+## on someone must not be shoved away).
+const DEEP_OVERLAP: float = 0.15
 
 ## Camera yaw in radians, set by CameraRig3D. 0 = forward is -Z.
 var camera_yaw: float = 0.0
@@ -39,6 +45,7 @@ var _detector: Area3D
 var _bark_label: Label3D
 var _bark_left: float = 0.0
 var _contact_cooldown: float = 0.0
+var _body_shape: CollisionShape3D
 
 
 func _ready() -> void:
@@ -54,6 +61,7 @@ func _ready() -> void:
 	shape.rotation_degrees.x = 90.0
 	shape.position.y = 0.3
 	add_child(shape)
+	_body_shape = shape
 	# _visual is a bare pivot the facing code yaws; the model hangs off it with
 	# its own fixed correction, so turning the dog stays one rotation.
 	_visual = Node3D.new()
@@ -94,6 +102,7 @@ func _physics_process(delta: float) -> void:
 	var planar := Vector3(velocity.x, 0.0, velocity.z).move_toward(target, acceleration * delta)
 	velocity = Vector3(planar.x, velocity.y - 9.8 * delta, planar.z)
 	move_and_slide()
+	_step_out_of_bodies(delta)
 	_report_contacts(planar, delta)
 	if is_on_floor():
 		velocity.y = 0.0
@@ -149,6 +158,32 @@ func planar_speed() -> float:
 
 func collar_position() -> Vector3:
 	return global_position + Vector3(0, 0.5, 0) - facing * 0.25
+
+
+## P04-08: physics pushes the dog out of a body it partly overlaps, but not
+## out of one it sits dead centre in (there is no direction to push). A
+## fighter can be placed right on top of the dog, so the dog steps out itself,
+## away from the body's centre, or backwards when it has none to go by.
+func _step_out_of_bodies(delta: float) -> void:
+	var space := get_world_3d().direct_space_state
+	if space == null or _body_shape == null:
+		return
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = _body_shape.shape
+	query.transform = global_transform * _body_shape.transform
+	query.collision_mask = Greybox.ACTOR_LAYER
+	query.exclude = [get_rid()]
+	for hit in space.intersect_shape(query, 4):
+		var body := hit.collider as Node3D
+		if body == null:
+			continue
+		var away := global_position - body.global_position
+		away.y = 0.0
+		if away.length() >= DEEP_OVERLAP:
+			continue
+		if away.length_squared() < 0.0004:
+			away = -facing
+		global_position += away.normalized() * STEP_OUT_SPEED * delta
 
 
 ## ADR-016: running into someone is felt. The body answers with a small

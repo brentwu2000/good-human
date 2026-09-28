@@ -161,6 +161,38 @@ func _run() -> void:
 	var gap := _flat(dog.global_position - them.global_position).length()
 	check(gap >= PENETRATION, "a dog left inside a fighter comes back out (%.2f m)" % gap)
 
+	# P04-08: even dead centre, where physics has no direction to push.
+	var centre := them.global_position
+	dog.global_position = Vector3(centre.x, dog.global_position.y, centre.z)
+	dog.velocity = Vector3.ZERO
+	# It steps out of the deep part itself; physics finishes the separation.
+	await _physics(45)
+	gap = _flat(dog.global_position - them.global_position).length()
+	check(gap >= PENETRATION, "a dog left dead centre inside a fighter steps out (%.2f m)" % gap)
+
+	# P04-08: the fight knows where fighters cannot stand.
+	check(sim.walkable.is_valid(), "the fight asks the Run World where people can stand")
+	var clear := Vector2.ZERO
+	var found := false
+	for ground: Vector2 in [Vector2(0, 300), Vector2(0, -300), Vector2(300, 0), Vector2(-300, 0)]:
+		if coordinator._walkable(ground):
+			clear = ground
+			found = true
+			break
+	check(found, "somewhere near the fight is open ground")
+	var wall := StaticBody3D.new()
+	wall.collision_layer = Greybox.WORLD_LAYER
+	var box := CollisionShape3D.new()
+	box.shape = BoxShape3D.new()
+	(box.shape as BoxShape3D).size = Vector3(1.0, 2.0, 1.0)
+	box.position.y = 1.0
+	wall.add_child(box)
+	map.add_child(wall)
+	wall.global_position = coordinator._ground_to_world(clear)
+	await _physics(2)
+	check(not coordinator._walkable(clear), "and a wall there is somewhere they cannot")
+	wall.queue_free()
+
 	coordinator.debug_force_result(CombatSimulation.Result.DISENGAGED)
 	coordinator.time_scale = 1.0
 	await _physics(3)

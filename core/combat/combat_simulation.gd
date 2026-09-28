@@ -57,6 +57,11 @@ var spacing: SpacingData
 ## and where its zero point has moved to (units, from where the fight began).
 var line_angle: float = 0.0
 var origin: Vector2 = Vector2.ZERO
+## P04-08: where a fighter can stand, asked with a ground position in units
+## from where the fight began (`world_position`). Unset, anywhere is fine,
+## which keeps the simulation runnable headless. The Run World answers it
+## against walls, benches and trees.
+var walkable: Callable
 
 var _first_to_decide: int = 0
 
@@ -306,7 +311,12 @@ func _footwork(fighter: CombatFighter, delta: float) -> void:
 	var d := distance()
 	if d > minf(_min_attack_range(fighter), spacing.ideal_max):
 		fighter.footwork = CombatFighter.Footwork.APPROACH
-		_move(fighter, fighter.move_speed * spacing.approach_speed * delta * _toward_opponent(fighter))
+		if _move(fighter, fighter.move_speed * spacing.approach_speed * delta * _toward_opponent(fighter)):
+			return
+		# Something is in the way: go round it rather than walking into it
+		# for ever.
+		if not _circle(fighter, spacing.circle_speed * delta * fighter.lateral):
+			fighter.lateral = -fighter.lateral
 		return
 	if d < spacing.ideal_min:
 		_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
@@ -319,7 +329,9 @@ func _footwork(fighter: CombatFighter, delta: float) -> void:
 		_continue_step(fighter, delta)
 		return
 	fighter.footwork = CombatFighter.Footwork.CIRCLE
-	_circle(fighter, spacing.circle_speed * delta * fighter.lateral)
+	# Circling into a wall turns them round the other way.
+	if not _circle(fighter, spacing.circle_speed * delta * fighter.lateral):
+		fighter.lateral = -fighter.lateral
 
 
 func _begin_step(fighter: CombatFighter, kind: CombatFighter.Footwork, distance_units: float, seconds: float) -> void:
@@ -330,10 +342,14 @@ func _begin_step(fighter: CombatFighter, kind: CombatFighter.Footwork, distance_
 
 func _continue_step(fighter: CombatFighter, delta: float) -> void:
 	var amount := fighter.step_speed * minf(delta, fighter.step_left)
+	var moved := false
 	if fighter.footwork == CombatFighter.Footwork.BACKSTEP:
-		_move(fighter, -amount * _toward_opponent(fighter))
+		moved = _move(fighter, -amount * _toward_opponent(fighter))
 	else:
-		_circle(fighter, amount * fighter.lateral)
+		moved = _circle(fighter, amount * fighter.lateral)
+	# Stepping into something ends the step where they are.
+	if not moved:
+		fighter.step_left = 0.0
 	fighter.step_left -= delta
 	if fighter.step_left <= 0.0:
 		fighter.step_left = 0.0
@@ -342,12 +358,26 @@ func _continue_step(fighter: CombatFighter, delta: float) -> void:
 
 ## Moves `fighter` `amount` units sideways round the other one, who stays
 ## exactly where they are. The distance between them does not change.
-func _circle(fighter: CombatFighter, amount: float) -> void:
+## Returns false, and moves nobody, when that would put them somewhere they
+## cannot stand.
+func _circle(fighter: CombatFighter, amount: float) -> bool:
+	var was_clear := _can_stand(fighter.side)
+	var before := [line_angle, origin]
 	var pivot_side := _other(fighter).side
 	var pivot := world_position(pivot_side)
 	line_angle += amount / maxf(distance(), 1.0)
 	origin = pivot - _line_direction() * fighters[pivot_side].position
 	origin = origin.limit_length(MAX_DRIFT)
+	if was_clear and not _can_stand(fighter.side):
+		line_angle = before[0]
+		origin = before[1]
+		return false
+	return true
+
+
+## True when `side` is standing somewhere they can stand (P04-08).
+func _can_stand(side: int) -> bool:
+	return not walkable.is_valid() or walkable.call(world_position(side))
 
 
 func _line_direction() -> Vector2:
@@ -515,7 +545,11 @@ func _tick_cooldowns(fighter: CombatFighter, delta: float) -> void:
 		fighter.cooldowns[id] = maxf(fighter.cooldowns[id] - delta, 0.0)
 
 
-func _move(fighter: CombatFighter, amount: float) -> void:
+## Moves `fighter` along the line. Returns false, and leaves them where they
+## were, when the ground they would move onto is not somewhere they can stand
+## (a wall, a bench): a step back, a dodge or a knockback stops at it. Someone
+## already caught in something may always move, so nobody is ever pinned.
+func _move(fighter: CombatFighter, amount: float) -> bool:
 	var target := _other(fighter)
 	var next := clampf(fighter.position + amount, -MAX_DRIFT, MAX_DRIFT)
 	# Never walk into the opponent: two bodies need room (P-04).
@@ -523,10 +557,17 @@ func _move(fighter: CombatFighter, amount: float) -> void:
 		next = minf(next, target.position - spacing.hard_min_separation)
 	else:
 		next = maxf(next, target.position + spacing.hard_min_separation)
+	var was := fighter.position
+	var was_clear := _can_stand(fighter.side)
 	fighter.position = next
+	if was_clear and not _can_stand(fighter.side):
+		fighter.position = was
+		return false
+	return true
 
 
-## A blow moves its target back along the line (never into anyone).
+## A blow moves its target back along the line (never into anyone, and
+## never through a wall: they stop against it).
 func _displace(target: CombatFighter, amount: float) -> void:
 	if amount > 0.0:
 		_move(target, -amount * _toward_opponent(target))
