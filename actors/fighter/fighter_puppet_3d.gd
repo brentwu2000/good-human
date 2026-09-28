@@ -154,6 +154,19 @@ func play_windup(skill: CombatSkillData) -> void:
 		&"dodge":
 			if _torso != null:
 				tween.tween_property(_torso, "rotation:z", 0.4, 0.1)
+		&"hook":
+			# P04-04: the whole upper body loads up. Shoulders and hips turn
+			# away and the arm comes up and out to the side — it has to be
+			# readable from across a street, because it is the blow worth
+			# barking at.
+			var arm := _joint(_arms, 1)
+			if arm != null:
+				tween.tween_property(arm, "rotation:z", 1.15, skill.windup).set_trans(Tween.TRANS_SINE)
+				tween.parallel().tween_property(arm, "rotation:x", 0.35, skill.windup)
+			if _torso != null:
+				tween.parallel().tween_property(_torso, "rotation:y", 0.55, skill.windup).set_trans(Tween.TRANS_SINE)
+			if _hips != null:
+				tween.parallel().tween_property(_hips, "rotation:y", 0.25, skill.windup)
 		_:
 			var arm := _joint(_arms, 1)
 			if arm != null:
@@ -165,6 +178,9 @@ func play_windup(skill: CombatSkillData) -> void:
 ## The strike itself: the limb swings through, the body follows it, and only
 ## then does everything settle back.
 func play_strike(skill: CombatSkillData) -> void:
+	if skill.animation_key == &"hook":
+		_play_hook_strike(skill)
+		return
 	var tween := _new_tween()
 	var kick := skill.animation_key == &"kick"
 	var limb := _joint(_legs if kick else _arms, 1)
@@ -178,9 +194,29 @@ func play_strike(skill: CombatSkillData) -> void:
 	tween.tween_callback(_reset_pose)
 
 
+## The hook swings across rather than out: the arm sweeps round at shoulder
+## height and the shoulders and hips unwind through it, past square.
+func _play_hook_strike(skill: CombatSkillData) -> void:
+	var tween := _new_tween()
+	# `_new_tween` squares the body up; start from the loaded wind-up pose.
+	var arm := _joint(_arms, 1)
+	if arm != null:
+		arm.rotation = Vector3(0.35, 0.0, 1.15)
+		tween.tween_property(arm, "rotation:x", -1.1, skill.strike_time + skill.contact_time).set_trans(Tween.TRANS_QUAD)
+	if _torso != null:
+		_torso.rotation.y = 0.55
+		tween.parallel().tween_property(_torso, "rotation:y", -0.6, skill.strike_time + skill.contact_time).set_trans(Tween.TRANS_QUAD)
+	if _hips != null:
+		_hips.rotation.y = 0.25
+		tween.parallel().tween_property(_hips, "rotation:y", -0.3, skill.strike_time + skill.contact_time)
+	tween.tween_interval(skill.follow_through)
+	tween.tween_callback(_reset_pose)
+
+
 ## `weight` is 0..1 for how hard the hit was, so a jab and a kick into an
 ## opening do not knock someone back the same distance (Gate 02 feel pass).
-func play_hurt(blocked: bool, weight: float = 0.5) -> void:
+## `twist` turns them with the blow (a hook comes from the side).
+func play_hurt(blocked: bool, weight: float = 0.5, twist: float = 0.0) -> void:
 	if blocked:
 		_log("擋住！", Color(0.6, 0.85, 1.0))
 	var amount := lerpf(0.14, 0.45, clampf(weight, 0.0, 1.0))
@@ -190,6 +226,10 @@ func play_hurt(blocked: bool, weight: float = 0.5) -> void:
 	if weight >= 0.75 and not blocked:
 		tween.parallel().tween_property(_body, "rotation:x", -0.22, 0.06)
 		tween.tween_property(_body, "rotation:x", 0.0, 0.24)
+	if twist != 0.0:
+		var turn := twist * (0.4 if blocked else 1.0)
+		tween.parallel().tween_property(_body, "rotation:y", turn, 0.06)
+		tween.tween_property(_body, "rotation:y", 0.0, 0.3)
 
 
 ## P03-E07: a bark landed. They turn to look at it and their guard opens — the

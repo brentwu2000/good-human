@@ -189,6 +189,11 @@ func _impact_weight(damage: float) -> float:
 	return clampf(damage / HEAVY_DAMAGE, 0.25, 1.0)
 
 
+## How far a blow turns the body it lands on: a hook comes from the side.
+func _twist(skill: CombatSkillData) -> float:
+	return 0.5 if skill != null and skill.animation_key == &"hook" else 0.0
+
+
 ## The visual accent belongs where bodies meet, not at the encounter marker.
 func _contact_point() -> Vector3:
 	if engagement == null:
@@ -270,13 +275,13 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 			actor.play_strike(skill)
 		&"hit":
 			var weight := _impact_weight(amount)
-			other.play_hurt(false, weight)
+			other.play_hurt(false, weight, _twist(skill))
 			other.motion.react(false)
 			engagement.pair.show_combat_impact(false, weight, _contact_point())
 			_punch_landed(weight)
 		&"blocked":
 			var block_weight := _impact_weight(amount) * 0.5
-			other.play_hurt(true, block_weight)
+			other.play_hurt(true, block_weight, _twist(skill))
 			engagement.pair.show_combat_impact(true, block_weight, _contact_point())
 			_punch_landed(0.35)
 		&"dodged":

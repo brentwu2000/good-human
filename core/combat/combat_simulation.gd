@@ -44,6 +44,8 @@ const REACTION_WINDOW: float = 0.3
 ## Yanked off balance, even usefully, they need this long to set their feet
 ## again — so dodging on the leash trades the owner's own tempo for safety.
 const PULL_RECOVERY: float = 1.5
+## Share of an attack's displacement that still moves someone who blocked it.
+const BLOCKED_DISPLACEMENT: float = 0.4
 
 var fighters: Array[CombatFighter] = []
 var result: Result = Result.NONE
@@ -405,7 +407,7 @@ func _phase_done(fighter: CombatFighter) -> void:
 					_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
 
 
-## Seconds until `attacker`'s current attack can no longer land.
+## A guard until `attacker`'s current attack can no longer land.
 func _time_to_contact_end(attacker: CombatFighter) -> float:
 	var skill := attacker.action
 	match attacker.phase:
@@ -444,9 +446,11 @@ func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 	if target.is_guarding():
 		damage *= 1.0 - target.action.damage_reduction
 		target.hp -= damage
+		_displace(target, skill.displacement * BLOCKED_DISPLACEMENT)
 		combat_event.emit(&"blocked", attacker.side, skill, damage)
 	else:
 		target.hp -= damage
+		_displace(target, skill.displacement)
 		combat_event.emit(&"hit", attacker.side, skill, damage)
 		# Same rule a bark obeys: an attack they have already committed to still
 		# comes. Without this, longer wind-ups mean far more time spent
@@ -484,6 +488,12 @@ func _move(fighter: CombatFighter, amount: float) -> void:
 	else:
 		next = maxf(next, target.position + spacing.hard_min_separation)
 	fighter.position = next
+
+
+## A blow moves its target back along the line (never into anyone).
+func _displace(target: CombatFighter, amount: float) -> void:
+	if amount > 0.0:
+		_move(target, -amount * _toward_opponent(target))
 
 
 func _toward_opponent(fighter: CombatFighter) -> float:

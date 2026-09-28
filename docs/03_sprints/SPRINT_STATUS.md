@@ -409,7 +409,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | P04-01 | Physical presence baseline | REVIEW |
 | P04-02 | Combat spacing/footwork | REVIEW |
 | P04-03 | Jab phases/contact | REVIEW |
-| P04-04 | Heavy Hook | TODO |
+| P04-04 | Heavy Hook | BLOCKED |
 | P04-05 | Kick | TODO |
 | P04-06 | Block/Dodge | TODO |
 | P04-07 | Hit reactions/impact | TODO |
@@ -438,4 +438,8 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - The leash now protects the owner until the attack's contact window closes, not just until its wind-up ends; otherwise a pull could save them from the telegraph and still leave them standing in the strike.
 - Balance (200 fights each): 169/157/122 → 160/159/137 wins against jogger/delivery/gym, fight length unchanged, Old Master still 0/200. The Gym Regular moved most (61 % → 68.5 %), because a whiffed kick-then-jab now costs the whiffer more. All balance bands hold.
 - `combat_contact_test` (26 checks): phase order, nothing lands during the wind-up, landing inside the window, landing once however long the window is, whiff and its extra recovery, stepping into an open window, blocking inside it, the pull covering it, and across 20 real fights no outcome ever arriving before its strike.
+- P04-04 BLOCKED on a balance decision for the owner. The groundwork is in and unused: `skill_heavy_hook.tres` (重勾拳: wind-up 0.55, strike 0.10, contact 0.06, follow-through 0.18, recovery 0.40, whiff +0.30, power 1.3, stagger 4, displacement 8, cooldown 5), a `displacement` field every attack can use, and the hook's body (shoulders and hips load away and the arm comes up and out on the wind-up, the arm sweeps across at shoulder height on the strike, and the person hit twists with it). No fighter carries it yet, so nothing plays differently.
+- Why it is blocked: given to every fighter, it pushes the untrained player below the approved "beatable but not free" band (≥ 50 %). Best setting found, 200 fights each against jogger/delivery/gym: 95/165/86, against 160/159/137 without it. A slow, readable heavy punch is exactly what a quick fighter steps away from or dodges: 60 % of the player's hooks missed the Jogger, against 28 % of the Jogger's hooks missing the player. No combination of wind-up, power, displacement or cooldown brought the Jogger and Gym fights back into the band.
+- Found on the way: with a 0.55–0.65 s wind-up, a guard raised against the hook (0.6 s) drops just before its contact window opens, so blocking it never worked. The fix (a guard raised against a blow you saw coming stays up until that blow's window closes) is written and measured but not committed, because on its own it moves the Delivery Worker from 159 to 99 of 200. It belongs with whichever balance option is chosen, or with P04-06 Block/Dodge.
+- Also seen: with kick and hook alternating on their cooldowns, the jab is almost never chosen (the AI always takes the highest-priority valid attack). The spec treats the jab as the everyday attack, so the priority-only choice needs revisiting whichever way the hook goes.
 

@@ -48,6 +48,9 @@ enum Condition {
 @export var power: float = 1.0
 ## Interrupts a target's wind-up when greater than the target's Stability.
 @export var stagger: float = 0.0
+## How far a landed hit moves the target back (units); a blocked one moves
+## them a share of it (BLOCKED_DISPLACEMENT in CombatSimulation).
+@export var displacement: float = 0.0
 ## Block: fraction of damage removed.
 @export_range(0.0, 1.0) var damage_reduction: float = 0.0
 ## Dodge: distance moved away from the opponent during active_time.
