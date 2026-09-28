@@ -249,9 +249,10 @@ func _test_dog_agency_hooks() -> void:
 	_start_attack(them, KICK)
 	kinds = _collect(sim)
 	var before := me.position
-	check(sim.pull(CombatSimulation.PLAYER, 20.0), "pull during an incoming kick saves the owner")
-	check(me.position < before, "pull moves the owner away from the opponent")
+	var leash := DogAgency.PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER
+	check(sim.pull(CombatSimulation.PLAYER, leash), "pull during an incoming kick saves the owner")
 	_step_until(sim, func() -> bool: return kinds.has(&"dodged") or kinds.has(&"hit") or kinds.has(&"missed"))
+	check(me.position < before, "pull moves the owner away from the opponent")
 	check_eq(me.hp, me.max_hp, "pulled owner takes no damage")
 
 	# Pull with nothing incoming costs nothing and gains nothing.

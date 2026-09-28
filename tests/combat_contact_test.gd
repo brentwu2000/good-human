@@ -134,15 +134,34 @@ func _test_block_in_window() -> void:
 
 
 ## The leash saves the owner from the whole attack, not just its wind-up.
+## P04-10: the leash hauls the owner back over a moment; whether it saves
+## them is where they are when the blow's window opens. In time, they are out
+## of reach and it is reported as dodged; too late, it lands anyway.
 func _test_pull_covers_contact() -> void:
+	var leash := DogAgency.PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER
 	var sim := _duel(60.0)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
+	var log := _log(sim)
 	_start_attack(them, JAB)
 	sim.step(STEP)
-	check(sim.pull(CombatSimulation.PLAYER, 20.0), "pulled during the wind-up")
-	var contact_end := sim.time + them.phase_time_left + JAB.strike_time + JAB.contact_time
-	check(me.pulled_until >= contact_end, "and protected until the window closes (%.2f ≥ %.2f)" % [me.pulled_until, contact_end])
+	check(sim.pull(CombatSimulation.PLAYER, leash), "pulled during the wind-up")
+	var at := me.position
+	sim.step(STEP)
+	check(me.position < at and me.position > at - leash * 0.5, "the owner is hauled back over a moment, not teleported")
+	_run_until_idle(sim, CombatSimulation.OPPONENT)
+	check(log.any(func(e: Array) -> bool: return e[0] == &"dodged"), "pulled clear in time: the jab misses, reported as dodged")
+	check_eq(me.hp, me.max_hp, "and costs nothing")
+
+	sim = _duel(58.0)
+	me = sim.fighters[CombatSimulation.PLAYER]
+	them = sim.fighters[CombatSimulation.OPPONENT]
+	log = _log(sim)
+	_start_attack(them, JAB)
+	them.phase_time_left = 0.001
+	check(sim.pull(CombatSimulation.PLAYER, leash), "pulled at the last instant")
+	_run_until_idle(sim, CombatSimulation.OPPONENT)
+	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "too late to get them out of reach: it lands anyway")
 
 
 ## In real fights every outcome of an attack comes after its release.

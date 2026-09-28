@@ -167,15 +167,23 @@ func _test_intervention_is_visible(map: RunMap3D, coordinator: CombatCoordinator
 	them.action = preload("res://data/combat/skills/skill_kick.tres")
 	them.phase = CombatFighter.Phase.WINDUP
 	them.phase_time_left = 5.0
-	var owner_pose := ours._body.position
-	check(sim.pull(CombatSimulation.PLAYER, 20.0), "the pull catches the wind-up")
-	# The yank is fast (out in ~0.09 s, back over ~0.28 s), so sample the whole
-	# movement rather than one frame of it.
-	var yanked := 0.0
-	for i in 30:
+	# P04-10: the owner is really hauled back across the ground, and leans into
+	# being dragged while it happens.
+	var owner_at := human.global_position
+	check(sim.pull(CombatSimulation.PLAYER, DogAgency.PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER), "the pull catches the wind-up")
+	var scale_before := coordinator.time_scale
+	coordinator.time_scale = 1.0
+	var leaned := 0.0
+	var hauled := 0.0
+	for i in 20:
 		await _tree.physics_frame
-		yanked = maxf(yanked, ours._body.position.distance_to(owner_pose))
-	check(yanked > 0.05, "the owner is visibly yanked (%.3f m)" % yanked)
+		leaned = maxf(leaned, ours._body.rotation.x)
+		hauled = maxf(hauled, _flat(human.global_position - owner_at).length())
+	coordinator.time_scale = scale_before
+	check(hauled > 0.5, "the owner is hauled back across the ground (%.2f m)" % hauled)
+	check(leaned > 0.15, "leaning into being dragged (%.2f rad)" % leaned)
+	them.phase = CombatFighter.Phase.IDLE
+	them.action = null
 	await _physics(30)
 
 	# A bad pull looks like a mistake, not like a save.
@@ -433,3 +441,7 @@ func _wait_for_scene(path: String) -> void:
 			await _tree.process_frame
 			return
 	check(false, "timed out waiting for scene %s" % path)
+
+
+func _flat(v: Vector3) -> Vector3:
+	return Vector3(v.x, 0.0, v.z)

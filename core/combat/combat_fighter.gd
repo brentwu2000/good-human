@@ -36,8 +36,12 @@ var distracted_until: float = -1.0
 var exposed_until: float = -1.0
 ## Last simulation time this fighter was moving out of the way in a dodge.
 var last_evaded_at: float = -99.0
-## A leash pull moved this fighter out of the way until this time.
+## Being yanked by the leash until this time (P04-10): the owner is moving,
+## over `yank_left` more seconds at `yank_speed` units/s. Nothing protects
+## them but the distance it puts between them and the blow.
 var pulled_until: float = -1.0
+var yank_left: float = 0.0
+var yank_speed: float = 0.0
 ## P-04 footwork. `lateral` is which way round the opponent they prefer
 ## (+1 / -1). A step (sidestep, backstep) is a short committed move: it runs
 ## for `step_left` seconds at `step_speed` units/s.

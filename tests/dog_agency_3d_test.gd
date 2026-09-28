@@ -105,7 +105,10 @@ func _run() -> void:
 	var owner_before := human.global_position
 	await _pull(away, human.max_length + 0.6, 3)
 	check_eq(agency.last_pull, &"saved", "pulling away during a kick saves the owner")
-	check(sim.fighters[CombatSimulation.PLAYER].pulled_until > sim.time, "owner out of the kick's way")
+	check(sim.fighters[CombatSimulation.PLAYER].pulled_until > sim.time, "owner being hauled out of the kick's way")
+	# P04-10: the haul takes a moment of fight time (the kick is held far off).
+	coordinator.time_scale = 1.0
+	await _physics(20)
 	coordinator.time_scale = 0.0
 	await _physics(2)
 	check(human.global_position.distance_to(opponent_pos) > owner_before.distance_to(opponent_pos), "owner moved away from the opponent")

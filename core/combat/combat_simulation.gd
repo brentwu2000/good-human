@@ -26,8 +26,6 @@ const OPPONENT: int = 1
 const START_DISTANCE: float = 220.0
 ## How far either human may drift from the engagement origin.
 const MAX_DRIFT: float = 600.0
-## Damage multiplier for hits on a distracted (exposed) fighter.
-const OPENING_DAMAGE: float = 1.4
 ## The opening stays open this long after the target stops looking away, so the
 ## other human's next attack lands on it without being handed a free turn.
 const OPENING_GRACE: float = 1.2
@@ -44,6 +42,9 @@ const REACTION_WINDOW: float = 0.3
 ## Yanked off balance, even usefully, they need this long to set their feet
 ## again — so dodging on the leash trades the owner's own tempo for safety.
 const PULL_RECOVERY: float = 1.5
+## How long a leash yank takes to move the owner (P04-10). A pull is a body
+## being hauled back, not a teleport, so timing it against the blow matters.
+const PULL_SECONDS: float = 0.25
 ## Share of an attack's displacement that still moves someone who blocked it.
 const BLOCKED_DISPLACEMENT: float = 0.4
 ## A whiff within this long of the target dodging is their dodge's doing.
@@ -104,6 +105,7 @@ func step(delta: float) -> void:
 	time += delta
 	for fighter in fighters:
 		_tick_cooldowns(fighter, delta)
+		_yank(fighter, delta)
 	for fighter in fighters:
 		_advance(fighter, delta)
 		if is_finished():
@@ -153,7 +155,7 @@ func force_result(value: Result) -> void:
 # The dog never commands attacks; it changes the situation the humans react to.
 
 ## A bark makes `side` look away: no decisions for `seconds`, and hits land on
-## the opening (OPENING_DAMAGE). A full-strength one (DISTRACT_STRONG) also
+## the opening (GameBalance.opening_damage). A full-strength one (DISTRACT_STRONG) also
 ## costs them the action they were in and lets the other human pounce at once;
 ## a worn-out bark only turns their head, so repeat barking cannot stun-lock.
 func distract(side: int, seconds: float) -> void:
@@ -190,11 +192,14 @@ func pull(side: int, amount: float) -> bool:
 	var attacker := _other(fighter)
 	var saved := attacker.is_winding_up_attack()
 	if saved:
-		# Out of the way until that attack's contact window has closed, then
-		# back on their feet.
-		_move(fighter, -amount * _toward_opponent(fighter))
-		fighter.pulled_until = time + _time_to_contact_end(attacker) + 0.05
-		fighter.ready_at = maxf(fighter.ready_at, fighter.pulled_until + PULL_RECOVERY)
+		# P04-10: hauled back over PULL_SECONDS. Whether it saves them is
+		# decided by where they are when the blow's window opens — pull late,
+		# or into a wall, and it still lands.
+		fighter.yank_left = PULL_SECONDS
+		fighter.yank_speed = amount / PULL_SECONDS
+		fighter.pulled_until = time + PULL_SECONDS
+		fighter.step_left = 0.0
+		fighter.ready_at = maxf(fighter.ready_at, time + _time_to_contact_end(attacker) + 0.05 + PULL_RECOVERY)
 	# Report how far they were actually moved, not how far was asked for: with
 	# nothing to dodge they brace against the leash and do not move at all, and
 	# presentation has to be able to tell those apart.
@@ -280,6 +285,9 @@ func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
 
 
 func _decide(fighter: CombatFighter, delta: float) -> void:
+	if fighter.yank_left > 0.0:
+		# Being hauled back by the leash: no footwork fighting it.
+		return
 	if time < fighter.distracted_until:
 		# Looking at the dog, not moving their feet.
 		fighter.footwork = CombatFighter.Footwork.HOLD
@@ -309,6 +317,12 @@ func _footwork(fighter: CombatFighter, delta: float) -> void:
 		_continue_step(fighter, delta)
 		return
 	var d := distance()
+	if d > minf(_min_attack_range(fighter), spacing.ideal_max) and _incoming(fighter):
+		# Nobody walks back into a blow they can see coming (P04-10: a leash
+		# pull or a dodge that got them clear must not be undone by their own
+		# feet). They hold until it is spent.
+		fighter.footwork = CombatFighter.Footwork.HOLD
+		return
 	if d > minf(_min_attack_range(fighter), spacing.ideal_max):
 		fighter.footwork = CombatFighter.Footwork.APPROACH
 		if _move(fighter, fighter.move_speed * spacing.approach_speed * delta * _toward_opponent(fighter)):
@@ -332,6 +346,17 @@ func _footwork(fighter: CombatFighter, delta: float) -> void:
 	# Circling into a wall turns them round the other way.
 	if not _circle(fighter, spacing.circle_speed * delta * fighter.lateral):
 		fighter.lateral = -fighter.lateral
+
+
+## True while the other fighter has an attack on its way that has not landed
+## and that `fighter` is currently out of reach of: stepping in now would walk
+## into it. Someone already inside its reach gains nothing by holding.
+func _incoming(fighter: CombatFighter) -> bool:
+	var attacker := _other(fighter)
+	return attacker.action != null and attacker.action.effect == CombatSkillData.Effect.ATTACK \
+		and attacker.phase in [CombatFighter.Phase.WINDUP, CombatFighter.Phase.STRIKE, CombatFighter.Phase.CONTACT] \
+		and not attacker.connected \
+		and distance() > attacker.action.preferred_range + REACH_TOLERANCE
 
 
 func _begin_step(fighter: CombatFighter, kind: CombatFighter.Footwork, distance_units: float, seconds: float) -> void:
@@ -469,6 +494,18 @@ func _phase_done(fighter: CombatFighter) -> void:
 					_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
 
 
+## A leash yank in progress moves them back, and counts as getting out of the
+## way: a blow it takes them clear of is reported as dodged.
+func _yank(fighter: CombatFighter, delta: float) -> void:
+	if fighter.yank_left <= 0.0:
+		return
+	var amount := fighter.yank_speed * minf(delta, fighter.yank_left)
+	fighter.last_evaded_at = time
+	fighter.yank_left -= delta
+	if not _move(fighter, -amount * _toward_opponent(fighter)):
+		fighter.yank_left = 0.0
+
+
 ## Seconds until `attacker`'s current attack can no longer land.
 func _time_to_contact_end(attacker: CombatFighter) -> float:
 	var skill := attacker.action
@@ -497,17 +534,14 @@ func _try_contact(attacker: CombatFighter) -> void:
 
 func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 	var target := _other(attacker)
-	# P04-06: a dodge is not a shield. Someone still in reach when the window
-	# opens is hit however hard they were trying to get away; only moving out
-	# of reach (checked in `_try_contact`) avoids it. The leash is the dog's
-	# and still pulls the owner clear (P04-10 revisits it).
-	if time < target.pulled_until:
-		combat_event.emit(&"dodged", attacker.side, skill, 0.0)
-		return
+	# P04-06/P04-10: neither a dodge nor the leash is a shield. Someone still
+	# in reach when the window opens is hit however hard they are trying to
+	# get away, or being hauled away; only being out of reach (checked in
+	# `_try_contact`) avoids it.
 	var variance := 1.0 + _rng.randf_range(-_balance.damage_variance, _balance.damage_variance)
 	var damage := attacker.attack * skill.power * variance
 	if time < target.exposed_until and not target.is_guarding():
-		damage *= OPENING_DAMAGE
+		damage *= _balance.opening_damage
 		combat_event.emit(&"opening", attacker.side, skill, damage)
 	if target.is_guarding():
 		damage *= 1.0 - target.action.damage_reduction

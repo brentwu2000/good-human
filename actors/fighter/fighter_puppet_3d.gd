@@ -331,10 +331,13 @@ func play_distracted(towards: Vector3, seconds: float) -> void:
 func play_pulled(saved: bool) -> void:
 	if _body == null or _down:
 		return
-	var back := 0.42 if saved else 0.2
+	# Saved: the simulation hauls them back for real (P04-10), so the body
+	# only leans into being dragged. Braced: they do not move, so the jolt is
+	# all body.
+	var back := 0.0 if saved else 0.2
 	var tween := _new_tween()
 	tween.tween_property(_body, "position:z", back, 0.09).set_trans(Tween.TRANS_QUAD)
-	tween.parallel().tween_property(_body, "rotation:x", 0.2, 0.09)
+	tween.parallel().tween_property(_body, "rotation:x", 0.3 if saved else 0.2, 0.09)
 	tween.tween_property(_body, "position:z", 0.0, 0.28)
 	tween.parallel().tween_property(_body, "rotation:x", 0.0, 0.28)
 
