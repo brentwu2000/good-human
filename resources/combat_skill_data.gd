@@ -51,6 +51,9 @@ enum Condition {
 ## How far a landed hit moves the target back (units); a blocked one moves
 ## them a share of it (BLOCKED_DISPLACEMENT in CombatSimulation).
 @export var displacement: float = 0.0
+## How long a landed hit holds the fight still (s). P-04 ranges: light
+## 0.04–0.07, heavy 0.06–0.10. A blocked one holds for a share of it.
+@export var hit_stop: float = 0.05
 ## Block: fraction of damage removed.
 @export_range(0.0, 1.0) var damage_reduction: float = 0.0
 ## Dodge: distance moved away from the opponent during active_time.

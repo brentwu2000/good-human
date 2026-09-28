@@ -187,7 +187,7 @@ func _test_intervention_is_visible(map: RunMap3D, coordinator: CombatCoordinator
 		lurched = maxf(lurched, absf(ours._body.rotation.z))
 		# The stagger hold is shorter than this window, so record it as it
 		# happens rather than asking once it is already over.
-		staggered = staggered or ours.motion.state == CombatMotion3D.State.STAGGER
+		staggered = staggered or ours.motion.state == CombatMotion3D.State.STUMBLE
 	check(lurched > 0.05, "a bad pull throws the owner off balance sideways (%.3f rad)" % lurched)
 	check(staggered, "and reads as the worse outcome while it lasts")
 	coordinator.time_scale = 25.0
@@ -278,7 +278,7 @@ func _test_dog_pov(map: RunMap3D, coordinator: CombatCoordinator3D, dog: DogCont
 
 ## The states the spec asks for, and the reaction hold that makes a hit read.
 func _test_states_are_authored() -> void:
-	for required: String in ["IDLE_COMBAT", "APPROACH", "CIRCLE", "WINDUP", "ATTACK", "BLOCK", "DODGE", "HIT_REACT", "STAGGER", "DOWN", "RECOVER"]:
+	for required: String in ["IDLE_COMBAT", "APPROACH", "CIRCLE", "WINDUP", "ATTACK", "BLOCK", "DODGE", "HIT_LIGHT", "HIT_HEAVY", "STAGGER", "STUMBLE", "DOWN", "RECOVER"]:
 		check(CombatMotion3D.State.keys().has(required), "the spec's %s state exists" % required)
 
 	var motion := CombatMotion3D.new()
@@ -290,16 +290,26 @@ func _test_states_are_authored() -> void:
 	check_eq(motion.state, CombatMotion3D.State.CIRCLE, "in range and free: they work for an angle")
 
 	# A hit holds the body for its own moment rather than flickering back.
-	motion.react(false)
+	motion.react(CombatMotion3D.State.HIT_LIGHT)
 	motion.update(0.01, fighter, false, false)
-	check_eq(motion.state, CombatMotion3D.State.HIT_REACT, "a hit reads as a hit")
+	check_eq(motion.state, CombatMotion3D.State.HIT_LIGHT, "a hit reads as a hit")
 	motion.update(CombatMotion3D.REACT_SECONDS, fighter, false, false)
 	motion.update(0.01, fighter, false, false)
 	check_eq(motion.state, CombatMotion3D.State.CIRCLE, "and then the fight takes the body back")
-	motion.react(true)
+	motion.react(CombatMotion3D.State.STAGGER)
 	motion.update(0.01, fighter, false, false)
 	check_eq(motion.state, CombatMotion3D.State.STAGGER, "a stagger reads as worse than a hit")
 	check(CombatMotion3D.STAGGER_SECONDS > CombatMotion3D.REACT_SECONDS, "and holds longer")
+	# P04-07: a heavy blow holds the body longer than a jab, and a stumble
+	# longest of all.
+	for pair: Array in [[CombatMotion3D.State.HIT_HEAVY, CombatMotion3D.HEAVY_SECONDS], [CombatMotion3D.State.STUMBLE, CombatMotion3D.STUMBLE_SECONDS]]:
+		motion.update(1.0, fighter, false, false)
+		motion.react(pair[0])
+		motion.update(0.01, fighter, false, false)
+		check_eq(motion.state, pair[0], "%s is a state the body shows" % CombatMotion3D.State.keys()[pair[0]])
+		check(motion.is_committed(), "and the fight does not take the body back during it")
+	check(CombatMotion3D.REACT_SECONDS < CombatMotion3D.HEAVY_SECONDS and CombatMotion3D.HEAVY_SECONDS < CombatMotion3D.STUMBLE_SECONDS, "light < heavy < stumble")
+	motion.update(1.0, fighter, false, false)
 
 	motion.update(0.01, fighter, false, true)
 	check_eq(motion.state, CombatMotion3D.State.DOWN, "being defeated overrides everything")
@@ -377,6 +387,21 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	puppet.set_guard(false)
 	await _physics(12)
 	check(arm.rotation.x > -0.3, "when the block ends the guard comes down (%.2f rad)" % arm.rotation.x)
+
+	# P04-07: each blow gets its own answer.
+	puppet.play_hurt(false, 0.3, &"punch")
+	await _physics(2)
+	check(head.rotation.x < -0.2, "a jab snaps the head back (%.2f rad)" % head.rotation.x)
+	await _physics(30)
+	puppet.play_hurt(false, 0.8, &"hook")
+	await _physics(4)
+	check(absf(puppet._body.rotation.y) > 0.3, "a hook turns the body with it (%.2f rad)" % puppet._body.rotation.y)
+	check(absf(head.rotation.y) > 0.25, "and the head further (%.2f rad)" % head.rotation.y)
+	await _physics(30)
+	puppet.play_hurt(false, 0.9, &"kick")
+	await _physics(4)
+	check(torso.rotation.x > 0.25, "a kick folds them over it (%.2f rad)" % torso.rotation.x)
+	await _physics(30)
 
 	# A dodge's body answer leans away; it does not slide the figure sideways
 	# (the simulation has already moved them for real).

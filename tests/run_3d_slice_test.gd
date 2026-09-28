@@ -221,16 +221,18 @@ func _run() -> void:
 	check(coordinator._impact_weight(1.0) < coordinator._impact_weight(CombatCoordinator3D.HEAVY_DAMAGE), "a heavy hit weighs more than a jab")
 	check_eq(coordinator._impact_weight(CombatCoordinator3D.HEAVY_DAMAGE * 3.0), 1.0, "impact weight is capped")
 	rig._trauma = 0.0
-	coordinator._punch_landed(1.0)
+	coordinator._punch_landed(1.0, preload("res://data/combat/skills/skill_kick.tres").hit_stop)
 	check(coordinator._hitstop_left > 0.0, "a hit stops the fight for a beat")
 	check(rig._trauma > 0.0, "and shakes the view")
 	var heavy_stop := coordinator._hitstop_left
 	coordinator._hitstop_left = 0.0
-	coordinator._punch_landed(0.0)
+	coordinator._punch_landed(0.0, preload("res://data/combat/skills/skill_jab.tres").hit_stop)
 	check(coordinator._hitstop_left < heavy_stop, "a light hit stops it for less")
-	check(coordinator._hitstop_left <= CombatCoordinator3D.HITSTOP_HEAVY, "the pause is always short")
+	coordinator._hitstop_left = 0.0
+	coordinator._punch_landed(1.0, 1.0)
+	check(coordinator._hitstop_left <= CombatCoordinator3D.HITSTOP_MAX, "the pause is always short, whatever asks for it")
 	# The pause holds the clock; it must never advance the fight by itself.
-	coordinator._hitstop_left = CombatCoordinator3D.HITSTOP_HEAVY
+	coordinator._hitstop_left = CombatCoordinator3D.HITSTOP_MAX
 	var hp_before: float = coordinator.engagement.simulation.fighters[CombatSimulation.OPPONENT].hp
 	var time_before: float = coordinator.engagement.simulation.time
 	await _physics(3)

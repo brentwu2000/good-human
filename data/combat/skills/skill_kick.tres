@@ -19,6 +19,7 @@ contact_time = 0.06
 follow_through = 0.14
 whiff_recovery = 0.2
 recovery = 0.6
+hit_stop = 0.09
 power = 1.8
 stagger = 5.5
 damage_reduction = 0.0

@@ -254,33 +254,60 @@ func _play_hook_strike(skill: CombatSkillData) -> void:
 
 ## `weight` is 0..1 for how hard the hit was, so a jab and a kick into an
 ## opening do not knock someone back the same distance (Gate 02 feel pass).
-## `twist` turns them with the blow (a hook comes from the side).
-func play_hurt(blocked: bool, weight: float = 0.5, twist: float = 0.0) -> void:
+## `blow` is the attack's animation key: each blow is answered differently
+## (P04-07) — a jab snaps the head back, a hook turns the body with it, a
+## kick folds them over it.
+func play_hurt(blocked: bool, weight: float = 0.5, blow: StringName = &"") -> void:
 	if blocked:
 		_log("擋住！", Color(0.6, 0.85, 1.0))
 	var amount := lerpf(0.14, 0.45, clampf(weight, 0.0, 1.0))
-	var tween := _new_tween()
+	var settle := lerpf(0.16, 0.3, weight)
+	var tween := _new_tween().set_parallel()
+	# The impact, all at once: pushed back, plus what this blow does.
+	tween.tween_property(_body, "position:z", amount, 0.05)
 	if blocked:
 		# P04-06: the guard stays up through the blow. The forearms take it
 		# and are knocked back towards the face, then set again.
 		for arm in _arms:
 			if arm != null:
 				arm.rotation.x = -1.5
-				tween.parallel().tween_property(arm, "rotation:x", -1.15, 0.05)
-		tween.parallel().tween_property(_body, "position:z", amount, 0.05)
+				tween.tween_property(arm, "rotation:x", -1.15, 0.05)
+		if blow == &"hook":
+			tween.tween_property(_body, "rotation:y", 0.2, 0.06)
+	else:
+		match blow:
+			&"hook":
+				# From the side: the body turns with it and the head further.
+				tween.tween_property(_body, "rotation:y", 0.5, 0.06)
+				if _head != null:
+					tween.tween_property(_head, "rotation:y", 0.45, 0.06)
+			&"kick":
+				# Into the body: they fold over it, hips driven back.
+				if _torso != null:
+					tween.tween_property(_torso, "rotation:x", 0.38, 0.06)
+				if _hips != null:
+					tween.tween_property(_hips, "rotation:x", -0.15, 0.06)
+			_:
+				# A jab: the head snaps back.
+				if _head != null:
+					tween.tween_property(_head, "rotation:x", -0.35, 0.04)
+				if weight >= 0.75:
+					tween.tween_property(_body, "rotation:x", -0.22, 0.06)
+	# Then they come back from it, a heavier blow taking longer.
+	tween.chain().tween_property(_body, "position:z", 0.0, settle)
+	if blocked:
 		for arm in _arms:
 			if arm != null:
-				tween.parallel().tween_property(arm, "rotation:x", -1.5, lerpf(0.16, 0.3, weight)).set_delay(0.05)
-	else:
-		tween.tween_property(_body, "position:z", amount, 0.05)
-	tween.tween_property(_body, "position:z", 0.0, lerpf(0.16, 0.3, weight))
-	if weight >= 0.75 and not blocked:
-		tween.parallel().tween_property(_body, "rotation:x", -0.22, 0.06)
-		tween.tween_property(_body, "rotation:x", 0.0, 0.24)
-	if twist != 0.0:
-		var turn := twist * (0.4 if blocked else 1.0)
-		tween.parallel().tween_property(_body, "rotation:y", turn, 0.06)
-		tween.tween_property(_body, "rotation:y", 0.0, 0.3)
+				tween.tween_property(arm, "rotation:x", -1.5, settle)
+	tween.tween_property(_body, "rotation:y", 0.0, maxf(settle, 0.3))
+	# Back to their own posture, not bolt upright.
+	tween.tween_property(_body, "rotation:x", data.stoop if data != null else 0.0, maxf(settle, 0.24))
+	if _head != null:
+		tween.tween_property(_head, "rotation", Vector3.ZERO, maxf(settle, 0.18))
+	if _torso != null:
+		tween.tween_property(_torso, "rotation:x", 0.0, maxf(settle, 0.34))
+	if _hips != null:
+		tween.tween_property(_hips, "rotation:x", 0.0, maxf(settle, 0.34))
 
 
 ## P03-E07: a bark landed. They turn to look at it and their guard opens — the

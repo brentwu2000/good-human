@@ -412,7 +412,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | P04-04 | Heavy Hook | REVIEW |
 | P04-05 | Kick | REVIEW |
 | P04-06 | Block/Dodge | REVIEW |
-| P04-07 | Hit reactions/impact | TODO |
+| P04-07 | Hit reactions/impact | REVIEW |
 | P04-08 | Anti-stuck/sliding | TODO |
 | P04-09 | Dog POV presence test | TODO |
 | P04-10 | Bark/Pull integration | TODO |
@@ -453,6 +453,9 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - Block: the guard now stays visibly up through a blow. The hit reaction used to reset the pose and drop both arms at the moment of contact; the forearms are now knocked back towards the face and set again, and the guard comes down when the block actually ends rather than whenever the next action happens to reset the pose.
 - Still dog-owned and unchanged: a leash pull still carries the owner clear by protection time rather than by distance. It is the dog's action and P04-10 (Bark/Pull integration) revisits it.
 - Tests: `combat_contact_test` (a dodge in time is out of reach when the window opens and costs nothing; one too late is hit); `combat_motion_3d_test` (both forearms up in a guard, a blocked blow knocks it back without dropping it, it sets again, it comes down when the block ends, and a dodge leans away without sliding the figure).
+- P04-07: the reaction set is the spec's: HIT_LIGHT (was HIT_REACT), HIT_HEAVY (a hook or kick, or any hit heavy enough), STAGGER, STUMBLE (a bad leash pull, which used to borrow STAGGER) and DOWN, each holding the body for its own moment: light 0.28 s < heavy 0.40 < stagger 0.45 < stumble 0.50. Each blow is answered differently at the moment of contact: a jab snaps the head back, a hook turns the body with it and the head further, a kick folds them over it with the hips driven back. The impact happens all at once and the recovery after it; before, part of it was chained a step late.
+- Hit-stop is per attack and inside the spec's ranges: jab 0.05 s, hook 0.08, kick 0.09, a blocked blow 60 % of that, and nothing ever holds longer than 0.10 s, even the dog's biggest opening. The heavy hit-stop used to reach 0.16 s. The camera impulse and contact flash are unchanged, still scaled by the blow.
+- Not in this task: knockback checked against walls and other bodies is the same mechanism as keeping circling fighters out of walls, so it goes with P04-08. Impact audio is still missing because the project has no audio yet (the same gap blocks P03-E09).
 
 ## Sprint 05 — GREED / TERRITORY EXECUTION (Update 008)
 Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION.md`; systems `docs/04_systems/GREED_TERRITORY_SYSTEM.md`; data `docs/05_data/SPRINT05_DATA.md`; gate `docs/07_qa/SPRINT05_GREED_TERRITORY_GATE.md`; ADR-017 (extraction creates choice), ADR-018 (territory requires return). P-04 stays the combat baseline: Sprint 05 consumes it and does not redesign combat.

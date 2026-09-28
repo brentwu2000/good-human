@@ -27,6 +27,7 @@ func _ready() -> void:
 	_test_hook()
 	_test_kick()
 	_test_dodge_is_spatial()
+	_test_hit_stop_ranges()
 	_test_opening_gets_the_heavy_blow()
 	finish()
 
@@ -325,4 +326,14 @@ func _test_dodge_is_spatial() -> void:
 	_run_until_idle(sim, CombatSimulation.OPPONENT)
 	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "a dodge that has not got them out of reach does not save them")
 	check(me.hp < me.max_hp, "and it hurts")
+
+
+## P04-07: every attack holds the fight for its own short beat, inside the
+## spec's ranges — light 0.04–0.07 s, heavy 0.06–0.10 s.
+func _test_hit_stop_ranges() -> void:
+	check(JAB.hit_stop >= 0.04 and JAB.hit_stop <= 0.07, "a jab's hit-stop is light (%.2f)" % JAB.hit_stop)
+	for skill: CombatSkillData in [HOOK, KICK]:
+		check(skill.hit_stop >= 0.06 and skill.hit_stop <= 0.10, "%s's hit-stop is heavy (%.2f)" % [skill.id, skill.hit_stop])
+	check(JAB.hit_stop < HOOK.hit_stop and HOOK.hit_stop <= KICK.hit_stop, "and it grows with the blow")
+	check(CombatCoordinator3D.HITSTOP_MAX <= 0.10, "nothing holds longer than the heavy range")
 

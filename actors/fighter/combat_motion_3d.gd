@@ -16,19 +16,23 @@ enum State {
 	ATTACK,       ## the strike released, through its contact window
 	BLOCK,
 	DODGE,
-	HIT_REACT,
+	HIT_LIGHT,    ## a jab landed: a snap, and straight back into it
 	STAGGER,
 	DOWN,
 	RECOVER,      ## the beat after an action, open and off balance
 	SIDESTEP,     ## a quick step round the opponent (P-04)
 	BACKSTEP,     ## stepping back out of range (P-04)
 	FOLLOW_THROUGH, ## still extended after the contact window (P-04)
+	HIT_HEAVY,    ## a hook or kick landed: the body is moved and needs a moment (P-04)
+	STUMBLE,      ## off balance, dragged or shoved the wrong way (P-04)
 }
 
 ## Reaction states hold for their own moment before the simulation takes over
 ## the body again, so a hit reads as a hit rather than a flicker.
 const REACT_SECONDS: float = 0.28
+const HEAVY_SECONDS: float = 0.4
 const STAGGER_SECONDS: float = 0.45
+const STUMBLE_SECONDS: float = 0.5
 
 var state: State = State.IDLE_COMBAT
 ## How far the fighter is from wanting to close the distance, 0..1, for the
@@ -39,10 +43,20 @@ var _react_left: float = 0.0
 var _reacting: State = State.IDLE_COMBAT
 
 
-## A hit landed on this fighter: hold the reaction briefly.
-func react(staggered: bool) -> void:
-	_reacting = State.STAGGER if staggered else State.HIT_REACT
-	_react_left = STAGGER_SECONDS if staggered else REACT_SECONDS
+## Something happened to this body: hold that reaction for its own moment.
+## `kind` is HIT_LIGHT, HIT_HEAVY, STAGGER or STUMBLE.
+func react(kind: State) -> void:
+	_reacting = kind
+	match kind:
+		State.HIT_HEAVY:
+			_react_left = HEAVY_SECONDS
+		State.STAGGER:
+			_react_left = STAGGER_SECONDS
+		State.STUMBLE:
+			_react_left = STUMBLE_SECONDS
+		_:
+			_reacting = State.HIT_LIGHT
+			_react_left = REACT_SECONDS
 
 
 ## Recomputes the state from the simulation. `closing` is true when this fighter
@@ -81,4 +95,4 @@ func update(delta: float, fighter: CombatFighter, closing: bool, defeated: bool)
 
 ## True while the body is doing something the fight should not interrupt.
 func is_committed() -> bool:
-	return state in [State.WINDUP, State.ATTACK, State.FOLLOW_THROUGH, State.HIT_REACT, State.STAGGER, State.DOWN]
+	return state in [State.WINDUP, State.ATTACK, State.FOLLOW_THROUGH, State.HIT_LIGHT, State.HIT_HEAVY, State.STAGGER, State.STUMBLE, State.DOWN]

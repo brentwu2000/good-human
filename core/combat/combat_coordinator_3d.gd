@@ -29,8 +29,11 @@ const DISENGAGE_DISTANCE: float = 9.0
 ## the fight dead for a moment so it reads as contact rather than a slide. It
 ## only holds the clock — the simulation decides everything, and the pause is
 ## short enough never to change who wins.
-const HITSTOP_LIGHT: float = 0.06
-const HITSTOP_HEAVY: float = 0.16
+## P-04: every attack carries its own hit-stop (CombatSkillData.hit_stop);
+## nothing ever holds longer than this, even the dog's biggest opening.
+const HITSTOP_MAX: float = 0.10
+## Share of an attack's hit-stop a blocked blow gets.
+const BLOCKED_HITSTOP: float = 0.6
 ## Damage at or above this is a heavy hit (an opening, or a kick that connects).
 const HEAVY_DAMAGE: float = 9.0
 ## After a fight resolves the world holds the beat before letting go, so a win
@@ -189,9 +192,14 @@ func _impact_weight(damage: float) -> float:
 	return clampf(damage / HEAVY_DAMAGE, 0.25, 1.0)
 
 
-## How far a blow turns the body it lands on: a hook comes from the side.
-func _twist(skill: CombatSkillData) -> float:
-	return 0.5 if skill != null and skill.animation_key == &"hook" else 0.0
+## Hooks and kicks move the body they land on; a jab does not.
+func _is_heavy(skill: CombatSkillData, weight: float) -> bool:
+	return weight >= 0.75 or (skill != null and skill.animation_key in [&"hook", &"kick"])
+
+
+## The blow's own hold, capped.
+func _hit_stop(skill: CombatSkillData) -> float:
+	return minf(skill.hit_stop if skill != null else 0.05, HITSTOP_MAX)
 
 
 ## The visual accent belongs where bodies meet, not at the encounter marker.
@@ -201,10 +209,10 @@ func _contact_point() -> Vector3:
 	return (human.global_position + engagement.pair.human_global_position()) * 0.5
 
 
-## Freezes the fight for a beat and shakes the view, scaled by the hit.
-func _punch_landed(weight: float) -> void:
+## Freezes the fight for `stop` seconds and shakes the view, scaled by the hit.
+func _punch_landed(weight: float, stop: float) -> void:
 	blows_landed += 1
-	_hitstop_left = maxf(_hitstop_left, lerpf(HITSTOP_LIGHT, HITSTOP_HEAVY, weight))
+	_hitstop_left = maxf(_hitstop_left, minf(stop, HITSTOP_MAX))
 	if camera != null:
 		camera.add_trauma(weight)
 
@@ -275,15 +283,15 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 			actor.play_strike(skill)
 		&"hit":
 			var weight := _impact_weight(amount)
-			other.play_hurt(false, weight, _twist(skill))
-			other.motion.react(false)
+			other.play_hurt(false, weight, skill.animation_key if skill != null else &"")
+			other.motion.react(CombatMotion3D.State.HIT_HEAVY if _is_heavy(skill, weight) else CombatMotion3D.State.HIT_LIGHT)
 			engagement.pair.show_combat_impact(false, weight, _contact_point())
-			_punch_landed(weight)
+			_punch_landed(weight, _hit_stop(skill))
 		&"blocked":
 			var block_weight := _impact_weight(amount) * 0.5
-			other.play_hurt(true, block_weight, _twist(skill))
+			other.play_hurt(true, block_weight, skill.animation_key if skill != null else &"")
 			engagement.pair.show_combat_impact(true, block_weight, _contact_point())
-			_punch_landed(0.35)
+			_punch_landed(0.35, _hit_stop(skill) * BLOCKED_HITSTOP)
 		&"dodged":
 			other.play_evade()
 			actor.play_miss()
@@ -296,19 +304,19 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 		&"pulled":
 			# P03-E08: the leash yanked the owner. `amount` is how far.
 			actor.play_pulled(amount > 0.0)
-			actor.motion.react(false)
+			actor.motion.react(CombatMotion3D.State.HIT_LIGHT)
 		&"stumbled":
 			actor.play_stumble()
-			actor.motion.react(true)
+			actor.motion.react(CombatMotion3D.State.STUMBLE)
 		&"opening":
 			# The dog made this happen: the biggest hit of the fight should
 			# look like the biggest hit of the fight. Replace the ordinary coral
 			# pulse from the hit event with the warm dog-agency payoff.
 			engagement.pair.show_combat_impact(false, 1.0, _contact_point(), true)
-			_punch_landed(1.0)
+			_punch_landed(1.0, HITSTOP_MAX)
 		&"staggered":
 			actor.play_stagger()
-			actor.motion.react(true)
+			actor.motion.react(CombatMotion3D.State.STAGGER)
 		&"defeated":
 			actor.play_down()
 			other.play_victory()
