@@ -61,3 +61,15 @@ Installed 2026-09-18. D01–D09 can run in parallel; D10 uses implementation cap
 
 ## Rule
 Design does not wait idle for engineering. Explore both camera families where needed, then collapse to one direction after P-01.
+
+## P-04 Human Brawl Feel (Update 006 Patch 03)
+Installed 2026-09-28. Brief: `docs/06_art/P04_COMBAT_MOTION_DESIGN_WORKSTREAM.md`. Runs in parallel with engineering; append, never overwrite earlier D4 work.
+
+| ID | Deliverable | Owner | Status |
+|---|---|---|---|
+| D4-18 | Human Combat Motion Language | Design/Codex ART | TODO |
+| D4-19 | Footwork Board | Design/Codex ART | TODO |
+| D4-20 | Contact / Impact Frames | Design/Codex ART | TODO |
+| D4-21 | Dog Physical Presence | Design/Codex ART | TODO |
+| D4-22 | Dog POV Brawl Composition | Design/Codex ART | TODO |
+| D4-23 | Combat Personality Seeds | Design/Codex ART | TODO |

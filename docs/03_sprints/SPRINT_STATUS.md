@@ -398,3 +398,25 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 - The reaching hand is only possible because of the joint work: before it, the owner could not raise an arm at all.
 - Two test-timing notes, in the same family as the earlier ones: moving into the dog's eyes is a blend, so a check one frame after the win reads `pov` at 0.43 and fails for the right reason; and the hand and the dip happen within the same two seconds, so sampling them in sequence misses whichever went first — watch the whole beat at once.
 - The atmosphere director assumes audio (ducking ambience, impact, dog breathing, low-frequency pulse before the first strike). The project still has none, and this now blocks P03-E09.
+
+## P-04 HUMAN BRAWL FEEL + PHYSICAL PRESENCE (Update 006 Patch 03)
+Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESENCE.md`; ADR-016 (PROPOSED). Combat must read through motion and physical interaction, not text. Obvious Dog↔Human or Human↔Human penetration is a Critical Fail. Out of scope: ragdoll, a large move list, direct dog combat, rope wrapping, territory work, new map content.
+
+**BLOCKER:** Sprint 05 engineering stays gated until the P-04 Brawl Feel Gate (`docs/07_qa/P04_BRAWL_FEEL_GATE.md`).
+
+| ID | Task | Status |
+|---|---|---|
+| P04-01 | Physical presence baseline | TODO |
+| P04-02 | Combat spacing/footwork | TODO |
+| P04-03 | Jab phases/contact | TODO |
+| P04-04 | Heavy Hook | TODO |
+| P04-05 | Kick | TODO |
+| P04-06 | Block/Dodge | TODO |
+| P04-07 | Hit reactions/impact | TODO |
+| P04-08 | Anti-stuck/sliding | TODO |
+| P04-09 | Dog POV presence test | TODO |
+| P04-10 | Bark/Pull integration | TODO |
+| P04-11 | No-HUD readability | TODO |
+| P04-12 | Fresh Codex blind QA | TODO |
+
+## P-04 Engineering Notes (Claude)
