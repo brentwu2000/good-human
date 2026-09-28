@@ -20,6 +20,8 @@ enum State {
 	STAGGER,
 	DOWN,
 	RECOVER,      ## the beat after an action, open and off balance
+	SIDESTEP,     ## a quick step round the opponent (P-04)
+	BACKSTEP,     ## stepping back out of range (P-04)
 }
 
 ## Reaction states hold for their own moment before the simulation takes over
@@ -65,6 +67,10 @@ func update(delta: float, fighter: CombatFighter, closing: bool, defeated: bool)
 		state = State.RECOVER
 	elif closing:
 		state = State.APPROACH
+	elif fighter.footwork == CombatFighter.Footwork.BACKSTEP:
+		state = State.BACKSTEP
+	elif fighter.footwork == CombatFighter.Footwork.SIDESTEP:
+		state = State.SIDESTEP
 	else:
 		state = State.CIRCLE
 	intent = 1.0 if state == State.APPROACH else 0.0

@@ -3,6 +3,8 @@ extends RefCounted
 ## Runtime state of one human in a CombatSimulation.
 
 enum Phase { IDLE, WINDUP, ACTIVE, RECOVERY }
+## What their feet are doing while no action has them (P-04).
+enum Footwork { HOLD, APPROACH, CIRCLE, SIDESTEP, BACKSTEP }
 
 var data: FighterData
 ## 0 = player side, 1 = opponent side.
@@ -32,6 +34,13 @@ var distracted_until: float = -1.0
 var exposed_until: float = -1.0
 ## A leash pull moved this fighter out of the way until this time.
 var pulled_until: float = -1.0
+## P-04 footwork. `lateral` is which way round the opponent they prefer
+## (+1 / -1). A step (sidestep, backstep) is a short committed move: it runs
+## for `step_left` seconds at `step_speed` units/s.
+var footwork: Footwork = Footwork.HOLD
+var lateral: float = 1.0
+var step_left: float = 0.0
+var step_speed: float = 0.0
 ## Skill usage count, for tests / debug.
 var uses: Dictionary[StringName, int] = {}
 
@@ -69,6 +78,10 @@ func is_guarding() -> bool:
 
 func is_evading() -> bool:
 	return phase == Phase.ACTIVE and action != null and action.effect == CombatSkillData.Effect.DODGE
+
+
+func is_stepping() -> bool:
+	return step_left > 0.0
 
 
 func cooldown_left(skill: CombatSkillData) -> float:

@@ -126,6 +126,32 @@ func _run() -> void:
 	check(closest >= PENETRATION, "nor through its own owner mid-fight (closest %.2f m)" % closest)
 	check(hp_before == [sim.fighters[0].hp, sim.fighters[1].hp], "contact never deals damage")
 
+	# --- P04-02: the fight moves on the ground, and the fighters never overlap -------
+	# How much a fight turns is the simulation's business (combat_spacing_test);
+	# here the ground has to follow it: the right distance, the line pointing
+	# where the simulation says, and never two bodies overlapping.
+	var fighters_closest := INF
+	var mismatch := 0.0
+	var off_line := 0.0
+	coordinator.time_scale = 1.5
+	for i in 240:
+		await _tree.physics_frame
+		if not coordinator.is_fighting():
+			break
+		var gap := _flat(them.global_position - human.global_position)
+		fighters_closest = minf(fighters_closest, gap.length())
+		mismatch = maxf(mismatch, absf(gap.length() - sim.distance() / CombatCoordinator3D.UNITS_PER_METER))
+		var expected := coordinator._axis * cos(sim.line_angle) + coordinator._side_axis * sin(sim.line_angle)
+		off_line = maxf(off_line, absf(expected.signed_angle_to(gap.normalized(), Vector3.UP)))
+	coordinator.time_scale = 0.0
+	var bodies := 2.0 * DataRegistry.presence.human_radius
+	check(fighters_closest >= bodies, "two fighters never stand inside each other (closest %.2f m, bodies %.2f m)" % [fighters_closest, bodies])
+	check(mismatch < 0.02, "on the ground they are as far apart as the fight says (off by %.3f m)" % mismatch)
+	check(off_line < 0.02, "and the line between them points where the fight says (off by %.3f rad)" % off_line)
+	fighter_at = them.global_position
+	line = _flat(fighter_at - human.global_position)
+	across = line.normalized().cross(Vector3.UP)
+
 	# --- Put inside a body, the dog is pushed back out ----------------------------------
 	# A fighter stepping onto part of the dog, not the dog dropped dead centre.
 	var inside := fighter_at + across * 0.15

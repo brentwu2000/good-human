@@ -41,24 +41,17 @@ const RELEASE_SECONDS: float = 1.4
 const ACKNOWLEDGE_SECONDS: float = 1.9
 ## How long into that beat the hand actually lands.
 const PET_AT: float = 0.75
-## P03-E01/E03: two people in a fight circle each other. The simulation stays
-## one-dimensional and keeps owning distance and every outcome; the line they
-## stand on turns in the world while neither of them is committed to anything.
-## Spacing is the simulation's; the angle is presentation.
-const ORBIT_SPEED: float = 0.42
-## Closer than this share of their reach, a fighter is working for an angle
-## rather than closing the gap.
-const APPROACH_SHARE: float = 1.15
 
 var last_result: CombatSimulation.Result = CombatSimulation.Result.NONE
 ## Active fight or null.
 var engagement: Engagement3D
 
 var _pairs: Array[OpponentPair3D] = []
+## Where the fight began and its starting line; the simulation moves the
+## line from there (P-04 footwork), this only maps it onto the ground.
 var _origin: Vector3
 var _axis: Vector3
-var _orbit: float = 0.0
-var _orbit_direction: float = 1.0
+var _side_axis: Vector3
 var _accumulator: float = 0.0
 var _defeat_left: float = -1.0
 var _defeated_by: String = ""
@@ -137,9 +130,10 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	var gap := Vector3(b.x - a.x, 0, b.z - a.z)
 	_origin = (a + b) / 2.0
 	_axis = gap.normalized() if gap.length() > 0.01 else Vector3.FORWARD
-	_orbit = 0.0
-	_orbit_direction = 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
+	_side_axis = Vector3.UP.cross(_axis)
+	var lateral := 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
 	var sim := CombatSimulation.new(human.fighter, opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
+	sim.set_lateral(lateral)
 	engagement = Engagement3D.new(sim, opponent)
 	_accumulator = 0.0
 	last_result = CombatSimulation.Result.NONE
@@ -226,36 +220,22 @@ func is_owner_down() -> bool:
 	return _defeat_left >= 0.0
 
 
-## Motion states and the slow turn of the line they are fighting on.
+## Motion states from the simulation's footwork. Where they stand is the
+## simulation's too (`_world_position`); nothing here moves anyone.
 func _update_motion(delta: float) -> void:
 	var sim := engagement.simulation
 	var puppets := [human.puppet, engagement.pair.human_puppet]
-	var circling := true
 	for side in 2:
 		var fighter: CombatFighter = sim.fighters[side]
 		var puppet: FighterPuppet3D = puppets[side]
-		var closing := sim.distance() > _reach(fighter) * APPROACH_SHARE
+		var closing := fighter.footwork == CombatFighter.Footwork.APPROACH
 		puppet.motion.update(delta, fighter, closing, fighter.is_defeated())
 		puppet.play_motion(delta)
-		if puppet.motion.is_committed() or closing:
-			circling = false
-	# The line only turns while both of them are free to move their feet.
-	if circling:
-		_orbit += ORBIT_SPEED * _orbit_direction * delta * time_scale
-		_axis = _axis.rotated(Vector3.UP, ORBIT_SPEED * _orbit_direction * delta * time_scale)
-
-
-## The shortest range this fighter can attack from, in simulation units.
-func _reach(fighter: CombatFighter) -> float:
-	var reach := INF
-	for skill in fighter.data.skills:
-		if skill != null and skill.effect == CombatSkillData.Effect.ATTACK:
-			reach = minf(reach, skill.preferred_range)
-	return reach if reach < INF else 100.0
 
 
 func _world_position(side: int) -> Vector3:
-	var p := _origin + _axis * (engagement.simulation.fighters[side].position / UNITS_PER_METER)
+	var ground := engagement.simulation.world_position(side) / UNITS_PER_METER
+	var p := _origin + _axis * ground.x + _side_axis * ground.y
 	var y := human.global_position.y if side == CombatSimulation.PLAYER else engagement.pair.human_global_position().y
 	return Vector3(p.x, y, p.z)
 

@@ -407,7 +407,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | ID | Task | Status |
 |---|---|---|
 | P04-01 | Physical presence baseline | REVIEW |
-| P04-02 | Combat spacing/footwork | TODO |
+| P04-02 | Combat spacing/footwork | REVIEW |
 | P04-03 | Jab phases/contact | TODO |
 | P04-04 | Heavy Hook | TODO |
 | P04-05 | Kick | TODO |
@@ -425,4 +425,11 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - Ownership: the combat sync still places both fighters directly, so in a fight the dog is the one that gives way. A dog left partly inside a fighter is pushed back out by the physics. Exactly dead centre it is not (no direction to push), which belongs to P04-08 anti-stuck.
 - Not in this task: human↔human separation and the opponent's knockback against the world (P04-02 / P04-07). A fighter who is down still has a standing body where they fell (P04-07 reactions).
 - `physical_presence_test` (21 checks) drives the dog through the real Input Map into each body, in and out of a fight. `combat_motion_3d_test` pushed the dog forward from a metre off the fight to check the stick direction and could now end against a fighter depending on the random orbit; it steps back first.
+- P04-02 (owner chose option A, 2026-09-28: keep the one-dimensional rules, let the simulation own an angle). Footwork now belongs to the simulation instead of being a camera-side orbit. Between actions nobody stands still: too far, they close; too close, they backstep out; in their band (`ideal_min`–`ideal_max`, 0.58–0.68 m) they circle, sometimes sidestep and sometimes switch direction; and after an attack they sometimes step back to reset the distance. A fighter circling moves round the other one, who stays exactly where they are: the fight's line turns about them (`line_angle`, `origin`) and the distance does not change, so every rule and outcome still comes from the distance. All of it is data (`data/combat/spacing.tres`, `SpacingData` per the tuning schema); approach speed is a scale on each fighter's own speed stat, so training still shows.
+- Human↔human: the closest two fighters could stand was 0.30 m centre to centre, against 0.48 m for two bodies, so any shove (dodge, leash pull) could put one inside the other, which is a Critical Fail under P-04. `hard_min_separation` is now 0.52 m.
+- Balance moved little (200 fights each, player vs jogger/delivery/gym): wins 163/152/113 → 169/157/122, fights about 0.2 s longer, Old Master still 0/200. All `combat_sim_test` balance bands hold unchanged.
+- Presentation reads the simulation's footwork (`CombatMotion3D` gains SIDESTEP and BACKSTEP; APPROACH now means the simulation is actually closing). The fake side-to-side sway in CIRCLE is gone, because they really move now. The run RNG draw that used to choose the camera orbit direction now chooses which way the fighters start circling, so run seeds and loot are unchanged.
+- Seen while testing, for P04-03..05: fighters approaching from range both open with a kick at the edge of its 1.0 m reach, so the first exchange is two simultaneous kicks from a standstill. That is the attack layer (reach and phases), not footwork, but it reads as "stationary trading" at the start of a fight.
+- Not handled yet: circling does not know about walls, benches or the dog (P04-08/P04-09); the dog still gives way when a fighter steps onto it.
+- `combat_spacing_test` (20 checks, 36 simulated fights) covers the band, never standing inside each other, every footwork kind happening, under 5 % of free time spent standing still, the line turning, resets after exchanges, and determinism. `physical_presence_test` now also checks, in the 3D walk, that the fighters' bodies never overlap and that the ground matches the simulation's distance and line.
 

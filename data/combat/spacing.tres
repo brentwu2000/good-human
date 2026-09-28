@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpacingData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/spacing_data.gd" id="1_spacing"]
+
+[resource]
+script = ExtResource("1_spacing")
+ideal_min = 58.0
+ideal_max = 68.0
+hard_min_separation = 52.0
+approach_speed = 1.0
+circle_speed = 30.0
+backstep_distance = 30.0
+backstep_seconds = 0.3
+sidestep_distance = 35.0
+sidestep_seconds = 0.25
+sidestep_chance = 0.25
+lateral_flip_chance = 0.15
+reset_chance = 0.4

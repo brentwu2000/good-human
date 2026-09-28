@@ -4,6 +4,11 @@ extends RefCounted
 ## can be stepped headless. In the Run World the line runs between the two
 ## humans' positions (see Engagement); presentation listens to `combat_event`.
 ## Each fighter picks skills with a condition + priority evaluator.
+##
+## P-04: the line itself moves. A fighter circling or sidestepping moves round
+## the other one, which turns the line (`line_angle`) about the one standing
+## still and shifts its `origin`; distance and every outcome still come from
+## positions along the line, so the rules stay one-dimensional.
 
 ## kind: skill_started, hit, blocked, dodged, missed, staggered, defeated,
 ## distracted, opening (a hit on a distracted fighter), pulled, stumbled.
@@ -42,6 +47,11 @@ const PULL_RECOVERY: float = 1.5
 var fighters: Array[CombatFighter] = []
 var result: Result = Result.NONE
 var time: float = 0.0
+var spacing: SpacingData
+## The line the fight is on: its direction (radians, 0 = the starting line)
+## and where its zero point has moved to (units, from where the fight began).
+var line_angle: float = 0.0
+var origin: Vector2 = Vector2.ZERO
 
 var _first_to_decide: int = 0
 
@@ -51,6 +61,7 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 func _init(player: FighterData, opponent: FighterData, rng_seed: int, balance: GameBalance = null, start_distance: float = START_DISTANCE) -> void:
 	_balance = balance if balance != null else DataRegistry.balance
+	spacing = DataRegistry.spacing if DataRegistry.spacing != null else SpacingData.new()
 	_rng.seed = rng_seed
 	fighters = [CombatFighter.new(player, PLAYER, _balance), CombatFighter.new(opponent, OPPONENT, _balance)]
 	fighters[PLAYER].position = -start_distance / 2.0
@@ -63,6 +74,18 @@ func is_finished() -> bool:
 
 func distance() -> float:
 	return absf(fighters[OPPONENT].position - fighters[PLAYER].position)
+
+
+## Where `side` stands on the ground, in units from where the fight began.
+func world_position(side: int) -> Vector2:
+	return origin + _line_direction() * fighters[side].position
+
+
+## Which way both fighters start circling (+1 / -1). The same for both, so the
+## line visibly turns rather than two people shuffling against each other.
+func set_lateral(value: float) -> void:
+	for fighter in fighters:
+		fighter.lateral = signf(value) if value != 0.0 else 1.0
 
 
 func step(delta: float) -> void:
@@ -219,17 +242,82 @@ func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
 
 func _decide(fighter: CombatFighter, delta: float) -> void:
 	if time < fighter.distracted_until:
+		# Looking at the dog, not moving their feet.
+		fighter.footwork = CombatFighter.Footwork.HOLD
+		fighter.step_left = 0.0
 		return
 	var skill := choose_skill(fighter)
+	# A step is finished before an attack starts; a defence can still cut in.
+	if skill != null and fighter.is_stepping() and skill.effect == CombatSkillData.Effect.ATTACK:
+		skill = null
+	# Hesitation only delays attacks; it never makes the AI scripted.
+	if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and _rng.randf() < _balance.hesitation_chance:
+		fighter.ready_at = time + fighter.action_interval * 0.5
+		skill = null
 	if skill != null:
-		# Hesitation only delays attacks; it never makes the AI scripted.
-		if skill.effect == CombatSkillData.Effect.ATTACK and _rng.randf() < _balance.hesitation_chance:
-			fighter.ready_at = time + fighter.action_interval * 0.5
-			return
+		fighter.step_left = 0.0
+		fighter.footwork = CombatFighter.Footwork.HOLD
 		_start(fighter, skill)
 		return
-	if distance() > _min_attack_range(fighter):
-		_move(fighter, fighter.move_speed * delta * _toward_opponent(fighter))
+	_footwork(fighter, delta)
+
+
+## P-04: between actions nobody stands still trading turns. Too far, they
+## close; too close, they step back out; in their range they circle, now and
+## then sidestep, and sometimes change which way they are going round.
+func _footwork(fighter: CombatFighter, delta: float) -> void:
+	if fighter.is_stepping():
+		_continue_step(fighter, delta)
+		return
+	var d := distance()
+	if d > minf(_min_attack_range(fighter), spacing.ideal_max):
+		fighter.footwork = CombatFighter.Footwork.APPROACH
+		_move(fighter, fighter.move_speed * spacing.approach_speed * delta * _toward_opponent(fighter))
+		return
+	if d < spacing.ideal_min:
+		_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
+		_continue_step(fighter, delta)
+		return
+	if _rng.randf() < spacing.lateral_flip_chance * delta:
+		fighter.lateral = -fighter.lateral
+	if _rng.randf() < spacing.sidestep_chance * delta:
+		_begin_step(fighter, CombatFighter.Footwork.SIDESTEP, spacing.sidestep_distance, spacing.sidestep_seconds)
+		_continue_step(fighter, delta)
+		return
+	fighter.footwork = CombatFighter.Footwork.CIRCLE
+	_circle(fighter, spacing.circle_speed * delta * fighter.lateral)
+
+
+func _begin_step(fighter: CombatFighter, kind: CombatFighter.Footwork, distance_units: float, seconds: float) -> void:
+	fighter.footwork = kind
+	fighter.step_left = maxf(seconds, 0.01)
+	fighter.step_speed = distance_units / fighter.step_left
+
+
+func _continue_step(fighter: CombatFighter, delta: float) -> void:
+	var amount := fighter.step_speed * minf(delta, fighter.step_left)
+	if fighter.footwork == CombatFighter.Footwork.BACKSTEP:
+		_move(fighter, -amount * _toward_opponent(fighter))
+	else:
+		_circle(fighter, amount * fighter.lateral)
+	fighter.step_left -= delta
+	if fighter.step_left <= 0.0:
+		fighter.step_left = 0.0
+		fighter.footwork = CombatFighter.Footwork.HOLD
+
+
+## Moves `fighter` `amount` units sideways round the other one, who stays
+## exactly where they are. The distance between them does not change.
+func _circle(fighter: CombatFighter, amount: float) -> void:
+	var pivot_side := _other(fighter).side
+	var pivot := world_position(pivot_side)
+	line_angle += amount / maxf(distance(), 1.0)
+	origin = pivot - _line_direction() * fighters[pivot_side].position
+	origin = origin.limit_length(MAX_DRIFT)
+
+
+func _line_direction() -> Vector2:
+	return Vector2(cos(line_angle), sin(line_angle))
 
 
 func _min_attack_range(fighter: CombatFighter) -> float:
@@ -292,6 +380,10 @@ func _phase_done(fighter: CombatFighter) -> void:
 			fighter.action = null
 			if skill != null and skill.effect == CombatSkillData.Effect.ATTACK:
 				fighter.ready_at = time + fighter.action_interval
+				# Spacing reset: sometimes they come off the exchange rather
+				# than staying on top of the other person.
+				if _rng.randf() < spacing.reset_chance:
+					_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
 
 
 func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
@@ -344,11 +436,11 @@ func _tick_cooldowns(fighter: CombatFighter, delta: float) -> void:
 func _move(fighter: CombatFighter, amount: float) -> void:
 	var target := _other(fighter)
 	var next := clampf(fighter.position + amount, -MAX_DRIFT, MAX_DRIFT)
-	# Never walk through the opponent.
+	# Never walk into the opponent: two bodies need room (P-04).
 	if fighter.side == PLAYER:
-		next = minf(next, target.position - 30.0)
+		next = minf(next, target.position - spacing.hard_min_separation)
 	else:
-		next = maxf(next, target.position + 30.0)
+		next = maxf(next, target.position + spacing.hard_min_separation)
 	fighter.position = next
 
 

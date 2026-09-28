@@ -97,7 +97,8 @@ func set_guard(active: bool) -> void:
 func play_motion(delta: float) -> void:
 	if _body == null or _down or _pose_tween != null and _pose_tween.is_running():
 		return
-	_footwork += delta * (7.0 if motion.state == CombatMotion3D.State.APPROACH else 4.2)
+	var quick := motion.state in [CombatMotion3D.State.APPROACH, CombatMotion3D.State.SIDESTEP, CombatMotion3D.State.BACKSTEP]
+	_footwork += delta * (7.0 if quick else 4.2)
 	var bob := 0.0
 	var lean := 0.0
 	var guard := 0.06 if _guarding else 0.0
@@ -110,10 +111,18 @@ func play_motion(delta: float) -> void:
 			bob = absf(sin(_footwork)) * 0.035
 			lean = 0.10
 		CombatMotion3D.State.CIRCLE:
-			# Side-to-side footwork while they look for an angle.
+			# Stepping round the other person, looking for an angle. The
+			# simulation moves them; this is just the feet.
 			bob = absf(sin(_footwork)) * 0.022
 			lean = 0.05
-			_body.position.x = sin(_footwork * 0.5) * 0.06
+		CombatMotion3D.State.SIDESTEP:
+			# A quick step off the line, weight dropped into it.
+			bob = absf(sin(_footwork)) * 0.03 - 0.03
+			lean = 0.07
+		CombatMotion3D.State.BACKSTEP:
+			# Weight back, getting out of range.
+			bob = absf(sin(_footwork)) * 0.03
+			lean = -0.1
 		CombatMotion3D.State.RECOVER:
 			# Off balance and open — the moment a dog's bark is worth most.
 			bob = sin(_footwork * 0.6) * 0.01
@@ -123,8 +132,7 @@ func play_motion(delta: float) -> void:
 	_body.position.y = bob
 	_body.rotation.x = lean
 	_body.position.z = guard
-	if motion.state != CombatMotion3D.State.CIRCLE:
-		_body.position.x = move_toward(_body.position.x, 0.0, delta * 0.4)
+	_body.position.x = move_toward(_body.position.x, 0.0, delta * 0.4)
 
 
 ## The telegraph: the limb that is about to strike draws back, and the body
