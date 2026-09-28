@@ -34,6 +34,8 @@ var cooldowns: Dictionary[StringName, float] = {}
 var distracted_until: float = -1.0
 ## Hits against this fighter before this time exploit an opening (bark).
 var exposed_until: float = -1.0
+## Last simulation time this fighter was moving out of the way in a dodge.
+var last_evaded_at: float = -99.0
 ## A leash pull moved this fighter out of the way until this time.
 var pulled_until: float = -1.0
 ## P-04 footwork. `lateral` is which way round the opponent they prefer

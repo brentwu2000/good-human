@@ -90,7 +90,18 @@ func set_hp_ratio(ratio: float) -> void:
 
 
 func set_guard(active: bool) -> void:
+	# P04-06: the guard comes down when the block ends, not whenever the
+	# next action happens to reset the pose.
+	var lowered := _guarding and not active
 	_guarding = active
+	if not lowered or _down:
+		return
+	var raised := _arms.filter(func(arm: Node3D) -> bool: return arm != null and arm.rotation.x < -0.8)
+	if raised.is_empty():
+		return
+	var drop := create_tween().set_parallel()
+	for arm: Node3D in raised:
+		drop.tween_property(arm, "rotation:x", 0.0, 0.12).set_trans(Tween.TRANS_SINE)
 
 
 ## Drives the body from its motion state. Called every frame by the coordinator.
@@ -249,7 +260,19 @@ func play_hurt(blocked: bool, weight: float = 0.5, twist: float = 0.0) -> void:
 		_log("擋住！", Color(0.6, 0.85, 1.0))
 	var amount := lerpf(0.14, 0.45, clampf(weight, 0.0, 1.0))
 	var tween := _new_tween()
-	tween.tween_property(_body, "position:z", amount, 0.05)
+	if blocked:
+		# P04-06: the guard stays up through the blow. The forearms take it
+		# and are knocked back towards the face, then set again.
+		for arm in _arms:
+			if arm != null:
+				arm.rotation.x = -1.5
+				tween.parallel().tween_property(arm, "rotation:x", -1.15, 0.05)
+		tween.parallel().tween_property(_body, "position:z", amount, 0.05)
+		for arm in _arms:
+			if arm != null:
+				tween.parallel().tween_property(arm, "rotation:x", -1.5, lerpf(0.16, 0.3, weight)).set_delay(0.05)
+	else:
+		tween.tween_property(_body, "position:z", amount, 0.05)
 	tween.tween_property(_body, "position:z", 0.0, lerpf(0.16, 0.3, weight))
 	if weight >= 0.75 and not blocked:
 		tween.parallel().tween_property(_body, "rotation:x", -0.22, 0.06)
@@ -336,14 +359,20 @@ func is_distracted() -> bool:
 	return _look_away_left > 0.0
 
 
-## A dodge is a body moving out of the way, not a word on the screen.
+## A dodge is a body moving out of the way, not a word on the screen. The
+## simulation has already moved them clear (P04-06); this is the body
+## snapping back and away from the blow as it goes past.
 func play_evade() -> void:
 	_log("閃過！", Color(0.7, 1.0, 0.7))
 	var tween := _new_tween()
-	tween.tween_property(_body, "position:x", 0.32, 0.09).set_trans(Tween.TRANS_QUAD)
-	tween.parallel().tween_property(_body, "rotation:z", 0.22, 0.09)
-	tween.tween_property(_body, "position:x", 0.0, 0.2)
-	tween.parallel().tween_property(_body, "rotation:z", 0.0, 0.2)
+	tween.tween_property(_body, "rotation:x", -0.28, 0.08).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(_body, "rotation:z", 0.18, 0.08)
+	if _head != null:
+		tween.parallel().tween_property(_head, "rotation:x", -0.2, 0.08)
+	tween.tween_property(_body, "rotation:x", 0.0, 0.24)
+	tween.parallel().tween_property(_body, "rotation:z", 0.0, 0.24)
+	if _head != null:
+		tween.parallel().tween_property(_head, "rotation:x", 0.0, 0.24)
 
 
 ## A swing that hits nothing still travels, and overreaches.

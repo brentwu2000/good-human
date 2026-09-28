@@ -46,6 +46,8 @@ const REACTION_WINDOW: float = 0.3
 const PULL_RECOVERY: float = 1.5
 ## Share of an attack's displacement that still moves someone who blocked it.
 const BLOCKED_DISPLACEMENT: float = 0.4
+## A whiff within this long of the target dodging is their dodge's doing.
+const DODGE_CREDIT: float = 0.5
 
 var fighters: Array[CombatFighter] = []
 var result: Result = Result.NONE
@@ -389,6 +391,7 @@ func _advance(fighter: CombatFighter, delta: float) -> void:
 	if fighter.is_evading():
 		var speed := fighter.action.reposition_distance / maxf(fighter.action.active_time, 0.01)
 		_move(fighter, -speed * delta * _toward_opponent(fighter))
+		fighter.last_evaded_at = time
 	fighter.phase_time_left -= delta
 	if fighter.phase_time_left <= 0.0:
 		_phase_done(fighter)
@@ -414,10 +417,11 @@ func _phase_done(fighter: CombatFighter) -> void:
 			if fighter.phase_time_left <= 0.0:
 				_phase_done(fighter)
 		CombatFighter.Phase.CONTACT:
-			# The window closed on nobody: a whiff, and they overreach.
-			var whiffed := not fighter.connected
-			if whiffed:
-				combat_event.emit(&"missed", fighter.side, skill, 0.0)
+			# The window closed on nobody: a whiff, and they overreach. If the
+			# target was getting out of the way, it was their dodge.
+			if not fighter.connected:
+				var dodged := time - _other(fighter).last_evaded_at <= DODGE_CREDIT
+				combat_event.emit(&"dodged" if dodged else &"missed", fighter.side, skill, 0.0)
 			_enter(fighter, CombatFighter.Phase.FOLLOW_THROUGH, skill.follow_through)
 		CombatFighter.Phase.FOLLOW_THROUGH:
 			var whiff := 0.0 if fighter.connected else skill.whiff_recovery
@@ -463,7 +467,11 @@ func _try_contact(attacker: CombatFighter) -> void:
 
 func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 	var target := _other(attacker)
-	if target.is_evading() or time < target.pulled_until:
+	# P04-06: a dodge is not a shield. Someone still in reach when the window
+	# opens is hit however hard they were trying to get away; only moving out
+	# of reach (checked in `_try_contact`) avoids it. The leash is the dog's
+	# and still pulls the owner clear (P04-10 revisits it).
+	if time < target.pulled_until:
 		combat_event.emit(&"dodged", attacker.side, skill, 0.0)
 		return
 	var variance := 1.0 + _rng.randf_range(-_balance.damage_variance, _balance.damage_variance)

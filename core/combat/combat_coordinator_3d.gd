@@ -286,6 +286,7 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amoun
 			_punch_landed(0.35)
 		&"dodged":
 			other.play_evade()
+			actor.play_miss()
 		&"missed":
 			actor.play_miss()
 		&"distracted":

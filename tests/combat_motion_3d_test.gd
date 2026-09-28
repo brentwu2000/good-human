@@ -362,6 +362,31 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	await _physics(30)
 	puppet._reset_pose()
 
+	# P04-06: the guard stays up through a blow, and comes down when it ends.
+	var block: CombatSkillData = preload("res://data/combat/skills/skill_block.tres")
+	var arm_l := Greybox.part(body, "ArmL")
+	puppet.play_windup(block)
+	puppet.set_guard(true)
+	await _physics(10)
+	check(arm.rotation.x < -1.2 and arm_l.rotation.x < -1.2, "a guard puts both forearms up")
+	puppet.play_hurt(true, 0.8)
+	await _physics(2)
+	check(arm.rotation.x < -1.0, "a blocked blow knocks the guard back, it does not drop it (%.2f rad)" % arm.rotation.x)
+	await _physics(25)
+	check(arm.rotation.x < -1.2, "and the guard sets again (%.2f rad)" % arm.rotation.x)
+	puppet.set_guard(false)
+	await _physics(12)
+	check(arm.rotation.x > -0.3, "when the block ends the guard comes down (%.2f rad)" % arm.rotation.x)
+
+	# A dodge's body answer leans away; it does not slide the figure sideways
+	# (the simulation has already moved them for real).
+	puppet.play_evade()
+	await _physics(5)
+	check(absf(puppet._body.position.x) < 0.01, "a dodge does not fake a sideways slide")
+	check(puppet._body.rotation.x < -0.1, "it snaps back from the blow (%.2f rad)" % puppet._body.rotation.x)
+	await _physics(30)
+	puppet._reset_pose()
+
 
 func _wait_until(done: Callable, max_frames: int) -> void:
 	for i in max_frames:

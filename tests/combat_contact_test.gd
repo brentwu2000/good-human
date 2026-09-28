@@ -10,6 +10,7 @@ const JAB: CombatSkillData = preload("res://data/combat/skills/skill_jab.tres")
 const KICK: CombatSkillData = preload("res://data/combat/skills/skill_kick.tres")
 const BLOCK: CombatSkillData = preload("res://data/combat/skills/skill_block.tres")
 const HOOK: CombatSkillData = preload("res://data/combat/skills/skill_heavy_hook.tres")
+const DODGE: CombatSkillData = preload("res://data/combat/skills/skill_dodge.tres")
 const STEP: float = 1.0 / 60.0
 
 
@@ -25,6 +26,7 @@ func _ready() -> void:
 	_test_motion_states()
 	_test_hook()
 	_test_kick()
+	_test_dodge_is_spatial()
 	_test_opening_gets_the_heavy_blow()
 	finish()
 
@@ -285,4 +287,42 @@ func _test_kick() -> void:
 	_start_attack(sim.fighters[CombatSimulation.PLAYER], KICK)
 	_run_until_idle(sim, CombatSimulation.PLAYER)
 	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "it lands from where a jab cannot")
+
+
+## P04-06: a dodge is getting out of reach, not a shield. Too late and still
+## in reach, you are hit however hard you are trying to get away.
+func _test_dodge_is_spatial() -> void:
+	# In time: moving back clears the kick's reach before its window opens.
+	var sim := _duel(60.0)
+	var me := sim.fighters[CombatSimulation.PLAYER]
+	var them := sim.fighters[CombatSimulation.OPPONENT]
+	var log := _log(sim)
+	_start_attack(them, KICK)
+	me.action = DODGE
+	me.phase = CombatFighter.Phase.ACTIVE
+	me.phase_time_left = DODGE.active_time
+	var at_contact := -1.0
+	for i in 120:
+		sim.step(STEP)
+		if at_contact < 0.0 and them.phase == CombatFighter.Phase.CONTACT:
+			at_contact = sim.distance()
+		if them.is_idle():
+			break
+	check(log.any(func(e: Array) -> bool: return e[0] == &"dodged"), "a dodge in time is reported as a dodge")
+	check_eq(me.hp, me.max_hp, "and costs nothing")
+	check(at_contact > KICK.preferred_range + CombatSimulation.REACH_TOLERANCE, "because they were out of reach when the window opened (%.0f)" % at_contact)
+
+	# Too late: still dodging, still in reach when the window opens — hit.
+	sim = _duel(60.0)
+	me = sim.fighters[CombatSimulation.PLAYER]
+	them = sim.fighters[CombatSimulation.OPPONENT]
+	log = _log(sim)
+	_start_attack(them, JAB)
+	them.phase_time_left = 0.02
+	me.action = DODGE
+	me.phase = CombatFighter.Phase.ACTIVE
+	me.phase_time_left = DODGE.active_time
+	_run_until_idle(sim, CombatSimulation.OPPONENT)
+	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "a dodge that has not got them out of reach does not save them")
+	check(me.hp < me.max_hp, "and it hurts")
 
