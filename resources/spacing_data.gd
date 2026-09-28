@@ -10,8 +10,8 @@ extends Resource
 @export var ideal_min: float = 58.0
 @export var ideal_max: float = 68.0
 ## Two people never stand closer than this, centre to centre. It is the width
-## of two bodies (2 × 0.24 m) and a little air.
-@export var hard_min_separation: float = 52.0
+## of two bodies (2 × 0.27 m, the drawn torso) and a little air.
+@export var hard_min_separation: float = 56.0
 ## Scale on the fighter's own move speed when closing the gap.
 @export var approach_speed: float = 1.0
 ## Sideways speed round the opponent while circling (units/s).

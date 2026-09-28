@@ -139,6 +139,7 @@ var _has_look: bool = false
 var context: Context = Context.EXPLORE
 ## 0..1 blend into the dog's eyes, eased separately from the rest of the framing.
 var pov: float = 0.0
+## First-person aim, as a direction from the dog's eye (P04-09). Zero = not yet aimed.
 var _pov_aim: Vector3 = Vector3.ZERO
 var _first_person_view: DogFirstPersonView3D
 ## Control frame for the stick (see header).
@@ -292,25 +293,29 @@ func _aim_point(delta: float, instant: bool) -> Vector3:
 ## P03-E05: CombatCenter — a point between the two humans, biased towards the
 ## owner. The aim follows it with a dead zone and a capped turn rate, so first
 ## person tracks the fight without micro-correcting or whipping around.
+##
+## P04-09: the aim is kept as a direction from the eye, not as a point in the
+## world. Kept as a point, the dog running close past someone swung the view by
+## parallax alone — up to 0.4 rad in a single frame — with nothing capping it.
+## Now only the direction turns, and never faster than the cap, however the dog
+## moves.
 func _tracked_combat_center(delta: float, instant: bool) -> Vector3:
 	var eye := dog.eye_position()
 	var target := combat_center()
-	if instant or _pov_aim == Vector3.ZERO:
-		_pov_aim = target
-		return target
 	var to_target := (target - eye).normalized()
-	var to_current := (_pov_aim - eye).normalized()
-	if to_target.length() < 0.01 or to_current.length() < 0.01:
+	if to_target.length() < 0.01:
 		return target
+	if instant or _pov_aim == Vector3.ZERO:
+		_pov_aim = to_target
+		return target
+	var to_current := _pov_aim
 	var angle := to_current.angle_to(to_target)
-	if angle <= pov_dead_zone:
-		return _pov_aim
-	# Turn towards it, never faster than the cap.
-	var step := minf(angle - pov_dead_zone, pov_turn_rate * delta)
-	var axis := to_current.cross(to_target)
-	var direction := to_target if axis.length() < 0.0001 else to_current.rotated(axis.normalized(), step)
-	_pov_aim = eye + direction * eye.distance_to(target)
-	return _pov_aim
+	if angle > pov_dead_zone:
+		# Turn towards it, never faster than the cap.
+		var step := minf(angle - pov_dead_zone, pov_turn_rate * delta)
+		var axis := to_current.cross(to_target)
+		_pov_aim = to_target if axis.length() < 0.0001 else to_current.rotated(axis.normalized(), step).normalized()
+	return eye + _pov_aim * maxf(eye.distance_to(target), 0.5)
 
 
 ## The point the fight is happening at: between the two humans, weighted towards

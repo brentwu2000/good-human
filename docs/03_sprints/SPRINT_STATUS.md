@@ -414,7 +414,7 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 | P04-06 | Block/Dodge | REVIEW |
 | P04-07 | Hit reactions/impact | REVIEW |
 | P04-08 | Anti-stuck/sliding | REVIEW |
-| P04-09 | Dog POV presence test | TODO |
+| P04-09 | Dog POV presence test | REVIEW |
 | P04-10 | Bark/Pull integration | TODO |
 | P04-11 | No-HUD readability | TODO |
 | P04-12 | Fresh Codex blind QA | TODO |
@@ -460,6 +460,10 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - The dog is never left inside a body. Physics pushes it out of a partial overlap but has nothing to push by when it sits dead centre; there it now steps out itself (away from the body, or backwards). It only does this for a deep overlap (under 0.15 m centre to centre): a first version that also acted on mere contact shoved the dog away from anyone it leaned on, and the extraction test caught it.
 - The dog cannot jam the fight (a gate Critical Fail): fighters never stop for it, it is moved aside instead (ADR-016), and it can never end up stuck inside one.
 - Tests: `combat_spacing_test` runs 24 fights with a wall behind the player or a post between them (nobody ever stands in it, every fight still ends in a winner) and checks that a fighter who starts inside something is not pinned; `physical_presence_test` puts the dog dead centre in a fighter and checks the Run World says no where a wall is.
+- P04-09: a new test, `dog_pov_presence_test`, plays physical presence the way the player sees it: from inside the dog's head during a live fight, steering through the real Input Map round the fight one way, straight in, back out and round the other way (about 34 m and more than two laps in 7 s). It checks that the first-person view holds, the dog moves freely and can circle, the lens never enters a person, the dog never stays inside one, and the view never snaps.
+- It found a real snap. The first-person aim was kept as a point in the world, so when the dog ran close past someone the view swung by parallax alone, up to 0.41 rad (23°) in a single frame, which the existing turn cap never saw. The aim is now a direction from the eye, and only that direction turns, never faster than the cap, however the dog moves: the sharpest turn measured is now 0.05 rad per frame (the cap plus a little hit shake).
+- It also showed that the collision body was narrower than the drawn one: the torso is drawn 0.27 m wide and the body was 0.24, so two fighters at their closest (0.52 m) visibly overlapped by about 2 cm. The body now matches the widest drawn part (0.27 m) and fighters never stand closer than 0.56 m. Balance unchanged (130/131/103). The lens stays at least 0.39 m from anyone's centre, outside every drawn part at the dog's eye height.
+- Also found in P04-09, by the extraction test failing about one run in six: a dog (or owner) standing on a person or another dog took that body as its floor, a moving platform, so when the body was placed somewhere new (fighters and opponent dogs are positioned directly) its jump was handed on as velocity and flung the dog up to 23 m across the map. Only the world is ground now (`platform_floor_layers`, no platform walls) for both the dog and the owner. `physical_presence_test` stands the dog on their dog and moves the pair 5 m: without the fix the dog is carried 3.6 m, with it it stays put.
 
 ## Sprint 05 — GREED / TERRITORY EXECUTION (Update 008)
 Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION.md`; systems `docs/04_systems/GREED_TERRITORY_SYSTEM.md`; data `docs/05_data/SPRINT05_DATA.md`; gate `docs/07_qa/SPRINT05_GREED_TERRITORY_GATE.md`; ADR-017 (extraction creates choice), ADR-018 (territory requires return). P-04 stays the combat baseline: Sprint 05 consumes it and does not redesign combat.

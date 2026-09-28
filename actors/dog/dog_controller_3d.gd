@@ -53,6 +53,12 @@ func _ready() -> void:
 	# ADR-016: the dog is blocked by people and other dogs as well as the
 	# world, and slides round them the way it slides along a wall.
 	collision_mask = Greybox.WORLD_LAYER | Greybox.ACTOR_LAYER
+	# Only the world is ground. Standing on a person or a dog made that body a
+	# moving platform, and when it was placed somewhere new (fighters and
+	# opponent dogs are positioned directly) its jump was handed on as
+	# velocity and flung this body across the map (P04-09).
+	platform_floor_layers = Greybox.WORLD_LAYER
+	platform_wall_layers = 0
 	var shape := CollisionShape3D.new()
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = 0.25

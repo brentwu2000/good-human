@@ -196,6 +196,21 @@ func _run() -> void:
 	coordinator.debug_force_result(CombatSimulation.Result.DISENGAGED)
 	coordinator.time_scale = 1.0
 	await _physics(3)
+
+	# P04-09: a body is never a moving platform. The dog left standing on top
+	# of their dog must not be carried off when that dog is placed somewhere
+	# new (it used to be flung across the map).
+	await _wait_seconds(3.0)
+	var carrier := pair._dog
+	var on_top := carrier.global_position + Vector3(0, 0.75, 0)
+	dog.global_position = on_top
+	dog.velocity = Vector3.ZERO
+	await _physics(20)
+	var before := dog.global_position
+	pair.set_human_global_position(pair.human_global_position() + Vector3(5.0, 0, 0))
+	await _physics(6)
+	var moved := _flat(dog.global_position - before).length()
+	check(moved < 1.5, "moving someone the dog stands on does not fling the dog (%.2f m)" % moved)
 	finish()
 
 

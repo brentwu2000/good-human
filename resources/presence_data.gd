@@ -4,8 +4,10 @@ extends Resource
 ## PresenceData). Body shapes are deliberately no wider than the bodies drawn:
 ## an oversized invisible capsule reads as a force field, not a person.
 
-## A standing human, before the fighter's own body_scale.
-@export var human_radius: float = 0.24
+## A standing human, before the fighter's own body_scale. As wide as the
+## widest drawn part (the torso, 0.27 m), so two bodies at their closest
+## never visibly overlap (P04-09).
+@export var human_radius: float = 0.27
 @export var human_height: float = 1.72
 ## A greybox dog lying along its own facing, before the breed's size.
 @export var dog_radius: float = 0.2
