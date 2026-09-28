@@ -8,10 +8,10 @@ Codex owns the art pipeline and later performs independent QA. Do not replace fi
 ## Project
 - Engine: Godot 4.x
 - Language: GDScript
-- Platform: mobile-first 2D
+- Platform: mobile-first 3D, dog-height camera (ADR-010 in `docs/99_notes/DECISIONS.md`). The Sprint 01–03 2D scenes are still in the repo.
 - Player identity: the dog
 - Current phase: MVP
-- Current sprint: `docs/03_sprints/SPRINT_04_DOG_AGENCY.md` (in the 3D walk)
+- Current sprint: `docs/03_sprints/SPRINT_04_DOG_AGENCY.md` (in the 3D walk); its active blocker is P-03, `docs/03_sprints/SPRINT_04_P03_STREET_BRAWL.md`. `SPRINT_STATUS.md` is authoritative.
 
 ## Read Order
 Before coding:

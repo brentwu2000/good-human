@@ -74,11 +74,12 @@ Work the loop — inspect, change, screenshot, evaluate — rather than emitting
 wall of Blender Python and calling it done. Save a `.blend` before anything
 destructive.
 
-Use it for what the code-built primitives cannot do. The characters are
-currently assembled from boxes and capsules by `Greybox`/`HumanModular3D`, and
-gameplay now poses them through named joints (`Hips`, `Torso`, `Head`, `ArmL`,
-`ArmR`, `LegL`, `LegR` — see `Greybox.part()`). Anything exported to replace
-them has to keep those joint names reachable, or the combat animation stops
+Use it for what the code-built primitives cannot do. The dog is an imported
+model, `assets/characters/dog/models/shiba_01/shiba_01.glb`. The human is still
+assembled from boxes and capsules by `HumanModular3D`, and gameplay poses it
+through named joints (`Hips`, `Torso`, `Head`, `ArmL`, `ArmR`, `LegL`, `LegR` —
+see `Greybox.part()`). A model exported to replace the human has to keep those
+joint names reachable, or the combat animation stops
 working. Record any imported asset in `ASSET_LICENSES.md` as usual, and keep
 `.glb` output under the normal `assets/` folders.
 
@@ -124,7 +125,7 @@ Also do not open (they contain implementation notes): `CLAUDE.md`, `docs/03_spri
 
 Read only:
 1. `docs/07_qa/QA_RULES.md`
-2. current `QA_BRIEF` (Sprint 01: `docs/07_qa/SPRINT_01_QA_BRIEF.md`)
+2. the QA brief for the build under test, which the owner names (e.g. `docs/07_qa/SPRINT_04_QA_BRIEF.md`, `docs/07_qa/P_03_STREET_BRAWL_QA.md`)
 
 Phase 1: exploratory blind test.
 Phase 2: acceptance/golden-path test.

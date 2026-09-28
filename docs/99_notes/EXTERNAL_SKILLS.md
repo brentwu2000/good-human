@@ -9,7 +9,7 @@ External skills are generic Godot 4.x references only; they never authorize scop
 | Source | License | Content |
 |---|---|---|
 | [Aetik-yue/GodoMaster](https://github.com/Aetik-yue/GodoMaster) | MIT | `godomaster` (copied from pet-survival) |
-| [thedivergentai/gd-agentic-skills](https://github.com/thedivergentai/gd-agentic-skills) @ `4c4d0ff` | LGPL-3.0 (`.claude/skills/LICENSE-gd-agentic-skills.txt`) | 24 of 99 skills |
+| [thedivergentai/gd-agentic-skills](https://github.com/thedivergentai/gd-agentic-skills) @ `4c4d0ff` | LGPL-3.0 (`.claude/skills/LICENSE-gd-agentic-skills.txt`) | 22 of 99 skills (the 2D-only `godot-2d-physics` and `godot-characterbody-2d` were removed: production is 3D) |
 
 ## Sprint 01 mapping
 | Skill | Tasks |
@@ -18,9 +18,9 @@ External skills are generic Godot 4.x references only; they never authorize scop
 | `godot-autoload-architecture` | P0-002, P0-003 |
 | `godot-save-load-systems` | P0-003, P0-016 |
 | `godot-scene-management` | Boot → Home → RunMap → Result |
-| `godot-characterbody-2d`, `godot-camera-systems` | P0-004 |
+| `godot-camera-systems` | P0-004 |
 | `godot-input-handling`, `godot-platform-mobile` | P0-004, P0-005 |
-| `godot-2d-physics`, `godot-composition` | P0-007 (InteractionDetector / Interactable) |
+| `godot-composition` | P0-007 (InteractionDetector / Interactable) |
 | `godot-resource-data-patterns` | P0-008, P0-010 |
 | `godot-inventory-system` | P0-009, P0-012, P0-016 |
 | `godot-signal-architecture` | RunManager / HUD communication |
@@ -28,12 +28,12 @@ External skills are generic Godot 4.x references only; they never authorize scop
 | `godot-export-builds`, `godot-platform-mobile` | P0-019 Android |
 | `godot-testing-patterns` | P0-020, Golden Path (GdUnit4-based; not installed in project) |
 
-## Later sprints (installed, do not use yet)
-`godot-combat-system`, `godot-ability-system`, `godot-rpg-stats`, `godot-state-machine-advanced` (Sprint 02–04).
+## Combat and progression
+`godot-combat-system`, `godot-ability-system`, `godot-rpg-stats`, `godot-state-machine-advanced`: use within the current sprint's scope.
 `godot-navigation-pathfinding`, `godot-platform-web`, `godot-performance-optimization`: low relevance now.
 
 ## Not installed (add when needed)
-`godot-tilemap-mastery` (if greybox moves to TileMapLayer), `godot-debugging-profiling`, `godot-2d-animation`, `godot-procedural-generation` (ADR-003: do not generate the city).
+`godot-debugging-profiling`, `godot-procedural-generation` (ADR-003: do not generate the city).
 
 Add more:
 ```bash

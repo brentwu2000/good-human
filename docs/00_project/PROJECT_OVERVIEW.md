@@ -11,7 +11,7 @@ Home → Walk → Search → Loot → Dog behavior → Human growth → Encounte
 ## Platform / Format
 - Mobile first
 - Single-hand-friendly
-- 2D
+- 3D, dog-height camera (ADR-010)
 - Modern town/neighborhood
 - Single-player first
 - Small indie-team scope
