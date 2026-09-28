@@ -138,7 +138,12 @@ func _test_intervention_is_visible(map: RunMap3D, coordinator: CombatCoordinator
 	var ours := human.puppet
 
 	# A bark turns the opponent's head away from the fight, towards the dog.
-	dog.global_position = pair.human_global_position() + Vector3(2.5, 0.1, 0.0)
+	# Beside the fight, square to the line between them: the line turns as they
+	# circle (P-04), so a fixed offset can land where they already face.
+	var to_owner := human.global_position - pair.human_global_position()
+	to_owner.y = 0.0
+	var beside := to_owner.normalized().cross(Vector3.UP)
+	dog.global_position = pair.human_global_position() + beside * 2.5 + Vector3(0, 0.1, 0)
 	await _physics(4)
 	check(not theirs.is_distracted(), "they are watching the person they are fighting")
 	var facing_before := theirs.rotation.y
