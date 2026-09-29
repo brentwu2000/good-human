@@ -25,6 +25,10 @@ const HESITATE_SECONDS: float = 0.35
 var data: FighterData
 
 var _body: Node3D
+## Codex's skeletal model (P04HumanVisual) plays its authored Walk / Idle /
+## Down clips outside the fight's procedural choreography; this is the one
+## playing, or empty while the choreography drives the joints.
+var _ambient_clip: String = ""
 var _hp_label: Label3D
 ## The fight wants the health bar shown; it only is with fight text on.
 var _hp_wanted: bool = false
@@ -138,6 +142,30 @@ func set_guard(active: bool) -> void:
 	var drop := create_tween().set_parallel()
 	for arm: Node3D in raised:
 		drop.tween_property(arm, "rotation:x", 0.0, 0.12).set_trans(Tween.TRANS_SINE)
+
+
+## Outside a fight: Codex's model walks or stands with its authored clips.
+## Anything the body is already doing (a bump, the win beat) finishes first.
+func set_ambient(moving: bool) -> void:
+	var skeletal := _body as P04HumanVisual
+	if skeletal == null or _down:
+		return
+	if _pose_tween != null and _pose_tween.is_running():
+		return
+	var clip := "Walk" if moving else "Idle"
+	if _ambient_clip == clip:
+		return
+	_ambient_clip = clip
+	skeletal.play_clip(clip)
+
+
+## In a fight the P-04 choreography drives the joints, through Codex's
+## adapter on the skeletal model.
+func set_fighting() -> void:
+	_ambient_clip = ""
+	var skeletal := _body as P04HumanVisual
+	if skeletal != null:
+		skeletal.use_legacy_controls()
 
 
 ## Drives the body from its motion state. Called every frame by the coordinator.
@@ -488,6 +516,10 @@ func play_stagger() -> void:
 ## like a board.
 func play_down() -> void:
 	_down = true
+	# The adapter maps joint rotations only, so the fall (which drops the hips)
+	# is Codex's authored Down clip on the skeletal model.
+	if _play_down_clip():
+		return
 	var tween := _new_tween()
 	for leg in _legs:
 		if leg != null:
@@ -519,6 +551,8 @@ func play_acknowledge(towards: Vector3) -> void:
 	_look_away_left = 2.2
 	if _body == null or _down:
 		return
+	# The crouch and the reach are the choreography's, not a clip.
+	set_fighting()
 	# The fight is over, so nothing else turns them any more: they turn round
 	# to the dog themselves, whichever side of them it ended up on.
 	var to_dog := towards - global_position
@@ -550,15 +584,32 @@ func set_beaten(beaten: bool) -> void:
 	_down = beaten
 	if _pose_tween != null:
 		_pose_tween.kill()
+	if beaten and _play_down_clip():
+		return
 	_body.rotation.x = -PI / 2.0 if beaten else 0.0
 	_body.position.y = 0.2 if beaten else 0.0
+	if not beaten:
+		set_fighting()
 
 
 func revive() -> void:
 	_down = false
 	if _pose_tween != null:
 		_pose_tween.kill()
+	set_fighting()
 	_reset_pose()
+
+
+## Plays Codex's Down clip and holds its last frame; false for the greybox.
+func _play_down_clip() -> bool:
+	var skeletal := _body as P04HumanVisual
+	if skeletal == null:
+		return false
+	if _pose_tween != null:
+		_pose_tween.kill()
+	_ambient_clip = "Down"
+	skeletal.play_clip("Down", false)
+	return true
 
 
 ## An automatic note about this fighter's own mechanics: shown only when the

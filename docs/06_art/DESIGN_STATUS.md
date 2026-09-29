@@ -67,25 +67,27 @@ Installed 2026-09-28. Brief: `docs/06_art/P04_COMBAT_MOTION_DESIGN_WORKSTREAM.md
 
 | ID | Deliverable | Owner | Status |
 |---|---|---|---|
-| D4-18 | Human Combat Motion Language | Design/Codex ART | TODO |
-| D4-19 | Footwork Board | Design/Codex ART | TODO |
-| D4-20 | Contact / Impact Frames | Design/Codex ART | TODO |
-| D4-21 | Dog Physical Presence | Design/Codex ART | TODO |
-| D4-22 | Dog POV Brawl Composition | Design/Codex ART | TODO |
-| D4-23 | Combat Personality Seeds | Design/Codex ART | TODO |
+| D4-18 | [Human Combat Motion Language](P04_MOTION_LANGUAGE_01.md) | Design/Codex ART | REVIEW |
+| D4-19 | [Footwork Board](P04_FOOTWORK_BOARD_01.md) | Design/Codex ART | REVIEW |
+| D4-20 | [Contact / Impact Frames](P04_CONTACT_FRAMES_01.md) | Design/Codex ART | REVIEW |
+| D4-21 | [Dog Physical Presence](P04_DOG_PHYSICAL_PRESENCE_01.md) | Design/Codex ART | REVIEW |
+| D4-22 | [Dog POV Brawl Composition](P04_DOG_POV_BRAWL_COMPOSITION_01.md) | Design/Codex ART | REVIEW |
+| D4-23 | [Combat Personality Seeds](P04_COMBAT_PERSONALITY_SEEDS_01.md) | Design/Codex ART | REVIEW |
 
 ## Sprint 05 Execution Design (Update 008)
+
+Blender implementation update 2026-09-29: [working assets and review scene](P04_BLENDER_IMPLEMENTATION_01.md) now accompany D4-18..D4-23 and D5-01 references. Design REVIEW is not production-art approval; meshes/animations are grade B and their production work remains IN_PROGRESS.
 Installed 2026-09-28. Brief: `docs/06_art/SPRINT05_DESIGN_EXECUTION.md`. Design may start before the P-04 Gate; engineering stays gated. Inherit P-04 Dog POV/combat direction; do not reopen combat camera design.
 
 | ID | Deliverable | Owner | Status |
 |---|---|---|---|
-| D5-01 | Big Banyan Landmark | Design/Codex ART | TODO |
-| D5-02 | Scent Ownership Language | Design/Codex ART | TODO |
-| D5-03 | Mark Territory Storyboard | Design/Codex ART | TODO |
-| D5-04 | Greed Moment | Design/Codex ART | TODO |
-| D5-05 | SAFE vs UNBANKED HUD | Design/Codex ART | TODO |
-| D5-06 | Persistent Rival Pair | Design/Codex ART | TODO |
+| D5-01 | [Big Banyan Landmark](D5_01_BANYAN_EXECUTION_01.md) | Design/Codex ART | REVIEW |
+| D5-02 | Scent Ownership Language | Design/Codex ART | IN_PROGRESS |
+| D5-03 | Mark Territory Storyboard | Design/Codex ART | IN_PROGRESS |
+| D5-04 | Greed Moment | Design/Codex ART | IN_PROGRESS |
+| D5-05 | SAFE vs UNBANKED HUD | Design/Codex ART | IN_PROGRESS |
+| D5-06 | Persistent Rival Pair | Design/Codex ART | IN_PROGRESS |
 | D5-07 | Territory World States | Design/Codex ART | TODO |
-| D5-08 | Ownership Reward Reveal | Design/Codex ART | TODO |
+| D5-08 | Ownership Reward Reveal | Design/Codex ART | IN_PROGRESS |
 | D5-09 | Target Screenshot 04 | Design/Codex ART | TODO |
 | D5-10 | Design Decision Pack | Design/Codex ART | TODO |

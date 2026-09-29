@@ -1,0 +1,9 @@
+# D4-23 generation record
+
+2026-09-28. Built-in image_gen. Grade R, reference only. Input: owner-provided P03_STREET_BRAWL_STORYBOARD.png for civilian material direction. No third-party model imported. Not gameplay footage.
+
+Output: `p04_personality_seeds_01.png`. Inspected consistent civilian outfit and distinguishable guard/shoulder/stance silhouettes. Shoe graphics in the generated reference are not a production logo direction; use original unbranded footwear in final art. Motion timing, power neutrality and cross-outfit recognition remain unverified.
+
+## Exact prompt
+
+Use case: illustration-story. Cinematic realistic animation concept sheet for GOOD HUMAN!, exactly three equal full-body columns labeled UNTRAINED, SCRAPPER, CALM. The SAME ordinary adult male, same beige casual jacket, blue jeans, sneakers, same build age face and lighting in ALL columns. No outfit/status/strength hierarchy. Warm urban park paving minimal background, low dog-height oblique observer camera, head hands and all feet fully visible. UNTRAINED: uneven hesitant raised hands, shoulders tense, weight uncertain but feet grounded, no slapstick or coward caricature. SCRAPPER: forward attentive torso, asymmetrical open guard, wider grounded stance, compact determined expression, no superhero or professional boxer physique. CALM: relaxed shoulders, small economical guard, balanced staggered feet, attentive composed expression, not smug, not superior. These are three alternative motion-personality pose seeds for the same character, not levels, classes or increasing power. Prioritize readable silhouette and weight differences with physically plausible joints. No weapons, scars, magical effects, stat numbers, dog, leash, HUD or extra text. Title P-04 / PERSONALITY SEEDS. Reference image provides material realism and civilian character only.

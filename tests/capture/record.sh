@@ -7,7 +7,7 @@ set -u
 GODOT="${GODOT:-/c/Users/b/Downloads/Godot_v4.6.3-stable_win64.exe/Godot_v4.6.3-stable_win64_console.exe}"
 cd "$(dirname "$0")/../.."
 PROJECT="$(pwd -W 2>/dev/null || pwd)"
-CASES="${*:-snap orbit_cw orbit_ccw behind_bark leash_pull critical win loss p02_snap}"
+CASES="${*:-snap orbit_cw orbit_ccw behind_bark leash_pull critical win loss p02_snap banyan}"
 mkdir -p build/captures
 failed=0
 for case in $CASES; do

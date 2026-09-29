@@ -6,15 +6,19 @@ States: `RESEARCH`, `CANDIDATE`, `IN_PROGRESS`, `REVIEW`, `APPROVED`, `REJECTED`
 |---|---|---:|---|
 | ART-001 | Visual Target 01 | P0 | REVIEW |
 | ART-002 | Dog Base 01 | P0 | REVIEW |
-| ART-003 | Human Modular Base | P0 | RESEARCH |
+| ART-003 | Human Modular Base | P0 | IN_PROGRESS |
 | ART-004 | Dog Idle/Walk/Run/Sniff | P0 | IN_PROGRESS |
-| ART-005 | Environment starter kit | P1 | RESEARCH |
+| ART-005 | Environment starter kit | P1 | IN_PROGRESS |
 | ART-006 | Search props | P1 | RESEARCH |
 | ART-007 | Bus stop extraction | P1 | RESEARCH |
 | ART-008 | Sprint 01 loot icons | P1 | RESEARCH |
 | ART-009 | HUD visual prototype | P1 | RESEARCH |
 
 Codex Art owns this status file. Art work must not silently change game design.
+
+## Blender implementation 2026-09-29
+
+[P04 / D5-01 implementation record](P04_BLENDER_IMPLEMENTATION_01.md): actual modular human GLB with 17 clips, Banyan GLB, opt-in human compatibility layer and a running ART showroom. Assets are grade B candidates; no S/final-art approval. Human and environment remain IN_PROGRESS because reference-quality finish and full runtime integration are outstanding. Existing dog model is reused for interaction staging.
 
 ## Current reference for combat (pointer added by Claude, no status changed)
 P-03 Street Brawl is the live combat direction (Update 006 Patch 02, 2026-09-18).

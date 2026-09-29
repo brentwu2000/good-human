@@ -1,0 +1,31 @@
+{
+  "height_m": 1.76,
+  "grade": "B - implementation candidate, not S final art",
+  "meshes": {
+    "Face_Module": 11234,
+    "Top_Module": 3936,
+    "Bottom_Jeans": 1992,
+    "Hair_Module": 1834,
+    "Shoes_Module": 624
+  },
+  "animations": [
+    "Approach",
+    "Backstep",
+    "Block",
+    "Circle",
+    "Dodge",
+    "Down",
+    "HeavyHook",
+    "HitHeavy",
+    "HitLight",
+    "Idle",
+    "Idle_Calm",
+    "Idle_Scrapper",
+    "Idle_Untrained",
+    "Jab",
+    "Kick",
+    "Stumble",
+    "Walk"
+  ],
+  "blend": "../good-human-3d-pipeline/blender/human/p04_owner/owner_10_surface_fix.blend"
+}

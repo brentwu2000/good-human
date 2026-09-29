@@ -283,14 +283,24 @@ static func label(text: String, height: float, font_size: int = 40, color: Color
 	return l
 
 
-## Makes every mesh under `node` see-through (or solid again).
+## Makes every mesh under `node` see-through (or solid again). Imported art
+## (Codex's models) carries shared materials, so a mesh gets its own copy of
+## each one the first time it is faded; the shared material is never touched.
 static func set_faded(node: Node, faded: bool, alpha: float = 0.25) -> void:
 	for child in node.find_children("*", "MeshInstance3D", true, false):
-		var mat := (child as MeshInstance3D).get_surface_override_material(0) as StandardMaterial3D
-		if mat == null:
-			continue
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if faded else BaseMaterial3D.TRANSPARENCY_DISABLED
-		mat.albedo_color.a = alpha if faded else 1.0
+		var mesh := child as MeshInstance3D
+		for surface in mesh.get_surface_override_material_count():
+			var mat := mesh.get_surface_override_material(surface) as StandardMaterial3D
+			if mat == null:
+				if not faded:
+					continue
+				var shared := mesh.get_active_material(surface) as StandardMaterial3D
+				if shared == null:
+					continue
+				mat = shared.duplicate() as StandardMaterial3D
+				mesh.set_surface_override_material(surface, mat)
+			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if faded else BaseMaterial3D.TRANSPARENCY_DISABLED
+			mat.albedo_color.a = alpha if faded else 1.0
 
 
 static func _instance(mesh: PrimitiveMesh, color: Color, position: Vector3, rotation: Vector3 = Vector3.ZERO) -> MeshInstance3D:

@@ -569,7 +569,10 @@ func _set_body_faded(body: Node3D, faded: bool) -> void:
 func _blocks_the_lens(body: Node3D) -> bool:
 	var lens := camera.global_position
 	var at := body.global_position
-	if Vector2(at.x - lens.x, at.z - lens.z).length() < near_fade_distance:
+	# Their dog is at the dog's own eye height, so it fills far more of the
+	# frame than a person the same distance away.
+	var reach := near_fade_distance * (1.0 if body is FighterPuppet3D else 1.6)
+	if Vector2(at.x - lens.x, at.z - lens.z).length() < reach:
 		return true
 	if pov > 0.85:
 		return false

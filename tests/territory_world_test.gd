@@ -126,11 +126,15 @@ func _run() -> void:
 
 
 ## Number of scent traces on the landmark: the state's world read (D5-07).
+## Codex's scent set shows its `Scent_<STATE>_*` pieces; the greybox fallback
+## uses small spheres.
 func _scent_knots(point: TerritoryPoint3D) -> int:
 	var count := 0
-	for child in point.landmark.get_children():
-		var mesh := child as MeshInstance3D
-		if mesh != null and mesh.mesh is SphereMesh and (mesh.mesh as SphereMesh).radius < 0.12:
+	for node in point.landmark.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		if mesh.name.begins_with("Scent_") and mesh.is_visible_in_tree():
+			count += 1
+		elif mesh.get_parent() == point.landmark and mesh.mesh is SphereMesh and (mesh.mesh as SphereMesh).radius < 0.12:
 			count += 1
 	return count
 

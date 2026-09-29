@@ -137,6 +137,7 @@ func set_human_global_position(value: Vector3) -> void:
 
 func begin_combat() -> void:
 	state = State.COMBAT
+	human_puppet.set_fighting()
 	human_puppet.show_hp(true)
 	if presentation != null:
 		presentation.set_visual_state(EncounterPresentation3D.VisualState.COMBAT)
@@ -219,9 +220,12 @@ func _process(delta: float) -> void:
 	_update_dog_reactions(delta)
 	if state == State.COMBAT and _dog != null:
 		_dog.position.y = absf(sin(_time * 12.0)) * 0.08
+	if state == State.IDLE:
+		human_puppet.set_ambient(false)
 	if state != State.RETURNING:
 		_place_dog()
 		return
+	human_puppet.set_ambient(true)
 	var to_home := -human_puppet.position
 	to_home.y = 0.0
 	if to_home.length() <= RETURN_SPEED * delta:

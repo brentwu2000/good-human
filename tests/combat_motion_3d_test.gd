@@ -408,13 +408,30 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 		check(Greybox.part(body, joint_name) != null, "the body has a %s joint" % joint_name)
 	var head := Greybox.part(body, "Head")
 	var torso := Greybox.part(body, "Torso")
-	check(torso.is_ancestor_of(head), "the head hangs off the torso")
-	check(torso.is_ancestor_of(Greybox.part(body, "ArmR")), "and so do the arms")
 	var hips := Greybox.part(body, "Hips")
-	check(is_equal_approx(hips.position.y, Greybox.HIP_HEIGHT), "the hips sit at hip height")
-	# Art decoration added in plain world coordinates ends up on the right part,
-	# so the face and hair travel with the head instead of staying behind.
-	check(head.get_child_count() >= 4, "the head carries its own face and hair (%d pieces)" % head.get_child_count())
+	if body is P04HumanVisual:
+		# Codex's skeletal model: the joints are controls that drive its bones
+		# (the face and hair are part of the mesh). A control has to move its
+		# bone, or the fight's choreography would pose nothing. Checked on a
+		# model of its own: the walking owner is playing its Idle clip.
+		var probe := P04HumanVisual.new()
+		add_child(probe)
+		probe.use_legacy_controls()
+		var bone := probe.skeleton.find_bone("head")
+		var rest := probe.skeleton.get_bone_pose_rotation(bone)
+		(probe.controls["Head"] as Node3D).rotation.x = 0.5
+		probe._process(1.0 / 60.0)
+		var turned := probe.skeleton.get_bone_pose_rotation(bone).angle_to(rest)
+		check(turned > 0.2, "Codex's model: turning the Head control turns the head bone (%.2f rad)" % turned)
+		probe.queue_free()
+		check(Greybox.part(body, "Head") != null and hips != null and torso != null, "and the choreography's joints are all reachable")
+	else:
+		check(torso.is_ancestor_of(head), "the head hangs off the torso")
+		check(torso.is_ancestor_of(Greybox.part(body, "ArmR")), "and so do the arms")
+		check(is_equal_approx(hips.position.y, Greybox.HIP_HEIGHT), "the hips sit at hip height")
+		# Art decoration added in plain world coordinates ends up on the right
+		# part, so the face and hair travel with the head instead of staying behind.
+		check(head.get_child_count() >= 4, "the head carries its own face and hair (%d pieces)" % head.get_child_count())
 
 	# A punch swings an arm; it does not just shove the whole body forward.
 	var arm := Greybox.part(body, "ArmR")

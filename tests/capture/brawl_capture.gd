@@ -9,10 +9,11 @@ extends Node
 ##         res://tests/capture/brawl_capture.tscn -- <case>
 ##
 ## `tests/capture/record.sh` records every case. Cases: snap, orbit_cw,
-## orbit_ccw, behind_bark, leash_pull, critical, win, loss, p02_snap.
+## orbit_ccw, behind_bark, leash_pull, critical, win, loss, p02_snap, banyan
+## (the dog walking up to the Big Banyan, no fight).
 ## This is a recording tool, not a test: it asserts nothing.
 
-const CASES: Array[String] = ["snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap"]
+const CASES: Array[String] = ["snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap", "banyan"]
 const MOVES: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 var _tree: SceneTree
@@ -54,6 +55,10 @@ func _run() -> void:
 	human = map.human
 	pair = map.get_node("Encounters/pair_park") as OpponentPair3D
 	await _seconds(0.5)
+	if case_name == "banyan":
+		await _walk_to_banyan()
+		_tree.quit()
+		return
 
 	# Every case starts the same way: walking up to the pair from a few metres
 	# out and provoking them, so the Snap is always in the recording.
@@ -101,6 +106,17 @@ func _run() -> void:
 			await _seconds(1.5)
 	_release_moves()
 	_tree.quit()
+
+
+func _walk_to_banyan() -> void:
+	var tree := map.get_node("BanyanTerritory") as Node3D
+	var start := tree.global_position + Vector3(0, 0.1, 7.0)
+	dog.global_position = start
+	human.global_position = start + Vector3(0.7, 0, 1.2)
+	map.rig.snap_behind_dog()
+	await _seconds(0.6)
+	await _drive_to(tree.global_position + Vector3(0.4, 0, 2.2), 0.5, 7.0)
+	await _seconds(2.0)
 
 
 ## Steers the dog along `direction.call()` for `seconds` through the real

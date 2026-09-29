@@ -117,6 +117,7 @@ func _follow(delta: float) -> void:
 		global_position = _follow_anchor() - to_dog.normalized() * max_length
 	if planar.length() > 0.2:
 		puppet.rotation.y = lerp_angle(puppet.rotation.y, atan2(-planar.x, -planar.z), minf(delta * 8.0, 1.0))
+	puppet.set_ambient(planar.length() > 0.3)
 
 
 ## Where the owner aims: beside the dog rather than in its tracks.
@@ -174,6 +175,8 @@ func set_state(value: State) -> void:
 	if value == State.FOLLOW:
 		puppet.revive()
 		puppet.show_hp(false)
+	elif value == State.COMBAT:
+		puppet.set_fighting()
 
 
 ## The owner walks behind the dog, which is exactly where the chase camera is.

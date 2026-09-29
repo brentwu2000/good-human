@@ -13,17 +13,33 @@ const SCENT_NEUTRAL := Color("#a28ba8")
 const SCENT_RIVAL := Color("#d06b55")
 const SCENT_PLAYER := Color("#37968b")
 const STONE := Color("#8f9187")
+## Codex's Blender tree and its scent-state set (D5-01/02, B-grade candidate,
+## `docs/06_art/P04_BLENDER_IMPLEMENTATION_01.md`). The greybox build below
+## stays as the fallback if they are ever missing.
+const TREE_MODEL := "res://assets/environment/territory/models/banyan_01/banyan_01.glb"
+const SCENT_VISUAL := "res://assets/environment/territory/p04_scent_visual.gd"
 
 
 static func build(state: TerritoryState = TerritoryState.DISCOVERED) -> Node3D:
 	var root := Node3D.new()
 	root.name = "BigBanyanLandmark"
 	root.add_to_group(&"territory_landmark")
-	_build_trunks(root)
-	_build_roots(root)
-	_build_canopy(root)
-	_build_hanging_roots(root)
-	_build_scent_knots(root, state)
+	if ResourceLoader.exists(TREE_MODEL) and ResourceLoader.exists(SCENT_VISUAL):
+		root.add_child((load(TREE_MODEL) as PackedScene).instantiate())
+		var scent := (load(SCENT_VISUAL) as GDScript).new() as Node3D
+		scent.name = "ScentStates"
+		# Set before it enters the tree: it shows its state in _ready.
+		scent.set("state", TerritoryState.keys()[state])
+		# Placement as in Codex's review scene.
+		scent.position = Vector3(0, 0.18, 0.55)
+		scent.scale = Vector3.ONE * 2.2
+		root.add_child(scent)
+	else:
+		_build_trunks(root)
+		_build_roots(root)
+		_build_canopy(root)
+		_build_hanging_roots(root)
+		_build_scent_knots(root, state)
 	root.add_child(TerritoryPresentation3D.new())
 	return root
 
