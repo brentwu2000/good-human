@@ -87,7 +87,23 @@ Installed 2026-09-28. Brief: `docs/06_art/SPRINT05_DESIGN_EXECUTION.md`. Design 
 | D5-04 | Greed Moment | Design/Codex ART | IN_PROGRESS |
 | D5-05 | SAFE vs UNBANKED HUD | Design/Codex ART | IN_PROGRESS |
 | D5-06 | Persistent Rival Pair | Design/Codex ART | IN_PROGRESS |
-| D5-07 | Territory World States | Design/Codex ART | TODO |
+| D5-07 | Territory World States | Design/Codex ART | IN_PROGRESS |
 | D5-08 | Ownership Reward Reveal | Design/Codex ART | IN_PROGRESS |
-| D5-09 | Target Screenshot 04 | Design/Codex ART | TODO |
+| D5-09 | Target Screenshot 04 | Design/Codex ART | IN_PROGRESS |
 | D5-10 | Design Decision Pack | Design/Codex ART | TODO |
+
+## Sprint 06 Identity / Bond Design (Update 009)
+Installed 2026-09-29. Brief: `docs/06_art/SPRINT06_DESIGN_WORKSTREAM.md`. Design starts immediately; engineering waits for Greed/Territory Gate 01. Reuse the established Dog POV / P-04 combat language; do not reopen the combat camera.
+
+| ID | Deliverable | Owner | Status |
+|---|---|---|---|
+| D6-01 | Shelter Opening | Design/Codex ART | TODO |
+| D6-02 | Dog Candidate Language | Design/Codex ART | TODO |
+| D6-03 | Dog POV Adoption | Design/Codex ART | TODO |
+| D6-04 | Human Candidate System | Design/Codex ART | TODO |
+| D6-05 | Adoption Reactions | Design/Codex ART | TODO |
+| D6-06 | Pair Identity Home | Design/Codex ART | TODO |
+| D6-07 | Habit Readability | Design/Codex ART | TODO |
+| D6-08 | Memory Presentation | Design/Codex ART | TODO |
+| D6-09 | Target Screenshot 05 — MY HUMAN | Design/Codex ART | TODO |
+| D6-10 | Identity Decision Pack | Design/Codex ART | TODO |

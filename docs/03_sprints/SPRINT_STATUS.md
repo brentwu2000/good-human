@@ -516,3 +516,28 @@ Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION
 ## Sprint 05 Execution Engineering Notes (Claude)
 - Overlap to reconcile when engineering starts: the earlier Sprint 05 install (Update 007) already built P4-001..P4-010 (run value/risk, SAFE/UNBANKED presentation, temptation hooks, territory state/data, Banyan landmark, Mark Territory, resident rival, claim progression, extraction resolution), all REVIEW and paused. Most S05 tasks build on or re-verify that work rather than start from nothing; each S05 task should first check what P4-xxx already provides.
 
+## Sprint 06 — IDENTITY / BOND (Update 009)
+Installed 2026-09-29. Spec: `docs/03_sprints/SPRINT_06_IDENTITY_BOND.md`; systems `docs/04_systems/IDENTITY_SYSTEMS.md`; data `docs/05_data/SPRINT06_IDENTITY_SCHEMA.md`; gate `docs/07_qa/IDENTITY_GATE_01.md`; ADR-019 (one human, one relationship), ADR-020 (randomness with attachment). Depends on the P-04 combat baseline and the Sprint 05 Greed/Territory baseline; redesigns neither.
+
+**ENGINEERING GATE:** after Greed/Territory Gate 01 (which itself waits for the P-04 Brawl Feel Gate), unless the owner explicitly approves an isolated opening/adoption prototype earlier. Design D6-01–D6-10 starts now. Engineering order: dog candidates/shelter → human candidates/adoption → owner commitment/naming → PairState → Bond → Habit → Memory → Home → Collection → blind QA. Scope guard: no human roster, gacha rarity, reroll economy, romance system, giant relationship skill tree, new combat architecture or map expansion.
+
+| ID | Task | Status |
+|---|---|---|
+| S06-01 | Dog candidate generator | TODO |
+| S06-02 | Shelter selection | TODO |
+| S06-03 | Dog POV adoption | TODO |
+| S06-04 | Human candidate generator | TODO |
+| S06-05 | Behavior/reaction matching | TODO |
+| S06-06 | Owner commitment + naming | TODO |
+| S06-07 | PairState persistence | TODO |
+| S06-08 | Bond | TODO |
+| S06-09 | Habit | TODO |
+| S06-10 | Memory | TODO |
+| S06-11 | Home pair presentation | TODO |
+| S06-12 | Collection integration | TODO |
+| S06-13 | Save versioning | TODO |
+| S06-14 | Fresh Codex QA | TODO |
+
+## Sprint 06 Engineering Notes (Claude)
+- Overlap to reconcile when engineering starts: owner habits already exist in part. Sprint 03 TRAIN's OwnerBehavior and GrowthResolver turn repeated dog behaviour into visible owner reactions (leash stumbles, recovery pauses, hesitation, social readiness); S06-09 Habit should build on them rather than add a parallel system. Likewise S06-12 extends the existing Collection progress, and the current walk always uses one fixed owner (`player_human.tres`), which S06-04..07 replace with a generated, persistent one.
+
