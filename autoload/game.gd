@@ -51,10 +51,12 @@ func can_start_run() -> bool:
 
 ## Applies a finished run to the persistent profile, saves, then shows the result.
 func finish_run(result: RunResult, show_result: bool = true) -> void:
+	var stash_before := home_stash.total_value()
 	for stack in result.to_stash:
 		var left := home_stash.add_item(stack.item, stack.quantity)
 		if left > 0:
 			result.stash_overflow.append(ItemStack.new(stack.item, left))
+	result.banked_value_delta = home_stash.total_value() - stash_before
 
 	_resolve_territories(result)
 

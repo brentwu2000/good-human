@@ -106,6 +106,8 @@ func _test_stationary_dog() -> void:
 	var pressed := 0
 	var watched := 0
 	var ignored := 0
+	# Longest stretch any one body stays solid right at the lens.
+	var solid_run := {}
 	var unfaded_at_lens := 0
 	for i in 360:
 		await _tree.physics_frame
@@ -124,7 +126,10 @@ func _test_stationary_dog() -> void:
 			if gap < 0.6 and dog_counts:
 				pressed += 1
 			if _flat(lens - body.global_position).length() < rig.near_fade_distance and not rig._near_faded.has(body):
-				unfaded_at_lens += 1
+				solid_run[body] = int(solid_run.get(body, 0)) + 1
+				unfaded_at_lens = maxi(unfaded_at_lens, solid_run[body])
+			else:
+				solid_run[body] = 0
 	coordinator.time_scale = 0.35
 	check(watched > 60, "the fight went on around a dog standing still (%d frames)" % watched)
 	check(pressed <= watched * 0.05, "fighters keep clear of a dog standing beside them (%d of %d frames pressed onto it, closest %.2f m)" % [pressed, watched, closest])

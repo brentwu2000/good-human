@@ -499,7 +499,7 @@ Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION
 
 | ID | Task | Status |
 |---|---|---|
-| S05-01 | SAFE/UNBANKED/PERMANENT runtime | TODO |
+| S05-01 | SAFE/UNBANKED/PERMANENT runtime | REVIEW |
 | S05-02 | Extraction decision presentation | TODO |
 | S05-03 | Run Tension Director | TODO |
 | S05-04 | Big Banyan integration | TODO |
@@ -515,6 +515,9 @@ Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION
 | S05-14 | Fresh Codex blind QA | TODO |
 
 ## Sprint 05 Execution Engineering Notes (Claude)
+- **Owner decision (2026-09-29): Sprint 05 engineering approved** ("核准 Sprint 05 開工") without waiting for the P-04 Brawl Feel Gate. Named exception: Codex blind-tests the P-04 gate separately; if its result changes combat, Sprint 05 adapts. Order: the value layers first, consolidating the finished P4-001..010.
+- S05 ↔ P4 mapping: S05-01 ← P4-001/002 (SAFE/UNBANKED) + PERMANENT added; S05-02 ← P4-002 + owner condition and extraction direction; S05-03 new (Run Tension Director, grows out of P4-003 temptations); S05-04 ← P4-005; S05-05/06 ← P4-006; S05-07 ← P4-007; S05-08 ← P4-004/008; S05-09 ← P4-009/010; S05-10 ← P4-013; S05-11 ← P4-012.
+- S05-01: SAFE (dog's bag) and UNBANKED (owner's bag) were already runtime state (`RunValue`, P4-001). PERMANENT is now `RunResult.banked_value_delta`: what finishing the walk actually added to the home stash, so overflow that did not fit is not counted. The result screen shows it beside the collection total. Test: `run_core_test`. Also: `dog_pov_presence_test`'s lens-fade check now measures the longest solid stretch per body, as its message says, instead of a total across the fight (it flaked at 6 total frames).
 - Overlap to reconcile when engineering starts: the earlier Sprint 05 install (Update 007) already built P4-001..P4-010 (run value/risk, SAFE/UNBANKED presentation, temptation hooks, territory state/data, Banyan landmark, Mark Territory, resident rival, claim progression, extraction resolution), all REVIEW and paused. Most S05 tasks build on or re-verify that work rather than start from nothing; each S05 task should first check what P4-xxx already provides.
 
 ## Sprint 06 — IDENTITY / BOND (Update 009)

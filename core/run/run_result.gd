@@ -26,6 +26,9 @@ var safe_value: int = 0
 var unbanked_value: int = 0
 ## What the walk actually took away (0 unless the owner's bag was lost).
 var lost_value: int = 0
+## PERMANENT (Sprint 05 S05-01): what this walk actually added to the home
+## stash — what came home, less what did not fit (filled in by Game).
+var banked_value_delta: int = 0
 ## When going home first became possible, -1 if it never did, and what the
 ## walk was worth at that moment.
 var first_extraction_time: float = -1.0

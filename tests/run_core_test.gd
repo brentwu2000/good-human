@@ -256,6 +256,7 @@ func _test_finish_run_updates_stash_and_save() -> void:
 	Game.finish_run(result, false)
 	check_eq(Game.home_stash.count_item(&"tennis_ball"), 2, "extracted items in stash")
 	check_eq(_count(result.stash_overflow, &"umbrella"), 1, "items beyond 30 slots reported as overflow")
+	check_eq(result.banked_value_delta, DataRegistry.get_item(&"tennis_ball").value * 2, "PERMANENT: only what reached the stash counts as banked")
 	check_eq(SaveManager.data["statistics"]["runs"], 1, "runs counted")
 	check_eq(SaveManager.data["statistics"]["successful_extractions"], 1, "successful extraction counted")
 

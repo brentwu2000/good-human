@@ -54,7 +54,8 @@ func show_result(result: RunResult) -> void:
 	if not result.stash_overflow.is_empty():
 		loot.append("\n倉庫放不下（已遺失）")
 		loot.append_array(_describe(result.stash_overflow))
-	loot.append("\n家中收藏總值  $%d" % Game.home_stash.total_value())
+	var banked := "  （+$%d）" % result.banked_value_delta if result.banked_value_delta > 0 else ""
+	loot.append("\n家中收藏總值  $%d%s" % [Game.home_stash.total_value(), banked])
 	_loot_label.text = "\n".join(loot)
 
 	# Retain the aggregate text for compatibility; the visible UI uses cards.
