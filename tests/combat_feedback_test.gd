@@ -52,6 +52,7 @@ func _run() -> void:
 	await _test_dog_instinct()
 	await _test_camera_comparison()
 	_test_debug_tools()
+	await _test_bodies_stay_upright()
 
 	coordinator.debug_force_result(CombatSimulation.Result.DISENGAGED)
 	coordinator.time_scale = 1.0
@@ -182,6 +183,37 @@ func _test_debug_tools() -> void:
 		critical_button.pressed.emit()
 		check(coordinator.owner_condition() <= 0.26, "the critical-owner button puts the owner at 25%% (%.2f)" % coordinator.owner_condition())
 		coordinator.debug_set_owner_condition(1.0)
+
+
+## Codex's model in a real fight: the clips carry the body and the
+## choreography layers over them, and nothing accumulates. The layer once added
+## onto its own output wherever a clip did not key a bone (the import drops
+## constant tracks), and the pelvis drifted to 90–160°: fighters leaning far
+## back, one turned on its side in mid-air.
+func _test_bodies_stay_upright() -> void:
+	if not coordinator.is_fighting():
+		return
+	var skeletal := human.puppet._body as P04HumanVisual
+	if skeletal == null:
+		return
+	coordinator.time_scale = 1.0
+	var pelvis := skeletal.skeleton.find_bone("pelvis")
+	var tilt := func() -> float:
+		var up := (skeletal.skeleton.global_basis * skeletal.skeleton.get_bone_global_pose(pelvis).basis).y.normalized()
+		return rad_to_deg(acos(clampf(up.dot(Vector3.UP), -1.0, 1.0)))
+	var rest_up := (skeletal.skeleton.global_basis * skeletal.skeleton.get_bone_global_rest(pelvis).basis).y.normalized()
+	var rest: float = rad_to_deg(acos(clampf(rest_up.dot(Vector3.UP), -1.0, 1.0)))
+	var worst := 0.0
+	var clips := {}
+	for i in 600:
+		await _tree.physics_frame
+		if not coordinator.is_fighting():
+			break
+		worst = maxf(worst, absf(tilt.call() - rest))
+		clips[skeletal.player.current_animation] = true
+	check(clips.size() >= 3, "the fight plays several of Codex's clips (%s)" % ", ".join(clips.keys()))
+	check(worst < 35.0, "and the hips never drift from upright (%.0f° from rest at worst)" % worst)
+	coordinator.time_scale = 0.0
 
 
 func _physics(count: int) -> void:

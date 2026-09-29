@@ -13,7 +13,7 @@ extends Node
 ## (the dog walking up to the Big Banyan, no fight).
 ## This is a recording tool, not a test: it asserts nothing.
 
-const CASES: Array[String] = ["snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap", "banyan"]
+const CASES: Array[String] = ["snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap", "banyan", "inspect"]
 const MOVES: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 var _tree: SceneTree
@@ -57,6 +57,10 @@ func _run() -> void:
 	await _seconds(0.5)
 	if case_name == "banyan":
 		await _walk_to_banyan()
+		_tree.quit()
+		return
+	if case_name == "inspect":
+		await _inspect()
 		_tree.quit()
 		return
 
@@ -106,6 +110,29 @@ func _run() -> void:
 			await _seconds(1.5)
 	_release_moves()
 	_tree.quit()
+
+
+## A fixed side view for checking bodies: the owner walking beside the dog,
+## then a fight, both seen square-on from 3.5 m.
+func _inspect() -> void:
+	var at := pair.global_position + Vector3(0, 0.1, 4.0)
+	dog.global_position = at + Vector3(-3.0, 0, 0)
+	human.global_position = at + Vector3(-3.7, 0, 0.6)
+	var side := Camera3D.new()
+	map.add_child(side)
+	side.global_position = at + Vector3(0, 1.1, 4.0)
+	side.look_at(at + Vector3(0, 0.9, 0), Vector3.UP)
+	side.fov = 55.0
+	side.make_current()
+	await _drive(func() -> Vector3: return Vector3.RIGHT, 2.5, 0.55)
+	await _seconds(1.0)
+	side.global_position = pair.global_position + Vector3(3.2, 1.2, 1.4)
+	side.look_at(pair.global_position + Vector3(0, 0.9, 1.0), Vector3.UP)
+	dog.global_position = pair.global_position + Vector3(0.6, 0.1, 1.1)
+	human.global_position = pair.global_position + Vector3(0, 0.1, 1.6)
+	await _seconds(0.3)
+	await _press(&"interact")
+	await _seconds(9.0)
 
 
 func _walk_to_banyan() -> void:

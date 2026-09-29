@@ -20,6 +20,9 @@ var legacy_driven := false
 ## Controls added on top of the playing clip, and how strongly (0..1).
 var layered := false
 var layer_weight := 0.0
+## Per bone: what this layer last wrote, and the clip pose it was added to.
+var _written: Dictionary = {}
+var _clip_base: Dictionary = {}
 var controls: Dictionary = {}
 
 func _init() -> void:
@@ -52,11 +55,20 @@ func _process(_delta: float) -> void:
 			continue
 		var control: Node3D = controls[joint_name]
 		var turn := control.basis.orthonormalized()
-		# Layered: the clip's pose this frame is the base (every clip keys every
-		# bone, so it is rewritten each frame and nothing accumulates).
 		var base := skeleton.get_bone_rest(index).basis.orthonormalized()
 		if layered:
-			base = Basis(skeleton.get_bone_pose_rotation(index))
+			# The clip's pose this frame is the base — but only if the clip
+			# actually wrote this bone. Godot's import drops tracks that never
+			# change (the pelvis, in most clips), so a bone can still hold what
+			# this layer wrote last frame; taking that as the base again made
+			# the layer add onto itself every frame and the pelvis drifted to
+			# 90–160° (the owner leaning back, a fighter turned on their side).
+			var current := skeleton.get_bone_pose_rotation(index)
+			var clip_pose := current
+			if _written.has(index) and current.is_equal_approx(_written[index]):
+				clip_pose = _clip_base[index]
+			_clip_base[index] = clip_pose
+			base = Basis(clip_pose)
 			turn = Basis(Quaternion.IDENTITY.slerp(turn.get_rotation_quaternion(), layer_weight))
 		# The control is a rotation in this node's frame, turning the bone about
 		# its own joint. With the parent's global rest P and the bone's local
@@ -66,8 +78,9 @@ func _process(_delta: float) -> void:
 		var parent := skeleton.get_bone_parent(index)
 		var parent_rest := model.basis * (skeleton.get_bone_global_rest(parent).basis if parent >= 0 else Basis.IDENTITY)
 		parent_rest = parent_rest.orthonormalized()
-		var posed := parent_rest.inverse() * turn * parent_rest * base
-		skeleton.set_bone_pose_rotation(index, posed.get_rotation_quaternion())
+		var posed := (parent_rest.inverse() * turn * parent_rest * base).get_rotation_quaternion()
+		skeleton.set_bone_pose_rotation(index, posed)
+		_written[index] = posed
 
 func play_clip(clip: String, loop := true) -> void:
 	legacy_driven = false
