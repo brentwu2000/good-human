@@ -136,6 +136,8 @@ static func part(root: Node3D, joint_name: String) -> Node3D:
 ## belongs to, by where it is. Art code can keep adding pieces in plain world
 ## coordinates without knowing the skeleton exists.
 static func bind_parts(root: Node3D) -> void:
+	if root.has_meta("skeletal_art"):
+		return
 	var head := part(root, "Head")
 	var torso := part(root, "Torso")
 	if head == null or torso == null:

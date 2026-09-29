@@ -3,10 +3,12 @@ extends Node3D
 ## Greybox 3D human for the owner and opponents. Presentation only: plays what
 ## the combat coordinator tells it. Same method names as FighterPuppet.
 
-## P03-E10: the combat log is debug-only. The exit gate is that a fight reads
-## with this off, so it defaults off and the body has to carry the meaning.
-## Deliberate dialogue still goes through `shout()`; this gates only the
-## automatic annotations the puppet writes about its own mechanics.
+## P03-E10 / P04-11: every piece of fight text that explains the mechanics —
+## the combat log, the health bars, the dog's outcome toasts and the lines
+## that announce an opening or a save — is debug-only. The P-04 gate is that
+## a fight reads with all of it off, so it defaults off and the bodies carry
+## the meaning. Story dialogue at the start and end of a fight is not
+## affected.
 static var show_combat_text: bool = false
 
 ## A bump from the dog was answered (ADR-016). Presentation only.
@@ -16,6 +18,10 @@ var data: FighterData
 
 var _body: Node3D
 var _hp_label: Label3D
+## The fight wants the health bar shown; it only is with fight text on.
+var _hp_wanted: bool = false
+## 0..1 how the fighter is doing (P04-11): shown by the body, not a bar.
+var _condition: float = 1.0
 var _popup: Label3D
 var _popup_left: float = 0.0
 var _pose_tween: Tween
@@ -60,11 +66,14 @@ func apply(fighter: FighterData) -> void:
 		_popup = Greybox.label("", 2.6, 44, Color(1, 1, 0.75))
 		add_child(_popup)
 	_down = false
+	_condition = 1.0
 	_reset_pose()
 
 
 func _process(delta: float) -> void:
 	_time += delta
+	if _hp_label != null:
+		_hp_label.visible = _hp_wanted and show_combat_text
 	_look_away_left = maxf(_look_away_left - delta, 0.0)
 	_popup_left -= delta
 	if _popup != null and _popup_left <= 0.0:
@@ -79,14 +88,22 @@ func face_towards(point: Vector3) -> void:
 
 
 func show_hp(value: bool) -> void:
+	_hp_wanted = value
 	if _hp_label != null:
-		_hp_label.visible = value
+		_hp_label.visible = value and show_combat_text
 
 
 ## Ratio only: never numbers that reveal strength.
 func set_hp_ratio(ratio: float) -> void:
+	_condition = clampf(ratio, 0.0, 1.0)
 	var filled := int(ceil(clampf(ratio, 0.0, 1.0) * 5.0))
 	_hp_label.text = "■".repeat(filled) + "□".repeat(5 - filled)
+
+
+## 0 while they are fine, rising to 1 as they near the end: from 60 % health
+## down (P04-11).
+func hurt_amount() -> float:
+	return clampf(inverse_lerp(0.6, 0.1, _condition), 0.0, 1.0)
 
 
 func set_guard(active: bool) -> void:
@@ -109,7 +126,9 @@ func play_motion(delta: float) -> void:
 	if _body == null or _down or _pose_tween != null and _pose_tween.is_running():
 		return
 	var quick := motion.state in [CombatMotion3D.State.APPROACH, CombatMotion3D.State.SIDESTEP, CombatMotion3D.State.BACKSTEP]
-	_footwork += delta * (7.0 if quick else 4.2)
+	# P04-11: a hurt fighter moves heavily, so who is losing reads without a bar.
+	var hurt := hurt_amount()
+	_footwork += delta * (7.0 if quick else 4.2) * lerpf(1.0, 0.65, hurt)
 	var bob := 0.0
 	var lean := 0.0
 	var guard := 0.06 if _guarding else 0.0
@@ -140,8 +159,14 @@ func play_motion(delta: float) -> void:
 			lean = -0.08
 		_:
 			return
+	# P04-11: the body shows how the fight is going for them. Hurt, they stoop,
+	# their guard drops and their feet get heavy; close to the end they sway.
+	lean += hurt * 0.2
+	guard *= 1.0 - hurt * 0.6
+	bob *= 1.0 + hurt * 0.6
 	_body.position.y = bob
-	_body.rotation.x = lean
+	_body.rotation.x = lean + (data.stoop if data != null else 0.0)
+	_body.rotation.z = sin(_time * 2.4) * 0.07 * smoothstep(0.55, 1.0, hurt)
 	_body.position.z = guard
 	_body.position.x = move_toward(_body.position.x, 0.0, delta * 0.4)
 

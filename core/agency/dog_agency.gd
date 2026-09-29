@@ -10,7 +10,9 @@ extends Node
 ##   away or sideways repositions them (dodging an attack being wound up);
 ##   only dragging them towards the opponent makes them stumble; a strong
 ##   sustained pull away drags them out of the fight.
-## Every consequence is announced (`outcome`) so players can learn it.
+## Every consequence is announced (`outcome`) so players can learn it; the
+## toasts and the lines that name a mechanic only show with fight text on
+## (P04-11): in play, the bodies have to show it.
 ## Hidden numbers are debug-only. Training goes through TrainingObserver.
 
 signal barked(result: StringName)
@@ -139,19 +141,22 @@ func _bark_in_fight() -> BarkResult:
 		if _flat(dog.global_position - human.global_position).length() <= BARK_STARTLE_DISTANCE:
 			# Right behind your own human: they're the one who jumps.
 			engagement.simulation.distract(CombatSimulation.PLAYER, BARK_OWNER_STARTLE_SECONDS)
-			human.say("哇！你叫什麼啦！", Color(1.0, 0.8, 0.6), 1.0)
+			if FighterPuppet3D.show_combat_text:
+				human.say("哇！你叫什麼啦！", Color(1.0, 0.8, 0.6), 1.0)
 			outcome.emit("✘ 在主人背後叫，嚇到自己人了", false)
 			return BarkResult.STARTLED_OWNER
 		outcome.emit("…主人擋住了，對方沒注意到", false)
 		return BarkResult.UNHEARD
 	var effect := _bark_effect()
 	if effect < BARK_MIN_EFFECT:
-		opponent.human_puppet.shout("（不理你）", Color(0.8, 0.8, 0.8))
+		if FighterPuppet3D.show_combat_text:
+			opponent.human_puppet.shout("（不理你）", Color(0.8, 0.8, 0.8))
 		outcome.emit("…叫太多次，對方不理你了", false)
 		return BarkResult.IGNORED
 	engagement.simulation.distract(CombatSimulation.OPPONENT, BARK_DISTRACT_SECONDS * effect)
-	opponent.human_puppet.shout("什麼？！", Color(1.0, 0.9, 0.5))
-	human.say("好機會！", Color(0.7, 1.0, 0.7), 0.8)
+	if FighterPuppet3D.show_combat_text:
+		opponent.human_puppet.shout("什麼？！", Color(1.0, 0.9, 0.5))
+		human.say("好機會！", Color(0.7, 1.0, 0.7), 0.8)
 	outcome.emit("✦ 對手分心了！主人抓到破綻", true)
 	training_moment.emit(&"agency_bark_distract", opponent.spot_id)
 	return BarkResult.DISTRACTED
@@ -218,19 +223,22 @@ func _update_leash(delta: float) -> void:
 	var sim := engagement.simulation
 	if away_share < PULL_INTO_FIGHT_SHARE:
 		sim.stumble(CombatSimulation.PLAYER, PULL_STUMBLE_SECONDS)
-		human.say("別扯啦！", Color(1.0, 0.7, 0.6), 0.9)
+		if FighterPuppet3D.show_combat_text:
+			human.say("別扯啦！", Color(1.0, 0.7, 0.6), 0.9)
 		last_pull = &"stumbled"
 		outcome.emit("✘ 把主人往對手身上扯，踉蹌了", false)
 		training_moment.emit(&"agency_bad_pull", engagement.pair.spot_id)
 	elif pull_saves >= PULL_SAVES_PER_FIGHT:
 		# Found their feet: the lead goes taut and they stay put.
 		sim.brace(CombatSimulation.PLAYER)
-		human.say("我站穩了！", Color(0.9, 0.9, 0.9), 0.8)
+		if FighterPuppet3D.show_combat_text:
+			human.say("我站穩了！", Color(0.9, 0.9, 0.9), 0.8)
 		last_pull = &"braced"
 		outcome.emit("…主人站穩了，拉不動了", false)
 	elif sim.pull(CombatSimulation.PLAYER, PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER):
 		pull_saves += 1
-		human.say("哇！差點被打到！", Color(0.7, 1.0, 0.8), 1.0)
+		if FighterPuppet3D.show_combat_text:
+			human.say("哇！差點被打到！", Color(0.7, 1.0, 0.8), 1.0)
 		last_pull = &"saved"
 		outcome.emit("✦ 把主人拉開，躲過一招！", true)
 		training_moment.emit(&"agency_pull_save", engagement.pair.spot_id)

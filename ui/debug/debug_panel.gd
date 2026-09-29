@@ -103,8 +103,9 @@ func _with_combat(action: Callable) -> void:
 		action.call(combat_coordinator)
 
 
-## P03-E10: the combat log is off in normal play; this puts it back for
-## debugging without changing anything the fight does.
+## P03-E10 / P04-11: fight text (log, health bars, the dog's outcome toasts)
+## is off in normal play; this puts it back for debugging without changing
+## anything the fight does.
 func _toggle_combat_log() -> void:
 	FighterPuppet3D.show_combat_text = not FighterPuppet3D.show_combat_text
 	_update_combat_log_button()
@@ -113,7 +114,7 @@ func _toggle_combat_log() -> void:
 func _update_combat_log_button() -> void:
 	var button := get_node_or_null("%CombatLogButton") as Button
 	if button != null:
-		button.text = "戰鬥文字：開" if FighterPuppet3D.show_combat_text else "戰鬥文字：關"
+		button.text = "戰鬥文字/血條：開" if FighterPuppet3D.show_combat_text else "戰鬥文字/血條：關"
 
 
 func _bind(button: Button, action: Callable) -> void:

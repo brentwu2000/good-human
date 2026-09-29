@@ -75,6 +75,7 @@ func _run() -> void:
 
 	await _test_dog_pov(map, coordinator, dog, human, pair)
 	await _test_intervention_is_visible(map, coordinator, dog, human, pair)
+	await _test_reads_without_text(map, coordinator, dog, human, pair)
 	await _test_resolution_beat(coordinator, dog, human)
 	finish()
 
@@ -175,8 +176,10 @@ func _test_intervention_is_visible(map: RunMap3D, coordinator: CombatCoordinator
 	coordinator.time_scale = 1.0
 	var leaned := 0.0
 	var hauled := 0.0
-	for i in 20:
-		await _tree.physics_frame
+	# The lean is a tween, and tweens advance on process frames: sample those,
+	# or its short peak can fall between two physics frames.
+	for i in 30:
+		await _tree.process_frame
 		leaned = maxf(leaned, ours._body.rotation.x)
 		hauled = maxf(hauled, _flat(human.global_position - owner_at).length())
 	coordinator.time_scale = scale_before
@@ -198,6 +201,73 @@ func _test_intervention_is_visible(map: RunMap3D, coordinator: CombatCoordinator
 		staggered = staggered or ours.motion.state == CombatMotion3D.State.STUMBLE
 	check(lurched > 0.05, "a bad pull throws the owner off balance sideways (%.3f rad)" % lurched)
 	check(staggered, "and reads as the worse outcome while it lasts")
+	coordinator.time_scale = 25.0
+
+
+## P04-11: with fight text off (normal play) nothing explains the fight in
+## words — no health bars, no outcome toasts, no line announcing an opening —
+## and how each fighter is doing shows in their body instead.
+func _test_reads_without_text(map: RunMap3D, coordinator: CombatCoordinator3D, dog: DogController3D, human: HumanFollower3D, pair: OpponentPair3D) -> void:
+	if not coordinator.is_fighting():
+		dog.global_position = pair.global_position + Vector3(1.0, 0.1, 1.0)
+		await _physics(6)
+		pair.interact(map.run_manager)
+		await _physics(6)
+	check(coordinator.is_fighting(), "a fight to read")
+	check(not FighterPuppet3D.show_combat_text, "fight text is off in normal play")
+	coordinator.time_scale = 0.0
+	await _physics(2)
+	var ours := human.puppet
+	var theirs := pair.human_puppet
+	check(not ours._hp_label.visible and not theirs._hp_label.visible, "no health bars over the fighters")
+
+	# A bark that lands: it shows in their bodies, not in words.
+	var agency := map.get_node("DogAgency") as DogAgency
+	var hud := map.get_node("RunHUD")
+	var to_owner := human.global_position - pair.human_global_position()
+	to_owner.y = 0.0
+	dog.global_position = pair.human_global_position() + to_owner.normalized().cross(Vector3.UP) * 2.0 + Vector3(0, 0.1, 0)
+	dog.facing = (pair.human_global_position() - dog.global_position).normalized()
+	agency.recent_barks.clear()
+	agency.barks_heard = 0
+	var toasts_before: int = hud._toast_queue.size()
+	human._bubble.text = ""
+	check_eq(agency.bark(), DogAgency.BarkResult.DISTRACTED, "the bark lands")
+	check(human._bubble.text.is_empty(), "the owner does not announce the opening")
+	check_eq(hud._toast_queue.size(), toasts_before, "and no toast explains it")
+	await _physics(10)
+	check(theirs.is_distracted(), "their body turns to the dog instead")
+
+	# The debug switch puts it all back, without changing the fight.
+	FighterPuppet3D.show_combat_text = true
+	await _physics(2)
+	check(ours._hp_label.visible and theirs._hp_label.visible, "debug: health bars come back with fight text on")
+	FighterPuppet3D.show_combat_text = false
+	await _physics(2)
+
+	# How they are doing, in the body: hurt, they stoop and their guard drops;
+	# near the end they sway.
+	if ours._pose_tween != null:
+		ours._pose_tween.kill()
+	ours._reset_pose()
+	ours.set_guard(false)
+	ours.motion.state = CombatMotion3D.State.CIRCLE
+	ours.set_hp_ratio(1.0)
+	var fresh_lean := 0.0
+	for i in 20:
+		ours.play_motion(1.0 / 60.0)
+		fresh_lean = maxf(fresh_lean, ours._body.rotation.x)
+	ours.set_hp_ratio(0.12)
+	var hurt_lean := 0.0
+	var sway := 0.0
+	for i in 60:
+		ours._time += 1.0 / 60.0
+		ours.play_motion(1.0 / 60.0)
+		hurt_lean = maxf(hurt_lean, ours._body.rotation.x)
+		sway = maxf(sway, absf(ours._body.rotation.z))
+	check(hurt_lean > fresh_lean + 0.12, "a badly hurt fighter stoops (%.2f against %.2f rad)" % [hurt_lean, fresh_lean])
+	check(sway > 0.03, "and sways on their feet (%.2f rad)" % sway)
+	ours.set_hp_ratio(1.0)
 	coordinator.time_scale = 25.0
 
 
