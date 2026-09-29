@@ -11,7 +11,7 @@ const TEAL := Color("#3b8f86")
 static func build(data: FighterData) -> Node3D:
 	# Review candidate only; final-art approval is separate from the asset import.
 	if ProjectSettings.get_setting("art/use_p04_candidate", false):
-		var candidate := P04HumanVisual.new()
+		var candidate := P04HumanVisual.new(data.skeletal_model)
 		candidate.set_outfit_colors(data.shirt_color, data.pants_color)
 		candidate.use_legacy_controls()
 		return candidate

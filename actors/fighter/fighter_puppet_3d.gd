@@ -82,7 +82,9 @@ func apply(fighter: FighterData) -> void:
 	# Art adds its pieces to the root in plain world coordinates; put each one
 	# on the body part it sits on so limbs carry their own clothing.
 	Greybox.bind_parts(_body)
-	_body.scale = Vector3(fighter.body_scale.x, fighter.body_scale.y, fighter.body_scale.x)
+	# A dedicated model is built at its own size; body_scale shapes the shared one.
+	var own_model := fighter.skeletal_model != null and _body is P04HumanVisual
+	_body.scale = Vector3.ONE if own_model else Vector3(fighter.body_scale.x, fighter.body_scale.y, fighter.body_scale.x)
 	add_child(_body)
 	_hips = Greybox.part(_body, "Hips")
 	_torso = Greybox.part(_body, "Torso")

@@ -25,10 +25,12 @@ var _written: Dictionary = {}
 var _clip_base: Dictionary = {}
 var controls: Dictionary = {}
 
-func _init() -> void:
+## `scene`: another model on the same OwnerSkeleton (FighterData.skeletal_model);
+## null = the shared P-04 human.
+func _init(scene: PackedScene = null) -> void:
 	name = "P04HumanCandidate"
 	set_meta("skeletal_art", true)
-	model = MODEL.instantiate()
+	model = (scene if scene != null else MODEL).instantiate()
 	model.rotation.y = PI
 	add_child(model)
 	skeleton = _find_type(model, "Skeleton3D") as Skeleton3D
