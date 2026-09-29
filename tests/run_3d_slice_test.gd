@@ -261,9 +261,11 @@ func _run() -> void:
 	check(pair.is_beaten() and gained[0] > 0, "beaten pair, reward in the bag")
 
 	# --- Extraction -> result -> Home ---------------------------------------------
-	run.debug_unlock_all_extractions()
 	var bus := map.get_node("ExtractionPoints/bus_stop") as ExtractionPoint3D
+	check(not bus.is_showing_way_home(), "no light over a closed exit")
+	run.debug_unlock_all_extractions()
 	check(bus.available, "extraction point unlocks")
+	check(bus.is_showing_way_home(), "S05-02: a light over the open exit shows the way home from anywhere")
 	await _interact_at(dog, human, bus)
 	await _wait_for_scene(Game.RUN_RESULT_SCENE)
 	check(Game.last_run_result != null and Game.last_run_result.is_success(), "extracted from the 3D walk")
