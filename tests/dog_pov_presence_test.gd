@@ -81,10 +81,49 @@ func _run() -> void:
 	check(longest_overlap <= 3, "the dog never stays inside a person (longest %d frames)" % longest_overlap)
 	check(sharpest_turn < 0.12, "the view never snaps as bodies move round it (sharpest %.3f rad in a frame)" % sharpest_turn)
 
+	await _test_stationary_dog()
+
 	coordinator.debug_force_result(CombatSimulation.Result.DISENGAGED)
 	coordinator.time_scale = 1.0
 	await _physics(3)
 	finish()
+
+
+## P03-E12 (found in the captures): a dog standing still right beside the
+## fight. Fighters used to circle straight onto it and bury its eyes in their
+## clothing; they now keep clear of it (P-04: adjust path round the dog), and
+## anyone at the lens is faded.
+func _test_stationary_dog() -> void:
+	if not coordinator.is_fighting():
+		return
+	var centre := _fight_centre()
+	var line := _flat(pair.human_global_position() - human.global_position).normalized()
+	# Right up against the fight, as a player standing by it would be.
+	dog.global_position = centre + line.cross(Vector3.UP) * 0.7 + Vector3(0, 0.1, 0)
+	dog.velocity = Vector3.ZERO
+	coordinator.time_scale = 1.0
+	var closest := INF
+	var pressed := 0
+	var watched := 0
+	var unfaded_at_lens := 0
+	for i in 360:
+		await _tree.physics_frame
+		if not coordinator.is_fighting():
+			break
+		watched += 1
+		var lens := rig.camera.global_position
+		for body: Node3D in [human.puppet, pair.human_puppet]:
+			var gap := _flat(dog.global_position - body.global_position).length()
+			closest = minf(closest, gap)
+			if gap < 0.6:
+				pressed += 1
+			if _flat(lens - body.global_position).length() < rig.near_fade_distance and not rig._near_faded.has(body):
+				unfaded_at_lens += 1
+	coordinator.time_scale = 0.35
+	check(watched > 60, "the fight went on around a dog standing still (%d frames)" % watched)
+	check(pressed <= watched * 0.05, "fighters keep clear of a dog standing beside them (%d of %d frames pressed onto it, closest %.2f m)" % [pressed, watched, closest])
+	# The fade follows the fighters' move by a frame at most.
+	check(unfaded_at_lens <= 3, "nobody right at the lens is drawn solid for more than a frame or two (%d)" % unfaded_at_lens)
 
 
 ## Steers the dog along `direction.call()` through the real Input Map, read

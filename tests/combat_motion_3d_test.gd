@@ -308,7 +308,13 @@ func _test_dog_pov(map: RunMap3D, coordinator: CombatCoordinator3D, dog: DogCont
 	check(absf(centre.y - owner_head.y) < 0.3, "the fight is watched at head height (%.2f vs %.2f)" % [centre.y, owner_head.y])
 	check(centre.distance_to(owner_head) < centre.distance_to(opponent_head), "the fight is watched from the owner's side")
 	var aim := -rig.global_basis.z
-	check(aim.dot((centre - rig.global_position).normalized()) > 0.9, "the camera is pointed at the fight")
+	var to_centre := centre - rig.global_position
+	var flat_aim := Vector3(aim.x, 0, aim.z).normalized()
+	var flat_centre := Vector3(to_centre.x, 0, to_centre.z).normalized()
+	check(flat_aim.dot(flat_centre) > 0.9, "the camera is pointed at the fight")
+	# P03-E12: close up it looks no higher than the cap, so it sees bodies and
+	# not sky and chins (shake adds a little).
+	check(rad_to_deg(asin(clampf(aim.y, -1.0, 1.0))) <= rig.pov_max_look_up + 3.0, "and does not crane up at the sky (%.0f°)" % rad_to_deg(asin(clampf(aim.y, -1.0, 1.0))))
 
 	# Pushing forward must go where the player is looking. In first person the
 	# boom is behind their eyes and means nothing; reading the stick against it

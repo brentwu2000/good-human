@@ -75,6 +75,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("inventory"):
 		toggle_inventory()
+	# Held back during a fight; shown once it is over.
+	if not _experience_fx.visible and not _experience_queue.is_empty() and not _in_fight():
+		_play_next_experience()
 	_update_time()
 	_update_toast(delta)
 	_update_hint(delta)
@@ -199,12 +202,18 @@ func _on_training_event_recorded(event: TrainingEvent) -> void:
 	if memory.is_empty():
 		return
 	_experience_queue.append(memory)
-	if not _experience_fx.visible:
+	if not _experience_fx.visible and not _in_fight():
 		_play_next_experience()
 
 
+## P03-E12 / P04-11: a fight is read without words, so what the owner learned
+## in it waits until it is over.
+func _in_fight() -> bool:
+	return combat_coordinator != null and combat_coordinator.has_method(&"is_fighting") and combat_coordinator.is_fighting()
+
+
 func _play_next_experience() -> void:
-	if _experience_queue.is_empty():
+	if _experience_queue.is_empty() or _in_fight():
 		_experience_fx.hide()
 		return
 	_experience_label.text = "主人記住了：\n%s" % _experience_queue.pop_front()

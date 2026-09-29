@@ -57,6 +57,14 @@ const CRISIS_CONDITION: float = 0.34
 @export var snap_smoothing: float = 2.2
 ## The Combat Snap into first person (D4: 0.35-0.8 s). Blended, never cut.
 @export var pov_snap_rate: float = 3.4
+## P03-E12 (captures): a fighter this close to the lens (m, on the ground) is
+## drawn faded until they move off, rather than filling the frame with a
+## sleeve. Fighters themselves keep clear of the dog
+## (CombatCoordinator3D.DOG_CLEARANCE), so the dog's eyes stay in open space;
+## this covers the player pushing the dog right up against someone.
+@export var near_fade_distance: float = 0.8
+## How far up (degrees) the dog's eyes will look at the fight (P03-E12).
+@export var pov_max_look_up: float = 20.0
 ## CombatCenter: the point the POV camera watches, between the two humans and
 ## biased towards the owner (tunable, as the spec asks).
 @export_range(0.0, 1.0) var combat_center_owner_bias: float = 0.62
@@ -121,6 +129,7 @@ const CRISIS_CONDITION: float = 0.34
 var dog: DogController3D
 var owner_actor: HumanFollower3D
 var coordinator: CombatCoordinator3D
+var _near_faded: Array[Node3D] = []
 var yaw: float = 0.0
 var current: Dictionary = {}
 var collided: bool = false
@@ -309,12 +318,13 @@ func _aim_point(delta: float, instant: bool) -> Vector3:
 func _tracked_combat_center(delta: float, instant: bool) -> Vector3:
 	var eye := dog.eye_position()
 	var target := combat_center()
-	var to_target := (target - eye).normalized()
+	# Capped before the turn limit, so the limit still bounds every turn.
+	var to_target := _looking_up_at_most((target - eye).normalized())
 	if to_target.length() < 0.01:
 		return target
 	if instant or _pov_aim == Vector3.ZERO:
 		_pov_aim = to_target
-		return target
+		return eye + _pov_aim * maxf(eye.distance_to(target), 0.5)
 	var to_current := _pov_aim
 	var angle := to_current.angle_to(to_target)
 	if angle > pov_dead_zone:
@@ -323,6 +333,17 @@ func _tracked_combat_center(delta: float, instant: bool) -> Vector3:
 		var axis := to_current.cross(to_target)
 		_pov_aim = to_target if axis.length() < 0.0001 else to_current.rotated(axis.normalized(), step).normalized()
 	return eye + _pov_aim * maxf(eye.distance_to(target), 0.5)
+
+
+## P03-E12 (captures): from a dog's eyes 0.42 m off the ground, someone right
+## beside it puts the fight's centre nearly overhead, and the view became sky
+## and chins. The dog looks up no further than this, so bodies stay in frame.
+func _looking_up_at_most(direction: Vector3) -> Vector3:
+	var limit := deg_to_rad(pov_max_look_up)
+	var flat := Vector3(direction.x, 0.0, direction.z)
+	if flat.length() < 0.0001 or direction.y <= sin(limit):
+		return direction
+	return (flat.normalized() * cos(limit) + Vector3.UP * sin(limit)).normalized()
 
 
 ## The point the fight is happening at: between the two humans, weighted towards
@@ -510,6 +531,59 @@ func _update_owner_fade() -> void:
 	var owner_depth := (body - camera.global_position).dot(forward)
 	var dog_depth := (dog.global_position - camera.global_position).dot(forward)
 	owner_actor.set_faded(owner_depth < dog_depth - 0.1)
+	_fade_fighters_at_the_lens()
+
+
+## P03-E12: a fighter standing at the lens is faded, not hidden (they are
+## still the fight), until they move off. Only during a fight: walking, the
+## owner has their own rule above.
+func _fade_fighters_at_the_lens() -> void:
+	# The two fighters, and their dog, which stands at its owner's side.
+	var bodies: Array[Node3D] = []
+	if coordinator != null and coordinator.engagement != null and owner_actor != null:
+		var pair := coordinator.engagement.pair
+		bodies = [owner_actor.puppet, pair.human_puppet]
+		if pair._dog != null:
+			bodies.append(pair._dog)
+	for body in _near_faded.duplicate():
+		if not is_instance_valid(body) or not bodies.has(body) or not _blocks_the_lens(body):
+			if is_instance_valid(body):
+				_set_body_faded(body, false)
+			_near_faded.erase(body)
+	for body in bodies:
+		if body != null and not _near_faded.has(body) and _blocks_the_lens(body):
+			_set_body_faded(body, true)
+			_near_faded.append(body)
+
+
+func _set_body_faded(body: Node3D, faded: bool) -> void:
+	if body is FighterPuppet3D:
+		(body as FighterPuppet3D).set_faded(faded)
+	else:
+		Greybox.set_faded(body, faded, 0.28)
+
+
+## Right at the lens, or standing between the lens and the dog (the same rule
+## the walking owner has) — out of first person the dog is what the view is
+## built round, so a body in front of it is in the way.
+func _blocks_the_lens(body: Node3D) -> bool:
+	var lens := camera.global_position
+	var at := body.global_position
+	if Vector2(at.x - lens.x, at.z - lens.z).length() < near_fade_distance:
+		return true
+	if pov > 0.85:
+		return false
+	var forward := -global_basis.z
+	# Chest height for a person, back height for their dog.
+	var middle := at + Vector3(0, 0.9 if body is FighterPuppet3D else 0.4, 0)
+	var body_depth := (middle - lens).dot(forward)
+	var dog_depth := (dog.global_position - lens).dot(forward)
+	if body_depth <= 0.0 or body_depth >= dog_depth - 0.1:
+		return false
+	# Only if they are actually across the line of sight to the dog.
+	var to_dog := (dog.global_position + Vector3(0, 0.4, 0) - lens).normalized()
+	var to_body := (middle - lens).normalized()
+	return to_dog.angle_to(to_body) < 0.45
 
 
 func is_dog_visible() -> bool:

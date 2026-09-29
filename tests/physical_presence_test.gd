@@ -175,7 +175,7 @@ func _run() -> void:
 	var clear := Vector2.ZERO
 	var found := false
 	for ground: Vector2 in [Vector2(0, 300), Vector2(0, -300), Vector2(300, 0), Vector2(-300, 0)]:
-		if coordinator._walkable(ground):
+		if coordinator._walkable(ground) == 0.0:
 			clear = ground
 			found = true
 			break
@@ -190,7 +190,7 @@ func _run() -> void:
 	map.add_child(wall)
 	wall.global_position = coordinator._ground_to_world(clear)
 	await _physics(2)
-	check(not coordinator._walkable(clear), "and a wall there is somewhere they cannot")
+	check(coordinator._walkable(clear) >= CombatCoordinator3D.WALL_MISPLACEMENT, "and a wall there is somewhere they cannot")
 	wall.queue_free()
 
 	coordinator.debug_force_result(CombatSimulation.Result.DISENGAGED)

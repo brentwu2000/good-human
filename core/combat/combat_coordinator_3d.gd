@@ -15,6 +15,12 @@ const DEFEAT_SECONDS: float = 1.6
 const UNITS_PER_METER: float = 100.0
 ## Dog further than this (m) from its owner breaks the fight off.
 const DISENGAGE_DISTANCE: float = 9.0
+## P03-E12: fighters do not step within this of the dog (m, centre to centre)…
+const DOG_CLEARANCE: float = 0.9
+## …unless it has kept them from closing on each other this long (s).
+const DOG_BLOCK_LIMIT: float = 2.0
+## Misplacement of standing inside a wall: more than any dog margin can add.
+const WALL_MISPLACEMENT: float = 10.0
 
 @export var run_manager: RunManager
 ## Optional: the view shakes when a hit lands nearby.
@@ -55,6 +61,8 @@ var _pairs: Array[OpponentPair3D] = []
 var _origin: Vector3
 var _axis: Vector3
 var _side_axis: Vector3
+## How long the fighters have been kept from closing with the dog near them.
+var _kept_apart_left: float = 0.0
 var _accumulator: float = 0.0
 var _defeat_left: float = -1.0
 var _defeated_by: String = ""
@@ -150,6 +158,7 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	blows_landed = 0
 	release_left = 0.0
 	acknowledge_left = 0.0
+	_kept_apart_left = 0.0
 	sim.combat_event.connect(_on_combat_event)
 	sim.finished.connect(_on_finished)
 	_sync()
@@ -178,6 +187,7 @@ func _process(delta: float) -> void:
 		_hitstop_left -= delta
 		_sync()
 		return
+	_update_dog_block(delta)
 	_accumulator += delta * time_scale
 	while _accumulator >= STEP and engagement != null and not sim.is_finished():
 		_accumulator -= STEP
@@ -247,15 +257,32 @@ func _update_motion(delta: float) -> void:
 		puppet.play_motion(delta)
 
 
-## P04-08: a fighter can stand at `ground` (simulation units from where the
-## fight began) when a body there would touch no wall, bench or tree. People
-## and the dog are not obstacles here: the other fighter is kept apart by the
-## simulation, and the dog gives way (ADR-016).
-func _walkable(ground: Vector2) -> bool:
+## P04-08: how badly placed a fighter would be at `ground` (simulation units
+## from where the fight began); 0 is fine. Inside a wall, bench or tree is
+## WALL_MISPLACEMENT. The other fighter is kept apart by the simulation.
+##
+## P03-E12 (captures): the dog too, by a margin — how far inside it they are.
+## A fight that walks onto a dog standing beside it buries the dog's eyes in
+## clothing, and P-04 asks that a fighter adjusts its path round the dog rather
+## than through it. The simulation never lets a move make this worse, so a
+## fighter inside the margin can still step out or round but not further in,
+## and nobody is pinned; and a dog that keeps them from closing for
+## DOG_BLOCK_LIMIT stops counting until they are back in range, so it can never
+## jam the fight either.
+func _walkable(ground: Vector2) -> float:
 	var space := get_viewport().get_world_3d().direct_space_state if is_inside_tree() else null
 	if space == null:
-		return true
+		return 0.0
 	var at := _ground_to_world(ground)
+	var misplaced := 0.0
+	if _dog_counts():
+		var from_dog := Vector2(at.x - dog.global_position.x, at.z - dog.global_position.z).length()
+		misplaced += maxf(DOG_CLEARANCE - from_dog, 0.0)
+	return misplaced + (0.0 if _clear_of_world(at) else WALL_MISPLACEMENT)
+
+
+func _clear_of_world(at: Vector3) -> bool:
+	var space := get_viewport().get_world_3d().direct_space_state
 	var presence := DataRegistry.presence
 	var capsule := CapsuleShape3D.new()
 	capsule.radius = presence.human_radius if presence != null else 0.24
@@ -266,6 +293,27 @@ func _walkable(ground: Vector2) -> bool:
 	query.transform = Transform3D(Basis.IDENTITY, Vector3(at.x, human.global_position.y + capsule.height * 0.5 + 0.05, at.z))
 	query.collision_mask = Greybox.WORLD_LAYER
 	return space.intersect_shape(query, 1).is_empty()
+
+
+func _dog_counts() -> bool:
+	return _kept_apart_left < DOG_BLOCK_LIMIT
+
+
+## Counts how long the fighters have wanted to close and not been able to:
+## past DOG_BLOCK_LIMIT the dog is walked round no longer, until they are in
+## range again.
+func _update_dog_block(delta: float) -> void:
+	var sim := engagement.simulation
+	var want_to_close := sim.distance() > sim.spacing.ideal_max
+	if not want_to_close:
+		_kept_apart_left = 0.0
+		return
+	var dog_near := Vector2(dog.global_position.x - _fight_centre().x, dog.global_position.z - _fight_centre().z).length() < sim.distance() / UNITS_PER_METER
+	_kept_apart_left = _kept_apart_left + delta * time_scale if dog_near else 0.0
+
+
+func _fight_centre() -> Vector3:
+	return (human.global_position + engagement.pair.human_global_position()) * 0.5
 
 
 func _ground_to_world(ground: Vector2) -> Vector3:

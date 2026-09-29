@@ -58,7 +58,11 @@ var origin: Vector2 = Vector2.ZERO
 ## P04-08: where a fighter can stand, asked with a ground position in units
 ## from where the fight began (`world_position`). Unset, anywhere is fine,
 ## which keeps the simulation runnable headless. The Run World answers it
-## against walls, benches and trees.
+## against walls, benches, trees and the dog. The answer is either a bool (can
+## stand there) or a float: how badly placed that is, 0 meaning fine. A move
+## is never allowed to make it worse — out of the way and sideways are always
+## allowed, so nobody is ever pinned, but nobody steps further into a wall or
+## further onto the dog.
 var walkable: Callable
 
 var _first_to_decide: int = 0
@@ -391,23 +395,28 @@ func _continue_step(fighter: CombatFighter, delta: float) -> void:
 ## Returns false, and moves nobody, when that would put them somewhere they
 ## cannot stand.
 func _circle(fighter: CombatFighter, amount: float) -> bool:
-	var was_clear := _can_stand(fighter.side)
+	var was := _misplacement(fighter.side)
 	var before := [line_angle, origin]
 	var pivot_side := _other(fighter).side
 	var pivot := world_position(pivot_side)
 	line_angle += amount / maxf(distance(), 1.0)
 	origin = pivot - _line_direction() * fighters[pivot_side].position
 	origin = origin.limit_length(MAX_DRIFT)
-	if was_clear and not _can_stand(fighter.side):
+	if _misplacement(fighter.side) > was + 0.0001:
 		line_angle = before[0]
 		origin = before[1]
 		return false
 	return true
 
 
-## True when `side` is standing somewhere they can stand (P04-08).
-func _can_stand(side: int) -> bool:
-	return not walkable.is_valid() or walkable.call(world_position(side))
+## How badly placed `side` is where they stand (P04-08): 0 is fine.
+func _misplacement(side: int) -> float:
+	if not walkable.is_valid():
+		return 0.0
+	var answer: Variant = walkable.call(world_position(side))
+	if answer is bool:
+		return 0.0 if answer else 1.0
+	return float(answer)
 
 
 func _line_direction() -> Vector2:
@@ -589,8 +598,9 @@ func _tick_cooldowns(fighter: CombatFighter, delta: float) -> void:
 
 ## Moves `fighter` along the line. Returns false, and leaves them where they
 ## were, when the ground they would move onto is not somewhere they can stand
-## (a wall, a bench): a step back, a dodge or a knockback stops at it. Someone
-## already caught in something may always move, so nobody is ever pinned.
+## (a wall, a bench): a step back, a dodge or a knockback stops at it. A move
+## may never make where they stand worse, so someone already caught in
+## something can always get out, and nobody is ever pinned.
 func _move(fighter: CombatFighter, amount: float) -> bool:
 	var target := _other(fighter)
 	var next := clampf(fighter.position + amount, -MAX_DRIFT, MAX_DRIFT)
@@ -600,9 +610,9 @@ func _move(fighter: CombatFighter, amount: float) -> bool:
 	else:
 		next = maxf(next, target.position + spacing.hard_min_separation)
 	var was := fighter.position
-	var was_clear := _can_stand(fighter.side)
+	var misplaced := _misplacement(fighter.side)
 	fighter.position = next
-	if was_clear and not _can_stand(fighter.side):
+	if _misplacement(fighter.side) > misplaced + 0.0001:
 		fighter.position = was
 		return false
 	return true
