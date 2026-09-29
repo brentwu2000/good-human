@@ -46,6 +46,10 @@ const BARK_MIN_EFFECT: float = 0.3
 ## A yank is a rescue, not a stance: the owner has to find their feet again
 ## before the leash can save them a second time.
 const PULL_COOLDOWN: float = 3.0
+## P04-10 / ADR-L02: the leash can haul the owner clear this many times in one
+## fight. After that they have their footing and a pull only braces them, so
+## the dog helps in a fight without winning it.
+const PULL_SAVES_PER_FIGHT: int = 2
 ## Meters past the leash length before a pull happens.
 const PULL_SLACK: float = 0.3
 const PULL_MIN_DOG_SPEED: float = 1.0
@@ -71,6 +75,8 @@ var last_pull: StringName = &""
 var recent_barks: Array[float] = []
 ## Barks the current opponent has already heard (habituation).
 var barks_heard: int = 0
+## Times the leash has hauled the owner clear in this fight.
+var pull_saves: int = 0
 
 var _time: float = 0.0
 var _bark_ready_at: float = 0.0
@@ -80,7 +86,9 @@ var _drag_out_time: float = 0.0
 
 func _ready() -> void:
 	run_manager.run_started.connect(func(_s: int) -> void: _reset())
-	coordinator.engagement_started.connect(func(_e: Engagement3D) -> void: barks_heard = 0)
+	coordinator.engagement_started.connect(func(_e: Engagement3D) -> void:
+		barks_heard = 0
+		pull_saves = 0)
 
 
 func _reset() -> void:
@@ -88,6 +96,7 @@ func _reset() -> void:
 	last_pull = &""
 	recent_barks.clear()
 	barks_heard = 0
+	pull_saves = 0
 	_bark_ready_at = 0.0
 	_pull_ready_at = 0.0
 	_drag_out_time = 0.0
@@ -213,7 +222,14 @@ func _update_leash(delta: float) -> void:
 		last_pull = &"stumbled"
 		outcome.emit("✘ 把主人往對手身上扯，踉蹌了", false)
 		training_moment.emit(&"agency_bad_pull", engagement.pair.spot_id)
+	elif pull_saves >= PULL_SAVES_PER_FIGHT:
+		# Found their feet: the lead goes taut and they stay put.
+		sim.brace(CombatSimulation.PLAYER)
+		human.say("我站穩了！", Color(0.9, 0.9, 0.9), 0.8)
+		last_pull = &"braced"
+		outcome.emit("…主人站穩了，拉不動了", false)
 	elif sim.pull(CombatSimulation.PLAYER, PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER):
+		pull_saves += 1
 		human.say("哇！差點被打到！", Color(0.7, 1.0, 0.8), 1.0)
 		last_pull = &"saved"
 		outcome.emit("✦ 把主人拉開，躲過一招！", true)

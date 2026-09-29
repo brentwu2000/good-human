@@ -26,9 +26,6 @@ const OPPONENT: int = 1
 const START_DISTANCE: float = 220.0
 ## How far either human may drift from the engagement origin.
 const MAX_DRIFT: float = 600.0
-## The opening stays open this long after the target stops looking away, so the
-## other human's next attack lands on it without being handed a free turn.
-const OPENING_GRACE: float = 1.2
 ## A distraction at least this long is a full one: the target can still drop
 ## what it was doing. Shorter ones only make it look away.
 const DISTRACT_STRONG: float = 0.5
@@ -163,7 +160,7 @@ func distract(side: int, seconds: float) -> void:
 	if is_finished() or fighter.is_defeated() or seconds <= 0.0:
 		return
 	fighter.distracted_until = maxf(fighter.distracted_until, time + seconds)
-	fighter.exposed_until = maxf(fighter.exposed_until, time + seconds + OPENING_GRACE)
+	fighter.exposed_until = maxf(fighter.exposed_until, time + seconds + _balance.opening_grace)
 	# A full-strength bark also costs them what they were doing — for as long as
 	# they looked away, not for their own recovery, so slow heavy fighters are
 	# not perma-cancelled. An attack they have already committed to still lands.
@@ -205,6 +202,14 @@ func pull(side: int, amount: float) -> bool:
 	# presentation has to be able to tell those apart.
 	combat_event.emit(&"pulled", side, null, amount if saved else 0.0)
 	return saved
+
+
+## The leash went taut on someone with their footing: a jolt, no movement,
+## no cost and no save (P04-10).
+func brace(side: int) -> void:
+	if is_finished() or fighters[side].is_defeated():
+		return
+	combat_event.emit(&"pulled", side, null, 0.0)
 
 
 ## A bad pull knocks `side` off balance: current action lost, no attacks for a while.
@@ -263,7 +268,7 @@ func choose_skill(fighter: CombatFighter) -> CombatSkillData:
 ## Open to a punishing blow: distracted (a bark's opening) or caught in the
 ## recovery after a swing.
 func _is_open(target: CombatFighter) -> bool:
-	return time < target.exposed_until or target.phase == CombatFighter.Phase.RECOVERY
+	return time < target.exposed_until or (target.phase == CombatFighter.Phase.RECOVERY and not target.whiff_excused)
 
 
 func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
@@ -474,12 +479,15 @@ func _phase_done(fighter: CombatFighter) -> void:
 		CombatFighter.Phase.CONTACT:
 			# The window closed on nobody: a whiff, and they overreach. If the
 			# target was getting out of the way, it was their dodge.
+			fighter.whiff_excused = false
 			if not fighter.connected:
+				# Hauled away by the leash is not the attacker's mistake (P04-10).
+				fighter.whiff_excused = time - _other(fighter).pulled_until <= DODGE_CREDIT
 				var dodged := time - _other(fighter).last_evaded_at <= DODGE_CREDIT
 				combat_event.emit(&"dodged" if dodged else &"missed", fighter.side, skill, 0.0)
 			_enter(fighter, CombatFighter.Phase.FOLLOW_THROUGH, skill.follow_through)
 		CombatFighter.Phase.FOLLOW_THROUGH:
-			var whiff := 0.0 if fighter.connected else skill.whiff_recovery
+			var whiff := 0.0 if fighter.connected or fighter.whiff_excused else skill.whiff_recovery
 			_enter(fighter, CombatFighter.Phase.RECOVERY, skill.recovery + whiff)
 		CombatFighter.Phase.ACTIVE:
 			_enter(fighter, CombatFighter.Phase.RECOVERY, skill.recovery)

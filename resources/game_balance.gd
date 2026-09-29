@@ -33,6 +33,9 @@ extends Resource
 ## Damage multiplier for a blow into an opening the dog made (a bark). Held
 ## so the dog changes the exchange, not the result (ADR-L02).
 @export var opening_damage: float = 1.4
+## How long that opening stays open after they stop looking away (s): long
+## enough for the owner's next blow, not for a combination (ADR-L02).
+@export var opening_grace: float = 1.2
 ## Once engaged, the player's human breaks away when the dog is this far away.
 @export var disengage_distance: float = 400.0
 ## Fights longer than this end as ABORTED.

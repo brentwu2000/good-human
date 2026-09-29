@@ -42,6 +42,9 @@ var last_evaded_at: float = -99.0
 var pulled_until: float = -1.0
 var yank_left: float = 0.0
 var yank_speed: float = 0.0
+## The current attack missed only because its target was hauled away by the
+## leash: the attacker did not overreach, so no whiff penalty and no opening.
+var whiff_excused: bool = false
 ## P-04 footwork. `lateral` is which way round the opponent they prefer
 ## (+1 / -1). A step (sidestep, backstep) is a short committed move: it runs
 ## for `step_left` seconds at `step_speed` units/s.
