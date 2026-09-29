@@ -14,6 +14,9 @@ const PET_SECONDS: float = 0.5
 
 var _muzzle: Node3D
 var _tween: Tween
+var _ears: Array[Node3D] = []
+var _ear_rest: Array[Transform3D] = []
+var _instinct_tween: Tween
 
 
 func _ready() -> void:
@@ -29,6 +32,36 @@ func _ready() -> void:
 	for side in [-1.0, 1.0]:
 		var ear := Greybox.box(Vector3(0.05, 0.10, 0.03), fur.darkened(0.12), Vector3(0.115 * side, 0.115, -0.30), Vector3(-0.25, 0, 0.35 * side))
 		add_child(ear)
+		_ears.append(ear)
+		_ear_rest.append(ear.transform)
+
+
+## D4/P02-009, from inside the dog's head: THREAT pricks the ears up and
+## forward and lifts the muzzle in a snarl; WORRY lays the ears back and down
+## and lowers the muzzle. CALM puts everything back.
+func set_instinct(instinct: int) -> void:
+	if _muzzle == null:
+		return
+	if _instinct_tween != null:
+		_instinct_tween.kill()
+	_instinct_tween = create_tween().set_parallel()
+	var lift := 0.0
+	var ear_up := 0.0
+	var ear_turn := 0.0
+	match instinct:
+		DogInstinct.Instinct.THREAT:
+			lift = 0.14
+			ear_up = 0.025
+			ear_turn = -0.45
+		DogInstinct.Instinct.WORRY:
+			lift = -0.1
+			ear_up = -0.035
+			ear_turn = 0.5
+	_instinct_tween.tween_property(_muzzle, "rotation:x", lift, 0.15).set_trans(Tween.TRANS_SINE)
+	for i in _ears.size():
+		var rest := _ear_rest[i]
+		_instinct_tween.tween_property(_ears[i], "position:y", rest.origin.y + ear_up, 0.15)
+		_instinct_tween.tween_property(_ears[i], "rotation:x", rest.basis.get_euler().x + ear_turn, 0.15)
 
 
 ## A hand has landed: the head dips under it and comes back up.

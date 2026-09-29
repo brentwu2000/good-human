@@ -330,10 +330,10 @@ Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog sta
 | D4/P02-005 | Crisis framing | REVIEW |
 | D4/P02-006 | Victory release | REVIEW |
 | D4/P02-007 | Defeat owner-down beat | REVIEW |
-| D4/P02-008 | Owner condition feedback | TODO |
-| D4/P02-009 | Dog instinct feedback | TODO |
+| D4/P02-008 | Owner condition feedback | REVIEW |
+| D4/P02-009 | Dog instinct feedback | REVIEW |
 | D4/P02-010 | Owner↔dog acknowledgement | REVIEW |
-| D4/P02-011 | Debug/tuning | TODO |
+| D4/P02-011 | Debug/tuning | REVIEW |
 | D4/P02-012 | Blind comparison QA | TODO |
 
 ## P-02 Combat Experience Engineering Notes (Claude)
@@ -347,6 +347,11 @@ Key experiment (ADR-014, PROPOSED/PROTOTYPE): during seamless combat the dog sta
 - Still to do here: owner condition read through behaviour rather than an HP bar (D4/P02-008), dog instinct and owner↔dog acknowledgement (D4/P02-009/010), debug (011) and the blind comparison (012). Adoption depends on the P-02 playtest and the blind comparison (D4/P02-012, `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`); ADR-014 stays PROPOSED until then.
 - The Gate 02 feel pass already landed (hitstop, camera shake, damage-scaled impact) and is complementary: it is the moment of contact, this patch is the framing and the emotional curve around it.
 - Audio is still absent project-wide and still needs an ownership call; `COMBAT_EMOTIONAL_FEEDBACK` assumes an audio duck on SNAP, which cannot exist yet.
+- D4/P02-008 (COMBAT_EMOTIONAL_FEEDBACK): the owner's condition reads in three stages in the body, never a bar. HEALTHY: steady. HURT (60 % health and below): breathing hard, the guard pulled in tight, heavier feet, and a deeper, slower recovery after an action. CRITICAL (30 % and below): the guard sags with fatigue, they sway on their feet, and every couple of seconds they falter for a moment, head dropping (hesitation). DOWN is the existing owner-down beat. It builds on the P04-11 stoop; that first version dropped the guard as soon as they were hurt, where the spec wants it guarded when hurt and sagging only when critical.
+- D4/P02-009: `DogInstinct` gives the dog its own read of danger to its owner, in its own body and nowhere else (it changes no rule). THREAT, while a heavy blow (hook or kick) winds up at the owner: head down and forward and a "grr"; in the dog's eyes the ears prick up and the muzzle lifts in a snarl. WORRY, while the owner is critical or down: head low and a "嗚…"; ears laid back and down, muzzle lowered. The captions stand in for sound while the project has no audio, like the bark's. The growl lands on the same telegraph a leash pull answers.
+- D4/P02-011: the debug overlay shows the camera context and blend, which combat camera is in use, the owner's condition stage and health, and the dog's instinct. The debug panel gains "主人重傷（25%）" (owner to 25 % mid-fight, to tune HURT/CRITICAL and the CRISIS framing) and a combat-camera switch between Dog POV (ADR-015) and the P-02 owner-focused third person (ADR-014).
+- D4/P02-012 is Codex's blind comparison. Two builds for it: `build/windows_qa/GoodHuman.exe` (Dog POV) and `build/windows_qa_p02/GoodHuman.exe` (new export preset "Windows Desktop QA P-02", feature `p02_camera`: the fight stays in the owner-focused third person). Both are release builds with no debug panel and fight text off. Brief: `docs/07_qa/P_02_COMBAT_CAMERA_QA.md`.
+- Test: `combat_feedback_test` (31 checks) covers the three condition stages, the dog's THREAT and WORRY in both views and back to calm, the P-02 camera staying in third person while Dog POV drops into the dog's eyes, and the debug overlay and buttons.
 
 ## P-03 STREET BRAWL (Update 006 Patch 02)
 Installed 2026-09-18, after the owner played the P-02 framing and said it looked no different from an ordinary walk. The storyboard (`docs/06_art/dog_agency/P03_STREET_BRAWL_STORYBOARD.png`) answers why: the intended Combat Snap **drops the camera into the dog's eyes (first person)**, not a third-person shot that looks at the owner. "Explore as the dog. Fight through the dog's eyes."

@@ -45,6 +45,7 @@ var _detector: Area3D
 var _bark_label: Label3D
 var _bark_left: float = 0.0
 var _contact_cooldown: float = 0.0
+var _instinct_tween: Tween
 var _body_shape: CollisionShape3D
 
 
@@ -151,6 +152,33 @@ func play_bark() -> void:
 	var tween := create_tween()
 	tween.tween_property(_visual, "position:y", 0.12, 0.06)
 	tween.tween_property(_visual, "position:y", 0.0, 0.12)
+
+
+## D4/P02-009: the dog's own read of danger to its owner, shown in its body.
+## THREAT (a heavy blow winding up at the owner): head down and forward, a
+## growl. WORRY (the owner in a bad way): head low, a whine. The captions stand
+## in for sound, like the bark's, while the project has no audio. In first
+## person the ears and muzzle in frame carry it instead.
+func set_instinct(instinct: int) -> void:
+	if _instinct_tween != null:
+		_instinct_tween.kill()
+	_instinct_tween = create_tween()
+	var tilt := 0.0
+	match instinct:
+		DogInstinct.Instinct.THREAT:
+			tilt = -0.12
+			_show_caption("grr", 0.7)
+		DogInstinct.Instinct.WORRY:
+			tilt = -0.07
+			_show_caption("嗚…", 0.9)
+	_instinct_tween.tween_property(_visual, "rotation:x", tilt, 0.15).set_trans(Tween.TRANS_SINE)
+	if first_person_view != null:
+		first_person_view.set_instinct(instinct)
+
+
+func _show_caption(text: String, seconds: float) -> void:
+	_bark_label.text = text
+	_bark_left = seconds
 
 
 ## Yaw the dog is facing (0 = -Z).

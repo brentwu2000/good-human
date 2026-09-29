@@ -28,6 +28,12 @@ func _ready() -> void:
 	coordinator.camera = rig
 	rig.snap_behind_dog()
 	_build_bark_button()
+	# D4/P02-009: the dog's read of danger to its owner, shown in its body.
+	var instinct := DogInstinct.new()
+	instinct.name = "DogInstinct"
+	instinct.dog = dog
+	instinct.coordinator = coordinator
+	add_child(instinct)
 	var agency := get_node_or_null("DogAgency")
 	var hud := get_node_or_null("RunHUD")
 	if agency != null and hud != null:

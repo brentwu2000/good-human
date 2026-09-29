@@ -390,6 +390,21 @@ func debug_force_result(result: CombatSimulation.Result) -> void:
 		engagement.simulation.force_result(result)
 
 
+## D4/P02-011: put the owner at `ratio` of their health mid-fight, to tune how
+## HURT and CRITICAL read (and the CRISIS framing) without waiting for it.
+func debug_set_owner_condition(ratio: float) -> void:
+	if engagement != null:
+		var fighter := engagement.simulation.fighters[CombatSimulation.PLAYER]
+		fighter.hp = maxf(fighter.max_hp * ratio, 1.0)
+
+
+## Debug overlay line: the camera's framing and the owner's condition.
+func debug_text() -> String:
+	var rig_text := "camera %s pov %.2f %s" % [CameraRig3D.Context.keys()[camera.context], camera.pov, "DOG-POV" if CameraRig3D.combat_pov else "P-02 3rd"] if camera != null else "camera -"
+	var owner_text := "owner %s %.0f%%" % [FighterPuppet3D.Condition.keys()[human.puppet.condition_state()], owner_condition() * 100.0] if engagement != null else "owner -"
+	return "Combat: %s  %s" % [rig_text, owner_text]
+
+
 ## Puts the dog (and owner) next to the nearest pair that can be provoked.
 func debug_goto_next_pair() -> void:
 	if is_human_engaged():

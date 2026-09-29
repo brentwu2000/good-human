@@ -137,6 +137,13 @@ var _shake_time: float = 0.0
 var _look_offset: Vector3 = Vector3.ZERO
 var _has_look: bool = false
 var context: Context = Context.EXPLORE
+## D4/P02-011/012: which combat camera the fight uses. On, the Combat Snap
+## drops into the dog's eyes (ADR-015, P-03); off, the fight stays in the
+## owner-focused third person it is compared against (ADR-014, P-02). A build
+## exported with the `p02_camera` feature (preset "Windows Desktop QA P-02")
+## starts with it off, for the blind comparison; the debug panel flips it.
+static var combat_pov: bool = not OS.has_feature("p02_camera")
+
 ## 0..1 blend into the dog's eyes, eased separately from the rest of the framing.
 var pov: float = 0.0
 ## First-person aim, as a direction from the dog's eye (P04-09). Zero = not yet aimed.
@@ -253,7 +260,7 @@ func _update(delta: float, instant: bool) -> void:
 	# its own rate so it is always a transition, never a cut.
 	# Read from the context itself, not the blended framing: `pov` has its own
 	# snap rate and must not be smoothed twice.
-	var pov_target: float = CONTEXT_FRAMING[context].get("pov", 0.0)
+	var pov_target: float = CONTEXT_FRAMING[context].get("pov", 0.0) if combat_pov else 0.0
 	pov = pov_target if instant else lerpf(pov, pov_target, 1.0 - exp(-pov_snap_rate * delta))
 	if dog.first_person_view == null and _first_person_view != null:
 		dog.first_person_view = _first_person_view

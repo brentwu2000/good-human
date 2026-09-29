@@ -33,6 +33,16 @@ func _ready() -> void:
 	_bind(%WinFightButton, func() -> void: _with_combat(func(c: Node) -> void: c.debug_force_result(CombatSimulation.Result.VICTORY)))
 	_bind(%CombatLogButton, _toggle_combat_log)
 	_update_combat_log_button()
+	# D4/P02-011: tuning the owner's condition and comparing the two combat
+	# cameras. Built here so they sit with the other combat buttons.
+	_add_button("主人重傷（25%）", func() -> void: _with_combat(func(c: Node) -> void:
+		if c.has_method(&"debug_set_owner_condition"):
+			c.debug_set_owner_condition(0.25)))
+	var camera_button := _add_button("", Callable())
+	camera_button.pressed.connect(func() -> void:
+		CameraRig3D.combat_pov = not CameraRig3D.combat_pov
+		_update_camera_button(camera_button))
+	_update_camera_button(camera_button)
 	_bind(%TrainAllButton, func() -> void: run_manager.training.debug_add_all(3.0))
 	_bind(%GrowFullButton, func() -> void: _set_growth(DataRegistry.training.trait_full_growth))
 	_bind(%ResetGrowthButton, func() -> void: _set_growth(0.0))
@@ -51,6 +61,11 @@ func _process(_delta: float) -> void:
 		_info_label.text = "Run %02d:%02d   Seed %d\n%s\n%s" % [seconds / 60, seconds % 60, run_manager.run_seed, _training_text(), _goals_text()]
 		if dog_agency != null:
 			_info_label.text += "\n" + dog_agency.debug_text()
+		if combat_coordinator != null and combat_coordinator.has_method(&"debug_text"):
+			_info_label.text += "\n" + combat_coordinator.debug_text()
+		var instinct := get_tree().get_first_node_in_group(DogInstinct.GROUP) as DogInstinct
+		if instinct != null:
+			_info_label.text += "  " + instinct.debug_text()
 
 
 func toggle() -> void:
@@ -115,6 +130,23 @@ func _update_combat_log_button() -> void:
 	var button := get_node_or_null("%CombatLogButton") as Button
 	if button != null:
 		button.text = "戰鬥文字/血條：開" if FighterPuppet3D.show_combat_text else "戰鬥文字/血條：關"
+
+
+## A button in the same grid and style as the combat log toggle.
+func _add_button(text: String, action: Callable) -> Button:
+	var template := %CombatLogButton as Button
+	# No DUPLICATE_SIGNALS: the copy must not also toggle the combat log.
+	var button := template.duplicate(0) as Button
+	button.unique_name_in_owner = false
+	button.text = text
+	template.get_parent().add_child(button)
+	if action.is_valid():
+		button.pressed.connect(action)
+	return button
+
+
+func _update_camera_button(button: Button) -> void:
+	button.text = "戰鬥鏡頭：狗視角" if CameraRig3D.combat_pov else "戰鬥鏡頭：P-02 第三人稱"
 
 
 func _bind(button: Button, action: Callable) -> void:

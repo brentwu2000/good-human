@@ -14,6 +14,14 @@ static var show_combat_text: bool = false
 ## A bump from the dog was answered (ADR-016). Presentation only.
 signal bumped(from: Vector3)
 
+## P02-008: how the fight is going for them, as their body shows it.
+enum Condition { HEALTHY, HURT, CRITICAL, DOWN }
+const HURT_AT: float = 0.6
+const CRITICAL_AT: float = 0.3
+## Critical: every so often they falter for a moment (hesitation).
+const HESITATE_EVERY: float = 2.2
+const HESITATE_SECONDS: float = 0.35
+
 var data: FighterData
 
 var _body: Node3D
@@ -106,6 +114,17 @@ func hurt_amount() -> float:
 	return clampf(inverse_lerp(0.6, 0.1, _condition), 0.0, 1.0)
 
 
+## P02-008 (COMBAT_EMOTIONAL_FEEDBACK): the stage the body is showing.
+func condition_state() -> Condition:
+	if _down:
+		return Condition.DOWN
+	if _condition <= CRITICAL_AT:
+		return Condition.CRITICAL
+	if _condition <= HURT_AT:
+		return Condition.HURT
+	return Condition.HEALTHY
+
+
 func set_guard(active: bool) -> void:
 	# P04-06: the guard comes down when the block ends, not whenever the
 	# next action happens to reset the pose.
@@ -155,20 +174,39 @@ func play_motion(delta: float) -> void:
 			lean = -0.1
 		CombatMotion3D.State.RECOVER:
 			# Off balance and open — the moment a dog's bark is worth most.
+			# Hurt, they take longer to come back from it (P02-008).
 			bob = sin(_footwork * 0.6) * 0.01
-			lean = -0.08
+			lean = -0.08 - hurt * 0.1
 		_:
 			return
-	# P04-11: the body shows how the fight is going for them. Hurt, they stoop,
-	# their guard drops and their feet get heavy; close to the end they sway.
+	# P02-008 / P04-11: the body shows how the fight is going for them, not a
+	# bar. Hurt, they breathe hard, stoop and pull their guard in tight and
+	# their feet get heavy. Critical, the guard sags with fatigue, they sway,
+	# and now and then they falter for a moment before going on.
+	var state := condition_state()
+	var hesitating := state == Condition.CRITICAL and fmod(_time, HESITATE_EVERY) < HESITATE_SECONDS
+	if hesitating:
+		bob = 0.0
 	lean += hurt * 0.2
-	guard *= 1.0 - hurt * 0.6
+	if state == Condition.CRITICAL:
+		guard *= 0.4
 	bob *= 1.0 + hurt * 0.6
 	_body.position.y = bob
 	_body.rotation.x = lean + (data.stoop if data != null else 0.0)
 	_body.rotation.z = sin(_time * 2.4) * 0.07 * smoothstep(0.55, 1.0, hurt)
 	_body.position.z = guard
 	_body.position.x = move_toward(_body.position.x, 0.0, delta * 0.4)
+	var breathing := 0.0 if state == Condition.HEALTHY else 1.0
+	if _torso != null:
+		_torso.rotation.x = sin(_time * lerpf(2.2, 4.6, hurt)) * 0.05 * breathing
+	if _head != null:
+		_head.rotation.x = 0.28 if hesitating else 0.0
+	if not _guarding:
+		# Arms drawn in to protect themselves while hurt; hanging once spent.
+		var tucked := 1.0 if state == Condition.HURT else 0.0
+		for arm in _arms:
+			if arm != null:
+				arm.rotation.x = -0.5 * tucked
 
 
 ## The telegraph: the limb that is about to strike draws back, and the body
