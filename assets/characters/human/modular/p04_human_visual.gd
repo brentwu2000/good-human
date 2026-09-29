@@ -104,7 +104,10 @@ func pose_clip(clip: String, t: float) -> void:
 	var animation := player.get_animation(clip)
 	if player.current_animation != clip:
 		animation.loop_mode = Animation.LOOP_NONE
-		player.play(clip, 0.1)
+		# No cross-fade: at speed 0 a blend never advances, and the new clip
+		# would never take over (it did not, until this was found measuring
+		# reach). Gameplay moves the time smoothly anyway.
+		player.play(clip, 0.0)
 	player.speed_scale = 0.0
 	player.seek(clampf(t, 0.0, 1.0) * animation.length, true)
 

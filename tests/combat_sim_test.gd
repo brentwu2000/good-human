@@ -76,7 +76,8 @@ func _test_ai_choices() -> void:
 	check(sim.choose_skill(me) == PUNCH, "kick and hook on cooldown: the jab")
 	me.cooldowns[KICK.id] = 0.0
 	me.cooldowns[HOOK.id] = 0.0
-	_place(sim, 90.0)
+	# Beyond the jab and hook, inside the kick (P-04 reach matched to Codex's model).
+	_place(sim, 80.0)
 	check(sim.choose_skill(me) == KICK, "beyond punch reach: only kick is valid")
 
 	_place(sim, 60.0)
