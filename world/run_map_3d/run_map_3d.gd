@@ -13,6 +13,17 @@ const EnvironmentKit = preload("res://assets/environment/starter_kit/environment
 @export var coordinator: CombatCoordinator3D
 
 var rig: CameraRig3D
+## S05-03: the walk's tension, shown as the light turning towards evening and
+## home calling more strongly.
+var tension: RunTensionDirector
+
+const DAY_SKY := Color(0.62, 0.75, 0.88)
+const EVENING_SKY := Color(0.9, 0.7, 0.56)
+const DAY_AMBIENT := Color(0.75, 0.75, 0.8)
+const EVENING_AMBIENT := Color(0.8, 0.68, 0.62)
+const EVENING_SUN := Color(1.0, 0.8, 0.6)
+var _environment: Environment
+var _sun: DirectionalLight3D
 
 
 func _ready() -> void:
@@ -34,6 +45,13 @@ func _ready() -> void:
 	instinct.dog = dog
 	instinct.coordinator = coordinator
 	add_child(instinct)
+	tension = RunTensionDirector.new()
+	tension.name = "RunTensionDirector"
+	tension.run_manager = run_manager
+	tension.dog = dog
+	tension.temptation_director = get_node_or_null("TemptationDirector") as TemptationDirector
+	add_child(tension)
+	tension.tension_changed.connect(_apply_tension)
 	var agency := get_node_or_null("DogAgency")
 	var hud := get_node_or_null("RunHUD")
 	if agency != null and hud != null:
@@ -43,6 +61,18 @@ func _ready() -> void:
 				hud.show_toast(text, Color(0.6, 1.0, 0.7) if positive else Color(1.0, 0.75, 0.6)))
 	run_manager.run_started.connect(func(_s: int) -> void: human.say("好，出去散步吧！"))
 	run_manager.loot_gained.connect(_on_loot_gained)
+
+
+## Presentation only: the mood of the walk, never its rules.
+func _apply_tension(level: float) -> void:
+	_environment.background_color = DAY_SKY.lerp(EVENING_SKY, level)
+	_environment.ambient_light_color = DAY_AMBIENT.lerp(EVENING_AMBIENT, level)
+	_sun.light_color = Color.WHITE.lerp(EVENING_SUN, level)
+	_sun.light_energy = lerpf(1.1, 0.95, level)
+	for node in get_tree().get_nodes_in_group(ExtractionPoint.GROUP):
+		var point := node as ExtractionPoint3D
+		if point != null:
+			point.set_call(level)
 
 
 func _on_loot_gained(item: ItemData, _quantity: int) -> void:
@@ -88,7 +118,9 @@ func _build_environment() -> void:
 	environment.ambient_light_energy = 0.6
 	world_env.environment = environment
 	add_child(world_env)
+	_environment = environment
 	var sun := DirectionalLight3D.new()
+	_sun = sun
 	sun.rotation_degrees = Vector3(-55, 35, 0)
 	sun.light_energy = 1.1
 	sun.shadow_enabled = true

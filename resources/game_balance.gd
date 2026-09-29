@@ -13,6 +13,11 @@ extends Resource
 @export var risk_notable_value: int = 60
 ## ...and enough that going home is plainly the sensible thing to do.
 @export var risk_heavy_value: int = 160
+## S05-03 Run Tension Director: time after going home became possible over
+## which the walk's mood finishes turning towards evening, and the distance
+## from home (m) at which "far from home" is felt in full.
+@export var tension_ramp_seconds: float = 150.0
+@export var tension_far_distance: float = 30.0
 
 @export_group("Combat")
 ## Derived combat values (CombatStats). Keep formulas here, not in skills.

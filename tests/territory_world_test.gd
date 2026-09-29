@@ -73,6 +73,8 @@ func _run() -> void:
 	var marks: Array[TerritoryData] = []
 	banyan.marked.connect(func(t: TerritoryData) -> void: marks.append(t))
 	check(banyan.can_interact(run), "a place the dog understands can be marked")
+	var temptations := map.get_node("TemptationDirector") as TemptationDirector
+	check(temptations._world_offers(TemptationData.Needs.TERRITORY, run.run_value()), "S05-03: an unmarked place the dog knows is a reason to stay")
 	check(banyan.get_prompt(run).contains("做記號"), "and says so in the dog's terms")
 	banyan.interact(run)
 	check_eq(marks.size(), 1, "the dog marks it")
@@ -80,6 +82,7 @@ func _run() -> void:
 	check(progress.last_event(&"banyan").contains("我的味道"), "the place remembers being marked")
 	check_eq(progress.claim_progress(&"banyan"), 0, "marking alone earns nothing — getting home does")
 	check(not banyan.can_interact(run), "and it cannot be marked twice on one walk")
+	check(not temptations._world_offers(TemptationData.Needs.TERRITORY, run.run_value()), "once marked today, it no longer tempts")
 
 	# P4-008: the resident lives here, but only once the dog has met him, and
 	# he is never in two places at once.

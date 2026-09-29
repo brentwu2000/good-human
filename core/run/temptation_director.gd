@@ -140,7 +140,12 @@ func _world_offers(needs: TemptationData.Needs, value: RunValue) -> bool:
 		TemptationData.Needs.SQUIRREL:
 			return not _in_run(Squirrel.GROUP).is_empty()
 		TemptationData.Needs.TERRITORY:
-			# Territory arrives with P4-005; until then nothing offers it.
+			# A place the dog knows and has not made its own, not yet marked
+			# today (S05-03: the Banyan as a reason to stay).
+			for point in _in_run(TerritoryPoint3D.GROUP):
+				var state: TerritoryProgress.State = point.state()
+				if state >= TerritoryProgress.State.DISCOVERED and state < TerritoryProgress.State.OWNED and not point.marked_this_walk:
+					return true
 			return false
 	return false
 

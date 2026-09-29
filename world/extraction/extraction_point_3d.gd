@@ -16,6 +16,8 @@ var _marker: MeshInstance3D
 var _home_light: MeshInstance3D
 const HOME_LIGHT_HEIGHT: float = 14.0
 var _time: float = 0.0
+## 0..1: how strongly home calls (S05-03, from the walk's tension).
+var call_strength: float = 0.0
 var _name_label: Label3D
 
 
@@ -61,6 +63,13 @@ func set_available(value: bool) -> void:
 		_name_label.text = "%s（%02d:%02d 開放）" % [display_label, int(unlock_time) / 60, int(unlock_time) % 60]
 
 
+## S05-03: the more there is to lose, the brighter the light over home.
+func set_call(strength: float) -> void:
+	call_strength = clampf(strength, 0.0, 1.0)
+	if _home_light != null:
+		_home_light.scale = Vector3(1.0 + 0.5 * call_strength, 1.0, 1.0 + 0.5 * call_strength)
+
+
 ## True while the light over this exit is showing the way home.
 func is_showing_way_home() -> bool:
 	return _home_light != null and _home_light.visible
@@ -71,7 +80,7 @@ func _process(delta: float) -> void:
 		return
 	_time += delta
 	var mat := _home_light.material_override as StandardMaterial3D
-	mat.albedo_color.a = 0.22 + 0.08 * sin(_time * 1.6)
+	mat.albedo_color.a = 0.22 + 0.2 * call_strength + 0.08 * sin(_time * (1.6 + call_strength))
 
 
 static func _build_home_light() -> MeshInstance3D:
