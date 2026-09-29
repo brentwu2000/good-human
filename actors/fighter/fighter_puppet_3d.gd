@@ -14,6 +14,23 @@ static var show_combat_text: bool = false
 ## A bump from the dog was answered (ADR-016). Presentation only.
 signal bumped(from: Vector3)
 
+## Codex's authored combat clips (P-04 + ART), by attack, reaction and footwork.
+const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick"}
+const REACTION_CLIPS := {
+	CombatMotion3D.State.HIT_LIGHT: "HitLight",
+	CombatMotion3D.State.HIT_HEAVY: "HitHeavy",
+	CombatMotion3D.State.STAGGER: "HitHeavy",
+	CombatMotion3D.State.STUMBLE: "Stumble",
+}
+const FOOTWORK_CLIPS := {
+	CombatMotion3D.State.APPROACH: "Approach",
+	CombatMotion3D.State.CIRCLE: "Circle",
+	CombatMotion3D.State.SIDESTEP: "Circle",
+	CombatMotion3D.State.BACKSTEP: "Backstep",
+}
+## How strongly the P-04 choreography's joint accents layer over the clips.
+const COMBAT_LAYER: float = 0.5
+
 ## P02-008: how the fight is going for them, as their body shows it.
 enum Condition { HEALTHY, HURT, CRITICAL, DOWN }
 const HURT_AT: float = 0.6
@@ -157,15 +174,69 @@ func set_ambient(moving: bool) -> void:
 		return
 	_ambient_clip = clip
 	skeletal.play_clip(clip)
+	# A bump or a growth reaction still shows over the walk.
+	skeletal.use_clip_layer(1.0)
 
 
-## In a fight the P-04 choreography drives the joints, through Codex's
-## adapter on the skeletal model.
+## In a fight Codex's authored combat clips carry the body, timed by the
+## simulation (`drive_combat_clip`), and the P-04 choreography layers its
+## accents over them at COMBAT_LAYER.
 func set_fighting() -> void:
 	_ambient_clip = ""
 	var skeletal := _body as P04HumanVisual
 	if skeletal != null:
-		skeletal.use_legacy_controls()
+		skeletal.use_clip_layer(COMBAT_LAYER)
+
+
+## Codex's attack clips peak exactly halfway through (authored as an out-and-
+## back strike). The first half is spread over the wind-up and strike, so the
+## peak lands as the contact window opens; the second half over contact,
+## follow-through and recovery. Blocks, dodges, hit reactions and footwork
+## follow the same state the choreography reads. Called every frame by the
+## coordinator during a fight.
+func drive_combat_clip(fighter: CombatFighter) -> void:
+	var skeletal := _body as P04HumanVisual
+	if skeletal == null or _down:
+		return
+	var reaction := motion.reaction_progress()
+	if reaction >= 0.0:
+		skeletal.pose_clip(REACTION_CLIPS.get(motion.reacting_state(), "HitLight"), reaction)
+		return
+	var skill := fighter.action
+	if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and not fighter.is_idle():
+		skeletal.pose_clip(ATTACK_CLIPS.get(skill.animation_key, "Jab"), _attack_progress(fighter, skill))
+		return
+	if fighter.is_guarding():
+		skeletal.pose_clip("Block", 0.5)
+		return
+	if fighter.is_evading() and skill != null:
+		skeletal.pose_clip("Dodge", 1.0 - fighter.phase_time_left / maxf(skill.active_time, 0.01))
+		return
+	var loop: String = FOOTWORK_CLIPS.get(motion.state, "Idle")
+	if skeletal.player.current_animation != loop or skeletal.player.speed_scale == 0.0:
+		skeletal.play_clip(loop)
+		skeletal.use_clip_layer(COMBAT_LAYER)
+
+
+## 0..1 through an attack's clip: 0.5 is the moment its contact window opens.
+static func _attack_progress(fighter: CombatFighter, skill: CombatSkillData) -> float:
+	var lead := maxf(skill.windup + skill.strike_time, 0.01)
+	var after := maxf(skill.contact_time + skill.follow_through + skill.recovery, 0.01)
+	var left := fighter.phase_time_left
+	match fighter.phase:
+		CombatFighter.Phase.WINDUP:
+			return 0.5 * (skill.windup - left) / lead
+		CombatFighter.Phase.STRIKE:
+			return 0.5 * (skill.windup + skill.strike_time - left) / lead
+		CombatFighter.Phase.CONTACT:
+			return 0.5 + 0.5 * (skill.contact_time - left) / after
+		CombatFighter.Phase.FOLLOW_THROUGH:
+			return 0.5 + 0.5 * (skill.contact_time + skill.follow_through - left) / after
+		CombatFighter.Phase.RECOVERY:
+			# A whiff makes recovery longer than authored: never go backwards.
+			var done := maxf(skill.contact_time + skill.follow_through + skill.recovery - left, skill.contact_time + skill.follow_through)
+			return 0.5 + 0.5 * minf(done / after, 1.0)
+	return 0.0
 
 
 ## Drives the body from its motion state. Called every frame by the coordinator.
@@ -551,8 +622,13 @@ func play_acknowledge(towards: Vector3) -> void:
 	_look_away_left = 2.2
 	if _body == null or _down:
 		return
-	# The crouch and the reach are the choreography's, not a clip.
-	set_fighting()
+	# The crouch and the reach are the choreography's: over the standing clip,
+	# at full strength.
+	var skeletal := _body as P04HumanVisual
+	if skeletal != null:
+		_ambient_clip = ""
+		skeletal.play_clip("Idle")
+		skeletal.use_clip_layer(1.0)
 	# The fight is over, so nothing else turns them any more: they turn round
 	# to the dog themselves, whichever side of them it ended up on.
 	var to_dog := towards - global_position

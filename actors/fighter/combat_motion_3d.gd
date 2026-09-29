@@ -93,6 +93,25 @@ func update(delta: float, fighter: CombatFighter, closing: bool, defeated: bool)
 	intent = 1.0 if state == State.APPROACH else 0.0
 
 
+## 0..1 through the reaction being held, or -1 when there is none.
+func reaction_progress() -> float:
+	if _react_left <= 0.0:
+		return -1.0
+	var duration := REACT_SECONDS
+	match _reacting:
+		State.HIT_HEAVY:
+			duration = HEAVY_SECONDS
+		State.STAGGER:
+			duration = STAGGER_SECONDS
+		State.STUMBLE:
+			duration = STUMBLE_SECONDS
+	return clampf(1.0 - _react_left / duration, 0.0, 1.0)
+
+
+func reacting_state() -> State:
+	return _reacting
+
+
 ## True while the body is doing something the fight should not interrupt.
 func is_committed() -> bool:
 	return state in [State.WINDUP, State.ATTACK, State.FOLLOW_THROUGH, State.HIT_LIGHT, State.HIT_HEAVY, State.STAGGER, State.STUMBLE, State.DOWN]

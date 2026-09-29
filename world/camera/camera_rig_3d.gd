@@ -576,6 +576,10 @@ func _blocks_the_lens(body: Node3D) -> bool:
 		return true
 	if pov > 0.85:
 		return false
+	# The P-02 camera is built round the owner (ADR-014): they are the subject,
+	# not something in the way of the dog.
+	if not combat_pov and owner_actor != null and body == owner_actor.puppet:
+		return false
 	var forward := -global_basis.z
 	# Chest height for a person, back height for their dog.
 	var middle := at + Vector3(0, 0.9 if body is FighterPuppet3D else 0.4, 0)

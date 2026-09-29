@@ -105,23 +105,30 @@ func _test_stationary_dog() -> void:
 	var closest := INF
 	var pressed := 0
 	var watched := 0
+	var ignored := 0
 	var unfaded_at_lens := 0
 	for i in 360:
 		await _tree.physics_frame
 		if not coordinator.is_fighting():
 			break
 		watched += 1
+		# Kept from closing too long, the fighters stop walking round the dog
+		# and shove it aside (so it can never jam the fight): not counted here.
+		var dog_counts := coordinator._dog_counts()
+		if not dog_counts:
+			ignored += 1
 		var lens := rig.camera.global_position
 		for body: Node3D in [human.puppet, pair.human_puppet]:
 			var gap := _flat(dog.global_position - body.global_position).length()
 			closest = minf(closest, gap)
-			if gap < 0.6:
+			if gap < 0.6 and dog_counts:
 				pressed += 1
 			if _flat(lens - body.global_position).length() < rig.near_fade_distance and not rig._near_faded.has(body):
 				unfaded_at_lens += 1
 	coordinator.time_scale = 0.35
 	check(watched > 60, "the fight went on around a dog standing still (%d frames)" % watched)
 	check(pressed <= watched * 0.05, "fighters keep clear of a dog standing beside them (%d of %d frames pressed onto it, closest %.2f m)" % [pressed, watched, closest])
+	check(ignored <= watched * 0.5, "and only push past it when it keeps them from each other (%d of %d frames)" % [ignored, watched])
 	# The fade follows the fighters' move by a frame at most.
 	check(unfaded_at_lens <= 3, "nobody right at the lens is drawn solid for more than a frame or two (%d)" % unfaded_at_lens)
 

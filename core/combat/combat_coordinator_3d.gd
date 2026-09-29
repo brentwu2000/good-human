@@ -254,6 +254,7 @@ func _update_motion(delta: float) -> void:
 		var puppet: FighterPuppet3D = puppets[side]
 		var closing := fighter.footwork == CombatFighter.Footwork.APPROACH
 		puppet.motion.update(delta, fighter, closing, fighter.is_defeated())
+		puppet.drive_combat_clip(fighter)
 		puppet.play_motion(delta)
 
 

@@ -34,6 +34,9 @@ var _name_label: Label3D
 var _dog_label: Label3D
 var _dog_label_left: float = 0.0
 var _dog_lunge: Vector3 = Vector3.ZERO
+## Their dog's place beside them, eased towards `_wanted_dog_offset`.
+const DOG_OFFSET := Vector3(0.8, 0, 0.3)
+var _dog_offset: Vector3 = DOG_OFFSET
 var _time: float = 0.0
 
 ## Opponent dog reactions (Sprint 04 basic hooks).
@@ -218,6 +221,7 @@ func _update_dog_reactions(delta: float) -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	_update_dog_reactions(delta)
+	_dog_offset = _dog_offset.lerp(_wanted_dog_offset(), minf(delta * 4.0, 1.0))
 	if state == State.COMBAT and _dog != null:
 		_dog.position.y = absf(sin(_time * 12.0)) * 0.08
 	if state == State.IDLE:
@@ -241,4 +245,19 @@ func _process(delta: float) -> void:
 func _place_dog() -> void:
 	if _dog == null:
 		return
-	_dog.position = human_puppet.position + Vector3(0.8, 0, 0.3) + _dog_lunge
+	_dog.position = human_puppet.position + _dog_offset + _dog_lunge
+
+
+## Where their dog stands beside them (in this node's frame). In a fight it
+## keeps to the far side of its owner from the player's owner: a fixed spot
+## let the fight circle the player's owner right into it (P-04, found in the
+## P03-E12 captures).
+func _wanted_dog_offset() -> Vector3:
+	if state != State.COMBAT or coordinator == null or coordinator.human == null:
+		return DOG_OFFSET
+	var away := human_puppet.global_position - coordinator.human.global_position
+	away.y = 0.0
+	if away.length_squared() < 0.0001:
+		return DOG_OFFSET
+	away = away.normalized()
+	return global_basis.inverse() * (away * 0.9 + away.cross(Vector3.UP) * 0.35)
