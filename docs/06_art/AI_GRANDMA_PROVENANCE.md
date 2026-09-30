@@ -24,3 +24,10 @@ Visual distance from the reference is not what the licence turns on. The shape a
 2. Rerun the v5 scripts unchanged: TripoSG → retopo → bake → stylize → texture → rig.
 3. Swap `grandma.glb`.
 4. Confirm the character sheet's rights.
+
+## 2026-10-01: Codex surface v4
+The shipped `grandma.glb` is now Codex's surface v4:
+- a cleaner re-unwrap, and a flat-material rebake (2048 base colour, no normal map);
+- the same mesh, skeleton, glasses and 19 clips, with the relaxed idle and arm splay unchanged.
+
+The source chain is the same as above, so the licence note still applies.

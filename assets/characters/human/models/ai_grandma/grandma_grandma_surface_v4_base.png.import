@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://diijeg32ifq7a"
-path="res://.godot/imported/grandma_grandma_game_base.jpg-bf457cac21f5f4bf2ae1dec661755315.ctex"
+uid="uid://b3lhftq5skc76"
+path="res://.godot/imported/grandma_grandma_surface_v4_base.png-948a9dc5d11a46959fcd5fae16945543.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "e3155d4e14bd06a1849085295cb20004"
+"md5": "3b0bccac69b171a598bf2b6eebb8eaa0"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/ai_grandma/grandma_grandma_game_base.jpg"
-dest_files=["res://.godot/imported/grandma_grandma_game_base.jpg-bf457cac21f5f4bf2ae1dec661755315.ctex"]
+source_file="res://assets/characters/human/models/ai_grandma/grandma_grandma_surface_v4_base.png"
+dest_files=["res://.godot/imported/grandma_grandma_surface_v4_base.png-948a9dc5d11a46959fcd5fae16945543.ctex"]
 
 [params]
 
