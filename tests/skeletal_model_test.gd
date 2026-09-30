@@ -34,7 +34,23 @@ func _run() -> void:
 	check(visual.skeleton.find_bone("pelvis") >= 0 and visual.skeleton.find_bone("upperarm_l") >= 0, "on the OwnerSkeleton bone names the adapter maps")
 	custom.set_ambient(false)
 	await get_tree().process_frame
-	check(visual.player.current_animation == "Idle", "and the ambient clip plays on it")
+	check(visual.player.current_animation.ends_with("Idle_Relaxed"), "and the relaxed ambient clip plays on it (%s)" % visual.player.current_animation)
+	# Outside a fight nobody stands in a guard: the relaxed clips, not the boxer's Idle.
+	var plain_visual := plain._body as P04HumanVisual
+	plain.set_ambient(false)
+	await get_tree().process_frame
+	check(plain_visual.player.current_animation == "relaxed/Idle_Relaxed", "the shared human stands relaxed (%s)" % plain_visual.player.current_animation)
+	plain.set_ambient(true)
+	await get_tree().process_frame
+	check(plain_visual.player.current_animation == "relaxed/Walk_Relaxed", "and walks relaxed (%s)" % plain_visual.player.current_animation)
+	check(plain_visual.player.has_animation("Jab") and plain_visual.player.has_animation("Idle"), "the combat clips are still there")
+	var sk := plain_visual.skeleton
+	var hand := sk.find_bone("hand_l")
+	var shoulder := sk.find_bone("upperarm_l")
+	plain_visual.player.seek(0.5, true)
+	var hand_y := (sk.get_bone_global_pose(hand).origin).y
+	var shoulder_y := (sk.get_bone_global_pose(shoulder).origin).y
+	check(hand_y < shoulder_y - 0.4, "hands hang well below the shoulders (%.2f m below)" % (shoulder_y - hand_y))
 	finish()
 
 

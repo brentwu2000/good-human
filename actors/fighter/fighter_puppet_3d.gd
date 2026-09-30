@@ -171,7 +171,7 @@ func set_ambient(moving: bool) -> void:
 		return
 	if _pose_tween != null and _pose_tween.is_running():
 		return
-	var clip := "Walk" if moving else "Idle"
+	var clip := skeletal.ambient_clip(moving)
 	if _ambient_clip == clip:
 		return
 	_ambient_clip = clip

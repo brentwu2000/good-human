@@ -35,6 +35,7 @@ func _init(scene: PackedScene = null) -> void:
 	add_child(model)
 	skeleton = _find_type(model, "Skeleton3D") as Skeleton3D
 	player = _find_type(model, "AnimationPlayer") as AnimationPlayer
+	_add_relaxed_clips()
 	for joint_name: String in BONE_MAP:
 		var joint := Node3D.new()
 		joint.name = joint_name
@@ -83,6 +84,30 @@ func _process(_delta: float) -> void:
 		var posed := (parent_rest.inverse() * turn * parent_rest * base).get_rotation_quaternion()
 		skeleton.set_bone_pose_rotation(index, posed)
 		_written[index] = posed
+
+## The clip for standing or walking outside a fight: relaxed when available.
+func ambient_clip(moving: bool) -> String:
+	var own := "Walk_Relaxed" if moving else "Idle_Relaxed"
+	if player != null and player.has_animation(own):
+		return own
+	var shared := "%s/%s" % [RELAXED_LIBRARY, own]
+	if player != null and player.has_animation(shared):
+		return shared
+	return "Walk" if moving else "Idle"
+
+
+func _add_relaxed_clips() -> void:
+	if player == null or player.has_animation("Idle_Relaxed") or player.has_animation_library(RELAXED_LIBRARY):
+		return
+	if _relaxed_library == null:
+		var source := RELAXED_CLIPS.instantiate()
+		var source_player := _find_type(source, "AnimationPlayer") as AnimationPlayer
+		if source_player != null:
+			_relaxed_library = source_player.get_animation_library(&"")
+		source.free()
+	if _relaxed_library != null:
+		player.add_animation_library(RELAXED_LIBRARY, _relaxed_library)
+
 
 func play_clip(clip: String, loop := true) -> void:
 	legacy_driven = false
