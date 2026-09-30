@@ -15,6 +15,8 @@ uniform float band_softness : hint_range(0.01, 0.5) = 0.18;
 uniform float band_offset : hint_range(-0.5, 0.5) = 0.0;
 uniform float shade_level : hint_range(0.0, 1.0) = 0.58;
 uniform vec4 shade_tint : source_color = vec4(0.86, 0.82, 0.95, 1.0);
+// Style Bible v2: a soft rim so characters separate from busy backgrounds.
+uniform float rim_strength : hint_range(0.0, 1.0) = 0.15;
 
 void fragment() {
 	vec4 c = albedo_color;
@@ -31,6 +33,8 @@ void fragment() {
 		NORMAL_MAP = texture(normal_tex, UV).rgb;
 		NORMAL_MAP_DEPTH = normal_strength;
 	}
+	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+	EMISSION = c.rgb * rim * rim_strength;
 }
 
 void light() {

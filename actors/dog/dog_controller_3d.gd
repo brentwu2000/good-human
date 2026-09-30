@@ -19,6 +19,8 @@ signal interact_requested(target: Node)
 const FUR_COLOR: Color = Color(0.78, 0.55, 0.32)
 ## The generated shiba, rigged and animated in the character pipeline.
 const MODEL_SCENE: PackedScene = preload("res://assets/characters/dog/models/shiba_01/shiba_01.glb")
+## Style Bible v1 proportions (tools/art/stylize_rigged.py): used when the style is on.
+const STYLIZED_SCENE := "res://assets/characters/dog/models/shiba_01/shiba_01_stylized.glb"
 ## The export faces +Z; every actor in this game faces -Z.
 const MODEL_YAW: float = PI
 ## How fast the dog steps out of a body it has been left inside (m/s).
@@ -72,7 +74,7 @@ func _ready() -> void:
 	# _visual is a bare pivot the facing code yaws; the model hangs off it with
 	# its own fixed correction, so turning the dog stays one rotation.
 	_visual = Node3D.new()
-	var model := MODEL_SCENE.instantiate() as Node3D
+	var model := SoftToon.pick(MODEL_SCENE, STYLIZED_SCENE).instantiate() as Node3D
 	model.rotation.y = MODEL_YAW
 	# This body's origin is not at its feet. The capsule lies on its side, so
 	# what rests on the floor is `position.y - radius` above the origin, and a

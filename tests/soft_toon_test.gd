@@ -36,7 +36,16 @@ func _run() -> void:
 	SoftToon.register(late)
 	check(_toon_surfaces(late) == _surfaces(late), "a character spawned while on gets it straight away")
 
+	var stylized := SoftToon.pick(OWNER_MODEL, P04HumanVisual.STYLIZED_MODEL)
+	check(stylized != OWNER_MODEL and stylized.resource_path.ends_with("_stylized.glb"), "on: new characters get the Style v1 proportions")
+	var styled_human := P04HumanVisual.new()
+	add_child(styled_human)
+	check(styled_human.skeleton.find_bone("head") >= 0 and styled_human.player.has_animation("Jab"), "same skeleton and clips on the stylized model")
+	var dog_scene := SoftToon.pick(DogController3D.MODEL_SCENE, DogController3D.STYLIZED_SCENE)
+	check(dog_scene.resource_path.ends_with("shiba_01_stylized.glb"), "and the shiba's")
+
 	SoftToon.set_enabled(get_tree(), false)
+	check(SoftToon.pick(OWNER_MODEL, P04HumanVisual.STYLIZED_MODEL) == OWNER_MODEL, "off: the original models")
 	check_eq(_toon_surfaces(human) + _toon_surfaces(dog) + _toon_surfaces(late), 0, "off again: the original materials are back")
 	SoftToon.enabled = was
 	finish()

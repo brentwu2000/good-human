@@ -152,7 +152,8 @@ func _add_button(text: String, action: Callable) -> Button:
 
 
 func _update_toon_button(button: Button) -> void:
-	button.text = "角色材質：卡通" if SoftToon.enabled else "角色材質：標準"
+	# Materials switch now; the Style v1 proportions follow on the next walk.
+	button.text = "角色風格：卡通" if SoftToon.enabled else "角色風格：標準"
 
 
 func _update_camera_button(button: Button) -> void:

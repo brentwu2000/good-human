@@ -30,7 +30,7 @@ var controls: Dictionary = {}
 func _init(scene: PackedScene = null) -> void:
 	name = "P04HumanCandidate"
 	set_meta("skeletal_art", true)
-	model = (scene if scene != null else MODEL).instantiate()
+	model = (scene if scene != null else SoftToon.pick(MODEL, STYLIZED_MODEL)).instantiate()
 	model.rotation.y = PI
 	add_child(model)
 	skeleton = _find_type(model, "Skeleton3D") as Skeleton3D

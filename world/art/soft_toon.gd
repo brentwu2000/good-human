@@ -15,6 +15,16 @@ static var enabled: bool = ProjectSettings.get_setting("art/soft_toon", false)
 static var _cache: Dictionary = {}
 
 
+## The Style Bible v1 version of a model (bigger head, hands, feet; same
+## skeleton and clips), when the style is on and one exists. Chosen when a
+## character is built: switching live changes materials, proportions follow
+## on the next walk.
+static func pick(default: PackedScene, stylized_path: String) -> PackedScene:
+	if enabled and ResourceLoader.exists(stylized_path):
+		return load(stylized_path) as PackedScene
+	return default
+
+
 ## Marks `root` as a character and applies the current setting to it.
 static func register(root: Node) -> void:
 	root.add_to_group(GROUP)
