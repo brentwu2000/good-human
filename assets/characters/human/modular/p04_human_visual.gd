@@ -13,6 +13,15 @@ extends Node3D
 
 const MODEL := preload("res://assets/characters/human/models/p04_owner/p04_owner.glb")
 const BONE_MAP := {"Hips": "pelvis", "Torso": "spine_03", "Head": "head", "ArmL": "upperarm_r", "ArmR": "upperarm_l", "LegL": "thigh_r", "LegR": "thigh_l"}
+## Relaxed Idle / Walk on the same OwnerSkeleton (arms down, open hands).
+## Every authored P-04 idle and walk holds a guard; outside a fight nobody
+## should stand like a boxer. Shared by every model on this skeleton; a model
+## that carries its own Idle_Relaxed (retargeted to its proportions) uses that.
+## Style Bible v1 proportions of the same model (tools/art/stylize_rigged.py).
+const STYLIZED_MODEL := "res://assets/characters/human/models/p04_owner/p04_owner_stylized.glb"
+const RELAXED_CLIPS := preload("res://assets/characters/human/animations/p04_relaxed_clips.glb")
+const RELAXED_LIBRARY: StringName = &"relaxed"
+static var _relaxed_library: AnimationLibrary
 var skeleton: Skeleton3D
 var player: AnimationPlayer
 var model: Node3D
