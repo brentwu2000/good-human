@@ -79,6 +79,7 @@ func setup(data: EncounterData) -> void:
 		_dog.queue_free()
 	_dog = Greybox.dog(encounter.dog_color, encounter.dog_scale, encounter.dog_breed)
 	add_child(_dog)
+	SoftToon.register(_dog)
 	_dog_presence = PhysicalPresence3D.for_dog(DataRegistry.presence, encounter.dog_scale)
 	_dog.add_child(_dog_presence)
 	_dog_presence.dog_contact.connect(_on_dog_bumped)

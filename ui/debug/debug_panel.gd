@@ -43,6 +43,12 @@ func _ready() -> void:
 		CameraRig3D.combat_pov = not CameraRig3D.combat_pov
 		_update_camera_button(camera_button))
 	_update_camera_button(camera_button)
+	# Style Bible v1: the shared soft-toon material on every character.
+	var toon_button := _add_button("", Callable())
+	toon_button.pressed.connect(func() -> void:
+		SoftToon.set_enabled(get_tree(), not SoftToon.enabled)
+		_update_toon_button(toon_button))
+	_update_toon_button(toon_button)
 	_bind(%TrainAllButton, func() -> void: run_manager.training.debug_add_all(3.0))
 	_bind(%GrowFullButton, func() -> void: _set_growth(DataRegistry.training.trait_full_growth))
 	_bind(%ResetGrowthButton, func() -> void: _set_growth(0.0))
@@ -143,6 +149,10 @@ func _add_button(text: String, action: Callable) -> Button:
 	if action.is_valid():
 		button.pressed.connect(action)
 	return button
+
+
+func _update_toon_button(button: Button) -> void:
+	button.text = "角色材質：卡通" if SoftToon.enabled else "角色材質：標準"
 
 
 func _update_camera_button(button: Button) -> void:

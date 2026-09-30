@@ -36,6 +36,7 @@ func _init(scene: PackedScene = null) -> void:
 	skeleton = _find_type(model, "Skeleton3D") as Skeleton3D
 	player = _find_type(model, "AnimationPlayer") as AnimationPlayer
 	_add_relaxed_clips()
+	SoftToon.register(self)
 	for joint_name: String in BONE_MAP:
 		var joint := Node3D.new()
 		joint.name = joint_name

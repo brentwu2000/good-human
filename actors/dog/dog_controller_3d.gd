@@ -80,6 +80,7 @@ func _ready() -> void:
 	model.position.y = shape.position.y - capsule.radius
 	_visual.add_child(model)
 	add_child(_visual)
+	SoftToon.register(_visual)
 	_motion = DogModelMotion3D.new()
 	add_child(_motion)
 	_motion.bind(model)

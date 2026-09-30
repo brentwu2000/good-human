@@ -131,3 +131,4 @@ rendering_device/driver.windows="d3d12"
 [art]
 
 use_p04_candidate=true
+soft_toon=false
