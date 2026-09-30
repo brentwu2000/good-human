@@ -126,3 +126,28 @@ Contract with the game code (please keep it):
 - Feet at y = 0, real height in metres (`body_scale` is not applied to a `skeletal_model`).
 
 When a **commercial-safe** version exists (section 2), it can go through `export_commercial/` → the repo, and `FighterData.skeletal_model` can point at it for real. Whether she becomes the old master (a narrative change: 老爺爺 → 老奶奶) or a new encounter is the **owner's call**.
+
+---
+
+## 6. Owner direction (2026-09-30): fewer polygons, more cartoon
+
+Claude tried an automatic pass: `good_human_ai3d_poc/scripts/toonify.py`. It decimates a rigged GLB (weights, UVs and clips survive) and reduces the texture to N flat colours (median filter, then k-means). Comparison: `good_human_ai3d_poc/reports/toon/compare.png` and `compare_c6.png`.
+
+| Variant | Body tris | File | Read |
+|---|---|---|---|
+| rig6 (current) | 10,000 | 2.5 MB | reference |
+| toon 5000 | 5,000 | 1.7 MB | nearly identical: **safe budget cut** |
+| toon 3000 | 3,000 | 1.3 MB | fine at game distance, slightly faceted |
+| toon 1500 | 1,500 | 1.1 MB | breaks: jagged hair and shoes |
+| toon 3000, 6 colours, smooth | 3,000 | 0.9 MB | flatter, but cardigan and blouse merge and the glasses disappear; **still not cartoon** |
+
+Conclusion:
+- The polygon count can drop to **3–5k** with no rework.
+- The **cartoon look cannot come from post-processing**: the AI mesh has realistic lumpy forms, and colour quantisation erases features instead of stylising them.
+
+Suggested direction for you (it matches the P-04 human's own flat-colour look):
+- **Remodel or retopo in simple, readable forms**: a rounder head, a bun as one or two clean shapes, the cardigan as a simple shell, chunky shoes. Use the AI mesh only as a proportion and silhouette guide (`export/grandma_apose_base_10000.glb` plus the approved A-pose views).
+- **Flat colours by material region**, not a projected photo texture: hair, skin, cardigan (lavender; a few large painted flowers optional), blouse (cream), trousers (charcoal), socks, shoes (white/pink), glasses (dark), tote. Palette sampled from the approved views: skin ≈ (0.84, 0.60, 0.49), hair ≈ (0.63, 0.59, 0.61).
+- **Keep the face readable at low poly**: glasses as geometry, eyes as small painted shapes.
+- **Optional engine side (decide with Claude, since it affects every character)**: Godot `StandardMaterial3D.diffuse_mode = DIFFUSE_TOON` with toon specular gives a cel-shaded read across all characters with no asset change.
+- **Budget**: ≤ 5k tris body + ≤ 600 tote, 1 to 3 materials or one small palette texture, on the OwnerSkeleton with the same clip names (section 5 contract).
