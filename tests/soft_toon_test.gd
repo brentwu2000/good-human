@@ -41,6 +41,15 @@ func _run() -> void:
 	var styled_human := P04HumanVisual.new()
 	add_child(styled_human)
 	check(styled_human.skeleton.find_bone("head") >= 0 and styled_human.player.has_animation("Jab"), "same skeleton and clips on the stylized model")
+	styled_human.set_outfit_colors(Color(1, 0.4, 0.2), Color(0.1, 0.2, 0.5))
+	var outfit_ok := false
+	for m in styled_human.model.find_children("*", "MeshInstance3D", true, false):
+		if "Top_Module" in m.name:
+			for s in (m as MeshInstance3D).mesh.get_surface_count():
+				var o := (m as MeshInstance3D).get_surface_override_material(s) as ShaderMaterial
+				if o != null and o.get_shader_parameter("albedo_color") == Color(1, 0.4, 0.2):
+					outfit_ok = true
+	check(outfit_ok, "outfit colours survive the toon material")
 	var dog_scene := SoftToon.pick(DogController3D.MODEL_SCENE, DogController3D.STYLIZED_SCENE)
 	check(dog_scene.resource_path.ends_with("shiba_01_stylized.glb"), "and the shiba's")
 

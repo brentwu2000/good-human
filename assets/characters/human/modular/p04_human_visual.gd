@@ -168,12 +168,16 @@ func set_outfit_colors(top: Color, trousers: Color) -> void:
 		if not ("Top_Module" in mesh.name or "Bottom_Jeans" in mesh.name):
 			continue
 		for surface in mesh.mesh.get_surface_count():
-			var original := mesh.get_active_material(surface)
+			# The model's own material: a toon override may already sit on top.
+			var original := mesh.mesh.surface_get_material(surface)
 			if original is StandardMaterial3D and ("Jacket" in original.resource_name or "Denim" in original.resource_name):
 				var material := original.duplicate() as StandardMaterial3D
 				material.vertex_color_use_as_albedo = false
 				material.albedo_color = top if "Top_Module" in mesh.name else trousers
 				mesh.set_surface_override_material(surface, material)
+	if SoftToon.enabled:
+		SoftToon.restore(self)
+		SoftToon.apply(self)
 
 func _find_type(root: Node, type_name: String) -> Node:
 	for child: Node in root.get_children():

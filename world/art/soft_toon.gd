@@ -48,6 +48,8 @@ static func apply(root: Node) -> void:
 			var base := mi.get_active_material(s)
 			if base is ShaderMaterial and (base as ShaderMaterial).shader == SHADER:
 				continue
+			# Remember what the surface had (an outfit colour, say) for restore().
+			mi.set_meta(_meta_key(s), mi.get_surface_override_material(s))
 			mi.set_surface_override_material(s, toon_for(base))
 
 
@@ -57,7 +59,9 @@ static func restore(root: Node) -> void:
 		for s in mi.mesh.get_surface_count():
 			var over := mi.get_surface_override_material(s)
 			if over is ShaderMaterial and (over as ShaderMaterial).shader == SHADER:
-				mi.set_surface_override_material(s, null)
+				var before: Material = mi.get_meta(_meta_key(s), null)
+				mi.set_surface_override_material(s, before)
+				mi.remove_meta(_meta_key(s))
 
 
 ## The toon version of a material, shared between everything that uses it.
@@ -79,6 +83,10 @@ static func toon_for(source: Material) -> ShaderMaterial:
 	if source != null:
 		_cache[source] = m
 	return m
+
+
+static func _meta_key(surface: int) -> StringName:
+	return StringName("soft_toon_before_%d" % surface)
 
 
 static func _meshes(root: Node) -> Array[Node]:
