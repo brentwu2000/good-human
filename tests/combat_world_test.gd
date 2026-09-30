@@ -59,7 +59,7 @@ func _run() -> void:
 		check(not label.is_empty() and not _has_digit(label), "pair label has no power number (%s)" % label)
 	check_eq(ids.size(), 4, "each pair appears once")
 	check(master != null and master.spot_id == &"pair_big_tree", "Old Master under the big tree")
-	check(master.encounter.human.display_name == "老爺爺" and master.encounter.dog_scale < 1.0, "Old Master looks harmless")
+	check(master.encounter.human.display_name == "老奶奶" and master.encounter.dog_scale < 1.0, "Old Master looks harmless")
 
 	run.debug_give_item(&"tennis_ball", 2)
 	run.dog_safe_inventory.add_item(DataRegistry.get_item(&"mysterious_item"))
@@ -156,7 +156,7 @@ func _run() -> void:
 func _check_defeat_result() -> void:
 	var result := Game.last_run_result
 	check_eq(result.outcome, RunResult.Outcome.DEFEATED, "run ended by defeat")
-	check_eq(result.defeated_by, "老爺爺", "result names the opponent")
+	check_eq(result.defeated_by, "老奶奶", "result names the opponent")
 	check_eq(_count(result.lost, &"tennis_ball"), 2, "normal run inventory lost")
 	check_eq(_count(result.lost, &"mysterious_item"), 0, "safe item not lost")
 	check_eq(_count(result.to_stash, &"mysterious_item"), 1, "dog safe slot survives")

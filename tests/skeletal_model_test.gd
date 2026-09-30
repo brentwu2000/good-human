@@ -16,6 +16,12 @@ func _run() -> void:
 		check(true, "skeletal art is off in this project: nothing to test")
 		finish()
 		return
+	# The park grandma (the old master's slot) brings her own model.
+	check(OLD_MASTER.display_name == "老奶奶" and OLD_MASTER.skeletal_model != null, "the old master is the park grandma, with her own model")
+	var grandma := _puppet(OLD_MASTER)
+	var gv := grandma._body as P04HumanVisual
+	check(gv != null and gv.model.scene_file_path.ends_with("ai_grandma/grandma.glb"), "and the fight uses it (%s)" % (gv.model.scene_file_path if gv else "none"))
+	check(gv != null and gv.player.has_animation("Idle_Relaxed") and gv.player.has_animation("Jab"), "with her relaxed idle and the combat clips")
 	var shared := OLD_MASTER.duplicate() as FighterData
 	shared.skeletal_model = null
 	shared.body_scale = Vector2(0.85, 0.88)

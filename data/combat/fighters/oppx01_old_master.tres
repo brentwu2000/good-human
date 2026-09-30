@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="FighterData" load_steps=10 format=3]
+[gd_resource type="Resource" script_class="FighterData" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://resources/fighter_data.gd" id="1_fighter"]
 [ext_resource type="Script" path="res://resources/combat_stats.gd" id="2_stats"]
@@ -8,6 +8,7 @@
 [ext_resource type="Resource" path="res://data/combat/skills/skill_block.tres" id="5_block"]
 [ext_resource type="Resource" path="res://data/combat/skills/skill_dodge.tres" id="6_dodge"]
 [ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="7_skill"]
+[ext_resource type="PackedScene" path="res://assets/characters/human/models/ai_grandma/grandma.glb" id="10_grandma"]
 
 [sub_resource type="Resource" id="Resource_stats"]
 script = ExtResource("2_stats")
@@ -19,7 +20,8 @@ will = 15
 [resource]
 script = ExtResource("1_fighter")
 id = &"oppx01_old_master"
-display_name = "老爺爺"
+display_name = "老奶奶"
+skeletal_model = ExtResource("10_grandma")
 stats = SubResource("Resource_stats")
 skills = Array[ExtResource("7_skill")]([ExtResource("3_punch"), ExtResource("9_hook"), ExtResource("4_kick"), ExtResource("5_block"), ExtResource("6_dodge")])
 skin_color = Color(0.9, 0.78, 0.68, 1)
