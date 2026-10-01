@@ -1,0 +1,15 @@
+{
+  "breed": "frenchie",
+  "covered_texels": 623557,
+  "changed_texels_over_2_percent": 470936,
+  "source_sha256": "2a7bcc3ca71876d3c6874e069b2b76c202b0cbf07be434d264f5201153ffb5ac",
+  "coat": [
+    0.33,
+    0.255,
+    0.23
+  ],
+  "texture": [
+    1024,
+    1024
+  ]
+}

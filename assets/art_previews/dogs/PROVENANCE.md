@@ -15,3 +15,21 @@ excluded from every export preset; nothing here ships or replaces the game's shi
 
 Before any of these dogs is used in the game: re-paint the weights instead of copying shiba_01's (or accept its licence), as was
 done for the owner's other AI characters.
+
+## Codex texture repair — 2026-10-01
+
+Preview models now use a texture-only revision derived from the same owner-made
+breed sheets and factory projection PNGs, retrieved locally on 2026-10-01.
+Author: Codex ART, for the owner. Tools: Blender 5.2 surface-space projection and
+procedural palette fills, with Python packaging. No additional external assets,
+generative model, normal map, or RESEARCH_ONLY material was introduced.
+
+The factory's `<breed>_game.glb` and `projection/basecolor.png` remain unchanged.
+New deliverables use `<breed>_game_codex.glb` and `basecolor_codex.png`.
+Only the embedded JPEG changes: all original geometry, UVs, rig, skin weights,
+and animation data are preserved byte-for-byte. The inherited licence chain and
+grade-B / territory restriction above still apply. These are review candidates,
+not S-grade production approval.
+
+See [repair report](../../../docs/06_art/BREED_DOGS_TEXTURE_REPAIR_CODEX_2026-10-01.md)
+for comparisons, remaining defects, checksums and validation.

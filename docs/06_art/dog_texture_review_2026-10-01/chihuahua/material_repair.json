@@ -1,0 +1,15 @@
+{
+  "breed": "chihuahua",
+  "covered_texels": 626159,
+  "changed_texels_over_2_percent": 472499,
+  "source_sha256": "42277706e67b2ba937b3b9746d7641fc81262701621a980e51d9052c61f71b58",
+  "coat": [
+    0.8748235723972321,
+    0.5998137502670289,
+    0.3553725692033768
+  ],
+  "texture": [
+    1024,
+    1024
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "source_sha256": "63144f403146de232942d2d64f43799d053a4c057336ca1c8337c1c7669295d5",
+  "result_sha256": "9e9b18287cb741082e69a799fdaddc0fef0d8318eaf95022b2df6e79b2df62f1",
+  "bytes": 2027384,
+  "basecolor": [
+    1024,
+    1024
+  ],
+  "format": "JPEG",
+  "original_geometry_uv_rig_weights_clips_preserved": true,
+  "unchanged_nonimage_buffer_views": 201,
+  "joints": 23,
+  "clips": [
+    "Idle",
+    "Sit",
+    "Walk"
+  ]
+}
