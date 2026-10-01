@@ -19,7 +19,7 @@ var players: Array[AnimationPlayer] = []
 var camera: Camera3D
 var label: Label
 var clip_index := 0
-var yaw := -30.0
+var yaw := -10.0
 var distance := 4.2
 var toon := false
 
@@ -108,7 +108,7 @@ func _play() -> void:
 
 func _place_camera() -> void:
 	var r := deg_to_rad(yaw)
-	camera.position = Vector3(sin(r) * distance, 0.25 + distance * 0.22, cos(r) * distance)
+	camera.position = Vector3(sin(r) * distance, 0.3 + distance * 0.15, cos(r) * distance)
 	camera.look_at(Vector3(0, 0.3, 0))
 
 
