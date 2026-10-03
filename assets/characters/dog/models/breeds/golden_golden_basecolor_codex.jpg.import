@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dj1hf4kxuh34a"
-path="res://.godot/imported/golden_basecolor.jpg-e41ed7a9da7d9602a1ac5ed15bd82e13.ctex"
+uid="uid://b1yxyhxvcjgk"
+path="res://.godot/imported/golden_golden_basecolor_codex.jpg-044e667cc1b6b32ddbde376aa02d4cfb.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "7b1f19afae40fe086458356a7d86306f"
+"md5": "5ef6682d72278c3780e98ed669fadf1b"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/golden_basecolor.jpg"
-dest_files=["res://.godot/imported/golden_basecolor.jpg-e41ed7a9da7d9602a1ac5ed15bd82e13.ctex"]
+source_file="res://assets/characters/dog/models/breeds/golden_golden_basecolor_codex.jpg"
+dest_files=["res://.godot/imported/golden_golden_basecolor_codex.jpg-044e667cc1b6b32ddbde376aa02d4cfb.ctex"]
 
 [params]
 

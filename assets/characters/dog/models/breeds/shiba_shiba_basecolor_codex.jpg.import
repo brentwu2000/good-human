@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://y80f1rtes3if"
-path="res://.godot/imported/frenchie_frenchie_basecolor_codex.jpg-10d876135c889293e72e30499bb99120.ctex"
+uid="uid://sfbevh7xra2c"
+path="res://.godot/imported/shiba_shiba_basecolor_codex.jpg-a316eb194326d0fadeb1e104c82e366b.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "4b7057e2ee7fb3f196a122ed32ccf6fa"
+"md5": "c0e84a416429927265d0aed2c04374cb"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/frenchie_frenchie_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/frenchie_frenchie_basecolor_codex.jpg-10d876135c889293e72e30499bb99120.ctex"]
+source_file="res://assets/characters/dog/models/breeds/shiba_shiba_basecolor_codex.jpg"
+dest_files=["res://.godot/imported/shiba_shiba_basecolor_codex.jpg-a316eb194326d0fadeb1e104c82e366b.ctex"]
 
 [params]
 

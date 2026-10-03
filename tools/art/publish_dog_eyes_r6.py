@@ -18,7 +18,7 @@ def main():
         glb=src/f'{breed}_game_codex.glb'
         assert sha(glb)==record['result_sha256']
         assert sha(FACTORY/'export/dogs'/f'{breed}_game.glb')==record['source_sha256']
-        pairs=[(glb,ROOT/'assets/art_previews/dogs/models'/f'{breed}.glb')]
+        pairs=[(glb,ROOT/'assets/characters/dog/models/breeds'/f'{breed}.glb')]
         if external:pairs=[(glb,FACTORY/'export/dogs'/glb.name),(src/'basecolor_codex.png',FACTORY/'texture_work/dogs'/breed/'projection/basecolor_codex.png')]
         for source,dest in pairs:
             assert sha(dest) in [known.get(str(dest)),delivered.get(str(dest)),sha(source)],str(dest)

@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7lwo30yobs86"
-path="res://.godot/imported/shiba_basecolor.jpg-d84e9d6b576384ce5e2c2130ae8bea3d.ctex"
+uid="uid://c7ggwdj2xjit0"
+path="res://.godot/imported/chihuahua_chihuahua_basecolor_codex.jpg-118edecfbe01ada4c531d568a24529ec.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "84e5316bea0e08871e984a3a64f742a1"
+"md5": "72b0583b52580fee0f4fe454a998a0c3"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/shiba_basecolor.jpg"
-dest_files=["res://.godot/imported/shiba_basecolor.jpg-d84e9d6b576384ce5e2c2130ae8bea3d.ctex"]
+source_file="res://assets/characters/dog/models/breeds/chihuahua_chihuahua_basecolor_codex.jpg"
+dest_files=["res://.godot/imported/chihuahua_chihuahua_basecolor_codex.jpg-118edecfbe01ada4c531d568a24529ec.ctex"]
 
 [params]
 

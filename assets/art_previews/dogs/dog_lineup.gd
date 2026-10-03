@@ -1,11 +1,12 @@
 extends Node3D
 ## ART-only review of the breed-sheet dogs (AI 3D dog factory). Not in any build
-## (export_presets exclude assets/art_previews/*). Every GLB in models/ stands in a
-## row on the shared shiba rig.
+## (export_presets exclude assets/art_previews/*). Every breed GLB stands in a
+## row on the shared shiba rig. The models live in the game tree now (five are
+## opponent dogs); this scene stays a review tool.
 ##   ui_accept: next clip (Idle → Walk → Sit)   ui_select: soft toon on/off
 ##   ui_left / ui_right: orbit                  ui_up / ui_down: zoom
 ## Run with `-- --capture <png>` to save one frame and quit.
-const MODEL_DIR := "res://assets/art_previews/dogs/models/"
+const MODEL_DIR := "res://assets/characters/dog/models/breeds/"
 const CLIPS := ["Idle", "Walk", "Sit"]
 const NAMES := {
 	"shiba": "柴犬", "poodle": "貴賓犬", "corgi": "柯基犬", "golden": "黃金獵犬",

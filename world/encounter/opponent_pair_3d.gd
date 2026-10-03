@@ -16,7 +16,7 @@ const RETURN_SPEED: float = 1.6
 ## Only present once the dog has discovered this goal flag (empty = always).
 @export var required_flag: StringName
 ## Gone once this flag is set, so the same dog is never in two places at once
-## (Sprint 05: 阿黑 stops loitering in the alley once he is back at his tree).
+## (Sprint 05: 阿金 stops loitering in the alley once he is back at his tree).
 @export var retired_by_flag: StringName
 
 var encounter: EncounterData
@@ -27,6 +27,9 @@ var human_puppet: FighterPuppet3D
 var presentation: EncounterPresentation3D
 
 var _dog: Node3D
+## Drives a rigged dog_model's Idle / Walk clips; null for the greybox dog.
+var _dog_motion: DogModelMotion3D
+var _dog_last_position: Vector3
 ## ADR-016: bodies the player's dog cannot walk through.
 var _human_presence: PhysicalPresence3D
 var _dog_presence: PhysicalPresence3D
@@ -77,7 +80,7 @@ func setup(data: EncounterData) -> void:
 	human_puppet.show_hp(false)
 	if _dog != null:
 		_dog.queue_free()
-	_dog = Greybox.dog(encounter.dog_color, encounter.dog_scale, encounter.dog_breed)
+	_dog = _make_dog()
 	add_child(_dog)
 	SoftToon.register(_dog)
 	_dog_presence = PhysicalPresence3D.for_dog(DataRegistry.presence, encounter.dog_scale)
@@ -87,6 +90,24 @@ func setup(data: EncounterData) -> void:
 		BanyanRivalPair3D.decorate(human_puppet, _dog)
 	_name_label.text = "%s和%s" % [encounter.human.display_name, encounter.dog_name]
 	_place_dog()
+	_dog_last_position = _dog.position
+
+
+## The pair's breed model under a bare pivot (the facing code yaws the pivot,
+## the model keeps its own export correction), or the greybox dog.
+func _make_dog() -> Node3D:
+	_dog_motion = null
+	if encounter.dog_model == null:
+		return Greybox.dog(encounter.dog_color, encounter.dog_scale, encounter.dog_breed)
+	var pivot := Node3D.new()
+	pivot.name = "Dog"
+	var model := encounter.dog_model.instantiate() as Node3D
+	model.rotation.y = DogController3D.MODEL_YAW
+	pivot.add_child(model)
+	_dog_motion = DogModelMotion3D.new()
+	pivot.add_child(_dog_motion)
+	_dog_motion.bind(model)
+	return pivot
 
 
 ## In the world this walk (has a pair and any required discovery).
@@ -222,6 +243,7 @@ func _update_dog_reactions(delta: float) -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	_update_dog_reactions(delta)
+	_update_dog_motion(delta)
 	_dog_offset = _dog_offset.lerp(_wanted_dog_offset(), minf(delta * 4.0, 1.0))
 	if state == State.COMBAT and _dog != null:
 		_dog.position.y = absf(sin(_time * 12.0)) * 0.08
@@ -262,3 +284,13 @@ func _wanted_dog_offset() -> Vector3:
 		return DOG_OFFSET
 	away = away.normalized()
 	return global_basis.inverse() * (away * 0.9 + away.cross(Vector3.UP) * 0.35)
+
+
+## Walks the breed model while it follows its owner, idles otherwise.
+func _update_dog_motion(delta: float) -> void:
+	if _dog_motion == null or _dog == null or delta <= 0.0:
+		return
+	var moved := _dog.position - _dog_last_position
+	moved.y = 0.0
+	_dog_last_position = _dog.position
+	_dog_motion.update_motion(delta, moved.length() / delta, false)

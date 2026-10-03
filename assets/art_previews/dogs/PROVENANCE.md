@@ -1,8 +1,9 @@
 # Breed-sheet dogs — preview only
 
 Output of the AI 3D dog factory (`good_human_stylized_factory/scripts/batch_dogs.sh`),
-shown by `dog_lineup.tscn` (open with `tools/art/open_dog_lineup.bat`). This folder is
-excluded from every export preset; nothing here ships or replaces the game's shiba.
+shown by `dog_lineup.tscn` (open with `tools/art/open_dog_lineup.bat`). The models now
+live in `assets/characters/dog/models/breeds/` and five of them are the opponent pairs'
+dogs in the 3D walk (see "In the game" below); the player's dog is still `shiba_01`.
 
 | Stage | Tool | Licence |
 |---|---|---|
@@ -60,3 +61,20 @@ delivered; all original geometry, UVs, materials, skeleton, weights and clips
 remain byte-identical. The inherited licence restrictions and preview-only
 grade remain. See the [r6 report](../../../docs/06_art/BREED_DOGS_EYES_R6_2026-10-03.md)
 for actual runtime captures and remaining surface/texture limitations.
+
+## In the game — 2026-10-03
+
+The owner accepted the inherited shiba_01 licence (grade B, territory-restricted, the
+same terms as the player's shiba) and put the r6 models in the game. They moved to
+`assets/characters/dog/models/breeds/` (this folder is excluded from export); each
+`data/encounters/*.tres` names its dog through `EncounterData.dog_model`:
+
+| Pair | Dog | Breed |
+|---|---|---|
+| Jogger | 小柴 | shiba |
+| Gym | 阿鬥 (was 比特) | frenchie |
+| Old Master | 小白 | pomeranian |
+| Delivery | 短腳 (was 米克斯) | corgi |
+| Rival | 阿金 (was 阿黑) | golden |
+
+Chihuahua and poodle are unused. Re-paint the weights before release, as above.

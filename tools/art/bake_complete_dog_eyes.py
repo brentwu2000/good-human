@@ -10,7 +10,7 @@ OUT=ROOT/'build/dogs_eye_r6/texture_candidate'
 def main(breed):
     dest=OUT/breed;dest.mkdir(parents=True,exist_ok=True)
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.ops.import_scene.gltf(filepath=str(ROOT/'assets/art_previews/dogs/models'/f'{breed}.glb'))
+    bpy.ops.import_scene.gltf(filepath=str(ROOT/'assets/characters/dog/models/breeds'/f'{breed}.glb'))
     body=max((o for o in bpy.data.objects if o.type=='MESH'),key=lambda o:len(o.data.vertices))
     H=float(np.ptp(np.array([body.matrix_world@v.co for v in body.data.vertices])[:,2]))
     a=np.load(ROOT/'build/dogs_face_repair_r5/candidate'/breed/'face_surface.npz')

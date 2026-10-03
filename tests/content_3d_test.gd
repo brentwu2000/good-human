@@ -116,7 +116,7 @@ func _run() -> void:
 	dog.global_position = rival.human_global_position() + Vector3(0, 0.1, 2.2)
 	human.global_position = dog.global_position + Vector3(0.5, 0, 1.2)
 	await _physics(4)
-	check(director.active_desires().any(func(d: DesireData) -> bool: return d.id == &"desire_rival_duel"), "meeting 阿黑 wants a duel")
+	check(director.active_desires().any(func(d: DesireData) -> bool: return d.id == &"desire_rival_duel"), "meeting 阿金 wants a duel")
 	check(rival.get_child_count() > 0 and (rival._name_label.text as String).begins_with("❗"), "rival marked as wanted")
 	check(Game.goal_progress.is_discovered(&"places", &"alley"), "alley discovered")
 
@@ -153,7 +153,7 @@ func _run() -> void:
 	map.coordinator.time_scale = 25.0
 	await _interact_at(map.dog, map.human, rival)
 	await _wait_until(func() -> bool: return not map.coordinator.is_fighting(), 900)
-	check(Game.goal_progress.has_flag(&"rival_beaten"), "beating 阿黑 resolves the thread in 3D")
+	check(Game.goal_progress.has_flag(&"rival_beaten"), "beating 阿金 resolves the thread in 3D")
 
 	DirAccess.remove_absolute(TEST_SAVE)
 	finish()

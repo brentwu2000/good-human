@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bj2584osphgkt"
-path="res://.godot/imported/poodle_poodle_basecolor_codex.jpg-fd9c5e540c557cfe58613be745ee6aed.ctex"
+uid="uid://cqnry0achat3g"
+path="res://.godot/imported/pomeranian_pomeranian_basecolor_codex.jpg-5e457e905a24fde39ec707c8126b6a14.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "fc81dbb18ba4a6b560425cb3db361248"
+"md5": "49de214b57b463068e04b22ee5ed283b"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/poodle_poodle_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/poodle_poodle_basecolor_codex.jpg-fd9c5e540c557cfe58613be745ee6aed.ctex"]
+source_file="res://assets/characters/dog/models/breeds/pomeranian_pomeranian_basecolor_codex.jpg"
+dest_files=["res://.godot/imported/pomeranian_pomeranian_basecolor_codex.jpg-5e457e905a24fde39ec707c8126b6a14.ctex"]
 
 [params]
 

@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1yxyhxvcjgk"
-path="res://.godot/imported/golden_golden_basecolor_codex.jpg-57f9f18b619a0ae7edd88009a0feb216.ctex"
+uid="uid://y80f1rtes3if"
+path="res://.godot/imported/frenchie_frenchie_basecolor_codex.jpg-700bdda81ead798e9bfced25e7c4d60f.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "5ef6682d72278c3780e98ed669fadf1b"
+"md5": "4b7057e2ee7fb3f196a122ed32ccf6fa"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/golden_golden_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/golden_golden_basecolor_codex.jpg-57f9f18b619a0ae7edd88009a0feb216.ctex"]
+source_file="res://assets/characters/dog/models/breeds/frenchie_frenchie_basecolor_codex.jpg"
+dest_files=["res://.godot/imported/frenchie_frenchie_basecolor_codex.jpg-700bdda81ead798e9bfced25e7c4d60f.ctex"]
 
 [params]
 

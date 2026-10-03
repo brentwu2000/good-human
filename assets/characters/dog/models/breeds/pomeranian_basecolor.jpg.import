@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://o7qbq1ptt7r0"
-path="res://.godot/imported/corgi_basecolor.jpg-58a014a6920f4f10f4c503991f938886.ctex"
+uid="uid://cwyb2qfj7n8rk"
+path="res://.godot/imported/pomeranian_basecolor.jpg-f663f3438beecff1ca2c6347c3103f1d.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "2c0a6df1aa8478768653f89c29573b20"
+"md5": "70b8ea1208364e85e514c926a2d5d087"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/corgi_basecolor.jpg"
-dest_files=["res://.godot/imported/corgi_basecolor.jpg-58a014a6920f4f10f4c503991f938886.ctex"]
+source_file="res://assets/characters/dog/models/breeds/pomeranian_basecolor.jpg"
+dest_files=["res://.godot/imported/pomeranian_basecolor.jpg-f663f3438beecff1ca2c6347c3103f1d.ctex"]
 
 [params]
 

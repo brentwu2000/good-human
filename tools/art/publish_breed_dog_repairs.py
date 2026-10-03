@@ -27,7 +27,7 @@ def main():
             copy_new(candidate,FACTORY/'export/dogs'/candidate.name)
             copy_new(stage/'basecolor_codex.png',FACTORY/'texture_work/dogs'/breed/'projection/basecolor_codex.png')
         else:
-            preview=ROOT/'assets/art_previews/dogs/models'/f'{breed}.glb'
+            preview=ROOT/'assets/characters/dog/models/breeds'/f'{breed}.glb'
             backup=STAGE/'preview_originals'/preview.name
             if not backup.exists():copy_new(preview,backup)
             shutil.copy2(candidate,preview)

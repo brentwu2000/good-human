@@ -22,7 +22,7 @@ def main():
             copies=[(glb,FACTORY/'export/dogs'/glb.name,previous/glb.name),
                     (candidate/'basecolor_codex.png',FACTORY/'texture_work/dogs'/breed/'projection/basecolor_codex.png',previous/'basecolor_codex.png')]
         else:
-            copies=[(glb,ROOT/'assets/art_previews/dogs/models'/f'{breed}.glb',previous/glb.name)]
+            copies=[(glb,ROOT/'assets/characters/dog/models/breeds'/f'{breed}.glb',previous/glb.name)]
         for source,dest,backup in copies:
             assert sha(dest) in [sha(backup),sha(source),delivered.get(str(dest))],f'Unexpected external edit: {dest}'
             shutil.copy2(source,dest)

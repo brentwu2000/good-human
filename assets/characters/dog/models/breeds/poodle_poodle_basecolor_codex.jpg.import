@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c7ggwdj2xjit0"
-path="res://.godot/imported/chihuahua_chihuahua_basecolor_codex.jpg-20d7e5a8a4e65671ea7cf87dcddf664e.ctex"
+uid="uid://bj2584osphgkt"
+path="res://.godot/imported/poodle_poodle_basecolor_codex.jpg-12af19d4cebeed95a0ddd3f1c848c321.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "72b0583b52580fee0f4fe454a998a0c3"
+"md5": "fc81dbb18ba4a6b560425cb3db361248"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/chihuahua_chihuahua_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/chihuahua_chihuahua_basecolor_codex.jpg-20d7e5a8a4e65671ea7cf87dcddf664e.ctex"]
+source_file="res://assets/characters/dog/models/breeds/poodle_poodle_basecolor_codex.jpg"
+dest_files=["res://.godot/imported/poodle_poodle_basecolor_codex.jpg-12af19d4cebeed95a0ddd3f1c848c321.ctex"]
 
 [params]
 

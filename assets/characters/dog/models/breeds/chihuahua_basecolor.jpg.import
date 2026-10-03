@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cluacr0pgu8de"
-path="res://.godot/imported/corgi_corgi_basecolor_codex.jpg-682e91a03f74ff45df21056a797ca682.ctex"
+uid="uid://jhtsvxvxl7i1"
+path="res://.godot/imported/chihuahua_basecolor.jpg-a8feb17ea4a37658eb1164ab1ee78c22.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "fd4189a7962c4bbad01bf2e51c13e3a8"
+"md5": "1379d8d3a26850053ad5b8752124ae7d"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/corgi_corgi_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/corgi_corgi_basecolor_codex.jpg-682e91a03f74ff45df21056a797ca682.ctex"]
+source_file="res://assets/characters/dog/models/breeds/chihuahua_basecolor.jpg"
+dest_files=["res://.godot/imported/chihuahua_basecolor.jpg-a8feb17ea4a37658eb1164ab1ee78c22.ctex"]
 
 [params]
 

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bdvisntcfr6iw"
-path="res://.godot/imported/frenchie.glb-fb9e85ef0478a07d41d3e9e16d18748b.scn"
+uid="uid://dchnagsb00rxm"
+path="res://.godot/imported/chihuahua.glb-a3e09d3721bda1f850e7458504ea630d.scn"
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/frenchie.glb"
-dest_files=["res://.godot/imported/frenchie.glb-fb9e85ef0478a07d41d3e9e16d18748b.scn"]
+source_file="res://assets/characters/dog/models/breeds/chihuahua.glb"
+dest_files=["res://.godot/imported/chihuahua.glb-a3e09d3721bda1f850e7458504ea630d.scn"]
 
 [params]
 

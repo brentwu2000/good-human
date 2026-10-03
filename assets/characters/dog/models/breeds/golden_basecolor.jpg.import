@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bq5x00mbkuv2e"
-path="res://.godot/imported/poodle_basecolor.jpg-a02e3ca35895fe24c01a870ff3acf536.ctex"
+uid="uid://dj1hf4kxuh34a"
+path="res://.godot/imported/golden_basecolor.jpg-991dee206fb71bafb1235030a8b1f249.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "6b80f21fef6559d8efa1318f7ad44f96"
+"md5": "7b1f19afae40fe086458356a7d86306f"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/poodle_basecolor.jpg"
-dest_files=["res://.godot/imported/poodle_basecolor.jpg-a02e3ca35895fe24c01a870ff3acf536.ctex"]
+source_file="res://assets/characters/dog/models/breeds/golden_basecolor.jpg"
+dest_files=["res://.godot/imported/golden_basecolor.jpg-991dee206fb71bafb1235030a8b1f249.ctex"]
 
 [params]
 

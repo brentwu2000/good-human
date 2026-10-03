@@ -53,3 +53,13 @@ occluding muzzle pixels. R6 replaces them with an unobstructed eye source and
 per-mesh surface projection. Geometry/rig/animation data remain unchanged.
 Preview status remains REVIEW; mouth/nose seams, head geometry defects and
 limited close-up atlas resolution still prevent final-art approval.
+
+## Breed dogs in the game — 2026-10-03
+
+Owner decision: the r6 breed models are the opponent pairs' dogs (shiba, frenchie,
+pomeranian, corgi, golden); the player keeps `shiba_01`. Models moved to
+`assets/characters/dog/models/breeds/`; mapping and licence note in
+`assets/art_previews/dogs/PROVENANCE.md`. Still REVIEW / grade B art: the r6 report's
+mouth seams, ear gaps and face defects now show in the game. The rival's neckerchief
+is the greybox accessory placed on the golden's neck bone and wants an art pass.
+

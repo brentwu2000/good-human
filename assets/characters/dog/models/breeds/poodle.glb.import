@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://drgivfi4l81t"
-path="res://.godot/imported/poodle.glb-5ada2467a821491cbe505348aa5bc4bc.scn"
+path="res://.godot/imported/poodle.glb-77a219df013f14936f13c87d99105cc1.scn"
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/poodle.glb"
-dest_files=["res://.godot/imported/poodle.glb-5ada2467a821491cbe505348aa5bc4bc.scn"]
+source_file="res://assets/characters/dog/models/breeds/poodle.glb"
+dest_files=["res://.godot/imported/poodle.glb-77a219df013f14936f13c87d99105cc1.scn"]
 
 [params]
 

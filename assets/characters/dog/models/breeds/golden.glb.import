@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c0vfkeddvauxd"
-path="res://.godot/imported/pomeranian.glb-d9a00866643130dc42fd664589368b3c.scn"
+uid="uid://bthesiujy6jsa"
+path="res://.godot/imported/golden.glb-75f4ebb0a88f9cab2889b090fe29fabb.scn"
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/pomeranian.glb"
-dest_files=["res://.godot/imported/pomeranian.glb-d9a00866643130dc42fd664589368b3c.scn"]
+source_file="res://assets/characters/dog/models/breeds/golden.glb"
+dest_files=["res://.godot/imported/golden.glb-75f4ebb0a88f9cab2889b090fe29fabb.scn"]
 
 [params]
 

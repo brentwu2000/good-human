@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bkuxf01wxvr8x"
-path="res://.godot/imported/corgi.glb-fb79fbb03286dab88c12932f5e6b5a0f.scn"
+uid="uid://b0x7aiqnamdfw"
+path="res://.godot/imported/shiba.glb-22fd76d579cbcd59e783803a600b6025.scn"
 
 [deps]
 
-source_file="res://assets/art_previews/dogs/models/corgi.glb"
-dest_files=["res://.godot/imported/corgi.glb-fb79fbb03286dab88c12932f5e6b5a0f.scn"]
+source_file="res://assets/characters/dog/models/breeds/shiba.glb"
+dest_files=["res://.godot/imported/shiba.glb-22fd76d579cbcd59e783803a600b6025.scn"]
 
 [params]
 

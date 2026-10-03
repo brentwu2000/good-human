@@ -162,6 +162,7 @@ func _run() -> void:
 	await _physics(30)
 	var to_player := dog.global_position - other._dog.global_position
 	check(absf(angle_difference(other._dog.rotation.y, atan2(-to_player.x, -to_player.z))) < 0.4, "opponent dog turns to watch the player dog")
+	_check_breed_dogs(other)
 
 	# --- Debug overlay -------------------------------------------------------------------
 	check(agency.debug_text().begins_with("Agency:"), "debug overlay line")
@@ -171,6 +172,30 @@ func _run() -> void:
 
 
 # --- helpers ---------------------------------------------------------------
+
+## Every pair brings its own rigged breed dog, animated, with a physical
+## presence that matches the model rather than the old greybox size.
+func _check_breed_dogs(pair: OpponentPair3D) -> void:
+	var player := pair._dog.find_children("*", "AnimationPlayer", true, false)
+	check(player.size() == 1 and (player[0] as AnimationPlayer).is_playing(), "%s's dog is a rigged model, animating" % pair.encounter.id)
+	var breeds: Dictionary[String, bool] = {}
+	for path in DirAccess.get_files_at("res://data/encounters"):
+		var data := load("res://data/encounters/" + path.trim_suffix(".remap")) as EncounterData
+		if data == null:
+			continue
+		check(data.dog_model != null, "%s has a breed dog" % data.id)
+		if data.dog_model == null:
+			continue
+		breeds[data.dog_model.resource_path] = true
+		var model := data.dog_model.instantiate() as Node3D
+		var box := AABB()
+		for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+			box = box.merge(mesh.get_aabb()) if box.has_volume() else mesh.get_aabb()
+		model.free()
+		var presence_length := DataRegistry.presence.dog_length * data.dog_scale
+		var model_length := maxf(box.size.x, box.size.z)
+		check(absf(presence_length / model_length - 1.0) < 0.2, "%s's presence fits its dog (%.2f m vs %.2f m)" % [data.id, presence_length, model_length])
+	check(breeds.size() >= 5, "every pair has a different breed (%d)" % breeds.size())
 
 func _place(at: Vector3, look_at_point: Vector3) -> void:
 	dog.global_position = Vector3(at.x, 0.1, at.z)
