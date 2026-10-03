@@ -109,6 +109,7 @@ func _test_claim_resolution() -> void:
 	Game.territory_progress.clear()
 	Game.goal_progress.clear()
 	var data := DataRegistry.get_territory(BANYAN)
+	check_eq(preload("res://scenes/home.gd").territory_text(), "", "S05-08: Home says nothing of places the dog has never found")
 
 	# Marked, but the walk ended badly: nothing gained, nothing lost.
 	Game.territory_progress.advance_to(BANYAN, TerritoryProgress.State.CONTESTED)
@@ -139,6 +140,22 @@ func _test_claim_resolution() -> void:
 	check(third.territories_claimed.has(BANYAN), "the result says so, once")
 	check(Game.goal_progress.flags.has(data.owned_flag), "owning it sets the flag other content reads")
 	check(Game.territory_progress.last_event(BANYAN).contains("我的地方"), "and the place remembers it in the dog's words")
+
+	# S05-08: all of it survives quitting the game, and Home says it as memory.
+	Game.territory_progress.record_rival_fight(data.resident_encounter_id, true)
+	SaveManager.data["dog"]["territories"] = Game.territory_progress.serialize()
+	SaveManager.save_game()
+	Game.territory_progress.clear()
+	SaveManager.load_game()
+	Game.load_profile()
+	check(Game.territory_progress.is_owned(BANYAN), "S05-08: ownership survives a reload")
+	check_eq(Game.territory_progress.claim_progress(BANYAN), data.claim_target, "and the walks that earned it")
+	check_eq(Game.territory_progress.last_rival_outcome(data.resident_encounter_id), TerritoryProgress.RivalOutcome.DOG_WON, "and the rival's memory")
+	var home_text: String = preload("res://scenes/home.gd").territory_text()
+	check(home_text.contains(data.display_name) and home_text.contains(data.own_scent_text), "Home remembers the place in the dog's words (%s)" % home_text.replace("
+", " / "))
+	check(home_text.contains(data.resident_name) and home_text.contains("贏"), "and how it went with the one who lived there")
+	check(not home_text.contains("/") and not home_text.contains("%"), "never as a bar or a fraction")
 
 	# It cannot be claimed again.
 	var extra := _walk(RunResult.Outcome.EXTRACTED, [BANYAN])

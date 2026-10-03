@@ -14,6 +14,10 @@ extends Resource
 @export var claim_target: int = 3
 ## The pair that lives here and will not simply hand it over.
 @export var resident_spot: StringName
+## S05-08: who that is, for what the dog remembers at Home. By id and name
+## only, so loading the places never loads the pair.
+@export var resident_encounter_id: StringName
+@export var resident_name: String
 ## Collection/place id this landmark registers as when first found.
 @export var place_id: StringName
 ## Granted once, when the claim completes.

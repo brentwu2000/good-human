@@ -10,6 +10,7 @@ extends Control
 @onready var _controls_label: Label = %ControlsLabel
 @onready var _growth_label: Label = %GrowthLabel
 @onready var _goals_label: Label = %GoalsLabel
+@onready var _territory_label: Label = %TerritoryLabel
 
 
 func _ready() -> void:
@@ -28,6 +29,8 @@ func _refresh() -> void:
 	_controls_label.text = preload("res://ui/hud/run_hud.gd").controls_hint()
 	_growth_label.text = growth_text()
 	_goals_label.text = goals_text()
+	_territory_label.text = territory_text()
+	_territory_label.visible = not _territory_label.text.is_empty()
 
 
 ## The owner's unlocked changes, in words.
@@ -59,6 +62,42 @@ static func goals_text() -> String:
 		_count_text(progress.discovered_count(&"items"), DataRegistry.get_all_item_ids().size()),
 	])
 	return "\n".join(lines)
+
+
+## S05-08: the places the dog keeps going back to, as it remembers them —
+## what the roots smelled of, the last thing that happened there and how it
+## went with the dog that lives there. Never a progress bar (ADR-012).
+static func territory_text() -> String:
+	var progress := Game.territory_progress
+	var lines: Array[String] = []
+	for data in DataRegistry.get_all_territories():
+		var state := progress.state_of(data.id)
+		if state == TerritoryProgress.State.UNKNOWN:
+			continue
+		lines.append("🌳 %s" % data.display_name)
+		var feeling := ""
+		match state:
+			TerritoryProgress.State.DISCOVERED:
+				feeling = data.discovered_text
+			TerritoryProgress.State.CONTESTED:
+				feeling = data.rival_only_text
+			TerritoryProgress.State.CLAIMING:
+				feeling = data.mixed_scent_text
+			TerritoryProgress.State.OWNED:
+				feeling = data.own_scent_text
+		if not feeling.is_empty():
+			lines.append("「%s」" % feeling)
+		var last := progress.last_event(data.id)
+		if not last.is_empty() and last != feeling:
+			lines.append("最近：「%s」" % last)
+		if not data.resident_encounter_id.is_empty():
+			match progress.last_rival_outcome(data.resident_encounter_id):
+				TerritoryProgress.RivalOutcome.DOG_WON:
+					lines.append("上次和%s打，我們贏了。" % data.resident_name)
+				TerritoryProgress.RivalOutcome.DOG_LOST:
+					lines.append("上次輸給了%s。" % data.resident_name)
+	return "
+".join(lines)
 
 
 static func _count_text(found: int, total: int) -> String:
