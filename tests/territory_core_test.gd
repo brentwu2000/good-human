@@ -117,6 +117,10 @@ func _test_claim_resolution() -> void:
 	check_eq(Game.territory_progress.claim_progress(BANYAN), 0, "a walk that did not get home earns no claim")
 	check_eq(Game.territory_progress.state_of(BANYAN), TerritoryProgress.State.CONTESTED, "and takes nothing away")
 
+	var lost := _walk(RunResult.Outcome.DEFEATED, [BANYAN])
+	check_eq(preload("res://ui/run_result/run_result.gd").territory_lines(lost), [data.not_home_text], "S05-09: the result says a mark that did not get home did not count")
+	check_eq(preload("res://ui/run_result/run_result.gd").territory_lines(_walk(RunResult.Outcome.EXTRACTED, [])), [], "and says nothing of places not marked")
+
 	# Got home without marking: the place is not advanced by simply extracting.
 	Game.finish_run(_walk(RunResult.Outcome.EXTRACTED, []), false)
 	check_eq(Game.territory_progress.claim_progress(BANYAN), 0, "getting home alone does not claim a place")
@@ -138,6 +142,7 @@ func _test_claim_resolution() -> void:
 	Game.finish_run(third, false)
 	check(Game.territory_progress.is_owned(BANYAN), "the third walk home makes it the dog's place")
 	check(third.territories_claimed.has(BANYAN), "the result says so, once")
+	check_eq(preload("res://ui/run_result/run_result.gd").territory_lines(third), ["「%s」" % data.claimed_text], "in the dog's words")
 	check(Game.goal_progress.flags.has(data.owned_flag), "owning it sets the flag other content reads")
 	check(Game.territory_progress.last_event(BANYAN).contains("我的地方"), "and the place remembers it in the dog's words")
 

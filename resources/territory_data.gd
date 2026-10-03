@@ -30,6 +30,10 @@ extends Resource
 @export var rival_scent_text: String
 @export var marked_text: String
 @export var claimed_text: String
+## S05-09: on the result screen — marked and got home (it counted)…
+@export var came_home_text: String
+## …or marked and did not (it did not, and nothing was lost either).
+@export var not_home_text: String
 ## S05-05: what the roots smell of on a later walk, by whose scent is on top.
 ## Only the resident's (CONTESTED)…
 @export var rival_only_text: String

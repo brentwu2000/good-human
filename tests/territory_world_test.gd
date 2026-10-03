@@ -180,7 +180,15 @@ func _run() -> void:
 	check_eq(result.territory_claims.get(&"banyan", 0), 1, "getting home turned the mark into progress")
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CLAIMING, "the dog is working on the place")
 	check(not progress.is_owned(&"banyan"), "one walk home is not ownership")
+	var screen := _tree.current_scene
+	var card := screen.get_node("%TerritoryCard") as Control
+	var said := (screen.get_node("%TerritoryLabel") as Label).text
+	check(card.visible and said == banyan_data_came_home(), "S05-09: the result says the mark came home and counted (%s)" % said)
 	finish()
+
+
+func banyan_data_came_home() -> String:
+	return DataRegistry.get_territory(&"banyan").came_home_text
 
 
 ## Number of scent traces on the landmark: the state's world read (D5-07).

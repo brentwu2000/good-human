@@ -197,6 +197,25 @@ theme_override_colors/font_color = Color(1, 0.94, 0.72, 1)
 theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
 
+[node name="TerritoryCard" type="PanelContainer" parent="Margin/Layout/Scroll/Cards"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("Training")
+[node name="Body" type="VBoxContainer" parent="Margin/Layout/Scroll/Cards/TerritoryCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+[node name="SectionTitle" type="Label" parent="Margin/Layout/Scroll/Cards/TerritoryCard/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.71, 0.28, 1)
+theme_override_font_sizes/font_size = 22
+text = "🌳  地方的味道"
+[node name="TerritoryLabel" type="Label" parent="Margin/Layout/Scroll/Cards/TerritoryCard/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.90, 0.84, 1)
+theme_override_font_sizes/font_size = 24
+autowrap_mode = 3
+
 [node name="LootCard" type="PanelContainer" parent="Margin/Layout/Scroll/Cards"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("Loot")

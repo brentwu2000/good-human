@@ -9,6 +9,8 @@ extends Control
 @onready var _perk_card: PanelContainer = %PerkCard
 @onready var _perk_label: Label = %PerkLabel
 @onready var _loot_label: Label = %LootLabel
+@onready var _territory_card: PanelContainer = %TerritoryCard
+@onready var _territory_label: Label = %TerritoryLabel
 @onready var _home_button: Button = %HomeButton
 
 
@@ -24,6 +26,7 @@ func show_result(result: RunResult) -> void:
 		_items_label.text = ""
 		_training_card.visible = false
 		_perk_card.visible = false
+		_territory_card.visible = false
 		_loot_label.text = "還沒有帶東西回家。"
 		return
 
@@ -44,6 +47,9 @@ func show_result(result: RunResult) -> void:
 	var perks: Array[String] = _perk_lines(result.training)
 	_perk_card.visible = not perks.is_empty()
 	_perk_label.text = "\n\n".join(perks)
+	var places := territory_lines(result)
+	_territory_card.visible = not places.is_empty()
+	_territory_label.text = "\n".join(places)
 
 	var loot: Array[String] = []
 	loot.append("帶回來  $%d" % _value_of(result.to_stash))
@@ -62,6 +68,23 @@ func show_result(result: RunResult) -> void:
 	var legacy_lines: Array[String] = training_lines(result.training)
 	legacy_lines.append_array(loot)
 	_items_label.text = "\n".join(legacy_lines)
+
+
+## S05-09 (ADR-018): a mark counts only once the walk gets home, so the
+## result says which it was — in the dog's words, never as a fraction.
+static func territory_lines(result: RunResult) -> Array[String]:
+	var lines: Array[String] = []
+	for id in result.marked_territories:
+		var data := DataRegistry.get_territory(id)
+		if data == null:
+			continue
+		if result.territories_claimed.has(id):
+			lines.append("「%s」" % data.claimed_text)
+		elif result.is_success():
+			lines.append(data.came_home_text)
+		else:
+			lines.append(data.not_home_text)
+	return lines
 
 
 static func _experience_lines(summary: RunTrainingSummary) -> Array[String]:
