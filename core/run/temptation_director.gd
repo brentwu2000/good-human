@@ -29,6 +29,8 @@ const BETWEEN_OFFERS: float = 30.0
 @export var catalog: Array[TemptationData] = []
 
 var current: TemptationData
+## S05-04: the place the current offer is about, calling the dog in the world.
+var calling_point: TerritoryPoint3D
 var offered_ids: Dictionary[StringName, float] = {}
 
 var _next_attempt: float = 0.0
@@ -49,6 +51,7 @@ func _process(_delta: float) -> void:
 		if now >= _offer_expires_at:
 			var done := current
 			current = null
+			_stop_calling()
 			_next_attempt = now + BETWEEN_OFFERS
 			expired.emit(done)
 		return
@@ -64,6 +67,7 @@ func has_offer() -> bool:
 
 func _on_run_started(_run_seed: int) -> void:
 	current = null
+	calling_point = null
 	offered_ids.clear()
 	_next_attempt = 0.0
 	_offer_expires_at = 0.0
@@ -78,12 +82,34 @@ func _attempt_offer(now: float) -> void:
 	if run_manager.run_rng.randf() > OFFER_CHANCE:
 		return
 	var choice := _pick(now)
-	if choice == null:
-		return
+	if choice != null:
+		offer(choice, now)
+
+
+## Makes `choice` the current offer (also used by tests and the debug panel).
+func offer(choice: TemptationData, now: float) -> void:
 	current = choice
 	offered_ids[choice.id] = now
 	_offer_expires_at = now + choice.expiry
+	if choice.needs == TemptationData.Needs.TERRITORY:
+		# World cue before words: the place itself calls (S05-04).
+		calling_point = _territory_worth_returning()
+		if calling_point != null:
+			calling_point.set_calling(true)
 	offered.emit(choice)
+
+
+func _stop_calling() -> void:
+	if calling_point != null and is_instance_valid(calling_point):
+		calling_point.set_calling(false)
+	calling_point = null
+
+
+func _territory_worth_returning() -> TerritoryPoint3D:
+	for point in _in_run(TerritoryPoint3D.GROUP):
+		if point.is_worth_returning():
+			return point
+	return null
 
 
 ## Weighted pick with the run RNG among the templates the world can honour.
@@ -142,11 +168,7 @@ func _world_offers(needs: TemptationData.Needs, value: RunValue) -> bool:
 		TemptationData.Needs.TERRITORY:
 			# A place the dog knows and has not made its own, not yet marked
 			# today (S05-03: the Banyan as a reason to stay).
-			for point in _in_run(TerritoryPoint3D.GROUP):
-				var state: TerritoryProgress.State = point.state()
-				if state >= TerritoryProgress.State.DISCOVERED and state < TerritoryProgress.State.OWNED and not point.marked_this_walk:
-					return true
-			return false
+			return _territory_worth_returning() != null
 	return false
 
 

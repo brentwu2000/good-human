@@ -27,6 +27,14 @@ const SCENT_SECONDS: float = 1.5
 
 ## Meters: how close the dog has to be to leave its own mark.
 const MARK_RADIUS: float = 2.2
+## S05-04: the place calling the dog back, in scent rather than a map icon.
+## Amber wisps drift up out of the canopy, high enough to be seen over the
+## rooftops from the far side of the walk.
+const CALL_WISPS: int = 7
+const CALL_LOW: float = 6.0
+const CALL_HIGH: float = 18.0
+const CALL_RISE_SECONDS: float = 4.5
+const CALL_COLOR := Color("#efb448")
 
 @export var territory_id: StringName = &"banyan"
 @export var run_manager: RunManager
@@ -42,6 +50,9 @@ var marked_this_walk: bool = false
 var _presentation: TerritoryPresentation3D
 var _near_seconds: float = 0.0
 var _shown_state: int = -1
+var _calling: bool = false
+var _call: Node3D
+var _call_time: float = 0.0
 
 
 func _enter_tree() -> void:
@@ -58,7 +69,9 @@ func _ready() -> void:
 	add_interaction_area(MARK_RADIUS)
 	_rebuild_landmark()
 	if run_manager != null:
-		run_manager.run_started.connect(func(_s: int) -> void: marked_this_walk = false)
+		run_manager.run_started.connect(func(_s: int) -> void:
+			marked_this_walk = false
+			set_calling(false))
 
 
 # --- Marking (P4-007) ---------------------------------------------------------
@@ -91,9 +104,14 @@ func interact(context: Object) -> void:
 
 
 func _process(delta: float) -> void:
+	if _calling:
+		_animate_call(delta)
 	if data == null or dog == null or run_manager == null or not run_manager.is_running():
 		return
 	var distance := _flat_distance()
+	if _calling and distance <= NOTICE_RADIUS:
+		# The dog came: the place has said what it had to say.
+		set_calling(false)
 	if distance > NOTICE_RADIUS:
 		_near_seconds = 0.0
 		return
@@ -130,6 +148,67 @@ func play_mark() -> void:
 func play_reward_reveal() -> void:
 	if _presentation != null:
 		_presentation.play_reward_reveal()
+
+
+# --- Calling the dog back (S05-04) ---------------------------------------------
+
+## The place as a reason to stay out (the Banyan temptation). Presentation only.
+func set_calling(value: bool) -> void:
+	_calling = value
+	if value and _call == null:
+		_call = _build_call()
+		add_child(_call)
+	if _call != null:
+		_call.visible = value
+	_call_time = 0.0
+
+
+func is_calling() -> bool:
+	return _calling
+
+
+## True when the place is still worth coming back to on this walk: known, not
+## yet the dog's own, and not marked today.
+func is_worth_returning() -> bool:
+	var current := state()
+	return data != null and current >= TerritoryProgress.State.DISCOVERED 		and current < TerritoryProgress.State.OWNED and not marked_this_walk
+
+
+func _build_call() -> Node3D:
+	var root := Node3D.new()
+	root.name = "ScentCall"
+	for i in CALL_WISPS:
+		var mesh := SphereMesh.new()
+		mesh.radius = 0.55
+		mesh.height = 1.1
+		mesh.radial_segments = 10
+		mesh.rings = 6
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.albedo_color = Color(CALL_COLOR, 0.0)
+		var wisp := MeshInstance3D.new()
+		wisp.mesh = mesh
+		wisp.material_override = mat
+		wisp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(wisp)
+	return root
+
+
+## Each wisp rises on its own offset, curling round the trunk and thinning out
+## as it climbs, so it reads as a smell on the air rather than a beacon.
+func _animate_call(delta: float) -> void:
+	_call_time += delta
+	var count := _call.get_child_count()
+	for i in count:
+		var wisp := _call.get_child(i) as MeshInstance3D
+		var t := fposmod(_call_time / CALL_RISE_SECONDS + float(i) / count, 1.0)
+		var angle := t * TAU * 1.2 + float(i) * 2.1
+		var drift := lerpf(0.8, 2.6, t)
+		wisp.position = Vector3(cos(angle) * drift, lerpf(CALL_LOW, CALL_HIGH, t), sin(angle) * drift)
+		wisp.scale = Vector3.ONE * lerpf(0.7, 1.8, t)
+		var mat := wisp.material_override as StandardMaterial3D
+		mat.albedo_color.a = 0.55 * sin(t * PI)
 
 
 # --- The first two steps of the loop ------------------------------------------

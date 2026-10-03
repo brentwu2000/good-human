@@ -38,6 +38,8 @@ func _ready() -> void:
 	_add_button("主人重傷（25%）", func() -> void: _with_combat(func(c: Node) -> void:
 		if c.has_method(&"debug_set_owner_condition"):
 			c.debug_set_owner_condition(0.25)))
+	# S05-04: see the banyan call without waiting for the temptation roll.
+	_add_button("大榕樹在叫（誘惑）", _debug_banyan_call)
 	var camera_button := _add_button("", Callable())
 	camera_button.pressed.connect(func() -> void:
 		CameraRig3D.combat_pov = not CameraRig3D.combat_pov
@@ -117,6 +119,17 @@ func _goals_text() -> String:
 func _with_goals(action: Callable) -> void:
 	if goal_director != null:
 		action.call(goal_director)
+
+
+func _debug_banyan_call() -> void:
+	var director := run_manager.owner.get_node_or_null("TemptationDirector") as TemptationDirector if run_manager.owner != null else null
+	if director == null:
+		return
+	Game.territory_progress.advance_to(&"banyan", TerritoryProgress.State.DISCOVERED)
+	for template in director.catalog:
+		if template.needs == TemptationData.Needs.TERRITORY:
+			director.offer(template, run_manager.elapsed_time)
+			return
 
 
 func _with_combat(action: Callable) -> void:

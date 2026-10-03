@@ -82,10 +82,12 @@ func _test_walk() -> void:
 	# --- Items: a bandage for the owner --------------------------------------
 	coordinator.debug_set_owner_condition(0.3)
 	bandage_at = _index_of(run.human_run_inventory, &"bandage")
+	# A won fight can also drop a bandage, so count rather than expect none.
+	var bandages := run.human_run_inventory.count_item(&"bandage")
 	check(run.can_use_on_owner(run.human_run_inventory, bandage_at), "between fights a bandage can be used on the owner")
 	check(run.use_on_owner(run.human_run_inventory, bandage_at), "and is")
 	check(absf(run.owner_condition - 0.65) < 0.01, "a bandage gives back what its data says (%.2f)" % run.owner_condition)
-	check_eq(run.human_run_inventory.count_item(&"bandage"), 0, "and is used up")
+	check_eq(run.human_run_inventory.count_item(&"bandage"), bandages - 1, "and one is used up")
 	run.debug_give_item(&"boxing_gloves", 1)
 	check(not run.can_use_on_owner(run.human_run_inventory, _index_of(run.human_run_inventory, &"boxing_gloves")), "gloves are not medicine")
 

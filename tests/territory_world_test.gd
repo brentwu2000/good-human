@@ -76,6 +76,19 @@ func _run() -> void:
 	var temptations := map.get_node("TemptationDirector") as TemptationDirector
 	check(temptations._world_offers(TemptationData.Needs.TERRITORY, run.run_value()), "S05-03: an unmarked place the dog knows is a reason to stay")
 	check(banyan.get_prompt(run).contains("做記號"), "and says so in the dog's terms")
+	# S05-04: as a temptation, the place itself calls — in scent, not an icon.
+	var banyan_offer: TemptationData = null
+	for template in temptations.catalog:
+		if template.needs == TemptationData.Needs.TERRITORY:
+			banyan_offer = template
+	await _put_dog(dog, banyan.global_position + Vector3(20, 0, 0))
+	temptations.offer(banyan_offer, run.elapsed_time)
+	check(banyan.is_calling() and temptations.calling_point == banyan, "S05-04: the banyan temptation makes the tree call")
+	var wisp := banyan.get_node("ScentCall").get_child(0) as Node3D
+	await _physics(20)
+	check(wisp.position.y >= TerritoryPoint3D.CALL_LOW and (wisp.material_override as StandardMaterial3D).albedo_color.a > 0.0, "scent drifts up out of the canopy (%.1f m)" % wisp.position.y)
+	await _put_dog(dog, banyan.global_position + Vector3(1.5, 0, 0))
+	check(not banyan.is_calling(), "and stops once the dog has come")
 	banyan.interact(run)
 	check_eq(marks.size(), 1, "the dog marks it")
 	check(banyan.marked_this_walk, "this walk now counts for the place")
