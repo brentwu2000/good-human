@@ -57,6 +57,10 @@ func _run() -> void:
 	var hand_y := (sk.get_bone_global_pose(hand).origin).y
 	var shoulder_y := (sk.get_bone_global_pose(shoulder).origin).y
 	check(hand_y < shoulder_y - 0.4, "hands hang well below the shoulders (%.2f m below)" % (shoulder_y - hand_y))
+	# Every hair piece rides the skeleton, or it floats in place when the head moves.
+	var hair := plain_visual.model.find_children("Hair*", "MeshInstance3D", true, false)
+	var unskinned := hair.filter(func(m: MeshInstance3D) -> bool: return m.skin == null or m.get_node_or_null(m.skeleton) != sk)
+	check(hair.size() > 0 and unskinned.is_empty(), "the hair is skinned to the skeleton (%d pieces, %d loose)" % [hair.size(), unskinned.size()])
 	finish()
 
 

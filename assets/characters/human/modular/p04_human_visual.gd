@@ -11,7 +11,7 @@ extends Node3D
 ##   whatever clip is playing, at a weight, so gameplay accents (a head snap, a
 ##   hook's twist, breathing) layer over the authored motion.
 
-const MODEL := preload("res://assets/characters/human/models/p04_owner/p04_owner.glb")
+const MODEL := preload("res://assets/characters/human/models/p04_owner/p04_owner_hairfix.glb")
 const BONE_MAP := {"Hips": "pelvis", "Torso": "spine_03", "Head": "head", "ArmL": "upperarm_r", "ArmR": "upperarm_l", "LegL": "thigh_r", "LegR": "thigh_l"}
 ## Relaxed Idle / Walk on the same OwnerSkeleton (arms down, open hands).
 ## Every authored P-04 idle and walk holds a guard; outside a fight nobody
