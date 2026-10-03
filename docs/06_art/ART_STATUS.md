@@ -34,3 +34,22 @@ how to use it is `docs/06_art/dog_agency/P03_DESIGN_BRIEF.md`.
 
 This section exists only because the storyboard arrived in an owner update
 package rather than from Art, so nothing in the Art Read Order pointed at it.
+
+## Breed-dog eye revision r5 — 2026-10-02
+
+Seven preview dog eye textures updated and checked in Godot at front and both
+45-degree views with standard and SoftToon materials (42 captures). Factory
+_codex GLBs/PNGs and preview files are synchronized; originals retained. All 32
+test scenes pass. Eye ghosts corrected; mouth seams, ear/geometry defects and
+existing Sit deformation remain. Overall status: REVIEW, not final approval.
+The r3/r4 eye-validation claims are superseded by
+[the r5 report](BREED_DOGS_EYE_REPAIR_CODEX_2026-10-02.md).
+
+## Breed-dog complete-eye revision r6 — 2026-10-03
+
+Owner rejected r5; its eye-validation claim is superseded by the
+[r6 report](BREED_DOGS_EYES_R6_2026-10-03.md). Front-sheet eye crops included
+occluding muzzle pixels. R6 replaces them with an unobstructed eye source and
+per-mesh surface projection. Geometry/rig/animation data remain unchanged.
+Preview status remains REVIEW; mouth/nose seams, head geometry defects and
+limited close-up atlas resolution still prevent final-art approval.

@@ -16,6 +16,15 @@ Every third-party asset considered for GOOD HUMAN! must be recorded here before 
 | Banyan scent states and reward marker | Codex-directed original Blender authoring for GOOD HUMAN! | `tools/art/build_banyan_scent_states.py`; workshop `banyan_06` through `banyan_10` milestones | Original project-authored geometry and materials | Yes / Yes | B implementation candidate | `assets/environment/territory/models/banyan_01/banyan_scent_states.glb`; 35 mesh nodes for discovery, contest, claim, ownership, and reward review states. |
 | Greed moment prop kit | Codex-directed original Blender authoring for GOOD HUMAN! | `tools/art/build_greed_props.py`; workshop `blender/environment/greed/greed_props_01.blend` | Original project-authored geometry and materials | Yes / Yes | B implementation candidate | `assets/environment/territory/models/greed/greed_props.glb`; bus stop, bench, full bag, rival neckerchief, scent trail, and exit plaque. |
 
+## Complete puppy eye source — 2026-10-03
+
+Original Codex-directed built-in OpenAI imagegen output, using the owner's
+generated chihuahua sheet as style reference; no third-party eye image.
+Source, authoring prompts and retrieval record:
+`assets/_source/generated/dog_eyes_r6/PROVENANCE.md`. Preview grade B; existing
+dog model/rig restrictions remain. Only the RGBA puppy-eye source is baked
+into preview atlases; earlier iris experiments are not consumed.
+
 ### Continuing asset rules
 - Prefer CC0.
 - CC-BY is acceptable only when attribution requirements are recorded and satisfied.

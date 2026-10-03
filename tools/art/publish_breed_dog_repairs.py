@@ -8,8 +8,10 @@ def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def copy_new(source,target):
     target.parent.mkdir(parents=True,exist_ok=True)
     if target.exists():
-        assert sha(source)==sha(target),f'Refusing to replace existing output: {target}'
-    else:shutil.copy2(source,target)
+        # A prior Codex pass may be refreshed; factory originals never carry this suffix.
+        assert target.name.endswith('_codex.glb') or target.name.endswith('basecolor_codex.png'), target
+        if sha(source)==sha(target): return
+    shutil.copy2(source,target)
 def main():
     external='--factory' in sys.argv
     for breed in BREEDS:

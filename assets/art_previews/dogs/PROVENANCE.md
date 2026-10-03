@@ -33,3 +33,30 @@ not S-grade production approval.
 
 See [repair report](../../../docs/06_art/BREED_DOGS_TEXTURE_REPAIR_CODEX_2026-10-01.md)
 for comparisons, remaining defects, checksums and validation.
+
+## Eye texture revision r5 — 2026-10-02
+
+Codex ART repainted each eye from the same owner-supplied front reference using
+local surface projections in Blender, removing competing old eye projections.
+The poodle eyes were moved off the sloping muzzle onto the forward head surface;
+the Frenchie's nose was registered separately. No new external assets or models
+were used. Geometry, UVs, rig, weights and clips remain byte-identical to the
+factory GLBs. The existing licence restrictions and preview-only grade remain.
+See the [r5 report](../../../docs/06_art/BREED_DOGS_EYE_REPAIR_CODEX_2026-10-02.md)
+for actual both-side 45-degree screenshots and unresolved mouth/geometry defects.
+
+## Complete-eye revision r6 — 2026-10-03
+
+The r5 eye-quality claim is superseded. Its front-reference crops included
+occluding muzzle pixels, most visibly a diagonal cream cut across Frenchie eyes.
+R6 uses a complete puppy eye generated with the built-in OpenAI imagegen tool
+from the owner's chihuahua style reference, then bakes it into the existing UV
+atlas with per-side ray-cast placement, visibility checks and alpha filtering.
+The source and exact prompts are preserved in
+[`dog_eyes_r6/PROVENANCE.md`](../../_source/generated/dog_eyes_r6/PROVENANCE.md).
+
+Only the embedded base-colour image changes. No experimental eye mesh is
+delivered; all original geometry, UVs, materials, skeleton, weights and clips
+remain byte-identical. The inherited licence restrictions and preview-only
+grade remain. See the [r6 report](../../../docs/06_art/BREED_DOGS_EYES_R6_2026-10-03.md)
+for actual runtime captures and remaining surface/texture limitations.

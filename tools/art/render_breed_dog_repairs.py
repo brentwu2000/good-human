@@ -1,7 +1,7 @@
 """Fixed Blender review views; shares handoff light/camera convention."""
-import bpy,pathlib,math,sys
+import bpy,pathlib,math,sys,os
 from mathutils import Vector
-OUT=pathlib.Path(r'C:\Users\b\Documents\good-human\build\dogs_texture_codex')
+OUT=pathlib.Path(os.environ.get('DOG_REPAIR_OUT',r'C:\Users\b\Documents\good-human\build\dogs_texture_codex'))
 F=pathlib.Path(r'C:\Users\b\Documents\good_human_stylized_factory')
 argv=sys.argv[sys.argv.index('--')+1:]
 for breed in argv:
@@ -24,7 +24,18 @@ for breed in argv:
     sun.data.energy=2.5;sun.rotation_euler=(math.radians(50),0,math.radians(-30))
     cam=bpy.data.objects.new('ReviewCamera',bpy.data.cameras.new('ReviewCamera'));sc.collection.objects.link(cam);sc.camera=cam
     cam.data.type='ORTHO';cam.data.ortho_scale=size*1.15
-    for view,angle,lift in [('front',0,.25),('34',-40,.25),('side',-90,.25),('back',180,.25),('low',-30,-.35)]:
+    if os.environ.get('DOG_HEAD_REVIEW'):
+        h=hi.z-lo.z
+        target=Vector((0,-h*.22,h*.69))
+        cam.data.ortho_scale=h*.78
+        angles=[int(a) for a in os.environ.get('DOG_HEAD_ANGLES','-90,-60,-45,-30,0,30,45,60,90').split(',')]
+        for angle in angles:
+            d=Vector((math.sin(math.radians(angle)),-math.cos(math.radians(angle)),.10)).normalized()*5
+            cam.location=target+d;cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler()
+            sc.render.filepath=str(dest/f'{breed}_head_{angle:+03d}.png');bpy.ops.render.render(write_still=True)
+        print('DOG_HEAD_RENDER_COMPLETE',breed,flush=True)
+        continue
+    for view,angle,lift in [('front',0,.25),('34',-40,.25),('45',-45,.25),('side',-90,.25),('back',180,.25),('low',-30,-.35)]:
         d=Vector((math.sin(math.radians(angle)),-math.cos(math.radians(angle)),lift)).normalized()*5
         cam.location=c+d;cam.rotation_euler=(c-cam.location).to_track_quat('-Z','Y').to_euler()
         sc.render.filepath=str(dest/f'{breed}_{view}.png');bpy.ops.render.render(write_still=True)

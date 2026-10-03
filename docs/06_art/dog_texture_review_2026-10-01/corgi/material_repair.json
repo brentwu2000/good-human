@@ -1,7 +1,7 @@
 {
   "breed": "corgi",
   "covered_texels": 656266,
-  "changed_texels_over_2_percent": 434517,
+  "changed_texels_over_2_percent": 449004,
   "source_sha256": "56405acabf175faebdb9f70cc87b86b849effa3b56b6cd015c4e37f20ab6e094",
   "coat": [
     0.9055784912109375,

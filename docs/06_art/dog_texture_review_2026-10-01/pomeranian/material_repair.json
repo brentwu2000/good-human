@@ -1,7 +1,7 @@
 {
   "breed": "pomeranian",
   "covered_texels": 298587,
-  "changed_texels_over_2_percent": 200129,
+  "changed_texels_over_2_percent": 209272,
   "source_sha256": "dfad6d44193a888829257ad66bd882d80700158229831769276692dcd8c3389a",
   "coat": [
     0.9081079003810884,

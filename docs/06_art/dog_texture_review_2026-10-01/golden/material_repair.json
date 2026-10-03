@@ -1,7 +1,7 @@
 {
   "breed": "golden",
   "covered_texels": 367065,
-  "changed_texels_over_2_percent": 181030,
+  "changed_texels_over_2_percent": 211521,
   "source_sha256": "6e9e963d58eeb1edcf7c2e2d2ce2b16c6be8f665fad679acf51b1338a2633d1e",
   "coat": [
     0.9232059059143067,

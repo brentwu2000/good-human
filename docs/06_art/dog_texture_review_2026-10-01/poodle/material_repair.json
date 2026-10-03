@@ -1,7 +1,7 @@
 {
   "breed": "poodle",
   "covered_texels": 653483,
-  "changed_texels_over_2_percent": 570915,
+  "changed_texels_over_2_percent": 573245,
   "source_sha256": "d97e2f59b80e6560c0e710bf6c609b92daf5b7f0a88df3bf40e732aad3a55b62",
   "coat": [
     0.8387157292366028,

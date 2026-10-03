@@ -1,7 +1,7 @@
 """Replace only each embedded base-colour payload; validate all other data verbatim."""
-import pathlib,json,struct,hashlib
+import pathlib,json,struct,hashlib,os
 F=pathlib.Path(r'C:\Users\b\Documents\good_human_stylized_factory')
-OUT=pathlib.Path(r'C:\Users\b\Documents\good-human\build\dogs_texture_codex')
+OUT=pathlib.Path(os.environ.get('DOG_REPAIR_OUT',r'C:\Users\b\Documents\good-human\build\dogs_texture_codex'))
 def unpack(raw):
     n=struct.unpack_from('<I',raw,12)[0];doc=json.loads(raw[20:20+n])
     return doc,raw[28+n:]

@@ -3,11 +3,13 @@
 Owner-sheet colours and source projection only; no generated/research-only art.
 Outputs are staged under build/dogs_texture_codex, never factory originals.
 """
-import bpy, numpy as np, pathlib, sys, json, hashlib
+import bpy, numpy as np, pathlib, sys, json, hashlib, os
 
 F=pathlib.Path(r'C:\Users\b\Documents\good_human_stylized_factory')
-OUT=pathlib.Path(r'C:\Users\b\Documents\good-human\build\dogs_texture_codex')
+OUT=pathlib.Path(os.environ.get('DOG_REPAIR_OUT',r'C:\Users\b\Documents\good-human\build\dogs_texture_codex'))
+sys.path.insert(0,str(pathlib.Path(__file__).parent))
 sys.path.insert(0,str(F/'scripts'))
+from repair_dog_faces import rebuild_face
 from rig_full import barycentric
 from dog_project import figure_mask, fit, VIEWS
 
@@ -78,7 +80,7 @@ def main(breed):
             st=np.stack([mirror(u*14)*(tile.shape[1]-1.01),mirror(vv*14)*(tile.shape[0]-1.01)],1)
             t+=sample(tile,st)*weights[:,axis:axis+1]
         v=np.clip(t.mean(1)-np.median(tile.mean(-1)),-.10,.10)*.30
-        fur=np.clip(coat+v[:,None],0,1);pale=np.clip(cream+v[:,None]*.55,0,1)
+        fur=np.clip(coat+v[:,None]*1.7,0,1);pale=np.clip(cream+v[:,None]*.75,0,1)
     head=smooth(.53,.62,z)*(1-smooth(-.06,.04,y))
     if breed=='poodle':head=smooth(.44,.50,z)*(1-smooth(-.06,.04,y))
     tail=smooth(.16,.27,y)*smooth(.43,.56,z)
@@ -92,7 +94,12 @@ def main(breed):
     iy=np.clip(side_uv[:,1].astype(int),0,side_ref.shape[0]-1)
     torso=(1-head)*(1-tail)*smooth(.10,.24,z)
     side_col=mix(fur,side_col,side_mask[iy,ix].astype(float))
-    c=mix(c,side_col,torso*.92)
+    side_alpha=.64 if breed=='corgi' else .92
+    c=mix(c,side_col,torso*side_alpha)
+    if breed=='corgi':
+        # Feather the side-view takeover on the flank so the UV boundary is not a line.
+        flank=smooth(.18,.34,z)*(1-head)*(1-tail)*smooth(-.12,.02,y)
+        c=mix(c,fur,flank*.24)
     # Coat on unseen ear backs/crown, keeping the forward ear's pink leather.
     ear=smooth(.76,.84,z)*head
     ear_back=ear*smooth(-.28,.15,ny)
@@ -141,10 +148,15 @@ def main(breed):
         # Remove strap fragments on the rear of the head, keeping dark ears.
         rearhead=head*smooth(-.14,.15,ny)*(1-smooth(.72,.83,z))
         c=mix(c,pale,rearhead)
+    if breed!='poodle':
+        # Keep facial features on the forward plane; neutralise cheek/rear islands
+        # that can carry a second eye or muzzle from another projection view.
+        cheek=head*smooth(-.16,.10,ny)
+        c=mix(c,fur,cheek*.72)
     if breed in ['poodle']:
         # Remove all competing facial projections before applying one front view.
         head_base=mix(fur,pale,1-smooth(.64,.76,z))
-        c=mix(c,head_base,head)
+        c=mix(c,head_base,head*.72)
         if breed=='poodle':
             back_ref=read_image(F/'references/dogs/poodle_back.png')
             buv=fit(co,VIEWS['back'][0],figure_mask(back_ref))(pos[have])
@@ -157,7 +169,9 @@ def main(breed):
         face_pos=pos[have].copy()
         face_pos[:,0]=H*.18*np.arctan2(x,-(y+.14))
         front=sample(ref,projection(face_pos))
-        face=head*(1-smooth(-.235,-.165,y))
+        # Keep the single front source on the nose/eye plane; cheek surfaces stay fur.
+        # The narrower depth band prevents a second eye or muzzle on the 3/4 cheek.
+        face=head*(1-smooth(-.30,-.23,y))
         # Non-dog pixels cannot be projected onto crown/ear gaps.
         fuv=projection(face_pos);fm=figure_mask(ref)
         fix=np.clip(fuv[:,0].astype(int),0,ref.shape[1]-1);fiy=np.clip(fuv[:,1].astype(int),0,ref.shape[0]-1)
@@ -170,6 +184,9 @@ def main(breed):
         # Tongues and noses can sit below the generic head bound on short breeds.
         muzzle=(1-smooth(-.32,-.22,y))*smooth(.32,.44,z)
         c=mix(c,old,muzzle)
+    if os.environ.get('DOG_FACE_CACHE'):
+        np.savez_compressed(dest/'face_surface.npz',c=c,p=p,n=n,co=co/H,tris=tris,fur=fur,pale=pale,have=have,original=original)
+    c=rebuild_face(breed,c,p,n,co/H,tris,fur,pale,read_image,sample,smooth,mix,F)
     # Paint four warm paw-pad groups on downward-facing soles only.
     lowco=co[co[:,2]<co[:,2].min()+H*.045]/H
     cy=np.median(lowco[:,1]);pad=np.zeros(len(p))
