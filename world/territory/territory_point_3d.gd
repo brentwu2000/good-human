@@ -17,6 +17,9 @@ extends Interactable3D
 signal discovered(territory: TerritoryData)
 signal rival_scent_found(territory: TerritoryData)
 signal marked(territory: TerritoryData)
+## S05-05: the dog read whose scent is on the roots on this walk. `text` is
+## what it makes of it, in its own words.
+signal scents_read(territory: TerritoryData, text: String)
 
 const GROUP: StringName = &"territory_points"
 ## Meters. Close enough to see it is a landmark.
@@ -46,6 +49,8 @@ var landmark: Node3D
 ## Set when the dog marks the place on this walk; the claim is settled on the
 ## way home, not here.
 var marked_this_walk: bool = false
+## S05-05: the roots have been read on this walk (once per walk).
+var scents_read_this_walk: bool = false
 
 var _presentation: TerritoryPresentation3D
 var _near_seconds: float = 0.0
@@ -71,6 +76,7 @@ func _ready() -> void:
 	if run_manager != null:
 		run_manager.run_started.connect(func(_s: int) -> void:
 			marked_this_walk = false
+			scents_read_this_walk = false
 			set_calling(false))
 
 
@@ -224,17 +230,46 @@ func _notice() -> void:
 
 
 ## Standing at the roots long enough to take in what it smells of. Another dog
-## lives here — that is learned, not announced by a UI.
+## lives here — that is learned, not announced by a UI. On later walks the
+## same moment tells the dog how the place stands between them (S05-05).
 func _read_scents() -> void:
 	_near_seconds = 0.0
-	if data.resident_spot.is_empty() or state() != TerritoryProgress.State.DISCOVERED:
+	if scents_read_this_walk or data.resident_spot.is_empty():
 		return
-	if not Game.territory_progress.advance_to(territory_id, TerritoryProgress.State.CONTESTED):
+	scents_read_this_walk = true
+	if dog.has_method(&"play_sniff"):
+		dog.call(&"play_sniff")
+	if state() == TerritoryProgress.State.DISCOVERED:
+		if not Game.territory_progress.advance_to(territory_id, TerritoryProgress.State.CONTESTED):
+			return
+		Game.territory_progress.note_event(territory_id, data.rival_scent_text)
+		play_recognize()
+		refresh()
+		rival_scent_found.emit(data)
 		return
-	Game.territory_progress.note_event(territory_id, data.rival_scent_text)
-	play_recognize()
-	refresh()
-	rival_scent_found.emit(data)
+	var text := scent_text()
+	if not text.is_empty():
+		scents_read.emit(data, text)
+
+
+## 0..1: how much of what is on the roots is the dog's own. Grows only with
+## walks that came home after marking, never with time.
+func own_scent_share() -> float:
+	if Game.territory_progress.is_owned(territory_id):
+		return 1.0
+	return clampf(float(Game.territory_progress.claim_progress(territory_id)) / maxf(data.claim_target, 1), 0.0, 1.0)
+
+
+## What the roots say about whose place this is, in the dog's words.
+func scent_text() -> String:
+	match state():
+		TerritoryProgress.State.CONTESTED:
+			return data.rival_only_text
+		TerritoryProgress.State.CLAIMING:
+			return data.mixed_scent_text
+		TerritoryProgress.State.OWNED:
+			return data.own_scent_text
+	return ""
 
 
 func _rebuild_landmark() -> void:

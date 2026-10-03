@@ -125,6 +125,29 @@ func _run() -> void:
 	check(not banyan.marked_this_walk, "but a new walk has to be earned again")
 	check(run.marked_territories.is_empty(), "and starts with nothing marked")
 
+	# S05-05: on a later walk the roots say whose place it is, once per walk.
+	var readings: Array[String] = []
+	banyan.scents_read.connect(func(_t: TerritoryData, text: String) -> void: readings.append(text))
+	check(not banyan.scents_read_this_walk, "a new walk has not read the roots yet")
+	await _put_dog(dog, banyan.global_position + Vector3(1.5, 0, 0))
+	await _physics(int(TerritoryPoint3D.SCENT_SECONDS * 70.0))
+	check_eq(readings.size(), 1, "S05-05: standing at the roots reads them again on a new walk")
+	check_eq(readings[0] if readings.size() > 0 else "", banyan.data.rival_only_text, "only the resident's scent before any claim")
+	check_eq(banyan.own_scent_share(), 0.0, "none of it is the dog's yet")
+	await _physics(int(TerritoryPoint3D.SCENT_SECONDS * 140.0))
+	check_eq(readings.size(), 1, "and only once per walk")
+	var real_state: TerritoryProgress.State = progress.states[&"banyan"]
+	progress.states[&"banyan"] = TerritoryProgress.State.CLAIMING
+	progress.claims[&"banyan"] = 1
+	check_eq(banyan.scent_text(), banyan.data.mixed_scent_text, "claiming: the two scents are mixed")
+	check(absf(banyan.own_scent_share() - 1.0 / 3.0) < 0.01, "a third of it is the dog's after one walk home")
+	progress.states[&"banyan"] = TerritoryProgress.State.OWNED
+	check_eq(banyan.scent_text(), banyan.data.own_scent_text, "owned: it is mostly the dog's own")
+	progress.states[&"banyan"] = real_state
+	progress.claims.erase(&"banyan")
+	# This test's listener plus the walk's, which says it in the dog's voice.
+	check_eq(banyan.scents_read.get_connections().size(), 2, "the walk says it in the dog's voice")
+
 	# P4-010: mark it again, then actually walk home. The scene changes, so this
 	# is the last thing the walk does.
 	banyan.interact(run)

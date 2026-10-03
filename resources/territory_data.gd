@@ -26,3 +26,10 @@ extends Resource
 @export var rival_scent_text: String
 @export var marked_text: String
 @export var claimed_text: String
+## S05-05: what the roots smell of on a later walk, by whose scent is on top.
+## Only the resident's (CONTESTED)…
+@export var rival_only_text: String
+## …both dogs', mixed (CLAIMING)…
+@export var mixed_scent_text: String
+## …mostly the dog's own (OWNED).
+@export var own_scent_text: String

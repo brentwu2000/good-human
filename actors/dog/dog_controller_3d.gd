@@ -126,6 +126,11 @@ func _physics_process(delta: float) -> void:
 		interact_requested.emit(focused)
 
 
+## The nose down at something (S05-05: reading a place's scents).
+func play_sniff() -> void:
+	_motion.play_sniff()
+
+
 ## P03-E04: while the camera is inside the dog's head, its own body would fill
 ## the lens. The collision shape and every rule are untouched — this hides a
 ## mesh, nothing else.

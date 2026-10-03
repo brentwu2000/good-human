@@ -59,8 +59,24 @@ func _ready() -> void:
 			# P04-11: explaining the fight in words is debug-only.
 			if FighterPuppet3D.show_combat_text:
 				hud.show_toast(text, Color(0.6, 1.0, 0.7) if positive else Color(1.0, 0.75, 0.6)))
+	if hud != null:
+		_voice_territories(hud)
 	run_manager.run_started.connect(func(_s: int) -> void: human.say("好，出去散步吧！"))
 	run_manager.loot_gained.connect(_on_loot_gained)
+
+
+## S05-05: what the dog makes of a place is said in the walk, in its own voice,
+## the same way as the walk's temptations.
+func _voice_territories(hud: Node) -> void:
+	var voice := Color(1.0, 0.92, 0.66)
+	for node in get_tree().get_nodes_in_group(TerritoryPoint3D.GROUP):
+		var point := node as TerritoryPoint3D
+		if not is_ancestor_of(point):
+			continue
+		point.discovered.connect(func(t: TerritoryData) -> void: hud.show_toast(t.discovered_text, voice, true))
+		point.rival_scent_found.connect(func(t: TerritoryData) -> void: hud.show_toast(t.rival_scent_text, voice, true))
+		point.scents_read.connect(func(_t: TerritoryData, text: String) -> void: hud.show_toast(text, voice))
+		point.marked.connect(func(t: TerritoryData) -> void: hud.show_toast(t.marked_text, voice))
 
 
 ## Presentation only: the mood of the walk, never its rules.
