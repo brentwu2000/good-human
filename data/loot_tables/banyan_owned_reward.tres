@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="LootTableData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/loot_table_data.gd" id="1_table"]
+[ext_resource type="Script" path="res://resources/loot_entry.gd" id="2_entry"]
+[ext_resource type="Resource" path="res://data/items/banyan_frisbee.tres" id="3_frisbee"]
+
+[sub_resource type="Resource" id="Entry_frisbee"]
+script = ExtResource("2_entry")
+item = ExtResource("3_frisbee")
+weight = 1
+min_quantity = 1
+max_quantity = 1
+
+[resource]
+script = ExtResource("1_table")
+id = &"banyan_owned_reward"
+entries = Array[ExtResource("2_entry")]([SubResource("Entry_frisbee")])
+nothing_weight = 0

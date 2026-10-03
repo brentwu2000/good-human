@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="TerritoryData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="TerritoryData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/territory_data.gd" id="1_territory"]
+[ext_resource type="Resource" path="res://data/loot_tables/banyan_owned_reward.tres" id="2_reward"]
 
 [resource]
 script = ExtResource("1_territory")
@@ -11,6 +12,7 @@ resident_spot = &"banyan_resident"
 resident_encounter_id = &"enc_rival"
 resident_name = "阿金"
 place_id = &"big_tree"
+reward_table = ExtResource("2_reward")
 owned_flag = &"banyan_owned"
 contested_flag = &"banyan_contested"
 discovered_text = "好大的一棵樹……這裡的味道好多。"
@@ -22,3 +24,4 @@ mixed_scent_text = "我的味道和牠的混在一起了。"
 own_scent_text = "這裡幾乎都是我的味道。牠好久沒來了。"
 came_home_text = "帶著大榕樹的記號回到家了。那裡又多了一點我的味道。"
 not_home_text = "在大榕樹留了記號，可是沒能回到家……這次不算。之前的還在。"
+reward_found_text = "樹根下……有東西！是阿金藏的？"

@@ -20,6 +20,8 @@ signal marked(territory: TerritoryData)
 ## S05-05: the dog read whose scent is on the roots on this walk. `text` is
 ## what it makes of it, in its own words.
 signal scents_read(territory: TerritoryData, text: String)
+## S05-11: the place's one ownership reward was found at the roots.
+signal reward_found(territory: TerritoryData, item: ItemData)
 
 const GROUP: StringName = &"territory_points"
 ## Meters. Close enough to see it is a landmark.
@@ -267,6 +269,22 @@ func _read_scents() -> void:
 	var text := scent_text()
 	if not text.is_empty():
 		scents_read.emit(data, text)
+	_find_reward()
+
+
+## S05-11: the first walk the place is the dog's own, the roots give up
+## something the resident left behind. Once ever; a full bag keeps it waiting
+## for a later walk rather than losing it.
+func _find_reward() -> void:
+	if data.reward_table == null or not Game.territory_progress.is_owned(territory_id) 			or Game.territory_progress.is_reward_given(territory_id):
+		return
+	var stack := run_manager.grant_reward(data.reward_table)
+	if stack == null or run_manager.human_run_inventory.count_item(stack.item.id) <= 0:
+		return
+	Game.territory_progress.mark_reward_given(territory_id)
+	Game.territory_progress.note_event(territory_id, data.reward_found_text)
+	play_reward_reveal()
+	reward_found.emit(data, stack.item)
 
 
 ## 0..1: how much of what is on the roots is the dog's own. Grows only with

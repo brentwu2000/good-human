@@ -77,6 +77,7 @@ func _voice_territories(hud: Node) -> void:
 		point.rival_scent_found.connect(func(t: TerritoryData) -> void: hud.show_toast(t.rival_scent_text, voice, true))
 		point.scents_read.connect(func(_t: TerritoryData, text: String) -> void: hud.show_toast(text, voice))
 		point.marked.connect(func(t: TerritoryData) -> void: hud.show_toast(t.marked_text, voice))
+		point.reward_found.connect(func(t: TerritoryData, _item: ItemData) -> void: hud.show_toast(t.reward_found_text, voice, true))
 
 
 ## Presentation only: the mood of the walk, never its rules.

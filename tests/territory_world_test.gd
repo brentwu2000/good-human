@@ -155,6 +155,21 @@ func _run() -> void:
 	check(absf(banyan.own_scent_share() - 1.0 / 3.0) < 0.01, "a third of it is the dog's after one walk home")
 	progress.states[&"banyan"] = TerritoryProgress.State.OWNED
 	check_eq(banyan.scent_text(), banyan.data.own_scent_text, "owned: it is mostly the dog's own")
+	# S05-11: the first walk the tree is the dog's, the roots give something up.
+	progress.states[&"banyan"] = TerritoryProgress.State.OWNED
+	var revealed: Array[ItemData] = []
+	banyan.reward_found.connect(func(_t: TerritoryData, item: ItemData) -> void: revealed.append(item))
+	banyan.scents_read_this_walk = false
+	await _physics(int(TerritoryPoint3D.SCENT_SECONDS * 70.0))
+	check_eq(revealed.size(), 1, "S05-11: an owned place gives up its reward at the roots")
+	check_eq(run.human_run_inventory.count_item(&"banyan_frisbee"), 1, "something the resident left behind, in the owner's bag (still has to get home)")
+	check(progress.is_reward_given(&"banyan"), "and it is remembered as found")
+	check(progress.last_event(&"banyan").contains("阿金"), "the place remembers it")
+	banyan.scents_read_this_walk = false
+	await _physics(int(TerritoryPoint3D.SCENT_SECONDS * 70.0))
+	check_eq(revealed.size(), 1, "once ever, not every walk")
+	run.human_run_inventory.remove_item(&"banyan_frisbee")
+	progress.rewards_given.clear()
 	progress.states[&"banyan"] = real_state
 	progress.claims.erase(&"banyan")
 	# This test's listener plus the walk's, which says it in the dog's voice.

@@ -29,12 +29,16 @@ var rivals: Dictionary[StringName, Dictionary] = {}
 
 enum RivalOutcome { NONE, DOG_WON, DOG_LOST }
 
+## S05-11: territory id -> true once its ownership reward has been found.
+var rewards_given: Dictionary[StringName, bool] = {}
+
 
 func clear() -> void:
 	states.clear()
 	claims.clear()
 	last_events.clear()
 	rivals.clear()
+	rewards_given.clear()
 
 
 func state_of(id: StringName) -> State:
@@ -99,6 +103,14 @@ func last_rival_outcome(encounter_id: StringName) -> RivalOutcome:
 	return rival_record(encounter_id)["last"] as RivalOutcome
 
 
+func is_reward_given(id: StringName) -> bool:
+	return rewards_given.get(id, false)
+
+
+func mark_reward_given(id: StringName) -> void:
+	rewards_given[id] = true
+
+
 func serialize() -> Dictionary:
 	var state_names: Dictionary = {}
 	for id in states:
@@ -112,7 +124,10 @@ func serialize() -> Dictionary:
 	var rival_records: Dictionary = {}
 	for id in rivals:
 		rival_records[String(id)] = rival_record(id)
-	return {"states": state_names, "claims": claim_counts, "last_events": events, "rivals": rival_records}
+	var given: Array[String] = []
+	for id in rewards_given:
+		given.append(String(id))
+	return {"states": state_names, "claims": claim_counts, "last_events": events, "rivals": rival_records, "rewards_given": given}
 
 
 func deserialize(data: Dictionary) -> void:
@@ -131,6 +146,10 @@ func deserialize(data: Dictionary) -> void:
 	if raw_events is Dictionary:
 		for key: Variant in raw_events:
 			last_events[StringName(str(key))] = str(raw_events[key])
+	var raw_given: Variant = data.get("rewards_given")
+	if raw_given is Array:
+		for key: Variant in raw_given:
+			rewards_given[StringName(str(key))] = true
 	# Saves from before S05-07 have no rivals: nobody has been fought yet.
 	var raw_rivals: Variant = data.get("rivals")
 	if raw_rivals is Dictionary:

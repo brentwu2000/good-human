@@ -4,11 +4,12 @@ extends "res://tests/test_case.gd"
 const SPRINT_ITEMS: Array[StringName] = [
 	&"tennis_ball", &"dog_treat", &"sports_drink", &"bandage", &"old_running_shoes", &"umbrella",
 	&"jump_rope", &"hand_grip", &"dog_toy", &"old_sports_watch", &"boxing_gloves", &"mysterious_item",
-	&"half_tennis_ball",
+	&"half_tennis_ball", &"banyan_frisbee",
 ]
 const TABLE_PATHS: Array[String] = [
 	"res://data/loot_tables/residential_trash.tres",
 	"res://data/loot_tables/park_search.tres",
+	"res://data/loot_tables/banyan_owned_reward.tres",
 ]
 
 

@@ -20,7 +20,8 @@ extends Resource
 @export var resident_name: String
 ## Collection/place id this landmark registers as when first found.
 @export var place_id: StringName
-## Granted once, when the claim completes.
+## S05-11: found once, at the roots, on the first walk the place is the
+## dog's own (the claim itself completes at home).
 @export var reward_table: LootTableData
 ## Progress flag set once the place is owned, so content can react to it.
 @export var owned_flag: StringName
@@ -33,6 +34,8 @@ extends Resource
 @export var rival_scent_text: String
 @export var marked_text: String
 @export var claimed_text: String
+## S05-11: said when the dog finds the place's reward at the roots.
+@export var reward_found_text: String
 ## S05-09: on the result screen — marked and got home (it counted)…
 @export var came_home_text: String
 ## …or marked and did not (it did not, and nothing was lost either).

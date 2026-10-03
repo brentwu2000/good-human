@@ -70,6 +70,12 @@ func _test_rival_memory() -> void:
 	var cleaned := restored.rival_record(&"enc_rival")
 	check(cleaned["wins"] == 0 and cleaned["last"] == TerritoryProgress.RivalOutcome.NONE, "bad rival data is cleaned, not trusted")
 	check(not restored.rivals.has(&"bad"), "and junk entries are dropped")
+	progress.mark_reward_given(&"banyan")
+	restored.deserialize(progress.serialize())
+	check(restored.is_reward_given(&"banyan"), "S05-11: a found ownership reward stays found after a save")
+	check(not TerritoryProgress.new().is_reward_given(&"banyan"), "and is not found before")
+	var reward := DataRegistry.get_territory(&"banyan").reward_table
+	check(reward != null and reward.entries.size() == 1 and reward.entries[0].item.id == &"banyan_frisbee", "the banyan's reward is one place-related item")
 	check(DataRegistry.get_territory(&"banyan") != null and (load("res://data/encounters/enc_rival.tres") as EncounterData).persistent_rival, "the banyan resident is the persistent rival")
 
 
