@@ -28,6 +28,8 @@ const NOTICE_RADIUS: float = 6.0
 const SCENT_RADIUS: float = 3.0
 const SCENT_SECONDS: float = 1.5
 
+## OpponentPair3D.GROUP, by value (see _alert_resident).
+const RESIDENT_GROUP: StringName = &"opponent_pairs_3d"
 ## Meters: how close the dog has to be to leave its own mark.
 const MARK_RADIUS: float = 2.2
 ## S05-04: the place calling the dog back, in scent rather than a map icon.
@@ -112,12 +114,13 @@ func interact(context: Object) -> void:
 
 ## S05-06: if the dog that lives here is about, it sees the mark and reacts.
 ## Returns the pair that did, or null.
-func _alert_resident() -> OpponentPair3D:
-	for node in get_tree().get_nodes_in_group(OpponentPair3D.GROUP):
-		var pair := node as OpponentPair3D
-		if pair.spot_id == data.resident_spot:
-			pair.react_to_mark(dog.global_position if dog != null else global_position)
-			return pair if pair.riled_this_walk else null
+## Untyped on purpose: naming OpponentPair3D here closes a script dependency
+## cycle that made Godot crash on exit now and then.
+func _alert_resident() -> Node:
+	for pair in get_tree().get_nodes_in_group(RESIDENT_GROUP):
+		if pair.get(&"spot_id") == data.resident_spot:
+			pair.call(&"react_to_mark", dog.global_position if dog != null else global_position)
+			return pair if pair.get(&"riled_this_walk") else null
 	return null
 
 
