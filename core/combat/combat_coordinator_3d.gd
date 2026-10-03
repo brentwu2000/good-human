@@ -105,6 +105,7 @@ func can_provoke(_pair: OpponentPair3D) -> bool:
 
 func _on_run_started(_seed: int) -> void:
 	engagement = null
+	_apply_owner_condition()
 	_defeat_left = -1.0
 	last_result = CombatSimulation.Result.NONE
 	human.set_state(HumanFollower3D.State.FOLLOW)
@@ -145,13 +146,17 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	var lateral := 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
 	var sim := CombatSimulation.new(human.fighter, opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
 	sim.set_lateral(lateral)
+	# S05-02: the owner starts the fight in whatever state the walk left them.
+	var owner_fighter := sim.fighters[CombatSimulation.PLAYER]
+	owner_fighter.hp = maxf(owner_fighter.max_hp * run_manager.owner_condition, 1.0)
+	run_manager.owner_busy = true
 	sim.walkable = _walkable
 	engagement = Engagement3D.new(sim, opponent)
 	_accumulator = 0.0
 	last_result = CombatSimulation.Result.NONE
 	human.set_state(HumanFollower3D.State.COMBAT)
 	human.puppet.show_hp(true)
-	human.puppet.set_hp_ratio(1.0)
+	human.puppet.set_hp_ratio(owner_fighter.hp_ratio())
 	opponent.begin_combat()
 	opponent.human_puppet.shout("你家的狗在叫什麼？！", Color(1.0, 0.8, 0.5))
 	human.say("欸欸欸，不是我…", Color(1.0, 0.9, 0.6))
@@ -178,6 +183,7 @@ func _process(delta: float) -> void:
 		if _defeat_left < 0.0:
 			run_manager.defeat_run(_defeated_by)
 	if engagement == null:
+		_walk_owner_condition(delta)
 		return
 	var sim := engagement.simulation
 	if dog.global_position.distance_to(human.global_position) > DISENGAGE_DISTANCE:
@@ -195,6 +201,23 @@ func _process(delta: float) -> void:
 	if engagement != null:
 		_update_motion(delta)
 		_sync()
+
+
+## S05-02: between fights the owner gets a little back on their own, never past
+## `owner_regen_cap`, and a hurt owner walks heavier.
+func _walk_owner_condition(delta: float) -> void:
+	if not run_manager.is_running() or _defeat_left >= 0.0:
+		return
+	if human.is_following():
+		var balance := DataRegistry.balance
+		run_manager.recover_owner(balance.owner_regen_per_second * delta, balance.owner_regen_cap)
+	_apply_owner_condition()
+
+
+func _apply_owner_condition() -> void:
+	var condition := run_manager.owner_condition
+	human.puppet.set_hp_ratio(condition)
+	human.condition_speed = 1.0 - DataRegistry.balance.owner_hurt_slowdown * human.puppet.hurt_amount()
 
 
 ## 0..1 weight of one hit, so a jab and a kick into an opening do not land the
@@ -402,6 +425,9 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 	var ended := engagement
 	var opponent := ended.pair
 	var encounter := opponent.encounter
+	# S05-02: what the fight took stays taken.
+	run_manager.owner_busy = false
+	run_manager.set_owner_condition(0.0 if result == CombatSimulation.Result.DEFEAT else ended.simulation.fighters[CombatSimulation.PLAYER].hp_ratio())
 	engagement = null
 	last_result = result
 	_hitstop_left = 0.0
@@ -445,6 +471,10 @@ func debug_set_owner_condition(ratio: float) -> void:
 	if engagement != null:
 		var fighter := engagement.simulation.fighters[CombatSimulation.PLAYER]
 		fighter.hp = maxf(fighter.max_hp * ratio, 1.0)
+	else:
+		# S05-02: between fights, the condition the walk carries.
+		run_manager.set_owner_condition(ratio)
+		_apply_owner_condition()
 
 
 ## Debug overlay line: the camera's framing and the owner's condition.

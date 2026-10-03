@@ -86,6 +86,17 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_constants/separation = 12
 
+[node name="UseButton" type="Button" parent="Sheet/Margin/Layout/Buttons"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 88)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+disabled = true
+text = "🩹 給主人"
+
 [node name="DiscardButton" type="Button" parent="Sheet/Margin/Layout/Buttons"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 88)

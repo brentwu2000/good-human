@@ -19,6 +19,19 @@ extends Resource
 @export var tension_ramp_seconds: float = 150.0
 @export var tension_far_distance: float = 30.0
 
+@export_group("Owner condition")
+## S05-02: the owner's health carries from fight to fight. On their own they
+## get back this much per second while walking…
+@export var owner_regen_per_second: float = 0.01
+## …but only up to here. Above it, only rest spots and items help.
+@export_range(0.0, 1.0) var owner_regen_cap: float = 0.5
+## A rest spot (bench, bus stop) gives back this much per second…
+@export var rest_recovery_per_second: float = 0.12
+## …and at most this much per spot per walk.
+@export_range(0.0, 1.0) var rest_recovery_budget: float = 0.4
+## The owner walks this much slower at the very end of their strength.
+@export_range(0.0, 1.0) var owner_hurt_slowdown: float = 0.25
+
 @export_group("Combat")
 ## Derived combat values (CombatStats). Keep formulas here, not in skills.
 @export var hp_base: float = 24.0

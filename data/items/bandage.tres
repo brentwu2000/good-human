@@ -12,3 +12,4 @@ rarity = 0
 stackable = true
 max_stack = 5
 value = 15
+owner_recovery = 0.35

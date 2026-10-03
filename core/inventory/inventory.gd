@@ -108,6 +108,14 @@ func remove_item(item_id: StringName, quantity: int = 1) -> bool:
 	return true
 
 
+## Removes `quantity` from one slot's stack. False if it does not hold that many.
+func remove_at(index: int, quantity: int = 1) -> bool:
+	if not _valid(index) or slots[index] == null or quantity <= 0 or slots[index].quantity < quantity:
+		return false
+	_set_quantity(index, slots[index].quantity - quantity)
+	return true
+
+
 ## Takes the whole stack out of a slot.
 func take_stack(index: int) -> ItemStack:
 	if not _valid(index) or slots[index] == null:

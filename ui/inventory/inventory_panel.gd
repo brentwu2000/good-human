@@ -9,12 +9,15 @@ var _human: Inventory
 var _dog: Inventory
 var _selected_inventory: Inventory
 var _selected_index: int = -1
+## S05-02: set by a walk, so items can be used on the owner. Null at Home.
+var run_manager: RunManager
 
 @onready var _human_grid: InventoryGrid = %HumanGrid
 @onready var _dog_grid: InventoryGrid = %DogGrid
 @onready var _detail_label: Label = %DetailLabel
 @onready var _close_button: Button = %CloseButton
 @onready var _discard_button: Button = %DiscardButton
+@onready var _use_button: Button = %UseButton
 
 
 func _ready() -> void:
@@ -22,6 +25,7 @@ func _ready() -> void:
 	_dog_grid.slot_pressed.connect(_on_slot_pressed)
 	_close_button.pressed.connect(close)
 	_discard_button.pressed.connect(discard_selected)
+	_use_button.pressed.connect(use_selected_on_owner)
 
 
 func setup(human: Inventory, dog: Inventory) -> void:
@@ -56,6 +60,8 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 		_selected_index = index
 		_detail_label.text = "%s（$%d）：%s\n再點一格移動，或按「丟掉」" % [stack.item.display_name, stack.item.value, stack.item.description]
 		_discard_button.disabled = false
+		_use_button.visible = run_manager != null and stack.item.owner_recovery > 0.0
+		_use_button.disabled = run_manager == null or not run_manager.can_use_on_owner(inventory, index)
 		_update_highlight()
 		return
 
@@ -72,12 +78,21 @@ func discard_selected() -> void:
 	_clear_selection()
 
 
+## S05-02: a bandage or a drink for the owner. Uses one of the stack.
+func use_selected_on_owner() -> void:
+	if _selected_inventory == null or run_manager == null:
+		return
+	run_manager.use_on_owner(_selected_inventory, _selected_index)
+	_clear_selection()
+
+
 func _clear_selection() -> void:
 	_selected_inventory = null
 	_selected_index = -1
 	if is_node_ready():
 		_detail_label.text = "點一格選取物品，再點目標格移動。狗包的東西失敗也不會遺失。"
 		_discard_button.disabled = true
+		_use_button.visible = false
 		_update_highlight()
 
 

@@ -145,11 +145,22 @@ func _build_street() -> void:
 	for x in [-27.0, -15.0, -3.0, 9.0, 21.0]:
 		add_child(EnvironmentKit.lamp(Vector3(x, 0.05, 4.0)))
 	add_child(EnvironmentKit.bus_stop(Vector3(20, 0.05, 3.0)))
+	_add_rest_spot(&"RestBusStop", Vector3(20, 0, 3.0))
 	# Map edges.
 	for x in [-32.0, 32.0]:
 		add_child(Greybox.solid_box(Vector3(1, 3, 120), Color(0.4, 0.4, 0.42), Vector3(x, 1.5, -30)))
 	add_child(Greybox.solid_box(Vector3(64, 3, 1), Color(0.4, 0.4, 0.42), Vector3(0, 1.5, 12)))
 	add_child(Greybox.solid_box(Vector3(64, 3, 1), Color(0.4, 0.4, 0.42), Vector3(0, 1.5, -70)))
+
+
+## S05-02: the owner can catch their breath here.
+func _add_rest_spot(spot_name: StringName, at: Vector3) -> void:
+	var spot := RestSpot3D.new()
+	spot.name = spot_name
+	spot.run_manager = run_manager
+	spot.human = human
+	spot.position = at
+	add_child(spot)
 
 
 func _build_park() -> void:
@@ -171,6 +182,7 @@ func _build_park() -> void:
 	for p: Vector3 in [Vector3(-3, 0, -30), Vector3(6, 0, -26), Vector3(-11, 0, -37), Vector3(9, 0, -41)]:
 		add_child(EnvironmentKit.bush(p))
 	add_child(EnvironmentKit.bench(Vector3(-2, 0, -36)))
+	_add_rest_spot(&"RestBench", Vector3(-2, 0, -36))
 	add_child(EnvironmentKit.bin(Vector3(2.4, 0, -36), EnvironmentKit.TEAL))
 	for p: Vector3 in [Vector3(-5, 0, -24), Vector3(7, 0, -39), Vector3(-9, 0, -49)]:
 		add_child(EnvironmentKit.lamp(p))

@@ -14,6 +14,9 @@ enum Rarity { COMMON, UNCOMMON, RARE }
 @export var max_stack: int = 99
 @export var value: int = 0
 @export var icon: Texture2D
+## S05-02: how much of the owner's condition (0..1) using it on them gives
+## back. 0 = it cannot be used on the owner.
+@export_range(0.0, 1.0) var owner_recovery: float = 0.0
 
 
 static func rarity_color(value: Rarity) -> Color:

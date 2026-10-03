@@ -16,6 +16,8 @@ signal extraction_unlocked(point: Node)
 ## What the walk is worth now, split into safe and unbanked (P4-001).
 signal value_changed(value: RunValue)
 signal run_ended(result: RunResult)
+## S05-02: the owner's condition (0..1) changed. It carries from fight to fight.
+signal owner_condition_changed(ratio: float)
 
 enum RunStatus { NOT_STARTED, RUNNING, EXTRACTED, FAILED }
 
@@ -45,6 +47,13 @@ var training: TrainingTracker
 ## then, so the walk can tell whether the player chose to stay.
 var first_extraction_time: float = -1.0
 var value_at_first_extraction: RunValue
+
+## S05-02 (owner decision 2026-10-04): the owner's health is kept for the
+## whole walk instead of filling up before every fight. It comes back only a
+## little on its own; scenes (rest spots) and items do the rest.
+var owner_condition: float = 1.0
+## The owner is fighting: the fight owns their health until it ends.
+var owner_busy: bool = false
 
 var _last_value: RunValue
 
@@ -93,6 +102,8 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	first_extraction_time = -1.0
 	value_at_first_extraction = null
 	_last_value = null
+	owner_busy = false
+	set_owner_condition(1.0)
 
 	_extraction_points.clear()
 	extraction_states.clear()
@@ -139,6 +150,42 @@ func _emit_value_changed() -> void:
 		return
 	_last_value = value
 	value_changed.emit(value)
+
+
+# --- Owner condition (S05-02) ---------------------------------------------------
+
+func set_owner_condition(ratio: float) -> void:
+	var value := clampf(ratio, 0.0, 1.0)
+	if is_equal_approx(value, owner_condition):
+		return
+	owner_condition = value
+	owner_condition_changed.emit(owner_condition)
+
+
+## Raises the owner's condition by `amount`, never past `cap`. Returns what was
+## actually gained (0 while fighting or already at the cap).
+func recover_owner(amount: float, cap: float = 1.0) -> float:
+	if owner_busy or amount <= 0.0 or owner_condition >= cap:
+		return 0.0
+	var before := owner_condition
+	set_owner_condition(minf(owner_condition + amount, cap))
+	return owner_condition - before
+
+
+## True when the stack at `index` would do the owner any good right now.
+func can_use_on_owner(inventory: Inventory, index: int) -> bool:
+	var stack := inventory.stack_at(index) if inventory != null else null
+	return is_running() and not owner_busy and stack != null 		and stack.item.owner_recovery > 0.0 and owner_condition < 1.0
+
+
+## Uses one of the stack at `index` on the owner (a bandage, a drink).
+func use_on_owner(inventory: Inventory, index: int) -> bool:
+	if not can_use_on_owner(inventory, index):
+		return false
+	var item := inventory.stack_at(index).item
+	inventory.remove_at(index, 1)
+	recover_owner(item.owner_recovery)
+	return true
 
 
 # --- Search -----------------------------------------------------------------

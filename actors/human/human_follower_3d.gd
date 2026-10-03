@@ -23,6 +23,8 @@ enum State { FOLLOW, COMBAT, DOWN }
 var state: State = State.FOLLOW
 ## Growth hooks (same as the 2D owner): follow speed multiplier, standing still time.
 var speed_multiplier: float = 1.0
+## S05-02: a hurt owner walks heavier (set from the walk's owner condition).
+var condition_speed: float = 1.0
 var hold_time: float = 0.0
 var faded: bool = false
 
@@ -107,7 +109,7 @@ func _follow(delta: float) -> void:
 		toward.y = 0.0
 		if toward.length_squared() < 0.0001:
 			toward = to_dog
-		target = toward.normalized() * lerpf(walk_speed * 0.5, drag_speed, pull) * speed_multiplier
+		target = toward.normalized() * lerpf(walk_speed * 0.5, drag_speed, pull) * speed_multiplier * condition_speed
 	var planar := Vector3(velocity.x, 0.0, velocity.z).move_toward(target, 20.0 * delta)
 	velocity = Vector3(planar.x, velocity.y - 9.8 * delta, planar.z)
 	move_and_slide()

@@ -39,6 +39,8 @@ var _experience_tween: Tween
 @onready var _experience_fx: PanelContainer = %ExperienceFX
 @onready var _experience_label: Label = %ExperienceLabel
 @onready var _risk_label: Label = %RiskLabel
+## S05-02: the owner condition stage the risk line is showing.
+var _shown_owner_stage: int = 0
 
 
 func _ready() -> void:
@@ -63,6 +65,7 @@ func _ready() -> void:
 	run_manager.search_empty.connect(_on_search_empty)
 	run_manager.extraction_unlocked.connect(_on_extraction_unlocked)
 	run_manager.value_changed.connect(_on_value_changed)
+	run_manager.owner_condition_changed.connect(_on_owner_condition_changed)
 	if temptation_director != null:
 		temptation_director.offered.connect(_on_temptation_offered)
 	if run_manager.training != null:
@@ -136,6 +139,7 @@ func _on_inventory_closed() -> void:
 
 func _on_run_started(_run_seed: int) -> void:
 	_inventory_panel.setup(run_manager.human_run_inventory, run_manager.dog_safe_inventory)
+	_inventory_panel.run_manager = run_manager
 	if run_manager.dog_actor != null:
 		_dog_start = run_manager.dog_actor.global_position
 	for inventory in [run_manager.human_run_inventory, run_manager.dog_safe_inventory]:
@@ -178,6 +182,23 @@ func _on_value_changed(value: RunValue) -> void:
 	_update_risk_badge(value)
 
 
+## S05-02: only a change of stage is worth a new line, not every tick of rest.
+func _on_owner_condition_changed(_ratio: float) -> void:
+	var stage := _owner_stage()
+	if stage != _shown_owner_stage:
+		_update_risk_badge(run_manager.run_value())
+
+
+## 0 fine, 1 hurt, 2 barely standing — the thresholds the body shows (P-04).
+func _owner_stage() -> int:
+	var condition := run_manager.owner_condition
+	if condition <= FighterPuppet3D.CRITICAL_AT:
+		return 2
+	if condition <= FighterPuppet3D.HURT_AT:
+		return 1
+	return 0
+
+
 ## D5-05 selected presentation: one quiet consequence line, never a danger bar.
 func _update_risk_badge(value: RunValue) -> void:
 	var balance := DataRegistry.balance
@@ -192,6 +213,13 @@ func _update_risk_badge(value: RunValue) -> void:
 		text = "主人的袋子裝滿了" if text.is_empty() else text + " · 袋子已滿"
 	if value.unbanked_value >= balance.risk_heavy_value:
 		color = Color(1.0, 0.82, 0.55)
+	# S05-02: the owner's condition is part of the decision to stay out. It is
+	# said as a consequence, never as a number or a bar.
+	_shown_owner_stage = _owner_stage()
+	if _shown_owner_stage > 0:
+		var said := "主人受傷了" if _shown_owner_stage == 1 else "主人快撐不住了"
+		text = said if text.is_empty() else text + " · " + said
+		color = Color(1.0, 0.82, 0.55) if _shown_owner_stage == 1 else Color(1.0, 0.62, 0.55)
 	_risk_label.text = text
 	_risk_label.modulate = color
 	_risk_label.visible = not text.is_empty()
