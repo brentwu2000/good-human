@@ -258,6 +258,8 @@ func _read_scents() -> void:
 		if not Game.territory_progress.advance_to(territory_id, TerritoryProgress.State.CONTESTED):
 			return
 		Game.territory_progress.note_event(territory_id, data.rival_scent_text)
+		if not data.contested_flag.is_empty():
+			Game.goal_progress.set_flag(data.contested_flag)
 		play_recognize()
 		refresh()
 		rival_scent_found.emit(data)

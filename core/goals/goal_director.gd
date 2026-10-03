@@ -7,7 +7,9 @@ extends Node
 ##
 ## Events: item_found, brought_home, extracted, pair_met, fight_started,
 ## fight_won, fight_lost, disengaged, cue_sniffed, squirrel_spotted,
-## squirrel_treed, squirrel_escaped, place_visited.
+## squirrel_treed, squirrel_escaped, place_visited, and for places the dog can
+## come to own (S05-10): territory_found, territory_scent, territory_marked,
+## territory_marked_home (subject = territory id).
 ## Works in 2D and 3D: cues, squirrels, places and pairs are found by group and
 ## used through shared methods; distances are in meters.
 
@@ -15,6 +17,10 @@ signal desire_started(desire: DesireData, reason: StringName)
 signal desire_completed(desire: DesireData)
 signal desire_failed(desire: DesireData)
 signal discovered(category: StringName, id: StringName)
+
+## TerritoryPoint3D.GROUP, by value: territory points are used untyped here
+## so the goal and territory scripts never depend on each other.
+const TERRITORY_GROUP: StringName = &"territory_points"
 
 ## The dog counts as meeting a pair this close (meters).
 const MEET_DISTANCE: float = 2.75
@@ -64,6 +70,7 @@ func active_desires() -> Array[DesireData]:
 # --- Walk lifecycle ---------------------------------------------------------------
 
 func _on_run_started(_seed: int) -> void:
+	_listen_to_territories()
 	_met_pairs.clear()
 	_visited_places.clear()
 	for pair in coordinator.get_pairs():
@@ -76,11 +83,38 @@ func _on_run_started(_seed: int) -> void:
 	_refresh_cues()
 
 
+## Territory points are built by the world script after this node is ready,
+## so they are picked up when the walk starts.
+func _listen_to_territories() -> void:
+	for point in _in_run(TERRITORY_GROUP):
+		if point.is_connected(&"marked", _on_territory_marked):
+			continue
+		point.connect(&"discovered", _on_territory_found)
+		point.connect(&"rival_scent_found", _on_territory_scent)
+		point.connect(&"marked", _on_territory_marked)
+
+
+func _on_territory_found(territory: Resource) -> void:
+	send(&"territory_found", territory.get(&"id"))
+
+
+func _on_territory_scent(territory: Resource) -> void:
+	send(&"territory_scent", territory.get(&"id"))
+
+
+func _on_territory_marked(territory: Resource) -> void:
+	send(&"territory_marked", territory.get(&"id"))
+
+
 func _on_run_ended(result: RunResult) -> void:
 	if result.outcome == RunResult.Outcome.EXTRACTED:
 		tracker.handle_event(&"extracted", result.extraction_id)
 	for stack in result.to_stash:
 		tracker.handle_event(&"brought_home", stack.item_id)
+	# S05-10 (ADR-018): a mark that got home is what counts for a place.
+	if result.is_success():
+		for id in result.marked_territories:
+			tracker.handle_event(&"territory_marked_home", id)
 	tracker.end_walk()
 
 
@@ -199,6 +233,9 @@ func hint_position(from: Variant) -> Variant:
 		for squirrel in _in_run(Squirrel.GROUP):
 			if squirrel.squirrel_id == target and squirrel.visible:
 				best = _closer(from, best, squirrel.global_position)
+		for point in _in_run(TERRITORY_GROUP):
+			if point.get(&"territory_id") == target:
+				best = _closer(from, best, point.global_position)
 	return best
 
 

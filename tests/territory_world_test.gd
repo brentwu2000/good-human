@@ -62,6 +62,12 @@ func _run() -> void:
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CONTESTED, "another dog lives here")
 	check(progress.last_event(&"banyan").contains("別的狗"), "and the place remembers that in the dog's words")
 	check(_scent_knots(banyan) > knots_discovered, "the roots now show two dogs' traces")
+	# S05-10: learning whose place it is gives the dog something to want.
+	var goals := map.get_node("GoalDirector") as GoalDirector
+	check(goals.tracker.is_active(&"desire_banyan_answer"), "S05-10: the rival's scent makes the dog want to answer it")
+	check(Game.goal_progress.has_flag(&"banyan_contested"), "and the place's contested flag is set for later walks")
+	var nose: Variant = goals.hint_position(dog.global_position + Vector3(10, 0, 0))
+	check(nose != null and (nose as Vector3).distance_to(banyan.global_position) < 0.1, "the dog's nose points at the tree")
 
 	# It never runs backwards or fires twice, however long the dog hangs around.
 	await _physics(int(TerritoryPoint3D.SCENT_SECONDS * 140.0))
@@ -91,6 +97,7 @@ func _run() -> void:
 	check(not banyan.is_calling(), "and stops once the dog has come")
 	banyan.interact(run)
 	check_eq(marks.size(), 1, "the dog marks it")
+	check_eq(Game.goal_progress.state_of(&"desire_banyan_answer"), GoalProgress.State.COMPLETED, "marking answers the rival's scent")
 	check(banyan._alert_resident() == null, "nobody lives there yet to see it")
 	check(banyan.marked_this_walk, "this walk now counts for the place")
 	check(progress.last_event(&"banyan").contains("我的味道"), "the place remembers being marked")
@@ -124,6 +131,10 @@ func _run() -> void:
 	await _physics(5)
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CONTESTED, "a new walk does not reset the place")
 	check(not banyan.marked_this_walk, "but a new walk has to be earned again")
+	var claim := goals.tracker.get_desire(&"desire_banyan_claim")
+	check(goals.tracker.is_active(claim.id) or goals.tracker._can_offer(claim), "S05-10: on later walks the dog can want to take the tree home")
+	if not goals.tracker.is_active(claim.id):
+		goals.tracker._activate(claim, &"test")
 	check(run.marked_territories.is_empty(), "and starts with nothing marked")
 
 	# S05-05: on a later walk the roots say whose place it is, once per walk.
@@ -180,6 +191,10 @@ func _run() -> void:
 	check_eq(result.territory_claims.get(&"banyan", 0), 1, "getting home turned the mark into progress")
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CLAIMING, "the dog is working on the place")
 	check(not progress.is_owned(&"banyan"), "one walk home is not ownership")
+	check_eq(Game.goal_progress.state_of(&"desire_banyan_claim"), GoalProgress.State.COMPLETED, "S05-10: getting the mark home is what the dog wanted")
+	Game.goal_progress.set_flag(&"banyan_owned")
+	var later := DesireTracker.new(Game.goal_progress, DataRegistry.goals.desires)
+	check(not later._can_offer(claim), "once the tree is the dog's, it stops wanting that")
 	var screen := _tree.current_scene
 	var card := screen.get_node("%TerritoryCard") as Control
 	var said := (screen.get_node("%TerritoryLabel") as Label).text

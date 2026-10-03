@@ -24,6 +24,9 @@ extends Resource
 @export var reward_table: LootTableData
 ## Progress flag set once the place is owned, so content can react to it.
 @export var owned_flag: StringName
+## S05-10: progress flag set once the dog knows another dog lives here, so
+## desires can follow the place.
+@export var contested_flag: StringName
 
 @export_group("Dog words")
 @export var discovered_text: String
