@@ -10,6 +10,7 @@ func _ready() -> void:
 	_test_states_only_move_forward()
 	_test_claim_needs_walks_that_came_home()
 	_test_round_trip()
+	_test_rival_memory()
 	_test_bad_save_data()
 	_test_claim_resolution()
 	finish()
@@ -49,6 +50,27 @@ func _test_claim_needs_walks_that_came_home() -> void:
 	check(progress.is_owned(BANYAN), "the place is the dog's now")
 	check(not progress.add_claim(BANYAN, 3), "and cannot be claimed again")
 	check_eq(progress.claim_progress(BANYAN), 3, "progress does not run past the target")
+
+
+## S05-07: the rival's memory of the dog, and that it survives a save.
+func _test_rival_memory() -> void:
+	var progress := TerritoryProgress.new()
+	check_eq(progress.last_rival_outcome(&"enc_rival"), TerritoryProgress.RivalOutcome.NONE, "never fought: no memory")
+	progress.record_rival_fight(&"enc_rival", false)
+	progress.record_rival_fight(&"enc_rival", true)
+	var record := progress.rival_record(&"enc_rival")
+	check_eq([record["wins"], record["losses"]], [1, 1], "wins and losses are counted")
+	check_eq(progress.last_rival_outcome(&"enc_rival"), TerritoryProgress.RivalOutcome.DOG_WON, "and the last fight is what is remembered")
+	var restored := TerritoryProgress.new()
+	restored.deserialize(progress.serialize())
+	check_eq(restored.rival_record(&"enc_rival"), record, "rival memory survives a save")
+	restored.deserialize({"states": {"banyan": 2}})
+	check_eq(restored.last_rival_outcome(&"enc_rival"), TerritoryProgress.RivalOutcome.NONE, "an older save has no rival memory")
+	restored.deserialize({"rivals": {"enc_rival": {"wins": -3, "losses": "x", "last": 99}, "bad": "nonsense"}})
+	var cleaned := restored.rival_record(&"enc_rival")
+	check(cleaned["wins"] == 0 and cleaned["last"] == TerritoryProgress.RivalOutcome.NONE, "bad rival data is cleaned, not trusted")
+	check(not restored.rivals.has(&"bad"), "and junk entries are dropped")
+	check(DataRegistry.get_territory(&"banyan") != null and (load("res://data/encounters/enc_rival.tres") as EncounterData).persistent_rival, "the banyan resident is the persistent rival")
 
 
 func _test_round_trip() -> void:

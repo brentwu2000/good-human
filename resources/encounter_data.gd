@@ -23,4 +23,13 @@ enum DogBreed { MIX, SHIBA, PIT, SMALL_WHITE, BLACK_DOG }
 @export_multiline var intro_text: String
 ## S05-06: what their human says on seeing another dog mark their place.
 @export var mark_reaction_text: String
+
+@export_group("Persistent rival (S05-07)")
+## The same pair walk after walk: fights with them are remembered, and they
+## remember too. Memory only — never stronger or weaker for it.
+@export var persistent_rival: bool = false
+## Said on meeting again after the player's dog won last time…
+@export var recall_beaten_text: String
+## …and after it lost.
+@export var recall_won_text: String
 @export var reward_table: LootTableData

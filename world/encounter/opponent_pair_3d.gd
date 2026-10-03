@@ -46,6 +46,10 @@ var _time: float = 0.0
 var riled_this_walk: bool = false
 ## Meters: close enough to the mark to notice it.
 const MARK_NOTICE_DISTANCE: float = 14.0
+## S05-07: a persistent rival has recognised the player's dog on this walk.
+var recognised_this_walk: bool = false
+## Meters: close enough to recognise the dog they fought before.
+const RECOGNISE_DISTANCE: float = 5.0
 
 ## Opponent dog reactions (Sprint 04 basic hooks).
 const WATCH_DISTANCE: float = 6.0
@@ -72,6 +76,7 @@ func _ready() -> void:
 
 func setup(data: EncounterData) -> void:
 	riled_this_walk = false
+	recognised_this_walk = false
 	encounter = data
 	state = State.IDLE
 	if presentation != null:
@@ -176,6 +181,10 @@ func begin_combat() -> void:
 
 func end_combat(result: CombatSimulation.Result) -> void:
 	human_puppet.show_hp(false)
+	# S05-07: the same pair remembers how it went, walk after walk.
+	if encounter != null and encounter.persistent_rival and result in [CombatSimulation.Result.VICTORY, CombatSimulation.Result.DEFEAT]:
+		Game.territory_progress.record_rival_fight(encounter.id, result == CombatSimulation.Result.VICTORY)
+		recognised_this_walk = true
 	if result == CombatSimulation.Result.VICTORY:
 		state = State.BEATEN
 		human_puppet.set_beaten(true)
@@ -229,6 +238,31 @@ func react_to_mark(from: Vector3) -> void:
 	human_puppet.shout(encounter.mark_reaction_text if encounter != null and not encounter.mark_reaction_text.is_empty() else "欸！", Color(1.0, 0.8, 0.5))
 
 
+## S05-07: a persistent rival meeting the dog it fought before. How they hold
+## themselves follows how the last fight went; nothing about the next fight
+## changes.
+func _recognise(to_player: Vector3) -> void:
+	if encounter == null or not encounter.persistent_rival:
+		return
+	var last := Game.territory_progress.last_rival_outcome(encounter.id)
+	if last == TerritoryProgress.RivalOutcome.NONE:
+		return
+	recognised_this_walk = true
+	var toward := to_player.normalized() if to_player.length_squared() > 0.0001 else Vector3.ZERO
+	if last == TerritoryProgress.RivalOutcome.DOG_WON:
+		# They lost last time: their dog backs off behind its owner.
+		_show_dog_text("嗚……")
+		_dog_label_left = 1.6
+		_dog_lunge = -toward * 0.6
+		human_puppet.shout(encounter.recall_beaten_text, Color(0.85, 0.85, 0.9))
+	else:
+		# They won last time: their dog steps up to the end of its lead.
+		_show_dog_text("汪！")
+		_dog_label_left = 1.6
+		_dog_lunge = toward * 0.9
+		human_puppet.shout(encounter.recall_won_text, Color(1.0, 0.8, 0.5))
+
+
 ## The standing body follows the fighter's build.
 func _fit_human_presence() -> void:
 	if _human_presence != null:
@@ -261,6 +295,8 @@ func _update_dog_reactions(delta: float) -> void:
 		return
 	var to_player := player_dog.global_position - _dog.global_position
 	to_player.y = 0.0
+	if state == State.IDLE and not recognised_this_walk and to_player.length() <= RECOGNISE_DISTANCE:
+		_recognise(to_player)
 	if to_player.length() <= WATCH_DISTANCE:
 		_dog.rotation.y = lerp_angle(_dog.rotation.y, atan2(-to_player.x, -to_player.z), minf(delta * 6.0, 1.0))
 		if state == State.IDLE and to_player.length() <= SNIFF_DISTANCE and _dog_label_left <= -4.0:

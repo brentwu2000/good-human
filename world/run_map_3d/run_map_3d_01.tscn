@@ -144,6 +144,7 @@ script = ExtResource("9_pair")
 spot_id = &"banyan_resident"
 fixed_encounter = ExtResource("16_rival")
 required_flag = &"rival_beaten"
+retired_by_flag = &"banyan_owned"
 
 [node name="pair_big_tree" type="Node3D" parent="Encounters"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -52.5)

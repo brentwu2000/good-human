@@ -22,12 +22,19 @@ var states: Dictionary[StringName, State] = {}
 var claims: Dictionary[StringName, int] = {}
 ## Territory id -> short note on the last thing that happened there.
 var last_events: Dictionary[StringName, String] = {}
+## S05-07: the persistent rival — encounter id -> {"wins": int, "losses": int,
+## "last": int}. Wins/losses are the dog's side; "last" is RivalOutcome. It is
+## memory only: it never changes how strong anyone is.
+var rivals: Dictionary[StringName, Dictionary] = {}
+
+enum RivalOutcome { NONE, DOG_WON, DOG_LOST }
 
 
 func clear() -> void:
 	states.clear()
 	claims.clear()
 	last_events.clear()
+	rivals.clear()
 
 
 func state_of(id: StringName) -> State:
@@ -71,6 +78,27 @@ func add_claim(id: StringName, target: int) -> bool:
 	return true
 
 
+## S05-07: a fight with a persistent rival ended (won or lost; a broken-off
+## fight is not remembered as either).
+func record_rival_fight(encounter_id: StringName, dog_won: bool) -> void:
+	var record := rival_record(encounter_id)
+	if dog_won:
+		record["wins"] = int(record["wins"]) + 1
+	else:
+		record["losses"] = int(record["losses"]) + 1
+	record["last"] = RivalOutcome.DOG_WON if dog_won else RivalOutcome.DOG_LOST
+	rivals[encounter_id] = record
+
+
+func rival_record(encounter_id: StringName) -> Dictionary:
+	var record: Dictionary = rivals.get(encounter_id, {})
+	return {"wins": int(record.get("wins", 0)), "losses": int(record.get("losses", 0)), "last": int(record.get("last", RivalOutcome.NONE))}
+
+
+func last_rival_outcome(encounter_id: StringName) -> RivalOutcome:
+	return rival_record(encounter_id)["last"] as RivalOutcome
+
+
 func serialize() -> Dictionary:
 	var state_names: Dictionary = {}
 	for id in states:
@@ -81,7 +109,10 @@ func serialize() -> Dictionary:
 	var events: Dictionary = {}
 	for id in last_events:
 		events[String(id)] = last_events[id]
-	return {"states": state_names, "claims": claim_counts, "last_events": events}
+	var rival_records: Dictionary = {}
+	for id in rivals:
+		rival_records[String(id)] = rival_record(id)
+	return {"states": state_names, "claims": claim_counts, "last_events": events, "rivals": rival_records}
 
 
 func deserialize(data: Dictionary) -> void:
@@ -100,3 +131,16 @@ func deserialize(data: Dictionary) -> void:
 	if raw_events is Dictionary:
 		for key: Variant in raw_events:
 			last_events[StringName(str(key))] = str(raw_events[key])
+	# Saves from before S05-07 have no rivals: nobody has been fought yet.
+	var raw_rivals: Variant = data.get("rivals")
+	if raw_rivals is Dictionary:
+		for key: Variant in raw_rivals:
+			var raw: Variant = raw_rivals[key]
+			if not raw is Dictionary:
+				continue
+			var last := int(raw.get("last", RivalOutcome.NONE))
+			rivals[StringName(str(key))] = {
+				"wins": maxi(int(raw.get("wins", 0)), 0),
+				"losses": maxi(int(raw.get("losses", 0)), 0),
+				"last": last if last >= RivalOutcome.NONE and last <= RivalOutcome.DOG_LOST else RivalOutcome.NONE,
+			}

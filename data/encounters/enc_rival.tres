@@ -18,3 +18,6 @@ dog_breed = 4
 intro_text = "巷子裡的黃金獵犬阿金，嘴邊還叼著另外半顆網球。"
 reward_table = ExtResource("3_reward")
 mark_reaction_text = "欸！你家的狗在我們的樹下幹嘛？！"
+persistent_rival = true
+recall_beaten_text = "又是你們……我們走這邊就好。"
+recall_won_text = "又來啦？上次還沒學乖喔。"
