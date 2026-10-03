@@ -106,7 +106,19 @@ func interact(context: Object) -> void:
 	Game.territory_progress.note_event(territory_id, data.marked_text)
 	play_recognize()
 	play_mark()
+	_alert_resident()
 	marked.emit(data)
+
+
+## S05-06: if the dog that lives here is about, it sees the mark and reacts.
+## Returns the pair that did, or null.
+func _alert_resident() -> OpponentPair3D:
+	for node in get_tree().get_nodes_in_group(OpponentPair3D.GROUP):
+		var pair := node as OpponentPair3D
+		if pair.spot_id == data.resident_spot:
+			pair.react_to_mark(dog.global_position if dog != null else global_position)
+			return pair if pair.riled_this_walk else null
+	return null
 
 
 func _process(delta: float) -> void:

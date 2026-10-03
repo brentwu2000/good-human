@@ -91,6 +91,7 @@ func _run() -> void:
 	check(not banyan.is_calling(), "and stops once the dog has come")
 	banyan.interact(run)
 	check_eq(marks.size(), 1, "the dog marks it")
+	check(banyan._alert_resident() == null, "nobody lives there yet to see it")
 	check(banyan.marked_this_walk, "this walk now counts for the place")
 	check(progress.last_event(&"banyan").contains("我的味道"), "the place remembers being marked")
 	check_eq(progress.claim_progress(&"banyan"), 0, "marking alone earns nothing — getting home does")
@@ -150,8 +151,11 @@ func _run() -> void:
 
 	# P4-010: mark it again, then actually walk home. The scene changes, so this
 	# is the last thing the walk does.
+	check(resident.is_present() and not resident.riled_this_walk, "the resident is home and calm")
 	banyan.interact(run)
 	check(run.marked_territories.has(&"banyan"), "marked again on the new walk")
+	check(resident.riled_this_walk, "S05-06: the resident sees the mark and reacts")
+	check(not map.coordinator.is_fighting() and resident.is_idle(), "a reaction, not a fight: provoking is still the dog's choice")
 	run.debug_unlock_all_extractions()
 	await _physics(2)
 	run.extract(&"bus_stop")

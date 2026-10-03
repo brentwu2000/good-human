@@ -21,4 +21,6 @@ enum DogBreed { MIX, SHIBA, PIT, SMALL_WHITE, BLACK_DOG }
 @export var dog_breed: DogBreed = DogBreed.MIX
 ## Shown when the pair blocks the way. Appearance only.
 @export_multiline var intro_text: String
+## S05-06: what their human says on seeing another dog mark their place.
+@export var mark_reaction_text: String
 @export var reward_table: LootTableData

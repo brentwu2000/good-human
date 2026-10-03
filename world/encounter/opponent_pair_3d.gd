@@ -41,6 +41,11 @@ var _dog_lunge: Vector3 = Vector3.ZERO
 const DOG_OFFSET := Vector3(0.8, 0, 0.3)
 var _dog_offset: Vector3 = DOG_OFFSET
 var _time: float = 0.0
+## S05-06: the player's dog marked their place on this walk and they saw it.
+## Nothing more than that: it does not start a fight.
+var riled_this_walk: bool = false
+## Meters: close enough to the mark to notice it.
+const MARK_NOTICE_DISTANCE: float = 14.0
 
 ## Opponent dog reactions (Sprint 04 basic hooks).
 const WATCH_DISTANCE: float = 6.0
@@ -66,6 +71,7 @@ func _ready() -> void:
 
 
 func setup(data: EncounterData) -> void:
+	riled_this_walk = false
 	encounter = data
 	state = State.IDLE
 	if presentation != null:
@@ -199,6 +205,28 @@ func react_to_bark(from: Vector3) -> void:
 	var towards := from - _dog.global_position
 	towards.y = 0.0
 	_dog_lunge = towards.normalized() * minf(0.8, towards.length() * 0.5) if towards.length() > 0.01 else Vector3.ZERO
+
+
+## S05-06: the player's dog just marked their place. Their dog goes for it
+## (held back on the lead) and their human turns to see. The dog's owner can
+## still walk away: it is a reaction, never a fight.
+func react_to_mark(from: Vector3) -> void:
+	if not is_present() or state != State.IDLE:
+		return
+	var to_mark := from - human_puppet.global_position
+	to_mark.y = 0.0
+	if to_mark.length() > MARK_NOTICE_DISTANCE:
+		return
+	riled_this_walk = true
+	if _dog != null:
+		_show_dog_text("汪！汪汪！")
+		_dog_label_left = 1.8
+		var towards := from - _dog.global_position
+		towards.y = 0.0
+		_dog_lunge = towards.normalized() * minf(1.1, towards.length() * 0.5) if towards.length() > 0.01 else Vector3.ZERO
+	if to_mark.length_squared() > 0.0001:
+		human_puppet.rotation.y = atan2(-to_mark.x, -to_mark.z)
+	human_puppet.shout(encounter.mark_reaction_text if encounter != null and not encounter.mark_reaction_text.is_empty() else "欸！", Color(1.0, 0.8, 0.5))
 
 
 ## The standing body follows the fighter's build.
