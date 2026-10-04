@@ -150,7 +150,7 @@ unique_name_in_owner = true
 title = "新遊戲"
 ok_button_text = "重新開始"
 cancel_button_text = "取消"
-dialog_text = "現在的狗、主人和所有進度都會消失，從收容所重新開始。確定嗎？"
+dialog_text = "現在的狗、主人和所有進度都會消失，從動物醫院重新開始。確定嗎？"
 
 [node name="ControlsLabel" type="Label" parent="Margin/Layout"]
 unique_name_in_owner = true

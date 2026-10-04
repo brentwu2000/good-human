@@ -7,5 +7,5 @@ script = ExtResource("1_memory")
 id = &"met"
 category = 0
 importance = 3
-text = "在收容所的會客室遇見了{name}。"
-recall_line = "從收容所帶你回來……今天是第一次一起散步呢。"
+text = "在動物醫院的窗邊，{name}停下來看了你。"
+recall_line = "從動物醫院帶你回來……今天是第一次一起散步呢。"

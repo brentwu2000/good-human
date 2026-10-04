@@ -91,7 +91,7 @@ func _test_adoption() -> void:
 	var first_name := edit.text
 	scene.next_suggestion()
 	check(edit.text != first_name or chosen[0].background().name_suggestions.size() == 1, "another name can be offered")
-	check(scene.summary().contains("收容所") and scene.summary().contains("回來"), "how they met is kept in words (%s)" % scene.summary())
+	check(scene.summary().contains("動物醫院") and scene.summary().contains("回來"), "how they met is kept in words (%s)" % scene.summary())
 	scene.confirm_name("  阿明  ")
 	check(Game.has_pair(), "naming makes them the pair")
 	check_eq(Game.pair_state.human_custom_name, "阿明", "under the name given")
