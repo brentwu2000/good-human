@@ -18,6 +18,7 @@ func _run() -> void:
 		DirAccess.remove_absolute(TEST_SAVE)
 	SaveManager.save_path = TEST_SAVE
 	await _test_shelter()
+	await _test_adoption()
 	if FileAccess.file_exists(TEST_SAVE):
 		DirAccess.remove_absolute(TEST_SAVE)
 	finish()
@@ -51,6 +52,37 @@ func _test_shelter() -> void:
 	var picked := shelter.dogs[shelter.selected]
 	shelter.choose()
 	check(Game.chosen_dog == picked, "choosing hands that dog on to the adoption")
+
+
+func _test_adoption() -> void:
+	Game.adopting_human = null
+	var scene := (load(Game.ADOPTION_SCENE) as PackedScene).instantiate() as AdoptionScene
+	scene.pace = 0.02
+	scene.seed_value = 77
+	_tree.root.add_child(scene)
+	check(scene.dog == Game.chosen_dog, "S06-03: the dog chosen at the shelter is the one waiting")
+	var reactions: Array[int] = []
+	scene.reacted.connect(func(_i: int, r: int) -> void: reactions.append(r))
+	check_eq(scene.perform(AdoptionScene.Behavior.WAG), -1, "nothing to do before anyone comes in")
+	for visit in AdoptionScene.VISITORS:
+		await scene.visitor_ready
+		check_eq(scene.visit_index, visit, "visitor %d comes in" % (visit + 1))
+		var line := scene.find_child("Line", true, false) as Label
+		for k in AdoptionScene.ACTIONS_PER_VISIT:
+			var r := scene.perform([AdoptionScene.Behavior.WAG, AdoptionScene.Behavior.SIT, AdoptionScene.Behavior.LICK_HAND][k])
+			check(r >= 0, "they react to what the dog does")
+			check(RegEx.create_from_string("[0-9%]").search(line.text) == null, "and never in numbers (%s)" % line.text)
+		check_eq(scene.perform(AdoptionScene.Behavior.BARK), -1, "a visit has only so many moments")
+	check_eq(reactions.size(), AdoptionScene.VISITORS * AdoptionScene.ACTIONS_PER_VISIT, "every moment got a reaction")
+	var chosen: Array[HumanCandidate] = []
+	scene.decided.connect(func(h: HumanCandidate) -> void: chosen.append(h))
+	for i in 600:
+		await _tree.process_frame
+		if not chosen.is_empty():
+			break
+	check_eq(chosen.size(), 1, "one of them comes back for the dog")
+	check(chosen.size() == 1 and scene.humans.has(chosen[0]), "someone who visited")
+	check(Game.adopting_human == chosen[0] if chosen.size() == 1 else false, "and that human is handed on")
 
 
 func _wait_for_scene(path: String) -> void:

@@ -22,6 +22,8 @@ var territory_progress: TerritoryProgress = TerritoryProgress.new()
 var last_run_result: RunResult
 ## Sprint 06: the dog picked at the shelter, waiting to be adopted.
 var chosen_dog: DogCandidate
+## S06-03: the human who came back for it.
+var adopting_human: HumanCandidate
 
 
 func _ready() -> void:
@@ -43,6 +45,13 @@ func choose_dog(dog: DogCandidate) -> void:
 	chosen_dog = dog
 	if ResourceLoader.exists(ADOPTION_SCENE):
 		_change_scene(ADOPTION_SCENE)
+
+
+## S06-03: a human chose the dog. Naming and the pair itself follow (S06-06).
+func adopt(dog: DogCandidate, human: HumanCandidate) -> void:
+	chosen_dog = dog
+	adopting_human = human
+	goto_home()
 
 
 func goto_home() -> void:
