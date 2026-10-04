@@ -74,8 +74,11 @@ func _ready() -> void:
 	# _visual is a bare pivot the facing code yaws; the model hangs off it with
 	# its own fixed correction, so turning the dog stays one rotation.
 	_visual = Node3D.new()
-	var model := SoftToon.pick(MODEL_SCENE, STYLIZED_SCENE).instantiate() as Node3D
+	# Sprint 06: the save's own dog, as the breed it was at the shelter.
+	var model := DogVisual3D.model_for(Game.pair_state.dog if Game.has_pair() else null)
 	model.rotation.y = MODEL_YAW
+	# S06-07: an energetic dog sprints harder.
+	sprint_speed *= Game.dog_talent(&"energy")
 	# This body's origin is not at its feet. The capsule lies on its side, so
 	# what rests on the floor is `position.y - radius` above the origin, and a
 	# model whose own origin is at its paws would stand that far underground.

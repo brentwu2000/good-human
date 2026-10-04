@@ -103,7 +103,8 @@ func _process(delta: float) -> void:
 		cancel_search()
 		_show_popup("走掉了…", Color(0.8, 0.8, 0.8))
 		return
-	_progress += delta
+	# S06-07: a dog with a good nose finds things faster.
+	_progress += delta * Game.dog_talent(&"nose")
 	_visual.rotation.z = sin(_time * 40.0) * 0.08
 	_name_label.text = "%s %s" % [display_label, "●".repeat(int(_progress / search_duration * 5.0))]
 	if _progress >= search_duration:

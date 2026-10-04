@@ -59,6 +59,12 @@ func owner_fighter() -> FighterData:
 	return pair_state.owner_fighter() if pair_state != null else load(HumanCandidate.TEMPLATE_PATH) as FighterData
 
 
+## S06-07: the dog's talent for `stat` ("nose", "energy", "voice"), 1.0
+## without a pair. Rolled at the shelter, leaning the way its traits do.
+func dog_talent(stat: StringName) -> float:
+	return pair_state.dog.stat(stat) if pair_state != null and pair_state.dog != null else 1.0
+
+
 ## Where a profile starts: Home with its pair, or the shelter for a new one.
 func goto_start() -> void:
 	if has_pair():

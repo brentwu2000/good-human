@@ -153,7 +153,7 @@ func _bark_in_fight() -> BarkResult:
 			opponent.human_puppet.shout("（不理你）", Color(0.8, 0.8, 0.8))
 		outcome.emit("…叫太多次，對方不理你了", false)
 		return BarkResult.IGNORED
-	engagement.simulation.distract(CombatSimulation.OPPONENT, BARK_DISTRACT_SECONDS * effect)
+	engagement.simulation.distract(CombatSimulation.OPPONENT, BARK_DISTRACT_SECONDS * effect * Game.dog_talent(&"voice"))
 	if FighterPuppet3D.show_combat_text:
 		opponent.human_puppet.shout("什麼？！", Color(1.0, 0.9, 0.5))
 		human.say("好機會！", Color(0.7, 1.0, 0.7), 0.8)

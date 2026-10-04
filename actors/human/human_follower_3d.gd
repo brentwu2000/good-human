@@ -65,6 +65,9 @@ func _ready() -> void:
 	add_child(shape)
 	puppet = FighterPuppet3D.new()
 	add_child(puppet)
+	# Sprint 06: the save's own human (their looks, name and hidden strength).
+	if Game.has_pair():
+		fighter = Game.owner_fighter()
 	if fighter != null:
 		puppet.apply(fighter)
 	puppet.show_hp(false)

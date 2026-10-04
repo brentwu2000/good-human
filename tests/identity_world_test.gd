@@ -105,6 +105,27 @@ func _test_adoption() -> void:
 	check(_tree.current_scene.scene_file_path == Game.HOME_SCENE, "and the pair goes home")
 	scene.queue_free()
 
+	# S06-07: the first walk is this dog and this human.
+	var pair := Game.pair_state
+	_tree.current_scene.get_node("%Walk3DButton").pressed.emit()
+	await _wait_for_scene(Game.RUN_MAP_3D_SCENE)
+	await _tree.physics_frame
+	var map := _tree.current_scene as RunMap3D
+	check_eq(map.human.fighter.display_name, "阿明", "S06-07: the walk's owner is the adopted human")
+	check_eq(map.human.fighter.stats.strength, pair.human.stats[&"strength"], "with their own hidden strength")
+	check_eq(map.human.fighter.shirt_color.to_html(false), pair.human.shirt_color.to_html(false), "and their own clothes")
+	var breed := DataRegistry.get_dog_breed(pair.dog.breed_id)
+	var model := map.dog.find_child("Model", true, false)
+	check(model != null and model.scene_file_path.get_file().get_basename().begins_with(breed.model_path.get_file().get_basename()), "the walk's dog is the breed chosen at the shelter (%s)" % (model.scene_file_path if model != null else "none"))
+	check(is_equal_approx(map.dog.sprint_speed, 6.2 * pair.dog.stat(&"energy")), "its energy is its own (%.2f)" % map.dog.sprint_speed)
+	check(is_equal_approx(Game.dog_talent(&"nose"), pair.dog.stat(&"nose")), "and so is its nose")
+	# Persistence: a reload brings back the same pair, not a new one.
+	var before := JSON.stringify(pair.serialize())
+	SaveManager.load_game()
+	Game.load_profile()
+	check_eq(JSON.stringify(Game.pair_state.serialize()), before, "the pair survives a reload unchanged")
+	check(Game.owner_fighter().display_name == "阿明", "and is still called by name")
+
 
 func _wait_for_scene(path: String) -> void:
 	for i in 300:
