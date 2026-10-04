@@ -44,8 +44,9 @@ func load_profile() -> void:
 	goal_progress.deserialize(dog.get("goals", {}))
 	territory_progress.deserialize(dog.get("territories", {}))
 	pair_state = PairState.deserialize(SaveManager.data.get("pair"))
-	if pair_state == null and (use_classic_pair_when_missing or int(SaveManager.data["statistics"]["runs"]) > 0):
-		# A save that already walked before Sprint 06 keeps its shiba and owner.
+	if pair_state == null and use_classic_pair_when_missing:
+		# Tests and review captures walk with the classic pair. Old saves get
+		# it through SaveManager's v1 -> v2 migration instead.
 		pair_state = PairState.classic()
 		SaveManager.data["pair"] = pair_state.serialize()
 

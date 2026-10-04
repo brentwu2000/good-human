@@ -5,7 +5,8 @@ extends Node
 signal saved
 signal loaded
 
-const SAVE_VERSION: int = 1
+## 1: Sprints 01-05. 2: Sprint 06, one dog and one human per save (`pair`).
+const SAVE_VERSION: int = 2
 const DEFAULT_SAVE_PATH: String = "user://save.json"
 
 ## Overridable so tests can use an isolated file.
@@ -69,6 +70,23 @@ func reset_to_default() -> void:
 	data = default_data()
 
 
+## Brings a save written by an older build up to SAVE_VERSION. Returns a new
+## dictionary; `raw` is left as it was.
+static func migrate(raw: Dictionary, from_version: int) -> Dictionary:
+	var data := raw.duplicate(true)
+	if from_version < 2:
+		# v1 -> v2 (Sprint 06): a save that already walked keeps its dog and
+		# owner as the classic pair instead of starting over at the shelter.
+		# A v1 save that never walked has nothing to keep and opens at the
+		# shelter like a new game.
+		var stats: Variant = data.get("statistics")
+		var runs := int(stats.get("runs", 0)) if stats is Dictionary and (stats.get("runs") is float or stats.get("runs") is int) else 0
+		if not data.get("pair") is Dictionary and runs > 0:
+			data["pair"] = PairState.classic().serialize()
+	data["version"] = SAVE_VERSION
+	return data
+
+
 func _quarantine_corrupt_file() -> void:
 	var corrupt_path := save_path + ".corrupt"
 	if FileAccess.file_exists(corrupt_path):
@@ -77,10 +95,13 @@ func _quarantine_corrupt_file() -> void:
 
 
 ## Fills missing keys from defaults and restores types lost by JSON
-## (all JSON numbers parse as float).
+## (all JSON numbers parse as float), migrating older versions first.
 func _sanitize(raw: Dictionary) -> Dictionary:
 	var result := default_data()
-	# Future versions migrate here before reading fields.
+	var version := int(raw.get("version", 1)) if (raw.get("version") is float or raw.get("version") is int) else 1
+	if version > SAVE_VERSION:
+		push_warning("SaveManager: save version %d is newer than this build (%d); reading what it can." % [version, SAVE_VERSION])
+	raw = migrate(raw, version)
 	if raw.get("stash") is Array:
 		result["stash"] = raw["stash"]
 	if raw.get("dog") is Dictionary:

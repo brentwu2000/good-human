@@ -15,6 +15,7 @@ func _ready() -> void:
 	_test_corrupt_json_falls_back()
 	_test_wrong_root_type_falls_back()
 	_test_partial_save_is_filled_and_typed()
+	_test_v1_migration()
 
 	_cleanup()
 	SaveManager.save_path = original_path
@@ -76,6 +77,39 @@ func _test_partial_save_is_filled_and_typed() -> void:
 	check_eq(SaveManager.data["dog"], {}, "missing dog filled")
 	check_eq(SaveManager.data["statistics"]["runs"], 2, "float runs converted")
 	check_eq(SaveManager.data["statistics"]["successful_extractions"], 0, "negative stat clamped")
+
+
+## S06-13: saves from before Sprint 06.
+func _test_v1_migration() -> void:
+	_cleanup()
+	_write_raw('{"version": 1, "stash": [], "dog": {}, "human": {}, "statistics": {"runs": 4, "successful_extractions": 2}}')
+	SaveManager.load_game()
+	check_eq(SaveManager.data["version"], SaveManager.SAVE_VERSION, "S06-13: an old save is brought up to date")
+	var pair := PairState.deserialize(SaveManager.data.get("pair"))
+	check(pair != null and pair.is_classic and pair.dog.breed_id == PairState.CLASSIC_BREED, "a save that already walked keeps its shiba and owner")
+	check_eq(SaveManager.data["statistics"]["runs"], 4, "and everything else")
+	_cleanup()
+	_write_raw('{"version": 1, "statistics": {"runs": 0}}')
+	SaveManager.load_game()
+	check(not SaveManager.data.has("pair"), "a v1 save that never walked starts at the shelter")
+	_cleanup()
+	var own := PairState.classic()
+	own.is_classic = false
+	own.human = HumanCandidate.deserialize({"background_id": "student"})
+	own.human_custom_name = "小宇"
+	_write_raw(JSON.stringify({"version": 2, "pair": own.serialize(), "statistics": {"runs": 1}}))
+	SaveManager.load_game()
+	var kept := PairState.deserialize(SaveManager.data.get("pair"))
+	check(kept != null and kept.human_custom_name == "小宇" and not kept.is_classic, "a v2 pair loads as it was")
+	SaveManager.save_game()
+	var raw := JSON.parse_string(FileAccess.get_file_as_string(TEST_PATH)) as Dictionary
+	check_eq(int(raw["version"]), SaveManager.SAVE_VERSION, "and is written back at the current version")
+	var migrated := SaveManager.migrate({"version": 1, "statistics": {"runs": 2}}, 1)
+	check(migrated.has("pair") and int(migrated["version"]) == SaveManager.SAVE_VERSION, "migration is a plain step from version to version")
+	_cleanup()
+	_write_raw('{"version": 99, "statistics": {"runs": 1}}')
+	SaveManager.load_game()
+	check_eq(SaveManager.data["statistics"]["runs"], 1, "a save from a newer build is read as far as it can be, not thrown away")
 
 
 func _write_raw(text: String) -> void:
