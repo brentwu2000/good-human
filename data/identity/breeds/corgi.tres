@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DogBreedData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/dog_breed_data.gd" id="1_breed"]
+
+[resource]
+script = ExtResource("1_breed")
+id = &"corgi"
+display_name = "柯基"
+model_path = "res://assets/characters/dog/models/breeds/corgi.glb"
+stylized_model_path = ""
+size = 1.0

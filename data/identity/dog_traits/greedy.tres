@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DogTraitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/dog_trait_data.gd" id="1_trait"]
+
+[resource]
+script = ExtResource("1_trait")
+id = &"greedy"
+text = "看到吃的就走不動"
+tags = Array[StringName]([&"food"])
+behavior_affinity = Dictionary[int, float]({1: 0.3, 7: 0.2})
+stat_bias = Dictionary[StringName, float]({&"nose": 0.08})

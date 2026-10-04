@@ -10,6 +10,8 @@ const TEMPTATIONS_DIR: String = "res://data/greed/temptations"
 const TERRITORIES_DIR: String = "res://data/territory"
 const PRESENCE_PATH: String = "res://data/presence/presence.tres"
 const SPACING_PATH: String = "res://data/combat/spacing.tres"
+const DOG_BREEDS_DIR: String = "res://data/identity/breeds"
+const DOG_TRAITS_DIR: String = "res://data/identity/dog_traits"
 
 var balance: GameBalance
 var training: TrainingBalance
@@ -20,6 +22,9 @@ var presence: PresenceData
 var spacing: SpacingData
 ## Reasons to stay out after going home became possible (Sprint 05).
 var temptations: Array[TemptationData] = []
+## Sprint 06: what a shelter dog can look like and be like, in id order.
+var dog_breeds: Array[DogBreedData] = []
+var dog_traits: Array[DogTraitData] = []
 
 var _territories: Dictionary[StringName, TerritoryData] = {}
 
@@ -37,6 +42,8 @@ func _ready() -> void:
 	_load_training_events()
 	_load_temptations()
 	_load_territories()
+	dog_breeds.assign(_load_dir(DOG_BREEDS_DIR))
+	dog_traits.assign(_load_dir(DOG_TRAITS_DIR))
 
 
 func get_training_event(event_id: StringName) -> TrainingEventData:
@@ -88,6 +95,39 @@ func _load_temptations() -> void:
 		seen[data.id] = true
 		temptations.append(data)
 	temptations.sort_custom(func(a: TemptationData, b: TemptationData) -> bool: return String(a.id) < String(b.id))
+
+
+func get_dog_breed(breed_id: StringName) -> DogBreedData:
+	for breed in dog_breeds:
+		if breed.id == breed_id:
+			return breed
+	return null
+
+
+func get_dog_trait(trait_id: StringName) -> DogTraitData:
+	for t in dog_traits:
+		if t.id == trait_id:
+			return t
+	return null
+
+
+## Every resource in `dir` that has a unique `id`, sorted by id so anything
+## rolled from the list follows its seed.
+func _load_dir(dir: String) -> Array[Resource]:
+	var found: Array[Resource] = []
+	var ids: Dictionary[StringName, bool] = {}
+	for file_name in ResourceLoader.list_directory(dir):
+		if not file_name.ends_with(".tres"):
+			continue
+		var res := load(dir.path_join(file_name))
+		var id: StringName = res.get(&"id") if res != null else &""
+		if id.is_empty() or ids.has(id):
+			push_error("DataRegistry: bad or duplicate %s in %s" % [file_name, dir])
+			continue
+		ids[id] = true
+		found.append(res)
+	found.sort_custom(func(a: Resource, b: Resource) -> bool: return String(a.get(&"id")) < String(b.get(&"id")))
+	return found
 
 
 func get_territory(territory_id: StringName) -> TerritoryData:

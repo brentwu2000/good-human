@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="DogBreedData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/dog_breed_data.gd" id="1_breed"]
+
+[resource]
+script = ExtResource("1_breed")
+id = &"shiba"
+display_name = "柴犬"
+model_path = "res://assets/characters/dog/models/shiba_01/shiba_01.glb"
+stylized_model_path = "res://assets/characters/dog/models/shiba_01/shiba_01_stylized.glb"
+size = 1.0
