@@ -35,93 +35,114 @@ theme_override_constants/margin_bottom = 32
 
 [node name="Layout" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 10
 alignment = 1
 
 [node name="Title" type="Label" parent="Margin/Layout"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_colors/font_color = Color(1, 1, 1, 0.55)
+theme_override_font_sizes/font_size = 22
 text = "GOOD HUMAN!"
 horizontal_alignment = 1
 
-[node name="OwnerPlaceholder" type="ColorRect" parent="Margin/Layout"]
-custom_minimum_size = Vector2(160, 240)
+[node name="PairView" type="SubViewportContainer" parent="Margin/Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 460)
 layout_mode = 2
-size_flags_horizontal = 4
-color = Color(0.55, 0.45, 0.35, 1)
+stretch = true
 
-[node name="OwnerLabel" type="Label" parent="Margin/Layout/OwnerPlaceholder"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "主人"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="Viewport" type="SubViewport" parent="Margin/Layout/PairView"]
+own_world_3d = true
+handle_input_locally = false
+size = Vector2i(341, 250)
+render_target_update_mode = 4
 
-[node name="StashLabel" type="Label" parent="Margin/Layout"]
+[node name="PairName" type="Label" parent="Margin/Layout"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+
+[node name="PairLabel" type="Label" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Details" type="ScrollContainer" parent="Margin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="DetailList" type="VBoxContainer" parent="Margin/Layout/Details"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="GoalsLabel" type="Label" parent="Margin/Layout/Details/DetailList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TerritoryLabel" type="Label" parent="Margin/Layout/Details/DetailList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="GrowthLabel" type="Label" parent="Margin/Layout/Details/DetailList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="StashLabel" type="Label" parent="Margin/Layout/Details/DetailList"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 18
 text = "Stash 0/30"
 horizontal_alignment = 1
 
-[node name="DogBagLabel" type="Label" parent="Margin/Layout"]
+[node name="DogBagLabel" type="Label" parent="Margin/Layout/Details/DetailList"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 18
 text = "狗包 0/2"
 horizontal_alignment = 1
 
-[node name="GrowthLabel" type="Label" parent="Margin/Layout"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="GoalsLabel" type="Label" parent="Margin/Layout"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="TerritoryLabel" type="Label" parent="Margin/Layout"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="ViewStashButton" type="Button" parent="Margin/Layout"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "查看倉庫"
-
 [node name="Walk3DButton" type="Button" parent="Margin/Layout"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 96)
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "出去散步"
 
-[node name="WalkButton" type="Button" parent="Margin/Layout"]
+[node name="ViewStashButton" type="Button" parent="Margin/Layout"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
+text = "查看倉庫"
+
+[node name="WalkButton" type="Button" parent="Margin/Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
 text = "舊的 2D 版本（已停止開發）"
 
 [node name="NewGameButton" type="Button" parent="Margin/Layout"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 16
 text = "🐾 新遊戲（從收容所開始）"
 
 [node name="NewGameConfirm" type="ConfirmationDialog" parent="."]
@@ -135,7 +156,7 @@ dialog_text = "現在的狗、主人和所有進度都會消失，從收容所�
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.65)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 14
 text = "WASD 移動"
 horizontal_alignment = 1
 autowrap_mode = 3

@@ -103,6 +103,12 @@ func _test_adoption() -> void:
 	check(saved != null and saved.human_custom_name == "阿明" and saved.dog.breed_id == scene.dog.breed_id, "it is saved at once")
 	await _wait_for_scene(Game.HOME_SCENE)
 	check(_tree.current_scene.scene_file_path == Game.HOME_SCENE, "and the pair goes home")
+	# S06-11: Home is the two of them first.
+	var home := _tree.current_scene
+	check((home.get_node("%PairName") as Label).text.begins_with("阿明"), "S06-11: Home leads with the human's name")
+	check((home.get_node("%PairLabel") as Label).text.contains("📷"), "and a remembered moment")
+	check(home.get_node("%PairView").find_children("*", "FighterPuppet3D", true, false).size() == 1, "and the two of them at home")
+	check(home.get_node("%PairView").get_index() < home.get_node("%StashLabel").get_parent().get_parent().get_index(), "before the stash and the counts")
 	scene.queue_free()
 
 	# S06-07: the first walk is this dog and this human.

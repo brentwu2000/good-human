@@ -1,5 +1,8 @@
 extends Control
-## Home placeholder: owner, stash/dog bag counts, start a walk.
+## Home (S06-11, D6-06): coming back to the pair. The dog and its human come
+## first — the two of them at home, the human's name, how close they are, what
+## the human has picked up, one remembered moment and what the dog still has
+## on its mind. The stash and the counts are below, smaller.
 
 @onready var _stash_label: Label = %StashLabel
 @onready var _dog_bag_label: Label = %DogBagLabel
@@ -13,6 +16,11 @@ extends Control
 @onready var _territory_label: Label = %TerritoryLabel
 @onready var _new_game_button: Button = %NewGameButton
 @onready var _new_game_confirm: ConfirmationDialog = %NewGameConfirm
+@onready var _pair_view: SubViewportContainer = %PairView
+@onready var _pair_name: Label = %PairName
+@onready var _pair_label: Label = %PairLabel
+
+var _dog_visual: Node3D
 
 
 func _ready() -> void:
@@ -22,6 +30,7 @@ func _ready() -> void:
 	# Sprint 06: a save is one pair, so meeting a new dog means starting over.
 	_new_game_button.pressed.connect(_new_game_confirm.popup_centered)
 	_new_game_confirm.confirmed.connect(Game.start_new_game)
+	_build_pair_view()
 	_refresh()
 
 
@@ -35,15 +44,67 @@ func _refresh() -> void:
 	_growth_label.text = growth_text()
 	_goals_label.text = goals_text()
 	_territory_label.text = territory_text()
-	_growth_label.text = pair_text() + "\n" + _growth_label.text
+	_pair_name.text = pair_name_text()
+	_pair_label.text = pair_text()
+	_pair_label.visible = not _pair_label.text.is_empty()
 	_territory_label.visible = not _territory_label.text.is_empty()
+
+
+func _process(delta: float) -> void:
+	if _dog_visual != null:
+		(_dog_visual.get_node("Motion") as DogModelMotion3D).update_motion(delta, 0.0, false)
+
+
+static func pair_name_text() -> String:
+	if not Game.has_pair():
+		return ""
+	var breed := DataRegistry.get_dog_breed(Game.pair_state.dog.breed_id)
+	return "%s和你（%s）" % [Game.pair_state.human_custom_name, breed.display_name if breed != null else "狗狗"]
+
+
+## The two of them at home: the human standing easy, the dog at their feet.
+func _build_pair_view() -> void:
+	var viewport := _pair_view.get_node("Viewport") as SubViewport
+	var world := Node3D.new()
+	viewport.add_child(world)
+	var env := WorldEnvironment.new()
+	env.environment = Environment.new()
+	env.environment.background_mode = Environment.BG_COLOR
+	env.environment.background_color = Color(0.93, 0.86, 0.74)
+	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.environment.ambient_light_color = Color(0.95, 0.86, 0.76)
+	env.environment.ambient_light_energy = 0.75
+	world.add_child(env)
+	var lamp := DirectionalLight3D.new()
+	lamp.rotation_degrees = Vector3(-40, 30, 0)
+	lamp.light_color = Color(1.0, 0.93, 0.82)
+	lamp.shadow_enabled = true
+	world.add_child(lamp)
+	world.add_child(Greybox.box(Vector3(6, 0.05, 4), Color(0.6, 0.45, 0.32), Vector3(0, -0.025, -0.5)))
+	world.add_child(Greybox.box(Vector3(6, 3, 0.1), Color(0.95, 0.9, 0.8), Vector3(0, 1.5, -1.8)))
+	world.add_child(Greybox.box(Vector3(1.6, 0.45, 0.7), Color(0.42, 0.55, 0.52), Vector3(-1.6, 0.225, -1.3)))
+	world.add_child(Greybox.box(Vector3(1.0, 0.03, 0.7), Color(0.85, 0.7, 0.55), Vector3(0.55, 0.015, -0.2)))
+	var owner_body := FighterPuppet3D.new()
+	world.add_child(owner_body)
+	owner_body.apply(Game.owner_fighter())
+	owner_body.position = Vector3(-0.35, 0, -0.5)
+	owner_body.rotation.y = PI - 0.25
+	owner_body.set_ambient(false)
+	_dog_visual = DogVisual3D.build(Game.pair_state.dog if Game.has_pair() else null)
+	_dog_visual.position = Vector3(0.55, 0, -0.1)
+	_dog_visual.rotation.y = PI + 0.35
+	world.add_child(_dog_visual)
+	var camera := Camera3D.new()
+	camera.fov = 45.0
+	world.add_child(camera)
+	camera.look_at_from_position(Vector3(0.1, 1.15, 2.1), Vector3(0.1, 0.9, -0.4))
 
 
 ## S06-08: the pair first — who the human is to this dog, in words.
 static func pair_text() -> String:
 	if not Game.has_pair():
 		return ""
-	var lines: Array[String] = ["你和%s：%s" % [Game.pair_state.human_custom_name, Bond.home_words(Game.pair_state)]]
+	var lines: Array[String] = [Bond.home_words(Game.pair_state)]
 	# S06-09: what they have started doing because of the dog.
 	for id in Game.pair_state.habit_ids:
 		var habit := DataRegistry.get_habit(id)

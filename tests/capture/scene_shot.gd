@@ -17,6 +17,7 @@ func _run() -> void:
 		get_tree().quit(1)
 		return
 	SaveManager.save_path = "user://captures/shot_save.json"
+	Game.use_classic_pair_when_missing = true
 	DirAccess.make_dir_recursive_absolute("user://captures")
 	var frames := int(args[2]) if args.size() > 2 else 30
 	# Hand "current scene" to a placeholder so the change frees it, not this.
