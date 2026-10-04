@@ -171,6 +171,11 @@ func _test_adoption_match() -> void:
 		var who := m.decide()
 		picks[who] = picks.get(who, 0) + 1
 	check(picks.get(0, 0) > 0 and picks.get(1, 0) > 0, "nothing is guaranteed when two people want the dog (%s)" % picks)
+	check_eq(AdoptionMatch.who_goes_home([0.2, 0.9, 0.7]), 1, "a visitor takes home the pup they care for most, if enough")
+	check_eq(AdoptionMatch.who_goes_home([0.7, 0.3]), 0, "which may be the player's")
+	check_eq(AdoptionMatch.who_goes_home([0.1, 0.3, -INF]), -1, "or nobody, and they walk on")
+	var other := AdoptionMatch.new(dog, [nurse], rng)
+	check(other.dog_affinity(other.natural_behavior()) >= other.dog_affinity(AdoptionMatch.Behavior.IGNORE), "a pup nobody plays does what comes naturally to it")
 	var nobody := AdoptionMatch.new(dog, [nurse, student], rng)
 	nobody.interest[0] = -0.5
 	nobody.interest[1] = 0.1

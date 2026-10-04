@@ -57,32 +57,86 @@ func _test_shelter() -> void:
 
 func _test_adoption() -> void:
 	Game.adopting_human = null
+	# Owner direction: the pups run about the pen, the player's own included.
+	# (At normal pace, in its own room, so nobody stops while it runs about.)
+	var pen := (load(Game.ADOPTION_SCENE) as PackedScene).instantiate() as AdoptionScene
+	pen.seed_value = 78
+	_tree.root.add_child(pen)
+	var start := pen.pup.position
+	Input.action_press(&"move_left")
+	for i in 10:
+		await _tree.process_frame
+	Input.action_release(&"move_left")
+	check(pen.pup.position.x < start.x - 0.05, "the player's pup runs where it is told")
+	var tapped := Vector3(0.9, 0, -0.9)
+	var was := pen.pup.position.distance_to(tapped)
+	pen._pup_target = tapped
+	for i in 120:
+		await _tree.process_frame
+	check(pen.pup.position.distance_to(tapped) < was * 0.5, "or towards wherever the floor was tapped (%s)" % pen.pup.position)
+	pen._pup_target = Vector3(9, 0, 9)
+	for i in 30:
+		await _tree.process_frame
+	check(pen.pup.position.x <= AdoptionScene.PEN_MAX.x + 0.001 and pen.pup.position.z <= AdoptionScene.PEN_MAX.y + 0.001, "but never out of the pen")
+	pen._pup_target = null
+	var front := Vector3(AdoptionScene.STOP.x, 0, AdoptionScene.PEN_MIN.y)
+	check(pen.seen_weight(front) > 0.99 and pen.seen_weight(Vector3(1.2, 0, AdoptionScene.PEN_MAX.y)) < 0.6, "a pup at the glass in front of them is seen better than one at the back")
+	var litter_before: Array[Vector3] = []
+	for other in pen._litter_pups:
+		litter_before.append(other.position)
+	for i in 240:
+		await _tree.process_frame
+	var moved := 0
+	for k in pen._litter_pups.size():
+		if pen._litter_pups[k].position.distance_to(litter_before[k]) > 0.05:
+			moved += 1
+	check(moved > 0, "the littermates wander about on their own (%d moved)" % moved)
+	for k in pen._litter_pups.size():
+		check(pen._litter_pups[k].position.distance_to(pen.pup.position) >= AdoptionScene.PUP_SPACING - 0.02, "pups go round each other, not through")
+	pen.queue_free()
 	var scene := (load(Game.ADOPTION_SCENE) as PackedScene).instantiate() as AdoptionScene
 	scene.pace = 0.02
 	scene.seed_value = 77
 	_tree.root.add_child(scene)
 	check(scene.dog == Game.chosen_dog, "S06-03: the dog chosen at the shelter is the one waiting")
+	check_eq(scene.litter.size(), ShelterScene.DOG_COUNT - 1, "the rest of the litter shares the window pen")
+	check(not scene.litter.has(scene.dog), "(not the player's pup again)")
 	var reactions: Array[int] = []
 	scene.reacted.connect(func(_i: int, r: int) -> void: reactions.append(r))
-	check_eq(scene.perform(AdoptionScene.Behavior.WAG), -1, "nothing to do before anyone comes in")
-	for visit in AdoptionScene.VISITORS:
-		await scene.visitor_ready
-		check_eq(scene.visit_index, visit, "visitor %d comes in" % (visit + 1))
-		var line := scene.find_child("Line", true, false) as Label
-		for k in AdoptionScene.ACTIONS_PER_VISIT:
-			var r := scene.perform([AdoptionScene.Behavior.WAG, AdoptionScene.Behavior.SIT, AdoptionScene.Behavior.LICK_HAND][k])
-			check(r >= 0, "they react to what the dog does")
-			check(RegEx.create_from_string("[0-9%]").search(line.text) == null, "and never in numbers (%s)" % line.text)
-		check_eq(scene.perform(AdoptionScene.Behavior.BARK), -1, "a visit has only so many moments")
-	check_eq(reactions.size(), AdoptionScene.VISITORS * AdoptionScene.ACTIONS_PER_VISIT, "every moment got a reaction")
 	var chosen: Array[HumanCandidate] = []
 	scene.decided.connect(func(h: HumanCandidate) -> void: chosen.append(h))
+	var gone: Array[int] = []
+	scene.pup_taken.connect(func(k: int, _h: HumanCandidate) -> void: gone.append(k))
+	check_eq(scene.perform(AdoptionScene.Behavior.WAG), -1, "nothing to do before anyone stops")
+	# The first one to stop falls for another pup in the pen.
+	await scene.visitor_ready
+	check_eq(scene.visit_index, 0, "someone stops at the window")
+	var line := scene.find_child("Line", true, false) as Label
+	scene.litter_matches[0].interest[0] = 5.0
+	scene.adoption.interest[0] = -5.0
+	for k in AdoptionScene.ACTIONS_PER_VISIT:
+		var r := scene.perform([AdoptionScene.Behavior.WAG, AdoptionScene.Behavior.SIT, AdoptionScene.Behavior.LICK_HAND][k])
+		check(r >= 0, "they react to what the dog does")
+		check(RegEx.create_from_string("[0-9%]").search(line.text) == null, "and never in numbers (%s)" % line.text)
+	check_eq(scene.perform(AdoptionScene.Behavior.BARK), -1, "a look at the window has only so many moments")
+	await scene.pup_taken
+	check_eq(gone, [0], "owner direction: a visitor can take another pup home instead")
+	check(scene.taken[0] and scene._litter_pups[0].is_queued_for_deletion(), "and it is gone from the pen")
+	check(chosen.is_empty() and not Game.has_pair(), "the player's pup waits on")
+	# The next one comes in for the player's pup.
+	await scene.visitor_ready
+	check_eq(scene.visit_index, 1, "someone else stops")
+	scene.adoption.interest[1] = 5.0
+	for k in AdoptionScene.ACTIONS_PER_VISIT:
+		scene.perform(AdoptionScene.Behavior.SIT)
 	for i in 600:
 		await _tree.process_frame
 		if not chosen.is_empty():
 			break
-	check_eq(chosen.size(), 1, "one of them comes back for the dog")
-	check(chosen.size() == 1 and scene.humans.has(chosen[0]), "someone who visited")
+	check_eq(reactions.size(), 2 * AdoptionScene.ACTIONS_PER_VISIT, "every moment got a reaction")
+	check_eq(chosen.size(), 1, "and comes in for the dog")
+	check(chosen.size() == 1 and chosen[0] == scene.humans[1], "the one who stopped and cared")
+	check(not scene.took_home.has(1), "(not someone who already took a pup home)")
 	# S06-06: the human is named, and from then on they are the save's pair.
 	await scene.naming_ready
 	check(scene.find_child("Naming", true, false).visible, "S06-06: the player names their human")

@@ -6,20 +6,26 @@ extends Node3D
 ## player IS that pup, at pup height, looking out at the street. People go by.
 ## Most do not stop. Now and then someone does, and looks in through the glass
 ## for a moment; the pup can only be itself at them — wag, sit, bark, bring a
-## toy — and they answer the way they are (S06-05), then walk on. No score.
-## In the end one of them comes back, through the door: the human chooses the
-## dog, not the other way round.
+## toy — and they answer the way they are (S06-05). The rest of the litter is
+## in the pen too, being themselves, and a visitor may fall for one of them
+## instead: they come in and carry that pup away, and the player's pup waits
+## on (owner direction 2026-10-05). No score. In the end someone comes in for
+## the player's pup: the human chooses the dog, not the other way round.
 
 signal visitor_ready(index: int)
 signal reacted(index: int, reaction: int)
 signal decided(human: HumanCandidate)
 ## S06-06: the naming panel is up.
 signal naming_ready
+## A visitor took one of the other pups home instead.
+signal pup_taken(litter_index: int, human: HumanCandidate)
 
 const Behavior := DogTraitData.Behavior
 const Reaction := HumanBackgroundData.Reaction
-## People who stop to look in (the possible adopters).
-const VISITORS: int = 3
+## At most this many people stop to look in (the possible adopters). If
+## nobody has come in for the player's pup by then, the one who cared most
+## comes back for it.
+const VISITORS: int = 6
 const ACTIONS_PER_VISIT: int = 3
 ## People who only walk past.
 const PASSERS_BY: int = 5
@@ -35,8 +41,22 @@ const STREET_END: float = 8.0
 ## The clinic door, outside and in, and where the adopter crouches.
 const DOOR_OUT := Vector3(3.3, 0.0, -2.0)
 const DOOR_IN := Vector3(3.0, 0.0, -0.8)
-const KNEEL := Vector3(0.25, 0.0, -0.75)
 const EYE_HEIGHT: float = 0.36
+## Where the litter starts in the pen (they wander from there).
+const LITTER_SPOTS: Array[Vector3] = [Vector3(-0.6, 0, -0.85), Vector3(0.55, 0, -1.0), Vector3(-0.15, 0, -0.5), Vector3(0.75, 0, -0.35)]
+const PUPPY_SCALE: float = 0.62
+## The pen by the window (owner direction 2026-10-05: the pups run about in
+## it, the player's own included). x and z limits; the glass is just beyond.
+const PEN_MIN := Vector2(-1.25, WINDOW_Z + 0.18)
+const PEN_MAX := Vector2(1.25, 0.25)
+const PUP_SPEED: float = 1.7
+const WANDER_SPEED: float = 1.1
+## Pups keep at least this far apart (centre to centre, m).
+const PUP_SPACING: float = 0.32
+## Right at the glass in front of whoever is looking, a pup is seen fully;
+## from further back its moments count for less, down to this.
+const FAR_WEIGHT: float = 0.35
+const SEEN_RANGE: float = 1.4
 
 const BEHAVIOR_TEXT := {
 	Behavior.WAG: "搖尾巴", Behavior.SIT: "坐好", Behavior.APPROACH: "走到窗邊",
@@ -65,7 +85,14 @@ const EMOTE := {
 
 var dog: DogCandidate
 var humans: Array[HumanCandidate] = []
+## How each visitor feels about the player's pup…
 var adoption: AdoptionMatch
+## …and about each other pup in the pen (same order as `litter`).
+var litter: Array[DogCandidate] = []
+var litter_matches: Array[AdoptionMatch] = []
+var taken: Array[bool] = []
+## Visitor index -> litter index of the pup they took home.
+var took_home: Dictionary[int, int] = {}
 var visit_index: int = -1
 var actions_left: int = 0
 var accepting: bool = false
@@ -75,13 +102,20 @@ var best_moments: Dictionary[int, Array] = {}
 var name_suggestions: Array[String] = []
 
 var _rng := RandomNumberGenerator.new()
+var _litter_pups: Array[Node3D] = []
+## Where each litter pup is heading and how long it rests first.
+var _wander_to: Array[Vector3] = []
+var _wander_rest: Array[float] = []
+## The player's own pup, in the pen with the rest.
+var pup: Node3D
+var _pup_target: Variant = null
+var _pup_busy: float = 0.0
 var _puppet: FighterPuppet3D
 var _emote: Label3D
 ## Passers-by: [puppet, direction (+1/-1), speed, lane z].
 var _passers: Array[Array] = []
 var _camera: Camera3D
-var _camera_rest := Vector3(0, EYE_HEIGHT, 0.1)
-var _camera_basis: Basis
+var _camera_rest := Vector3(0, 0.62, 1.15)
 var _toy: Node3D
 var _line: Label
 var _hint: Label
@@ -103,7 +137,15 @@ func _ready() -> void:
 		_rng.seed = seed_value
 	humans = HumanCandidateGenerator.generate(_rng, VISITORS, DataRegistry.human_backgrounds)
 	adoption = AdoptionMatch.new(dog, humans, _rng)
+	litter.assign(Game.window_litter.slice(0, LITTER_SPOTS.size()))
+	if litter.is_empty() and Game.window_litter.is_empty() and Game.chosen_dog == null:
+		litter = DogCandidateGenerator.generate(_rng, 3, DataRegistry.dog_breeds, DataRegistry.dog_traits)
+	for other in litter:
+		litter_matches.append(AdoptionMatch.new(other, humans, _rng))
+		taken.append(false)
 	_build_room()
+	_build_pup()
+	_build_litter()
 	_build_street()
 	_build_ui()
 	for i in PASSERS_BY:
@@ -113,6 +155,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_move_pup(delta)
+	_process_litter(delta)
 	for passer in _passers:
 		var body := passer[0] as FighterPuppet3D
 		body.position.x += float(passer[1]) * float(passer[2]) * delta / pace
@@ -126,11 +170,18 @@ func perform(behavior: int) -> int:
 	if not accepting or actions_left <= 0:
 		return -1
 	actions_left -= 1
+	if behavior in [Behavior.APPROACH, Behavior.LICK_HAND]:
+		# Up to the glass in front of them first.
+		pup.position = _clamp_to_pen(Vector3(STOP.x, 0, PEN_MIN.y))
 	var before := adoption.interest[visit_index]
-	var reaction := adoption.perform(behavior, visit_index)
+	var reaction := adoption.perform(behavior, visit_index, seen_weight(pup.position))
 	var gain := adoption.interest[visit_index] - before
 	if not best_moments.has(visit_index) or gain > float(best_moments[visit_index][0]):
 		best_moments[visit_index] = [gain, behavior, reaction]
+	# The others in the pen do their own thing at the same moment.
+	for k in litter.size():
+		if not taken[k]:
+			litter_matches[k].perform(litter_matches[k].natural_behavior(), visit_index, seen_weight(_litter_pups[k].position))
 	_play_dog(behavior)
 	_play_reaction(reaction)
 	reacted.emit(visit_index, reaction)
@@ -140,14 +191,96 @@ func perform(behavior: int) -> int:
 	return reaction
 
 
-## The day at the window: now and then someone stops, looks, walks on.
+## How well whoever is at the window can see a pup at `at` (1 right in front
+## of them at the glass, FAR_WEIGHT at the back of the pen).
+func seen_weight(at: Vector3) -> float:
+	var front := Vector3(STOP.x, 0, PEN_MIN.y)
+	var d := Vector2(at.x - front.x, at.z - front.z).length()
+	return lerpf(1.0, FAR_WEIGHT, clampf(d / SEEN_RANGE, 0.0, 1.0))
+
+
+## The player's pup runs about the pen: move actions, or a tap on the floor.
+func _move_pup(delta: float) -> void:
+	if pup == null:
+		return
+	_pup_busy = maxf(_pup_busy - delta, 0.0)
+	var input := Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
+	var velocity := Vector3(input.x, 0, input.y) * PUP_SPEED
+	if input.length() > 0.05:
+		_pup_target = null
+	elif _pup_target != null:
+		var to: Vector3 = _pup_target - pup.position
+		to.y = 0.0
+		if to.length() < 0.05:
+			_pup_target = null
+		else:
+			velocity = to.normalized() * minf(PUP_SPEED, to.length() / maxf(delta, 0.001))
+	if _naming != null and _naming.visible:
+		velocity = Vector3.ZERO
+	var motion := pup.get_node("Motion") as DogModelMotion3D
+	if velocity.length() > 0.05 and _pup_busy <= 0.0:
+		pup.position = _clamp_to_pen(_keep_apart(pup.position + velocity * delta, -1))
+		pup.rotation.y = lerp_angle(pup.rotation.y, atan2(-velocity.x, -velocity.z), minf(delta * 12.0, 1.0))
+		motion.update_motion(delta, velocity.length(), velocity.length() > 1.2)
+	else:
+		motion.update_motion(delta, 0.0, false)
+
+
+func _clamp_to_pen(at: Vector3) -> Vector3:
+	return Vector3(clampf(at.x, PEN_MIN.x, PEN_MAX.x), 0.0, clampf(at.z, PEN_MIN.y, PEN_MAX.y))
+
+
+## Pups bump and go round each other rather than through.
+func _keep_apart(at: Vector3, self_index: int) -> Vector3:
+	var bodies: Array[Node3D] = []
+	if self_index >= 0 and pup != null:
+		bodies.append(pup)
+	for k in _litter_pups.size():
+		if k != self_index and is_instance_valid(_litter_pups[k]) and not taken[k]:
+			bodies.append(_litter_pups[k])
+	for other in bodies:
+		var away := at - other.position
+		away.y = 0.0
+		if away.length() < PUP_SPACING:
+			at = other.position + (away.normalized() if away.length() > 0.001 else Vector3.RIGHT) * PUP_SPACING
+	return at
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var tap: Variant = null
+	if event is InputEventScreenTouch and event.pressed:
+		tap = event.position
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		tap = event.position
+	if tap == null or pup == null:
+		return
+	var from := _camera.project_ray_origin(tap)
+	var direction := _camera.project_ray_normal(tap)
+	if direction.y >= -0.001:
+		return
+	_pup_target = _clamp_to_pen(from + direction * (-from.y / direction.y))
+
+
+## The day at the window: now and then someone stops, looks, and walks on —
+## or comes in for one of the pups.
 func _watch_the_street() -> void:
 	for i in humans.size():
 		await _wait(_rng.randf_range(2.5, 4.5))
 		visit_index = i
 		await _stop_and_look(humans[i], 1 if i % 2 == 0 else -1)
+		if adopter != null:
+			return
 	await _wait(2.0)
 	_decide()
+
+
+## How much visitor `index` cares for each pup: the player's first, then the
+## litter (a pup already gone counts for nothing).
+func interest_by_pup(index: int) -> Array[float]:
+	var values: Array[float] = [adoption.interest[index]]
+	for k in litter.size():
+		values.append(-INF if taken[k] else litter_matches[k].interest[index])
+	return values
 
 
 func _stop_and_look(human: HumanCandidate, from_side: int) -> void:
@@ -171,6 +304,14 @@ func _stop_and_look(human: HumanCandidate, from_side: int) -> void:
 	accepting = false
 	_update_buttons()
 	await _wait(1.2)
+	var choice := AdoptionMatch.who_goes_home(interest_by_pup(visit_index))
+	if choice == 0:
+		adopter = human
+		await _come_in_for_player()
+		return
+	if choice > 0:
+		await _come_in_for_other(choice - 1)
+		return
 	_say("（他看了一會兒，又走了。）")
 	_emote.text = ""
 	await _walk(_puppet, Vector3(0, 0, LANE_Z), 0.6)
@@ -179,25 +320,69 @@ func _stop_and_look(human: HumanCandidate, from_side: int) -> void:
 	_puppet = null
 
 
-## One of them comes back for the dog (S06-05 decides who): along the street,
-## to the door, and in.
+## Nobody came in for the player's pup on the spot: the one who cared most
+## (and did not already take another pup home) comes back for it.
 func _decide() -> void:
-	adopter = humans[adoption.decide()]
+	var best := -1
+	for i in humans.size():
+		if took_home.has(i):
+			continue
+		if best < 0 or adoption.interest[i] > adoption.interest[best]:
+			best = i
+	adopter = humans[best]
 	_say("（過了一陣子……門口的鈴響了。）")
 	_puppet = _person(adopter)
 	_puppet.position = Vector3(STREET_END, 0, LANE_Z)
 	await _walk(_puppet, Vector3(DOOR_OUT.x, 0, LANE_Z), 2.0)
-	await _walk(_puppet, DOOR_OUT, 0.5)
+	await _come_in_for_player()
+
+
+## Straight from the window to the door, and in for the player's pup.
+func _come_in_for_player() -> void:
+	if _emote != null and is_instance_valid(_emote):
+		_emote.text = ""
+	_say("（他轉身走向門口……門鈴響了。）")
+	await _walk(_puppet, DOOR_OUT, 0.8)
 	_puppet.position = DOOR_IN
-	await _walk(_puppet, KNEEL, 1.2)
+	var kneel := pup.position + Vector3(0.4, 0, -0.25)
+	await _walk(_puppet, kneel, 1.2)
 	_puppet.set_ambient(false)
-	_puppet.face_towards(_camera.global_position)
-	_puppet.rotation.y = atan2(-(_camera.global_position.x - KNEEL.x), -(_camera.global_position.z - KNEEL.z))
-	_puppet.play_acknowledge(_camera.global_position)
+	_puppet.rotation.y = atan2(-(pup.position.x - kneel.x), -(pup.position.z - kneel.z))
+	_puppet.play_acknowledge(pup.global_position)
 	_say("「是剛剛窗邊那隻……就是你了。從今天起，我們是一家人。」")
+	for other in _litter_pups:
+		if is_instance_valid(other):
+			(other.get_node("Motion") as DogModelMotion3D).play_sniff(0.6)
 	decided.emit(adopter)
 	await _wait(1.6)
 	_open_naming()
+
+
+## Someone fell for another pup: they come in, pick it up and take it home.
+## The pen has one less in it, and the player's pup waits on.
+func _come_in_for_other(k: int) -> void:
+	took_home[visit_index] = k
+	var breed := DataRegistry.get_dog_breed(litter[k].breed_id)
+	var name := breed.display_name if breed != null else "小狗"
+	_emote.text = ""
+	_say("（他看著旁邊的%s，往門口走去……）" % name)
+	await _walk(_puppet, DOOR_OUT, 0.8)
+	_puppet.position = DOOR_IN
+	var chosen_pup := _litter_pups[k]
+	_wander_rest[k] = 99.0
+	await _walk(_puppet, chosen_pup.position + Vector3(0.35, 0, 0.3), 1.0)
+	_puppet.set_ambient(false)
+	_puppet.play_acknowledge(chosen_pup.global_position)
+	await _wait(0.9)
+	taken[k] = true
+	chosen_pup.queue_free()
+	_say("（%s被抱走了。圍欄裡空了一角。）" % name)
+	pup_taken.emit(k, humans[visit_index])
+	await _walk(_puppet, DOOR_IN, 1.0)
+	_puppet.position = DOOR_OUT
+	await _walk(_puppet, Vector3(STREET_END, 0, LANE_Z), 2.5)
+	_puppet.queue_free()
+	_puppet = null
 
 
 # --- Naming (S06-06) ----------------------------------------------------------------
@@ -287,39 +472,37 @@ func _reset_passer(passer: Array) -> void:
 
 # --- Presentation ---------------------------------------------------------------
 
-## What it looks like from inside the pup when it does something.
+## The player's pup does the thing, in its body, where everyone can see it.
 func _play_dog(behavior: int) -> void:
+	var motion := pup.get_node("Motion") as DogModelMotion3D
+	var model := pup.get_node("Model") as Node3D
 	var tween := create_tween()
-	var rest := _camera_rest
+	_pup_busy = 0.8 * pace
 	match behavior:
 		Behavior.WAG:
 			for i in 3:
-				tween.tween_property(_camera, "rotation:z", 0.05, 0.08 * pace)
-				tween.tween_property(_camera, "rotation:z", -0.05, 0.08 * pace)
-			tween.tween_property(_camera, "rotation:z", 0.0, 0.08 * pace)
-		Behavior.SIT:
-			tween.tween_property(_camera, "position", rest + Vector3(0, -0.1, 0), 0.25 * pace)
-		Behavior.LIE_DOWN:
-			tween.tween_property(_camera, "position", rest + Vector3(0, -0.22, 0), 0.4 * pace)
-		Behavior.APPROACH, Behavior.LICK_HAND:
-			# Right up to the glass.
-			tween.tween_property(_camera, "position", rest + Vector3(0, 0.03, WINDOW_Z + 0.25), 0.45 * pace)
+				tween.tween_property(model, "rotation:z", 0.12, 0.08 * pace)
+				tween.tween_property(model, "rotation:z", -0.12, 0.08 * pace)
+			tween.tween_property(model, "rotation:z", 0.0, 0.08 * pace)
+		Behavior.SIT, Behavior.LIE_DOWN:
+			motion.play_sit()
+			if behavior == Behavior.LIE_DOWN:
+				tween.tween_property(model, "position:y", -0.04, 0.3 * pace)
+				tween.tween_interval(0.6 * pace)
+				tween.tween_property(model, "position:y", 0.0, 0.2 * pace)
+		Behavior.APPROACH, Behavior.LICK_HAND, Behavior.STARE:
+			pup.rotation.y = 0.0
+			motion.play_sniff(0.6)
 		Behavior.BARK:
 			_say("汪！")
-			for i in 3:
-				tween.tween_property(_camera, "position", rest + Vector3(0.03, 0.02, 0), 0.04 * pace)
-				tween.tween_property(_camera, "position", rest, 0.04 * pace)
+			tween.tween_property(model, "position:y", 0.06, 0.06 * pace)
+			tween.tween_property(model, "position:y", 0.0, 0.08 * pace)
 		Behavior.FETCH:
 			_toy.visible = true
-			tween.tween_property(_camera, "position", rest + Vector3(0, 0, -0.35), 0.3 * pace)
-		Behavior.STARE:
-			tween.tween_property(_camera, "fov", 56.0, 0.5 * pace)
+			_toy.position = pup.position + Vector3(0, 0.12, -0.2)
+			tween.tween_interval(0.9 * pace)
 		Behavior.IGNORE:
-			tween.tween_property(_camera, "rotation:y", 1.1, 0.35 * pace)
-	tween.tween_interval(0.5 * pace)
-	tween.tween_property(_camera, "position", rest, 0.3 * pace)
-	tween.parallel().tween_property(_camera, "basis", _camera_basis, 0.3 * pace)
-	tween.parallel().tween_property(_camera, "fov", 68.0, 0.3 * pace)
+			pup.rotation.y = PI
 	tween.tween_callback(func() -> void: _toy.visible = false)
 
 
@@ -335,7 +518,7 @@ func _play_reaction(reaction: int) -> void:
 	var tween := create_tween()
 	match reaction:
 		Reaction.AFFECTIONATE:
-			_puppet.play_acknowledge(_camera.global_position)
+			_puppet.play_acknowledge(pup.global_position)
 		Reaction.INTERESTED:
 			tween.tween_property(_puppet, "position", STOP + Vector3(0, 0, 0.12), 0.3 * pace)
 		Reaction.AMUSED:
@@ -344,7 +527,7 @@ func _play_reaction(reaction: int) -> void:
 		Reaction.CAUTIOUS:
 			tween.tween_property(_puppet, "position", STOP + Vector3(0, 0, -0.35), 0.3 * pace)
 		Reaction.STARTLED:
-			_puppet.play_bumped(_camera.global_position)
+			_puppet.play_bumped(pup.global_position)
 			tween.tween_property(_puppet, "position", STOP + Vector3(0, 0, -0.55), 0.2 * pace)
 		Reaction.INDIFFERENT:
 			tween.tween_property(_puppet, "rotation:y", PI + 0.6, 0.3 * pace)
@@ -361,7 +544,7 @@ func _update_buttons() -> void:
 	for button in _buttons:
 		button.disabled = not accepting or actions_left <= 0
 	if _hint != null:
-		_hint.text = "他在看你。你想讓他看到什麼樣的你？" if accepting and actions_left > 0 else "（看著窗外的人。）"
+		_hint.text = "有人在看。跑到窗前，讓他看看你。" if accepting and actions_left > 0 else "（在圍欄裡跑跑看。點地板或用方向鍵移動。）"
 
 
 # --- The clinic and the street ------------------------------------------------------
@@ -383,10 +566,13 @@ func _build_room() -> void:
 	# Inside: the clinic's tiled floor and the low pen the pup sits in.
 	add_child(Greybox.box(Vector3(8, 0.04, 3.0), Color(0.84, 0.86, 0.85), Vector3(0, -0.02, 0.2)))
 	var pen := Color(0.92, 0.92, 0.9)
-	for x in [-0.55, 0.55]:
-		for z in [-0.2, 0.25]:
-			add_child(Greybox.cylinder(0.015, 0.55, pen, Vector3(x, 0.275, z)))
-	add_child(Greybox.box(Vector3(0.9, 0.04, 0.6), Color(0.78, 0.86, 0.92), Vector3(0, 0.02, 0.05)))
+	for x in [-1.35, -0.45, 0.45, 1.35]:
+		add_child(Greybox.cylinder(0.015, 0.45, pen, Vector3(x, 0.225, PEN_MAX.y + 0.08)))
+	add_child(Greybox.box(Vector3(2.7, 0.025, 0.025), pen, Vector3(0, 0.44, PEN_MAX.y + 0.08)))
+	for z in [-0.9, -0.3]:
+		for x in [-1.35, 1.35]:
+			add_child(Greybox.cylinder(0.015, 0.45, pen, Vector3(x, 0.225, z)))
+	add_child(Greybox.box(Vector3(2.6, 0.02, 1.5), Color(0.78, 0.86, 0.92), Vector3(0, 0.01, -0.5)))
 	# The shop front: a low wall, a big pane of glass, frames, the door.
 	var frame := Color(0.32, 0.34, 0.36)
 	add_child(Greybox.box(Vector3(8, 0.35, 0.12), Color(0.9, 0.9, 0.88), Vector3(0, 0.175, WINDOW_Z)))
@@ -426,19 +612,85 @@ func _build_room() -> void:
 	# The clinic's name on the glass, read backwards from inside.
 	var sign := Greybox.label("毛毛動物醫院", 0.0, 64, Color(0.2, 0.45, 0.42, 0.85), 30.0)
 	sign.billboard = BaseMaterial3D.BILLBOARD_DISABLED
-	sign.pixel_size = 0.004
+	sign.pixel_size = 0.0022
 	sign.position = Vector3(0.0, 2.15, WINDOW_Z - 0.02)
 	sign.rotation.y = PI
 	add_child(sign)
 	_camera = Camera3D.new()
-	_camera.fov = 68.0
+	_camera.fov = 70.0
 	add_child(_camera)
-	_camera.look_at_from_position(_camera_rest, Vector3(0, 0.95, -3.2))
+	_camera.look_at_from_position(_camera_rest, Vector3(0, 0.3, -3.2))
 	_camera_rest = _camera.position
-	_camera_basis = _camera.basis
 	_toy = Greybox.sphere(0.05, Color(0.9, 0.85, 0.2), Vector3(0.05, 0.25, -0.2))
 	_toy.visible = false
 	add_child(_toy)
+
+
+## The player's own pup: the same breed as at the cage, with a soft ring at
+## its feet so it can be told from its littermates.
+func _build_pup() -> void:
+	pup = DogVisual3D.build(dog)
+	pup.scale = Vector3.ONE * PUPPY_SCALE
+	pup.position = Vector3(0, 0, -0.1)
+	add_child(pup)
+	var ring := MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius = 0.26
+	disc.bottom_radius = 0.26
+	disc.height = 0.005
+	ring.mesh = disc
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glow.albedo_color = Color(1.0, 0.92, 0.6, 0.35)
+	ring.material_override = glow
+	ring.position.y = 0.03
+	ring.scale = Vector3.ONE / PUPPY_SCALE
+	pup.add_child(ring)
+
+
+## The rest of the litter in the pen, each being itself.
+func _build_litter() -> void:
+	for k in litter.size():
+		var other := DogVisual3D.build(litter[k])
+		other.scale = Vector3.ONE * PUPPY_SCALE
+		other.position = LITTER_SPOTS[k]
+		other.rotation.y = _rng.randf_range(-0.6, 0.6)
+		add_child(other)
+		_litter_pups.append(other)
+		_wander_to.append(LITTER_SPOTS[k])
+		_wander_rest.append(_rng.randf_range(0.5, 2.5))
+
+
+## They trot somewhere, stop, sniff, and go somewhere else — and when someone
+## is at the window, they tend to go and look too.
+func _process_litter(delta: float) -> void:
+	for k in _litter_pups.size():
+		var other := _litter_pups[k]
+		if not is_instance_valid(other) or taken[k]:
+			continue
+		var motion := other.get_node("Motion") as DogModelMotion3D
+		if _wander_rest[k] > 0.0:
+			_wander_rest[k] -= delta / pace
+			motion.update_motion(delta, 0.0, false)
+			continue
+		var to: Vector3 = _wander_to[k] - other.position
+		to.y = 0.0
+		if to.length() < 0.06:
+			_wander_rest[k] = _rng.randf_range(0.8, 3.0)
+			var near_window := accepting and _rng.randf() < 0.6
+			var x := _rng.randf_range(PEN_MIN.x, PEN_MAX.x)
+			var z := _rng.randf_range(PEN_MIN.y, PEN_MIN.y + 0.35) if near_window else _rng.randf_range(PEN_MIN.y, PEN_MAX.y)
+			_wander_to[k] = Vector3(x, 0, z)
+			if _rng.randf() < 0.4:
+				motion.play_sniff(0.6)
+			continue
+		var step := to.normalized() * WANDER_SPEED * delta / pace
+		if step.length() > to.length():
+			step = to
+		other.position = _clamp_to_pen(_keep_apart(other.position + step, k))
+		other.rotation.y = lerp_angle(other.rotation.y, atan2(-step.x, -step.z), minf(delta * 10.0, 1.0))
+		motion.update_motion(delta, WANDER_SPEED, false)
 
 
 func _build_street() -> void:
@@ -479,8 +731,14 @@ func _build_ui() -> void:
 	_line.add_theme_stylebox_override("normal", backing)
 	layer.add_child(_line)
 	var panel := PanelContainer.new()
+	# See-through, so the pups at the glass stay in view behind it.
+	var clear := StyleBoxFlat.new()
+	clear.bg_color = Color(0.12, 0.13, 0.14, 0.45)
+	clear.set_corner_radius_all(12)
+	clear.set_content_margin_all(10)
+	panel.add_theme_stylebox_override("panel", clear)
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	panel.offset_top = -360
+	panel.offset_top = -290
 	panel.offset_left = 16
 	panel.offset_right = -16
 	panel.offset_bottom = -16
@@ -501,9 +759,10 @@ func _build_ui() -> void:
 		var button := Button.new()
 		button.name = "Behavior%d" % behavior
 		button.text = BEHAVIOR_TEXT[behavior]
-		button.custom_minimum_size = Vector2(0, 84)
+		button.custom_minimum_size = Vector2(0, 66)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.add_theme_font_size_override("font_size", 26)
+		button.modulate = Color(1, 1, 1, 0.85)
+		button.add_theme_font_size_override("font_size", 24)
 		button.focus_mode = Control.FOCUS_NONE
 		button.pressed.connect(func() -> void: perform(behavior))
 		grid.add_child(button)

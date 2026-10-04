@@ -107,7 +107,9 @@ static func describe(dog: DogCandidate) -> String:
 func choose() -> void:
 	var dog := dogs[selected]
 	dog_chosen.emit(dog)
-	Game.choose_dog(dog)
+	# The rest of the litter goes to the window too: anyone stopping there
+	# might fall for one of them instead.
+	Game.choose_dog(dog, dogs.filter(func(d: DogCandidate) -> bool: return d != dog))
 
 
 ## Cage slot `slot` (0..5): left to right along the bottom row, then the top.

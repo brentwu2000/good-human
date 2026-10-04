@@ -27,6 +27,8 @@ var use_classic_pair_when_missing: bool = false
 var last_run_result: RunResult
 ## Sprint 06: the dog picked at the shelter, waiting to be adopted.
 var chosen_dog: DogCandidate
+## The other pups that share the window pen with it (they can be adopted too).
+var window_litter: Array[DogCandidate] = []
 ## S06-03: the human who came back for it.
 var adopting_human: HumanCandidate
 
@@ -92,8 +94,9 @@ func goto_start() -> void:
 
 
 ## S06-02: the player picked their dog; next comes the adoption.
-func choose_dog(dog: DogCandidate) -> void:
+func choose_dog(dog: DogCandidate, litter: Array = []) -> void:
 	chosen_dog = dog
+	window_litter.assign(litter)
 	if ResourceLoader.exists(ADOPTION_SCENE):
 		_change_scene(ADOPTION_SCENE)
 
