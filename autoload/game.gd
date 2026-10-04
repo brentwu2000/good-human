@@ -65,6 +65,23 @@ func dog_talent(stat: StringName) -> float:
 	return pair_state.dog.stat(stat) if pair_state != null and pair_state.dog != null else 1.0
 
 
+## Sprint 06: everything this save had is gone and the shelter is next. A
+## save never holds a second pair (ADR-019), so this is the only way to meet
+## another dog.
+func start_new_game() -> void:
+	SaveManager.reset_to_default()
+	SaveManager.save_game()
+	home_stash.clear()
+	human_growth.clear()
+	goal_progress.clear()
+	territory_progress.clear()
+	pair_state = null
+	chosen_dog = null
+	adopting_human = null
+	last_run_result = null
+	_change_scene(SHELTER_SCENE)
+
+
 ## Where a profile starts: Home with its pair, or the shelter for a new one.
 func goto_start() -> void:
 	if has_pair():

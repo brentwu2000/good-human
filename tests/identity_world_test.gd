@@ -125,6 +125,14 @@ func _test_adoption() -> void:
 	Game.load_profile()
 	check_eq(JSON.stringify(Game.pair_state.serialize()), before, "the pair survives a reload unchanged")
 	check(Game.owner_fighter().display_name == "阿明", "and is still called by name")
+	# A save is one pair: meeting another dog means a new game, from the shelter.
+	Game.home_stash.add_item(DataRegistry.get_item(&"umbrella"), 1)
+	Game.start_new_game()
+	await _wait_for_scene(Game.SHELTER_SCENE)
+	check(not Game.has_pair() and Game.home_stash.is_empty(), "a new game starts with nothing and no pair")
+	SaveManager.load_game()
+	Game.load_profile()
+	check(not Game.has_pair(), "and stays that way after a reload, until the next adoption")
 
 
 func _wait_for_scene(path: String) -> void:

@@ -117,6 +117,20 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "舊的 2D 版本（已停止開發）"
 
+[node name="NewGameButton" type="Button" parent="Margin/Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "🐾 新遊戲（從收容所開始）"
+
+[node name="NewGameConfirm" type="ConfirmationDialog" parent="."]
+unique_name_in_owner = true
+title = "新遊戲"
+ok_button_text = "重新開始"
+cancel_button_text = "取消"
+dialog_text = "現在的狗、主人和所有進度都會消失，從收容所重新開始。確定嗎？"
+
 [node name="ControlsLabel" type="Label" parent="Margin/Layout"]
 unique_name_in_owner = true
 layout_mode = 2

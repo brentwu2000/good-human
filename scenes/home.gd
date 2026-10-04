@@ -11,12 +11,17 @@ extends Control
 @onready var _growth_label: Label = %GrowthLabel
 @onready var _goals_label: Label = %GoalsLabel
 @onready var _territory_label: Label = %TerritoryLabel
+@onready var _new_game_button: Button = %NewGameButton
+@onready var _new_game_confirm: ConfirmationDialog = %NewGameConfirm
 
 
 func _ready() -> void:
 	_walk_button.pressed.connect(_on_walk_pressed)
 	_walk_3d_button.pressed.connect(Game.start_run_3d)
 	_view_stash_button.pressed.connect(func() -> void: _stash_panel.open(Game.home_stash))
+	# Sprint 06: a save is one pair, so meeting a new dog means starting over.
+	_new_game_button.pressed.connect(_new_game_confirm.popup_centered)
+	_new_game_confirm.confirmed.connect(Game.start_new_game)
 	_refresh()
 
 
