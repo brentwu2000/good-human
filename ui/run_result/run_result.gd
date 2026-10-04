@@ -41,6 +41,9 @@ func show_result(result: RunResult) -> void:
 		_:
 			_title_label.text = "😵 散步失敗……"
 
+	if result.bond_closer and Game.has_pair():
+		_summary_label.text += "
+（%s好像更習慣有你在身邊了。）" % Game.pair_state.human_custom_name
 	var training: Array[String] = _experience_lines(result.training)
 	_training_card.visible = not training.is_empty()
 	_training_label.text = "\n".join(training)

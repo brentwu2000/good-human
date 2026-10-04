@@ -54,6 +54,9 @@ var value_at_first_extraction: RunValue
 var owner_condition: float = 1.0
 ## The owner is fighting: the fight owns their health until it ends.
 var owner_busy: bool = false
+## Sprint 06: fights finished on this walk (won / lost by the owner).
+var fights_won: int = 0
+var fights_lost: int = 0
 
 var _last_value: RunValue
 
@@ -103,6 +106,8 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	value_at_first_extraction = null
 	_last_value = null
 	owner_busy = false
+	fights_won = 0
+	fights_lost = 0
 	set_owner_condition(1.0)
 
 	_extraction_points.clear()
@@ -160,6 +165,14 @@ func set_owner_condition(ratio: float) -> void:
 		return
 	owner_condition = value
 	owner_condition_changed.emit(owner_condition)
+
+
+## A fight ended with a result (a broken-off one is neither).
+func record_fight(won: bool) -> void:
+	if won:
+		fights_won += 1
+	else:
+		fights_lost += 1
 
 
 ## Raises the owner's condition by `amount`, never past `cap`. Returns what was
@@ -313,6 +326,8 @@ func _build_result(outcome: RunResult.Outcome, extraction_id: StringName) -> Run
 	result.safe_value = value.safe_value
 	result.unbanked_value = value.unbanked_value
 	result.marked_territories.assign(marked_territories.keys())
+	result.fights_won = fights_won
+	result.fights_lost = fights_lost
 	result.first_extraction_time = first_extraction_time
 	result.value_at_first_extraction = value_at_first_extraction.total() if value_at_first_extraction != null else 0
 	return result

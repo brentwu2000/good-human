@@ -35,7 +35,16 @@ func _refresh() -> void:
 	_growth_label.text = growth_text()
 	_goals_label.text = goals_text()
 	_territory_label.text = territory_text()
+	_growth_label.text = pair_text() + "
+" + _growth_label.text
 	_territory_label.visible = not _territory_label.text.is_empty()
+
+
+## S06-08: the pair first — who the human is to this dog, in words.
+static func pair_text() -> String:
+	if not Game.has_pair():
+		return ""
+	return "你和%s：%s" % [Game.pair_state.human_custom_name, Bond.home_words(Game.pair_state)]
 
 
 ## The owner's unlocked changes, in words.

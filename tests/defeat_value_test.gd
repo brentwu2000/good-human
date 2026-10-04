@@ -80,6 +80,10 @@ func _run() -> void:
 	check_eq(progress.state_of(&"banyan"), TerritoryProgress.State.CLAIMING, "and takes nothing away")
 	check(result.territory_claims.is_empty(), "the result claims nothing")
 
+	# S06-08: the walk is still time spent together.
+	check_eq(result.fights_lost, 1, "the lost fight is counted for the pair")
+	check(Bond.value(Game.pair_state, Bond.SHARED) > 0.0 and Bond.value(Game.pair_state, Bond.TRUST) == 0.0, "something gone through together, but no trust earned")
+
 	# Training: the owner remembers half.
 	check(result.training != null and result.training.is_partial(), "a defeat converts training partially")
 

@@ -41,6 +41,11 @@ var marked_territories: Array[StringName] = []
 ## Filled in by Game: places this walk moved forward, and any it completed.
 var territory_claims: Dictionary[StringName, int] = {}
 var territories_claimed: Array[StringName] = []
+## Sprint 06: fights the owner finished on this walk (for the bond).
+var fights_won: int = 0
+var fights_lost: int = 0
+## Set by Game when this walk brought the pair a stage closer (S06-08).
+var bond_closer: bool = false
 
 
 ## How long the player chose to stay on after they could have gone home.

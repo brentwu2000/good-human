@@ -8,6 +8,7 @@ func _ready() -> void:
 	_test_dog_generator()
 	_test_human_generator()
 	_test_adoption_match()
+	_test_bond()
 	finish()
 
 
@@ -172,6 +173,37 @@ func _test_adoption_match() -> void:
 	nobody.interest[0] = -0.5
 	nobody.interest[1] = 0.1
 	check_eq(nobody.decide(), 1, "if nobody is sure, the one who cared most comes back")
+
+
+func _test_bond() -> void:
+	var pair := PairState.classic()
+	check_eq(Bond.stage(pair), 0, "S06-08: a new pair is still getting to know each other")
+	var greeting := Bond.greeting(pair)
+	var lost := RunResult.new()
+	lost.outcome = RunResult.Outcome.DEFEATED
+	lost.fights_lost = 1
+	Bond.apply_walk(pair, lost)
+	check_eq(Bond.value(pair, Bond.TRUST), 0.0, "a lost walk earns no trust")
+	check(Bond.value(pair, Bond.FAMILIARITY) > 0.0 and Bond.value(pair, Bond.SHARED) > 0.0, "but it was time together, and something gone through")
+	var good := RunResult.new()
+	good.outcome = RunResult.Outcome.EXTRACTED
+	good.elapsed_time = 120.0
+	good.fights_won = 9
+	good.territories_claimed.append(&"banyan")
+	var before := Bond.total(pair)
+	Bond.apply_walk(pair, good)
+	check(Bond.total(pair) - before <= 2.0 + Bond.TRUST_PER_WALK + Bond.SHARED_PER_WALK, "one great walk can only do so much")
+	var closer := false
+	for i in 12:
+		closer = Bond.apply_walk(pair, good) or closer
+	check(closer, "walks together bring them closer by stages")
+	check_eq(Bond.stage(pair), Bond.STAGES.size() - 1, "until they are as close as can be")
+	check(Bond.greeting(pair) != greeting, "and the human greets the dog differently")
+	check(Bond.pets_before_walk(pair), "and stops to pet it before setting off")
+	var words := Bond.home_words(pair)
+	check(RegEx.create_from_string("[0-9%]").search(words) == null, "said in words at Home (%s)" % words)
+	var restored := PairState.deserialize(pair.serialize())
+	check_eq(Bond.stage(restored), Bond.stage(pair), "the bond survives a save")
 
 
 func _human_of(background: StringName, rng: RandomNumberGenerator) -> HumanCandidate:

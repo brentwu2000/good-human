@@ -61,8 +61,19 @@ func _ready() -> void:
 				hud.show_toast(text, Color(0.6, 1.0, 0.7) if positive else Color(1.0, 0.75, 0.6)))
 	if hud != null:
 		_voice_territories(hud)
-	run_manager.run_started.connect(func(_s: int) -> void: human.say("好，出去散步吧！"))
+	run_manager.run_started.connect(_greet)
 	run_manager.loot_gained.connect(_on_loot_gained)
+
+
+## S06-08: how the human sets off with their dog says how close they are.
+func _greet(_seed: int) -> void:
+	if not Game.has_pair():
+		human.say("好，出去散步吧！")
+		return
+	human.say(Bond.greeting(Game.pair_state))
+	if Bond.pets_before_walk(Game.pair_state):
+		human.puppet.play_acknowledge(dog.global_position)
+		dog.play_petted()
 
 
 ## S05-05: what the dog makes of a place is said in the walk, in its own voice,

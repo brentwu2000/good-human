@@ -139,6 +139,8 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 	result.banked_value_delta = home_stash.total_value() - stash_before
 
 	_resolve_territories(result)
+	if pair_state != null:
+		result.bond_closer = Bond.apply_walk(pair_state, result)
 
 	var stats: Dictionary = SaveManager.data["statistics"]
 	stats["runs"] = int(stats["runs"]) + 1
