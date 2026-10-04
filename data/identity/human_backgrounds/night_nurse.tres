@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="HumanBackgroundData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/human_background_data.gd" id="1_bg"]
+
+[resource]
+script = ExtResource("1_bg")
+id = &"night_nurse"
+reveal_text = "原來是剛下夜班的護理師。"
+personality_tags = Array[StringName]([&"caring", &"tired"])
+preference_weights = Dictionary[int, float]({5: 0.60, 6: 0.40, 1: 0.30, 3: -0.70, 2: 0.20})
+likes_dog_tags = Dictionary[StringName, float]({&"affectionate": 0.50, &"gentle": 0.40, &"loud": -0.50})
+tendencies = Array[StringName]([&"worrier", &"caring"])
+name_suggestions = Array[String](["小雯", "阿慧", "依婷"])
+shirt_colors = Array[Color]([Color(0.498, 0.718, 0.698, 1), Color(0.718, 0.788, 0.886, 1), Color(0.902, 0.831, 0.863, 1)])
+pants_colors = Array[Color]([Color(0.231, 0.290, 0.353, 1), Color(0.165, 0.184, 0.212, 1)])
+hair_styles = Array[int]([1, 4])
+top_styles = Array[int]([4, 3])
+accessory_styles = Array[int]([3, 0])
+reaction_lines = Dictionary[int, String]({0: "你好溫暖。", 1: "噗，好啦。", 2: "……你還好嗎？", 3: "嚇！拜託不要叫。", 4: "今天第一個好消息。", 5: "嗯……"})

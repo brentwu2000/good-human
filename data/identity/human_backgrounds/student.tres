@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="HumanBackgroundData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/human_background_data.gd" id="1_bg"]
+
+[resource]
+script = ExtResource("1_bg")
+id = &"student"
+reveal_text = "原來是住在學校附近的大學生。"
+personality_tags = Array[StringName]([&"playful", &"curious"])
+preference_weights = Dictionary[int, float]({4: 0.70, 0: 0.50, 2: 0.30, 6: -0.20, 8: -0.40})
+likes_dog_tags = Dictionary[StringName, float]({&"playful": 0.50, &"energetic": 0.40, &"calm": -0.10})
+tendencies = Array[StringName]([&"sociable", &"night_owl"])
+name_suggestions = Array[String](["阿凱", "小宇", "佳佳"])
+shirt_colors = Array[Color]([Color(0.878, 0.639, 0.227, 1), Color(0.345, 0.651, 0.545, 1), Color(0.851, 0.404, 0.373, 1)])
+pants_colors = Array[Color]([Color(0.169, 0.227, 0.333, 1), Color(0.420, 0.420, 0.420, 1)])
+hair_styles = Array[int]([2, 3])
+top_styles = Array[int]([1, 3])
+accessory_styles = Array[int]([4, 0])
+reaction_lines = Dictionary[int, String]({0: "欸你看你看！", 1: "哈哈哈哈好可愛！", 2: "牠是不是不太爽……", 3: "靠！嚇死。", 4: "你要跟我回家嗎？", 5: "喔。"})

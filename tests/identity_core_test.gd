@@ -6,6 +6,7 @@ extends "res://tests/test_case.gd"
 func _ready() -> void:
 	_test_dog_data()
 	_test_dog_generator()
+	_test_human_generator()
 	finish()
 
 
@@ -63,6 +64,55 @@ func _test_dog_generator() -> void:
 	check(DogCandidate.deserialize({}) == null and DogCandidate.deserialize("x") == null, "no dog from nothing")
 	var bad := DogCandidate.deserialize({"breed_id": "shiba", "base_dog_stats": {"nose": 99, "evil": 3}})
 	check(bad.stat(&"nose") <= 1.5 and not bad.base_dog_stats.has(&"evil"), "bad stats are clamped or dropped")
+
+
+func _test_human_generator() -> void:
+	check(DataRegistry.human_backgrounds.size() >= 5, "S06-04: many kinds of ordinary people (%d)" % DataRegistry.human_backgrounds.size())
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 11
+	var humans := HumanCandidateGenerator.generate(rng, 3, DataRegistry.human_backgrounds)
+	check_eq(humans.size(), 3, "three people visit")
+	var bgs: Dictionary[StringName, bool] = {}
+	for human in humans:
+		bgs[human.background_id] = true
+		check(human.background() != null, "%s has a background" % human.id)
+		check_eq(human.preference_weights.size(), DogTraitData.Behavior.size(), "and a lean on every dog behavior")
+		for stat in HumanCandidate.STAT_NAMES:
+			var v: int = human.stats[stat]
+			check(v >= HumanCandidateGenerator.STAT_MIN and v <= HumanCandidateGenerator.STAT_MAX, "%s %s in the shared spread" % [human.id, stat])
+	check_eq(bgs.size(), 3, "three different people")
+	# Appearance is not a strength rating: no background is stronger on average.
+	rng.seed = 5
+	var many := HumanCandidateGenerator.generate(rng, 600, DataRegistry.human_backgrounds)
+	var totals: Dictionary[StringName, Array] = {}
+	for human in many:
+		var sum := 0
+		for stat in HumanCandidate.STAT_NAMES:
+			sum += human.stats[stat]
+		if not totals.has(human.background_id):
+			totals[human.background_id] = [0, 0]
+		totals[human.background_id][0] += sum
+		totals[human.background_id][1] += 1
+	var means: Array[float] = []
+	for id in totals:
+		means.append(float(totals[id][0]) / totals[id][1])
+	check(means.max() - means.min() < 1.0, "no kind of person is reliably stronger (%.2f..%.2f)" % [means.min(), means.max()])
+	# Same clothes, different strength: within one background the stats vary.
+	var spread: Dictionary[int, bool] = {}
+	for human in many:
+		if human.background_id == many[0].background_id:
+			spread[human.stats[&"strength"]] = true
+	check(spread.size() >= 3, "people who look alike are not alike in a fight")
+	var fighter := humans[0].to_fighter_data("阿明")
+	check_eq(fighter.display_name, "阿明", "the human goes by the name they were given")
+	check_eq(fighter.stats.strength, humans[0].stats[&"strength"], "with their own hidden strength")
+	check_eq(fighter.shirt_color.to_html(false), humans[0].shirt_color.to_html(false), "and their own clothes")
+	check(not fighter.skills.is_empty(), "and the shared way of fighting")
+	var template := load(HumanCandidate.TEMPLATE_PATH) as FighterData
+	check(template.display_name == "主人" and template.stats.strength == 6, "the template is not changed by it")
+	var restored := HumanCandidate.deserialize(humans[0].serialize())
+	check_eq(JSON.stringify(restored.serialize()), JSON.stringify(humans[0].serialize()), "a human survives a save")
+	check(HumanCandidate.deserialize({}) == null, "no human from nothing")
 
 
 func _json(dogs: Array[DogCandidate]) -> String:
