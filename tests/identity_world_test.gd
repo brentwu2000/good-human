@@ -108,6 +108,14 @@ func _test_adoption() -> void:
 	check((home.get_node("%PairName") as Label).text.begins_with("阿明"), "S06-11: Home leads with the human's name")
 	check((home.get_node("%PairLabel") as Label).text.contains("📷"), "and a remembered moment")
 	check(home.get_node("%PairView").find_children("*", "FighterPuppet3D", true, false).size() == 1, "and the two of them at home")
+	# S06-12: meeting is the first entry of what the two have lived through.
+	check(Game.goal_progress.is_discovered(&"events", &"met"), "S06-12: the meeting is in the collection")
+	check_eq(Game.goal_progress.discovered_count(&"humans"), 0, "but no human is ever collected (no owner roster)")
+	check((home.get_node("%GoalsLabel") as Label).text.contains("一起經歷過的事 1/"), "Home counts the moments lived")
+	SaveManager.load_game()
+	var saved_goals := GoalProgress.new()
+	saved_goals.deserialize(SaveManager.data["dog"]["goals"])
+	check(saved_goals.is_discovered(&"events", &"met"), "and it is saved")
 	check(home.get_node("%PairView").get_index() < home.get_node("%StashLabel").get_parent().get_parent().get_index(), "before the stash and the counts")
 	scene.queue_free()
 

@@ -83,6 +83,9 @@ func _run() -> void:
 	# S06-08: the walk is still time spent together.
 	check_eq(result.fights_lost, 1, "the lost fight is counted for the pair")
 	check(Bond.value(Game.pair_state, Bond.SHARED) > 0.0 and Bond.value(Game.pair_state, Bond.TRUST) == 0.0, "something gone through together, but no trust earned")
+	# S06-10 / S06-12: the first time the human went down is remembered, and collected.
+	check(not Memories.recall_for(Game.pair_state, result.lost_to).is_empty(), "the pair remembers who beat them")
+	check(Game.goal_progress.is_discovered(&"events", &"first_defeat"), "and it is in the collection")
 
 	# Training: the owner remembers half.
 	check(result.training != null and result.training.is_partial(), "a defeat converts training partially")

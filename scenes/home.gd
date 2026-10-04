@@ -145,6 +145,9 @@ static func goals_text() -> String:
 		_count_text(progress.discovered_count(&"places"), catalog.places.size()),
 		_count_text(progress.discovered_count(&"items"), DataRegistry.get_all_item_ids().size()),
 	])
+	# S06-12: the kinds of moments the two have lived through.
+	if Game.has_pair():
+		lines.append("一起經歷過的事 %s" % _count_text(progress.discovered_count(&"events"), DataRegistry.memory_kinds.size()))
 	return "\n".join(lines)
 
 

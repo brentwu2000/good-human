@@ -102,10 +102,18 @@ func choose_dog(dog: DogCandidate) -> void:
 func adopt(dog: DogCandidate, human: HumanCandidate, human_name: String = "", summary: String = "") -> void:
 	adopting_human = human
 	pair_state = PairState.adopted(dog, human, human_name, summary)
-	Memories.remember(pair_state, &"met", &"shelter", 0)
+	_collect_memory(Memories.remember(pair_state, &"met", &"shelter", 0))
+	SaveManager.data["dog"]["goals"] = goal_progress.serialize()
 	chosen_dog = null
 	save_pair()
 	goto_home()
+
+
+## S06-12: each kind of moment the pair has lived is a collection entry
+## ("events"). The human is never one: there is no owner roster.
+func _collect_memory(memory: Dictionary) -> void:
+	if not memory.is_empty():
+		goal_progress.discover(&"events", StringName(str(memory["kind"])))
 
 
 func save_pair() -> void:
@@ -144,7 +152,8 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 		result.bond_closer = Bond.apply_walk(pair_state, result)
 		for habit in Habits.apply_walk(pair_state, result, DataRegistry.habits):
 			result.habits_formed.append(habit.id)
-		Memories.apply_walk(pair_state, result, int(SaveManager.data["statistics"]["runs"]) + 1)
+		for memory in Memories.apply_walk(pair_state, result, int(SaveManager.data["statistics"]["runs"]) + 1):
+			_collect_memory(memory)
 
 	var stats: Dictionary = SaveManager.data["statistics"]
 	stats["runs"] = int(stats["runs"]) + 1
