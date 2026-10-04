@@ -541,8 +541,8 @@ Installed 2026-09-29. Spec: `docs/03_sprints/SPRINT_06_IDENTITY_BOND.md`; system
 | ID | Task | Status |
 |---|---|---|
 | S06-01 | Dog candidate generator | REVIEW |
-| S06-02 | Shelter selection | IN_PROGRESS |
-| S06-03 | Dog POV adoption | TODO |
+| S06-02 | Shelter selection | REVIEW |
+| S06-03 | Dog POV adoption | IN_PROGRESS |
 | S06-04 | Human candidate generator | TODO |
 | S06-05 | Behavior/reaction matching | TODO |
 | S06-06 | Owner commitment + naming | TODO |
@@ -559,5 +559,6 @@ Installed 2026-09-29. Spec: `docs/03_sprints/SPRINT_06_IDENTITY_BOND.md`; system
 - **Owner decision (2026-10-04): Sprint 06 engineering approved** (「先繼續06」) before Greed/Territory Gate 01, whose blind QA is deferred with the others.
 - Plan: one persistent `PairState` on `Game` (save `pair`): dog, human, the human's name, bond, habits, memories. A new save with no pair opens at the shelter (S06-02); existing v1 saves migrate to the "classic" pair (the shiba + the old `player_human`) so playtest progress is kept (S06-13), and tests use the same classic pair, so the existing world tests keep booting to Home. The human's combat stats are rolled apart from their looks (FighterData already separates them).
 - S06-01: `DogBreedData` (looks only: model path, 7 breeds from Codex's breed set + the shiba) and `DogTraitData` (experiential text, personality tags, how much the dog does each adoption behavior, and a stat bias) in `data/identity`. `DogCandidateGenerator.generate(rng, count, breeds, traits)`: different breeds while there are enough, 2 visible + 1 hidden trait, talent (`nose`/`energy`/`voice` around 1.0) leaning the way all three traits do — so a visible trait hints at the talent and a hidden one surprises. No rarity. `DogCandidate` serialises and cleans bad save data. Test: new `identity_core_test` (62 checks).
+- S06-02: `scenes/shelter.tscn` (D6-01 placeholder look until Codex's shelter art): five dogs from the generator, each in a low pen on a blanket, facing the visitor, idling as its breed (`DogVisual3D` builds any breed with its motion and is shared by the later scenes). Third-person observation: ◀ ▶ / move actions / tapping a pen moves the camera along; the card shows the breed, the visible traits and 「還有一點看不出來……要一起生活才知道。」 — never a number, never the hidden trait. 「🐾 就是牠了」 → `Game.choose_dog` → adoption (S06-03). Review stills: `tests/capture/scene_shot.tscn -- <scene> <out.png>` (windowed). Test: new `identity_world_test` (9 checks).
 - Overlap to reconcile when engineering starts: owner habits already exist in part. Sprint 03 TRAIN's OwnerBehavior and GrowthResolver turn repeated dog behaviour into visible owner reactions (leash stumbles, recovery pauses, hesitation, social readiness); S06-09 Habit should build on them rather than add a parallel system. Likewise S06-12 extends the existing Collection progress, and the current walk always uses one fixed owner (`player_human.tres`), which S06-04..07 replace with a generated, persistent one.
 

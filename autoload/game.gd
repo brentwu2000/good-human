@@ -8,6 +8,9 @@ const RUN_MAP_SCENE: String = "res://world/run_map/run_map_01.tscn"
 ## P-02 3D vertical slice (switchable top-down / dog view).
 const RUN_MAP_3D_SCENE: String = "res://world/run_map_3d/run_map_3d_01.tscn"
 const RUN_RESULT_SCENE: String = "res://ui/run_result/run_result.tscn"
+## Sprint 06: a new game starts at the shelter, then the adoption.
+const SHELTER_SCENE: String = "res://scenes/shelter.tscn"
+const ADOPTION_SCENE: String = "res://scenes/adoption.tscn"
 
 var home_stash: Inventory
 ## The one human's persistent growth.
@@ -17,6 +20,8 @@ var goal_progress: GoalProgress = GoalProgress.new()
 ## The places the dog keeps going back to (Sprint 05).
 var territory_progress: TerritoryProgress = TerritoryProgress.new()
 var last_run_result: RunResult
+## Sprint 06: the dog picked at the shelter, waiting to be adopted.
+var chosen_dog: DogCandidate
 
 
 func _ready() -> void:
@@ -31,6 +36,13 @@ func load_profile() -> void:
 	var dog: Dictionary = SaveManager.data["dog"]
 	goal_progress.deserialize(dog.get("goals", {}))
 	territory_progress.deserialize(dog.get("territories", {}))
+
+
+## S06-02: the player picked their dog; next comes the adoption.
+func choose_dog(dog: DogCandidate) -> void:
+	chosen_dog = dog
+	if ResourceLoader.exists(ADOPTION_SCENE):
+		_change_scene(ADOPTION_SCENE)
 
 
 func goto_home() -> void:
