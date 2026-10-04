@@ -51,6 +51,10 @@ var recognised_this_walk: bool = false
 ## Meters: close enough to recognise the dog they fought before.
 const RECOGNISE_DISTANCE: float = 5.0
 
+## S05-13 (P-04): a dog going for the player's dog stops this far from it,
+## centre to centre — clear of its body whichever way the two are facing.
+const LUNGE_CLEARANCE: float = 0.75
+
 ## Opponent dog reactions (Sprint 04 basic hooks).
 const WATCH_DISTANCE: float = 6.0
 const SNIFF_DISTANCE: float = 1.3
@@ -211,9 +215,7 @@ func react_to_bark(from: Vector3) -> void:
 	if _dog == null:
 		return
 	_show_dog_text("汪汪！")
-	var towards := from - _dog.global_position
-	towards.y = 0.0
-	_dog_lunge = towards.normalized() * minf(0.8, towards.length() * 0.5) if towards.length() > 0.01 else Vector3.ZERO
+	_lunge_at(from, 0.8)
 
 
 ## S05-06: the player's dog just marked their place. Their dog goes for it
@@ -230,9 +232,7 @@ func react_to_mark(from: Vector3) -> void:
 	if _dog != null:
 		_show_dog_text("汪！汪汪！")
 		_dog_label_left = 1.8
-		var towards := from - _dog.global_position
-		towards.y = 0.0
-		_dog_lunge = towards.normalized() * minf(1.1, towards.length() * 0.5) if towards.length() > 0.01 else Vector3.ZERO
+		_lunge_at(from, 1.1)
 	if to_mark.length_squared() > 0.0001:
 		human_puppet.rotation.y = atan2(-to_mark.x, -to_mark.z)
 	human_puppet.shout(encounter.mark_reaction_text if encounter != null and not encounter.mark_reaction_text.is_empty() else "欸！", Color(1.0, 0.8, 0.5))
@@ -259,8 +259,19 @@ func _recognise(to_player: Vector3) -> void:
 		# They won last time: their dog steps up to the end of its lead.
 		_show_dog_text("汪！")
 		_dog_label_left = 1.6
-		_dog_lunge = toward * 0.9
+		_lunge_at(coordinator.dog.global_position, 0.9)
 		human_puppet.shout(encounter.recall_won_text, Color(1.0, 0.8, 0.5))
+
+
+## Their dog goes for `target` on its lead: at most `reach` (m), half the way
+## there, and never closer than LUNGE_CLEARANCE (P-04: no dog inside a dog).
+func _lunge_at(target: Vector3, reach: float) -> void:
+	var resting := human_puppet.position + _dog_offset
+	var towards := target - (global_transform * resting)
+	towards.y = 0.0
+	var room := maxf(towards.length() - LUNGE_CLEARANCE, 0.0)
+	var length := minf(minf(reach, towards.length() * 0.5), room)
+	_dog_lunge = global_basis.inverse() * (towards.normalized() * length) if towards.length() > 0.01 else Vector3.ZERO
 
 
 ## The standing body follows the fighter's build.
