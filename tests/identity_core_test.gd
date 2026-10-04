@@ -7,6 +7,7 @@ func _ready() -> void:
 	_test_dog_data()
 	_test_dog_generator()
 	_test_human_generator()
+	_test_adoption_match()
 	finish()
 
 
@@ -113,6 +114,70 @@ func _test_human_generator() -> void:
 	var restored := HumanCandidate.deserialize(humans[0].serialize())
 	check_eq(JSON.stringify(restored.serialize()), JSON.stringify(humans[0].serialize()), "a human survives a save")
 	check(HumanCandidate.deserialize({}) == null, "no human from nothing")
+
+
+func _test_adoption_match() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	var dog := DogCandidateGenerator.generate(rng, 1, DataRegistry.dog_breeds, DataRegistry.dog_traits)[0]
+	var nurse := _human_of(&"night_nurse", rng)
+	var student := _human_of(&"student", rng)
+	var adoption := AdoptionMatch.new(dog, [nurse, student], rng)
+	var before := adoption.interest[0]
+	var reaction := adoption.perform(AdoptionMatch.Behavior.LICK_HAND, 0)
+	check(adoption.interest[0] > before, "S06-05: a behaviour someone likes draws them in")
+	check(reaction in [AdoptionMatch.Reaction.INTERESTED, AdoptionMatch.Reaction.AFFECTIONATE], "and they show it (%s)" % AdoptionMatch.Reaction.keys()[reaction])
+	before = adoption.interest[0]
+	reaction = adoption.perform(AdoptionMatch.Behavior.BARK, 0)
+	check(adoption.interest[0] < before, "barking at a tired nurse pushes her away")
+	check(reaction in [AdoptionMatch.Reaction.STARTLED, AdoptionMatch.Reaction.CAUTIOUS], "and she shows that too (%s)" % AdoptionMatch.Reaction.keys()[reaction])
+	# The same trick again counts for less.
+	var gains: Array[float] = []
+	for i in 3:
+		var was := adoption.interest[1]
+		adoption.perform(AdoptionMatch.Behavior.FETCH, 1)
+		gains.append(adoption.interest[1] - was)
+	check(gains[0] > gains[2], "doing the same thing again counts for less (%.2f > %.2f)" % [gains[0], gains[2]])
+	# What the player does decides who it is far more often than chance —
+	# but the player only ever sees reactions.
+	var won := 0
+	var trials := 200
+	for t in trials:
+		rng.seed = 1000 + t
+		var visitors: Array[HumanCandidate] = HumanCandidateGenerator.generate(rng, 3, DataRegistry.human_backgrounds)
+		var m := AdoptionMatch.new(dog, visitors, rng)
+		var target := t % 3
+		# Courting: the two things the target likes best, a couple of times.
+		var ranked: Array[int] = []
+		for b in AdoptionMatch.Behavior.size():
+			ranked.append(b)
+		var person := visitors[target]
+		ranked.sort_custom(func(a: int, b: int) -> bool: return person.preference(a) > person.preference(b))
+		for k in 4:
+			m.perform(ranked[k % 2], target)
+		if m.decide() == target:
+			won += 1
+	check(won > trials * 0.6, "courting someone usually wins them (%d/%d)" % [won, trials])
+	# Two people ready: either may be the one.
+	var picks: Dictionary[int, int] = {}
+	for t in 200:
+		rng.seed = 5000 + t
+		var m := AdoptionMatch.new(dog, [nurse, student], rng)
+		m.interest[0] = 1.0
+		m.interest[1] = 0.8
+		var who := m.decide()
+		picks[who] = picks.get(who, 0) + 1
+	check(picks.get(0, 0) > 0 and picks.get(1, 0) > 0, "nothing is guaranteed when two people want the dog (%s)" % picks)
+	var nobody := AdoptionMatch.new(dog, [nurse, student], rng)
+	nobody.interest[0] = -0.5
+	nobody.interest[1] = 0.1
+	check_eq(nobody.decide(), 1, "if nobody is sure, the one who cared most comes back")
+
+
+func _human_of(background: StringName, rng: RandomNumberGenerator) -> HumanCandidate:
+	var bg := DataRegistry.get_human_background(background)
+	var only: Array[HumanBackgroundData] = [bg]
+	return HumanCandidateGenerator.generate(rng, 1, only)[0]
 
 
 func _json(dogs: Array[DogCandidate]) -> String:
