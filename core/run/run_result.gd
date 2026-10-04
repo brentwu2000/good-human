@@ -46,6 +46,9 @@ var fights_won: int = 0
 var fights_lost: int = 0
 ## Set by Game when this walk brought the pair a stage closer (S06-08).
 var bond_closer: bool = false
+## Sprint 06: places the dog searched on this walk, and habits it formed.
+var searches: int = 0
+var habits_formed: Array[StringName] = []
 
 
 ## How long the player chose to stay on after they could have gone home.

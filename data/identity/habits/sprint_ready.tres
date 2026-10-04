@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="HabitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/habit_data.gd" id="1_habit"]
+
+[resource]
+script = ExtResource("1_habit")
+id = &"sprint_ready"
+trigger_event_ids = Array[StringName]([&"run_dragged", &"run_escape"])
+counts_searches = false
+threshold = 4
+tendency_head_start = Dictionary[StringName, int]({&"restless": 1, &"energetic": 1})
+presentation_effect = &"sprint_ready"
+home_text = "看你一加速，就先跟著小跑起來。"
+noticed_text = "（主人好像知道你要衝了，先跟著跑了起來。）"
+walk_line = "又要衝了是吧！"

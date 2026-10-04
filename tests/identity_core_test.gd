@@ -9,6 +9,7 @@ func _ready() -> void:
 	_test_human_generator()
 	_test_adoption_match()
 	_test_bond()
+	_test_habits()
 	finish()
 
 
@@ -204,6 +205,46 @@ func _test_bond() -> void:
 	check(RegEx.create_from_string("[0-9%]").search(words) == null, "said in words at Home (%s)" % words)
 	var restored := PairState.deserialize(pair.serialize())
 	check_eq(Bond.stage(restored), Bond.stage(pair), "the bond survives a save")
+
+
+func _test_habits() -> void:
+	check_eq(DataRegistry.habits.size(), 4, "S06-09: four habits a human can pick up")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 9
+	var pair := PairState.classic()
+	var social := DataRegistry.get_habit(&"social_ready")
+	var walk := _walk_with([&"social_linger"], 0)
+	check(Habits.apply_walk(pair, walk, DataRegistry.habits).is_empty(), "one moment is not a habit yet")
+	check_eq(Habits.progress(pair, social), 1, "but it is remembered")
+	var formed: Array[HabitData] = []
+	for i in social.threshold:
+		formed.append_array(Habits.apply_walk(pair, walk, DataRegistry.habits))
+	check(formed.has(social) and pair.habit_ids.has(&"social_ready"), "enough walks of it and the human greets first")
+	check_eq(formed.count(social), 1, "a habit forms once")
+	check(Habits.has(pair, &"social_ready") and not Habits.has(pair, &"search_sigh"), "only the habits the dog taught")
+	var searching := _walk_with([], 3)
+	Habits.apply_walk(pair, searching, DataRegistry.habits)
+	check_eq(Habits.progress(pair, DataRegistry.get_habit(&"search_sigh")), 3, "searches count towards rummaging")
+	# Who the human is makes some habits come sooner.
+	var homebody := PairState.classic()
+	homebody.human = _human_of(&"office_worker", rng)
+	homebody.human.hidden_tendencies.assign([&"homebody"])
+	var sigh := DataRegistry.get_habit(&"search_sigh")
+	check(Habits.needed(homebody, sigh) < Habits.needed(pair, sigh), "a homebody gets resigned to rummaging sooner")
+	var restored := PairState.deserialize(pair.serialize())
+	check(restored.habit_ids.has(&"social_ready") and Habits.progress(restored, sigh) == 3, "habits and their progress survive a save")
+	for habit in DataRegistry.habits:
+		check(not habit.home_text.is_empty() and not habit.walk_line.is_empty() and not habit.noticed_text.is_empty(), "%s can be seen and said" % habit.id)
+
+
+func _walk_with(event_ids: Array[StringName], searches: int) -> RunResult:
+	var result := RunResult.new()
+	result.outcome = RunResult.Outcome.EXTRACTED
+	result.searches = searches
+	result.training = RunTrainingSummary.new()
+	for id in event_ids:
+		result.training.events.append(TrainingEvent.new(DataRegistry.get_training_event(id)))
+	return result
 
 
 func _human_of(background: StringName, rng: RandomNumberGenerator) -> HumanCandidate:

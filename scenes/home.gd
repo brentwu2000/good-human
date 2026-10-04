@@ -44,7 +44,14 @@ func _refresh() -> void:
 static func pair_text() -> String:
 	if not Game.has_pair():
 		return ""
-	return "你和%s：%s" % [Game.pair_state.human_custom_name, Bond.home_words(Game.pair_state)]
+	var lines: Array[String] = ["你和%s：%s" % [Game.pair_state.human_custom_name, Bond.home_words(Game.pair_state)]]
+	# S06-09: what they have started doing because of the dog.
+	for id in Game.pair_state.habit_ids:
+		var habit := DataRegistry.get_habit(id)
+		if habit != null:
+			lines.append("・%s" % habit.home_text)
+	return "
+".join(lines)
 
 
 ## The owner's unlocked changes, in words.

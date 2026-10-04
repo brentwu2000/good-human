@@ -119,6 +119,20 @@ func _test_adoption() -> void:
 	check(model != null and model.scene_file_path.get_file().get_basename().begins_with(breed.model_path.get_file().get_basename()), "the walk's dog is the breed chosen at the shelter (%s)" % (model.scene_file_path if model != null else "none"))
 	check(is_equal_approx(map.dog.sprint_speed, 6.2 * pair.dog.stat(&"energy")), "its energy is its own (%.2f)" % map.dog.sprint_speed)
 	check(is_equal_approx(Game.dog_talent(&"nose"), pair.dog.stat(&"nose")), "and so is its nose")
+	# S06-09: a habit the human has picked up shows on the walk.
+	var behavior := map.get_node("OwnerBehavior") as OwnerBehavior
+	check(not behavior.has_habit(&"search_sigh"), "S06-09: a new human has no habits yet")
+	pair.habit_ids.append(&"search_sigh")
+	behavior.refresh_habits()
+	var point := map.get_node("SearchPoints/trash_street_east") as SearchPoint3D
+	map.dog.global_position = point.global_position + Vector3(0.6, 0.1, 0)
+	map.human.global_position = point.global_position + Vector3(1.6, 0.1, 0)
+	point.interact(map.run_manager)
+	for i in 5:
+		await _tree.physics_frame
+	check(map.human.hold_time > 0.0, "used to the dog rummaging, the human just stops and waits")
+	check_eq(map.human._bubble.text, DataRegistry.get_habit(&"search_sigh").walk_line, "with a sigh of their own")
+	pair.habit_ids.erase(&"search_sigh")
 	# Persistence: a reload brings back the same pair, not a new one.
 	var before := JSON.stringify(pair.serialize())
 	SaveManager.load_game()

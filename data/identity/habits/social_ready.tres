@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="HabitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/habit_data.gd" id="1_habit"]
+
+[resource]
+script = ExtResource("1_habit")
+id = &"social_ready"
+trigger_event_ids = Array[StringName]([&"social_linger"])
+counts_searches = false
+threshold = 3
+tendency_head_start = Dictionary[StringName, int]({&"sociable": 1, &"caring": 1})
+presentation_effect = &"social_ready"
+home_text = "遇到別人，會先開口打招呼。"
+noticed_text = "（還沒走近，主人就先跟人打了招呼。）"
+walk_line = "嗨～你們好啊！"

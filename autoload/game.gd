@@ -141,6 +141,8 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 	_resolve_territories(result)
 	if pair_state != null:
 		result.bond_closer = Bond.apply_walk(pair_state, result)
+		for habit in Habits.apply_walk(pair_state, result, DataRegistry.habits):
+			result.habits_formed.append(habit.id)
 
 	var stats: Dictionary = SaveManager.data["statistics"]
 	stats["runs"] = int(stats["runs"]) + 1

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="HabitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/habit_data.gd" id="1_habit"]
+
+[resource]
+script = ExtResource("1_habit")
+id = &"search_sigh"
+trigger_event_ids = Array[StringName]([])
+counts_searches = true
+threshold = 6
+tendency_head_start = Dictionary[StringName, int]({&"homebody": 2, &"tidy": 1})
+presentation_effect = &"search_sigh"
+home_text = "你一開始翻東西，就停下來嘆氣等你。"
+noticed_text = "（你在翻東西的時候，主人只是嘆了口氣，停下來等你。）"
+walk_line = "唉……又來了。"

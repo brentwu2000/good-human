@@ -35,6 +35,10 @@ var exertion: float = 0.0
 var dragged_time: float = 0.0
 
 var _met_pairs: Dictionary[StringName, bool] = {}
+## Sprint 06 (S06-09): habits this human has picked up from the dog, by
+## presentation effect, and which have spoken up on this walk.
+var habits: Dictionary[StringName, HabitData] = {}
+var _habit_said: Dictionary[StringName, bool] = {}
 
 
 func _ready() -> void:
@@ -46,12 +50,36 @@ func _on_run_started(_seed: int) -> void:
 	exertion = 0.0
 	dragged_time = 0.0
 	_met_pairs.clear()
+	_habit_said.clear()
+	refresh_habits()
 	human.speed_multiplier = 1.0
 	human.hold_time = 0.0
 
 
 func refresh_traits() -> void:
 	traits = GrowthResolver.traits(Game.human_growth, DataRegistry.training)
+
+
+func refresh_habits() -> void:
+	habits.clear()
+	if Game.pair_state == null:
+		return
+	for id in Game.pair_state.habit_ids:
+		var habit := DataRegistry.get_habit(id)
+		if habit != null:
+			habits[habit.presentation_effect] = habit
+
+
+func has_habit(effect: StringName) -> bool:
+	return habits.has(effect)
+
+
+## A habit showing itself: the owner says their line, once a walk.
+func _habit_moment(effect: StringName, color: Color = Color(0.85, 0.95, 0.85)) -> void:
+	if _habit_said.has(effect) or not habits.has(effect):
+		return
+	_habit_said[effect] = true
+	human.say(habits[effect].walk_line, color)
 
 
 func is_dragged() -> bool:
@@ -65,12 +93,16 @@ func _physics_process(delta: float) -> void:
 	var heavy := run_manager.human_run_inventory.used_slot_count() >= DataRegistry.training.heavy_bag_slots
 	human.speed_multiplier = traits.heavy_bag_speed if heavy else 1.0
 	_check_pairs()
+	_check_searching()
 	if human.hold_time > 0.0:
 		dragged_time = 0.0
 		return
 
 	if is_dragged():
-		dragged_time += delta
+		# S06-09: a human used to the dog's sprints is already running with it.
+		if has_habit(&"sprint_ready"):
+			_habit_moment(&"sprint_ready")
+		dragged_time += delta * (0.5 if has_habit(&"sprint_ready") else 1.0)
 		exertion += traits.exertion_gain * delta
 	else:
 		dragged_time = 0.0
@@ -84,8 +116,14 @@ func _physics_process(delta: float) -> void:
 		exhausted.emit()
 	elif dragged_time >= traits.stumble_after:
 		dragged_time = 0.0
-		human.hold_time = STUMBLE_HOLD
-		human.say("哇啊！", Color(1.0, 0.8, 0.6), 0.8)
+		# S06-09: braced for the pull, they catch themselves sooner.
+		var braced := has_habit(&"leash_brace")
+		human.hold_time = STUMBLE_HOLD * (0.5 if braced else 1.0)
+		if braced:
+			_habit_said.erase(&"leash_brace")
+			_habit_moment(&"leash_brace", Color(1.0, 0.9, 0.7))
+		else:
+			human.say("哇啊！", Color(1.0, 0.8, 0.6), 0.8)
 		human.play_growth_behavior(&"leash", _stumble_improved(), STUMBLE_HOLD)
 		stumbled.emit()
 
@@ -101,13 +139,29 @@ func _check_pairs() -> void:
 		if dog.global_position.distance_to(pair.global_position) > MEET_DISTANCE * units_per_meter:
 			continue
 		_met_pairs[pair.spot_id] = true
-		if traits.hesitation_time > 0.05:
+		if has_habit(&"social_ready"):
+			# S06-09: used to the dog stopping to say hello, they say it first.
+			human.hold_time = maxf(human.hold_time, traits.hesitation_time * 0.5)
+			_habit_said.erase(&"social_ready")
+			_habit_moment(&"social_ready", Color(0.7, 1.0, 0.8))
+		elif traits.hesitation_time > 0.05:
 			human.hold_time = maxf(human.hold_time, traits.hesitation_time)
 			human.say("要…要過去喔？", Color(0.9, 0.9, 0.9), traits.hesitation_time)
 		elif traits.greets:
 			human.say("你好～今天天氣不錯喔", Color(0.7, 1.0, 0.8))
 		human.play_growth_behavior(&"threat", _hesitation_improved(), maxf(traits.hesitation_time, 0.45))
 		hesitated.emit(pair)
+
+
+## S06-09: the dog is rummaging again; a human used to it just stops and waits.
+func _check_searching() -> void:
+	if not has_habit(&"search_sigh"):
+		return
+	for point in get_tree().get_nodes_in_group(SearchPoint.GROUP):
+		if point.has_method(&"is_searching") and point.is_searching():
+			human.hold_time = maxf(human.hold_time, 0.3)
+			_habit_moment(&"search_sigh", Color(0.85, 0.85, 0.95))
+			return
 
 
 func _stumble_improved() -> bool:

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="HabitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/habit_data.gd" id="1_habit"]
+
+[resource]
+script = ExtResource("1_habit")
+id = &"leash_brace"
+trigger_event_ids = Array[StringName]([&"strain_tug", &"agency_pull_save", &"agency_pull_escape", &"agency_bad_pull"])
+counts_searches = false
+threshold = 4
+tendency_head_start = Dictionary[StringName, int]({&"worrier": 1, &"stubborn": 1})
+presentation_effect = &"leash_brace"
+home_text = "牽繩一緊，就先站穩腳步。"
+noticed_text = "（牽繩一緊，主人先站穩了。）"
+walk_line = "站穩……站穩……"

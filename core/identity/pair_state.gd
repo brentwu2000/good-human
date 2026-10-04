@@ -19,6 +19,8 @@ var is_classic: bool = false
 var bond: Dictionary[StringName, float] = {}
 ## Habits the human has picked up (S06-09).
 var habit_ids: Array[StringName] = []
+## Habit id -> moments gone through towards it (S06-09).
+var habit_progress: Dictionary[StringName, int] = {}
 ## Meaningful moments (S06-10), oldest first.
 var memories: Array[Dictionary] = []
 ## How they met, in words (S06-06).
@@ -69,9 +71,17 @@ func serialize() -> Dictionary:
 		"is_classic": is_classic,
 		"bond": bond_values,
 		"habit_ids": DogCandidate._strings(habit_ids),
+		"habit_progress": _string_keys(habit_progress),
 		"memories": memories.duplicate(true),
 		"adoption_summary": adoption_summary,
 	}
+
+
+static func _string_keys(values: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for key: Variant in values:
+		out[str(key)] = values[key]
+	return out
 
 
 ## Null when there is no usable pair in `data` (the save has not adopted yet).
@@ -91,6 +101,10 @@ static func deserialize(data: Variant) -> PairState:
 		for key: Variant in raw_bond:
 			pair.bond[StringName(str(key))] = clampf(float(raw_bond[key]), 0.0, 100.0)
 	pair.habit_ids = DogCandidate._names(data.get("habit_ids"))
+	var raw_progress: Variant = data.get("habit_progress")
+	if raw_progress is Dictionary:
+		for key: Variant in raw_progress:
+			pair.habit_progress[StringName(str(key))] = maxi(int(raw_progress[key]), 0)
 	var raw_memories: Variant = data.get("memories")
 	if raw_memories is Array:
 		for memory: Variant in raw_memories:

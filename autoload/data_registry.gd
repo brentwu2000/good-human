@@ -13,6 +13,7 @@ const SPACING_PATH: String = "res://data/combat/spacing.tres"
 const DOG_BREEDS_DIR: String = "res://data/identity/breeds"
 const DOG_TRAITS_DIR: String = "res://data/identity/dog_traits"
 const HUMAN_BACKGROUNDS_DIR: String = "res://data/identity/human_backgrounds"
+const HABITS_DIR: String = "res://data/identity/habits"
 
 var balance: GameBalance
 var training: TrainingBalance
@@ -27,6 +28,7 @@ var temptations: Array[TemptationData] = []
 var dog_breeds: Array[DogBreedData] = []
 var dog_traits: Array[DogTraitData] = []
 var human_backgrounds: Array[HumanBackgroundData] = []
+var habits: Array[HabitData] = []
 
 var _territories: Dictionary[StringName, TerritoryData] = {}
 
@@ -47,6 +49,7 @@ func _ready() -> void:
 	dog_breeds.assign(_load_dir(DOG_BREEDS_DIR))
 	dog_traits.assign(_load_dir(DOG_TRAITS_DIR))
 	human_backgrounds.assign(_load_dir(HUMAN_BACKGROUNDS_DIR))
+	habits.assign(_load_dir(HABITS_DIR))
 
 
 func get_training_event(event_id: StringName) -> TrainingEventData:
@@ -111,6 +114,13 @@ func get_human_background(background_id: StringName) -> HumanBackgroundData:
 	for bg in human_backgrounds:
 		if bg.id == background_id:
 			return bg
+	return null
+
+
+func get_habit(habit_id: StringName) -> HabitData:
+	for habit in habits:
+		if habit.id == habit_id:
+			return habit
 	return null
 
 

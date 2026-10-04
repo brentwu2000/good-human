@@ -44,6 +44,11 @@ func show_result(result: RunResult) -> void:
 	if result.bond_closer and Game.has_pair():
 		_summary_label.text += "
 （%s好像更習慣有你在身邊了。）" % Game.pair_state.human_custom_name
+	for id in result.habits_formed:
+		var habit := DataRegistry.get_habit(id)
+		if habit != null:
+			_summary_label.text += "
+" + habit.noticed_text
 	var training: Array[String] = _experience_lines(result.training)
 	_training_card.visible = not training.is_empty()
 	_training_label.text = "\n".join(training)

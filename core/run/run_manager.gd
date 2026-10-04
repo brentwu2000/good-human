@@ -327,6 +327,7 @@ func _build_result(outcome: RunResult.Outcome, extraction_id: StringName) -> Run
 	result.unbanked_value = value.unbanked_value
 	result.marked_territories.assign(marked_territories.keys())
 	result.fights_won = fights_won
+	result.searches = searched_points.size()
 	result.fights_lost = fights_lost
 	result.first_extraction_time = first_extraction_time
 	result.value_at_first_extraction = value_at_first_extraction.total() if value_at_first_extraction != null else 0
