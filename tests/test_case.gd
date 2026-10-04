@@ -7,6 +7,12 @@ var _failures: int = 0
 var _checks: int = 0
 
 
+func _init() -> void:
+	# Tests that boot into Home walk with the classic pair (Sprint 06); the
+	# identity tests turn this off to start at the shelter.
+	Game.use_classic_pair_when_missing = true
+
+
 func check(condition: bool, message: String) -> void:
 	_checks += 1
 	if not condition:

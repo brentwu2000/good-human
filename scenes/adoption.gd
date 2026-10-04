@@ -9,6 +9,8 @@ extends Node3D
 signal visitor_ready(index: int)
 signal reacted(index: int, reaction: int)
 signal decided(human: HumanCandidate)
+## S06-06: the naming panel is up.
+signal naming_ready
 
 const Behavior := DogTraitData.Behavior
 const Reaction := HumanBackgroundData.Reaction
@@ -23,6 +25,16 @@ const BEHAVIOR_TEXT := {
 	Behavior.WAG: "搖尾巴", Behavior.SIT: "坐好", Behavior.APPROACH: "靠過去",
 	Behavior.BARK: "汪一聲", Behavior.FETCH: "叼玩具", Behavior.LICK_HAND: "舔手",
 	Behavior.LIE_DOWN: "趴下", Behavior.STARE: "盯著看", Behavior.IGNORE: "不理他",
+}
+## S06-06: how the moment that counted is remembered.
+const DID_TEXT := {
+	Behavior.WAG: "搖了尾巴", Behavior.SIT: "乖乖坐好", Behavior.APPROACH: "靠了過去",
+	Behavior.BARK: "汪了一聲", Behavior.FETCH: "叼來了玩具", Behavior.LICK_HAND: "舔了他的手",
+	Behavior.LIE_DOWN: "趴了下來", Behavior.STARE: "一直盯著他", Behavior.IGNORE: "假裝不理他",
+}
+const FELT_TEXT := {
+	Reaction.INTERESTED: "他看了你好久", Reaction.AMUSED: "他笑了出來", Reaction.CAUTIOUS: "他退了一步",
+	Reaction.STARTLED: "他嚇了一跳", Reaction.AFFECTIONATE: "他蹲下來摸了摸你", Reaction.INDIFFERENT: "他好像沒什麼反應",
 }
 const EMOTE := {
 	Reaction.INTERESTED: "👀", Reaction.AMUSED: "😄", Reaction.CAUTIOUS: "😬",
@@ -41,6 +53,9 @@ var visit_index: int = -1
 var actions_left: int = 0
 var accepting: bool = false
 var adopter: HumanCandidate
+## S06-06: per visitor, the moment that moved them most: [gain, behavior, reaction].
+var best_moments: Dictionary[int, Array] = {}
+var name_suggestions: Array[String] = []
 
 var _puppet: FighterPuppet3D
 var _emote: Label3D
@@ -50,6 +65,9 @@ var _toy: Node3D
 var _line: Label
 var _hint: Label
 var _buttons: Array[Button] = []
+var _naming: Control
+var _name_edit: LineEdit
+var _suggestion: int = 0
 
 
 func _ready() -> void:
@@ -77,7 +95,11 @@ func perform(behavior: int) -> int:
 	if not accepting or actions_left <= 0:
 		return -1
 	actions_left -= 1
+	var before := adoption.interest[visit_index]
 	var reaction := adoption.perform(behavior, visit_index)
+	var gain := adoption.interest[visit_index] - before
+	if not best_moments.has(visit_index) or gain > float(best_moments[visit_index][0]):
+		best_moments[visit_index] = [gain, behavior, reaction]
 	_play_dog(behavior)
 	_play_reaction(reaction)
 	reacted.emit(visit_index, reaction)
@@ -142,10 +164,49 @@ func _decide() -> void:
 	_puppet.set_ambient(false)
 	_puppet.rotation.y = PI
 	_puppet.play_acknowledge(_camera.global_position)
-	_say("「就是你了。我們回家吧。」")
-	await get_tree().create_timer(1.6 * pace).timeout
+	_say("「就是你了。從今天起，我們是一家人。」")
 	decided.emit(adopter)
-	Game.adopt(dog, adopter)
+	await get_tree().create_timer(1.6 * pace).timeout
+	_open_naming()
+
+
+# --- Naming (S06-06) ----------------------------------------------------------------
+
+## The dog's family names their human: the one thing about them the player
+## decides. Suggestions fit who they are; anything can be typed.
+func _open_naming() -> void:
+	var bg := adopter.background()
+	name_suggestions.assign(bg.name_suggestions if bg != null and not bg.name_suggestions.is_empty() else ["主人"])
+	_suggestion = 0
+	_name_edit.text = name_suggestions[0]
+	for button in _buttons:
+		button.disabled = true
+	_hint.text = ""
+	_say("（這個人，以後就是你的人了。）")
+	_naming.visible = true
+	naming_ready.emit()
+
+
+func next_suggestion() -> void:
+	_suggestion = (_suggestion + 1) % name_suggestions.size()
+	_name_edit.text = name_suggestions[_suggestion]
+
+
+## The pair begins (Game.adopt saves it and goes Home).
+func confirm_name(typed: String = "") -> void:
+	if not typed.is_empty():
+		_name_edit.text = typed
+	var human_name := _name_edit.text.strip_edges().left(12)
+	Game.adopt(dog, adopter, human_name, summary())
+
+
+## How they met, in words: the moment that moved the human who came back.
+func summary() -> String:
+	var index := humans.find(adopter)
+	if not best_moments.has(index):
+		return "在收容所的會客室，他看了你一眼，就決定帶你回家。"
+	var moment: Array = best_moments[index]
+	return "在收容所的會客室，你%s，%s。後來，他回來帶你回家。" % [DID_TEXT.get(int(moment[1]), ""), FELT_TEXT.get(int(moment[2]), "")]
 
 
 # --- Presentation ---------------------------------------------------------------
@@ -299,3 +360,42 @@ func _build_ui() -> void:
 		grid.add_child(button)
 		_buttons.append(button)
 	_update_buttons()
+	_build_naming(layer)
+
+
+func _build_naming(layer: CanvasLayer) -> void:
+	_naming = PanelContainer.new()
+	_naming.name = "Naming"
+	_naming.visible = false
+	_naming.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_naming.offset_top = -360
+	_naming.offset_left = 16
+	_naming.offset_right = -16
+	_naming.offset_bottom = -16
+	layer.add_child(_naming)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	_naming.add_child(box)
+	var ask := Label.new()
+	ask.text = "你想怎麼叫他？"
+	ask.add_theme_font_size_override("font_size", 30)
+	box.add_child(ask)
+	_name_edit = LineEdit.new()
+	_name_edit.name = "NameEdit"
+	_name_edit.max_length = 12
+	_name_edit.custom_minimum_size = Vector2(0, 84)
+	_name_edit.add_theme_font_size_override("font_size", 34)
+	_name_edit.text_submitted.connect(func(_t: String) -> void: confirm_name())
+	box.add_child(_name_edit)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	for spec: Array in [["換一個", next_suggestion], ["🏠 就叫這個", func() -> void: confirm_name()]]:
+		var button := Button.new()
+		button.text = spec[0]
+		button.custom_minimum_size = Vector2(0, 88)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 28)
+		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(spec[1])
+		row.add_child(button)

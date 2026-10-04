@@ -19,6 +19,11 @@ var human_growth: HumanGrowth = HumanGrowth.new()
 var goal_progress: GoalProgress = GoalProgress.new()
 ## The places the dog keeps going back to (Sprint 05).
 var territory_progress: TerritoryProgress = TerritoryProgress.new()
+## Sprint 06: this save's one dog and one human; null until the adoption.
+var pair_state: PairState
+## Saves from before Sprint 06 (and tests) carry on with the classic pair
+## instead of starting over at the shelter.
+var use_classic_pair_when_missing: bool = false
 var last_run_result: RunResult
 ## Sprint 06: the dog picked at the shelter, waiting to be adopted.
 var chosen_dog: DogCandidate
@@ -38,6 +43,28 @@ func load_profile() -> void:
 	var dog: Dictionary = SaveManager.data["dog"]
 	goal_progress.deserialize(dog.get("goals", {}))
 	territory_progress.deserialize(dog.get("territories", {}))
+	pair_state = PairState.deserialize(SaveManager.data.get("pair"))
+	if pair_state == null and (use_classic_pair_when_missing or int(SaveManager.data["statistics"]["runs"]) > 0):
+		# A save that already walked before Sprint 06 keeps its shiba and owner.
+		pair_state = PairState.classic()
+		SaveManager.data["pair"] = pair_state.serialize()
+
+
+func has_pair() -> bool:
+	return pair_state != null
+
+
+## The human the walk uses: this save's own, or the classic owner.
+func owner_fighter() -> FighterData:
+	return pair_state.owner_fighter() if pair_state != null else load(HumanCandidate.TEMPLATE_PATH) as FighterData
+
+
+## Where a profile starts: Home with its pair, or the shelter for a new one.
+func goto_start() -> void:
+	if has_pair():
+		goto_home()
+	else:
+		_change_scene(SHELTER_SCENE)
 
 
 ## S06-02: the player picked their dog; next comes the adoption.
@@ -47,11 +74,20 @@ func choose_dog(dog: DogCandidate) -> void:
 		_change_scene(ADOPTION_SCENE)
 
 
-## S06-03: a human chose the dog. Naming and the pair itself follow (S06-06).
-func adopt(dog: DogCandidate, human: HumanCandidate) -> void:
-	chosen_dog = dog
+## S06-06: a human chose the dog and has been given their name. From here
+## on this is the save's pair (ADR-019: one human, one relationship).
+func adopt(dog: DogCandidate, human: HumanCandidate, human_name: String = "", summary: String = "") -> void:
 	adopting_human = human
+	pair_state = PairState.adopted(dog, human, human_name, summary)
+	chosen_dog = null
+	save_pair()
 	goto_home()
+
+
+func save_pair() -> void:
+	if pair_state != null:
+		SaveManager.data["pair"] = pair_state.serialize()
+		SaveManager.save_game()
 
 
 func goto_home() -> void:
@@ -91,6 +127,8 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 	SaveManager.data["human"]["growth_data"] = human_growth.serialize()
 	SaveManager.data["dog"]["goals"] = goal_progress.serialize()
 	SaveManager.data["dog"]["territories"] = territory_progress.serialize()
+	if pair_state != null:
+		SaveManager.data["pair"] = pair_state.serialize()
 	SaveManager.save_game()
 
 	last_run_result = result

@@ -13,6 +13,7 @@ func _ready() -> void:
 
 func _run() -> void:
 	_tree = get_tree()
+	Game.use_classic_pair_when_missing = false
 	DirAccess.make_dir_recursive_absolute(TEST_SAVE.get_base_dir())
 	if FileAccess.file_exists(TEST_SAVE):
 		DirAccess.remove_absolute(TEST_SAVE)
@@ -82,7 +83,27 @@ func _test_adoption() -> void:
 			break
 	check_eq(chosen.size(), 1, "one of them comes back for the dog")
 	check(chosen.size() == 1 and scene.humans.has(chosen[0]), "someone who visited")
-	check(Game.adopting_human == chosen[0] if chosen.size() == 1 else false, "and that human is handed on")
+	# S06-06: the human is named, and from then on they are the save's pair.
+	await scene.naming_ready
+	check(scene.find_child("Naming", true, false).visible, "S06-06: the player names their human")
+	var edit := scene.find_child("NameEdit", true, false) as LineEdit
+	check(chosen[0].background().name_suggestions.has(edit.text), "starting from a name that fits them (%s)" % edit.text)
+	var first_name := edit.text
+	scene.next_suggestion()
+	check(edit.text != first_name or chosen[0].background().name_suggestions.size() == 1, "another name can be offered")
+	check(scene.summary().contains("收容所") and scene.summary().contains("回來"), "how they met is kept in words (%s)" % scene.summary())
+	scene.confirm_name("  阿明  ")
+	check(Game.has_pair(), "naming makes them the pair")
+	check_eq(Game.pair_state.human_custom_name, "阿明", "under the name given")
+	check(Game.pair_state.dog == scene.dog and Game.pair_state.human == chosen[0], "this dog and this human")
+	check_eq(Game.owner_fighter().display_name, "阿明", "and the walk's fighter goes by it")
+	check(not Game.pair_state.is_classic, "a pair of the player's own, not the classic one")
+	SaveManager.load_game()
+	var saved := PairState.deserialize(SaveManager.data.get("pair"))
+	check(saved != null and saved.human_custom_name == "阿明" and saved.dog.breed_id == scene.dog.breed_id, "it is saved at once")
+	await _wait_for_scene(Game.HOME_SCENE)
+	check(_tree.current_scene.scene_file_path == Game.HOME_SCENE, "and the pair goes home")
+	scene.queue_free()
 
 
 func _wait_for_scene(path: String) -> void:

@@ -87,6 +87,9 @@ func _sanitize(raw: Dictionary) -> Dictionary:
 		result["dog"] = raw["dog"]
 	if raw.get("human") is Dictionary:
 		result["human"] = raw["human"]
+	# Sprint 06: the save's one pair (absent until the adoption).
+	if raw.get("pair") is Dictionary:
+		result["pair"] = raw["pair"]
 
 	var raw_stats: Variant = raw.get("statistics")
 	if raw_stats is Dictionary:
