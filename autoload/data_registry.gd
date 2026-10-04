@@ -14,6 +14,7 @@ const DOG_BREEDS_DIR: String = "res://data/identity/breeds"
 const DOG_TRAITS_DIR: String = "res://data/identity/dog_traits"
 const HUMAN_BACKGROUNDS_DIR: String = "res://data/identity/human_backgrounds"
 const HABITS_DIR: String = "res://data/identity/habits"
+const MEMORY_KINDS_DIR: String = "res://data/identity/memories"
 
 var balance: GameBalance
 var training: TrainingBalance
@@ -29,6 +30,7 @@ var dog_breeds: Array[DogBreedData] = []
 var dog_traits: Array[DogTraitData] = []
 var human_backgrounds: Array[HumanBackgroundData] = []
 var habits: Array[HabitData] = []
+var memory_kinds: Array[MemoryKindData] = []
 
 var _territories: Dictionary[StringName, TerritoryData] = {}
 
@@ -50,6 +52,7 @@ func _ready() -> void:
 	dog_traits.assign(_load_dir(DOG_TRAITS_DIR))
 	human_backgrounds.assign(_load_dir(HUMAN_BACKGROUNDS_DIR))
 	habits.assign(_load_dir(HABITS_DIR))
+	memory_kinds.assign(_load_dir(MEMORY_KINDS_DIR))
 
 
 func get_training_event(event_id: StringName) -> TrainingEventData:
@@ -114,6 +117,13 @@ func get_human_background(background_id: StringName) -> HumanBackgroundData:
 	for bg in human_backgrounds:
 		if bg.id == background_id:
 			return bg
+	return null
+
+
+func get_memory_kind(kind_id: StringName) -> MemoryKindData:
+	for kind in memory_kinds:
+		if kind.id == kind_id:
+			return kind
 	return null
 
 

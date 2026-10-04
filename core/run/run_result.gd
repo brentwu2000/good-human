@@ -49,6 +49,9 @@ var bond_closer: bool = false
 ## Sprint 06: places the dog searched on this walk, and habits it formed.
 var searches: int = 0
 var habits_formed: Array[StringName] = []
+## Encounters the owner beat on this walk, and the one that beat them.
+var won_against: Array[StringName] = []
+var lost_to: StringName = &""
 
 
 ## How long the player chose to stay on after they could have gone home.

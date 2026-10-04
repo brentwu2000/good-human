@@ -35,8 +35,7 @@ func _refresh() -> void:
 	_growth_label.text = growth_text()
 	_goals_label.text = goals_text()
 	_territory_label.text = territory_text()
-	_growth_label.text = pair_text() + "
-" + _growth_label.text
+	_growth_label.text = pair_text() + "\n" + _growth_label.text
 	_territory_label.visible = not _territory_label.text.is_empty()
 
 
@@ -50,8 +49,11 @@ static func pair_text() -> String:
 		var habit := DataRegistry.get_habit(id)
 		if habit != null:
 			lines.append("・%s" % habit.home_text)
-	return "
-".join(lines)
+	# S06-10: one photo, the moment that matters most lately.
+	var photo := Memories.featured(Game.pair_state)
+	if not photo.is_empty():
+		lines.append("📷 %s" % photo["text"])
+	return "\n".join(lines)
 
 
 ## The owner's unlocked changes, in words.
@@ -117,8 +119,7 @@ static func territory_text() -> String:
 					lines.append("上次和%s打，我們贏了。" % data.resident_name)
 				TerritoryProgress.RivalOutcome.DOG_LOST:
 					lines.append("上次輸給了%s。" % data.resident_name)
-	return "
-".join(lines)
+	return "\n".join(lines)
 
 
 static func _count_text(found: int, total: int) -> String:

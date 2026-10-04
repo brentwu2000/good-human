@@ -39,6 +39,10 @@ var _met_pairs: Dictionary[StringName, bool] = {}
 ## presentation effect, and which have spoken up on this walk.
 var habits: Dictionary[StringName, HabitData] = {}
 var _habit_said: Dictionary[StringName, bool] = {}
+## S06-10: places already remembered aloud on this walk.
+var _recalled: Dictionary[StringName, bool] = {}
+## Meters: close enough to a place for it to bring something back.
+const PLACE_RECALL_DISTANCE: float = 6.0
 
 
 func _ready() -> void:
@@ -51,6 +55,7 @@ func _on_run_started(_seed: int) -> void:
 	dragged_time = 0.0
 	_met_pairs.clear()
 	_habit_said.clear()
+	_recalled.clear()
 	refresh_habits()
 	human.speed_multiplier = 1.0
 	human.hold_time = 0.0
@@ -93,6 +98,7 @@ func _physics_process(delta: float) -> void:
 	var heavy := run_manager.human_run_inventory.used_slot_count() >= DataRegistry.training.heavy_bag_slots
 	human.speed_multiplier = traits.heavy_bag_speed if heavy else 1.0
 	_check_pairs()
+	_check_places()
 	_check_searching()
 	if human.hold_time > 0.0:
 		dragged_time = 0.0
@@ -139,6 +145,12 @@ func _check_pairs() -> void:
 		if dog.global_position.distance_to(pair.global_position) > MEET_DISTANCE * units_per_meter:
 			continue
 		_met_pairs[pair.spot_id] = true
+		# S06-10: someone the pair has history with brings it back.
+		var memory := Memories.recall_for(Game.pair_state, pair.encounter.id)
+		if not memory.is_empty():
+			human.say(str(memory["recall"]), Color(1.0, 0.92, 0.75), 2.2)
+			hesitated.emit(pair)
+			continue
 		if has_habit(&"social_ready"):
 			# S06-09: used to the dog stopping to say hello, they say it first.
 			human.hold_time = maxf(human.hold_time, traits.hesitation_time * 0.5)
@@ -151,6 +163,22 @@ func _check_pairs() -> void:
 			human.say("你好～今天天氣不錯喔", Color(0.7, 1.0, 0.8))
 		human.play_growth_behavior(&"threat", _hesitation_improved(), maxf(traits.hesitation_time, 0.45))
 		hesitated.emit(pair)
+
+
+## S06-10: passing a place that means something to the pair.
+func _check_places() -> void:
+	var dog := run_manager.dog_actor
+	if dog == null or Game.pair_state == null:
+		return
+	for point in get_tree().get_nodes_in_group(&"territory_points"):
+		var id: StringName = point.get(&"territory_id")
+		if _recalled.has(id) or dog.global_position.distance_to(point.global_position) > PLACE_RECALL_DISTANCE * units_per_meter:
+			continue
+		var memory := Memories.recall_for(Game.pair_state, id)
+		if memory.is_empty():
+			continue
+		_recalled[id] = true
+		human.say(str(memory["recall"]), Color(1.0, 0.92, 0.75), 2.2)
 
 
 ## S06-09: the dog is rummaging again; a human used to it just stops and waits.

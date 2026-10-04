@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MemoryKindData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/memory_kind_data.gd" id="1_memory"]
+
+[resource]
+script = ExtResource("1_memory")
+id = &"rare_find"
+category = 5
+importance = 2
+text = "一起把{what}帶回了家。"
+recall_line = ""

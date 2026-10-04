@@ -163,8 +163,7 @@ func _test_claim_resolution() -> void:
 	check_eq(Game.territory_progress.claim_progress(BANYAN), data.claim_target, "and the walks that earned it")
 	check_eq(Game.territory_progress.last_rival_outcome(data.resident_encounter_id), TerritoryProgress.RivalOutcome.DOG_WON, "and the rival's memory")
 	var home_text: String = preload("res://scenes/home.gd").territory_text()
-	check(home_text.contains(data.display_name) and home_text.contains(data.own_scent_text), "Home remembers the place in the dog's words (%s)" % home_text.replace("
-", " / "))
+	check(home_text.contains(data.display_name) and home_text.contains(data.own_scent_text), "Home remembers the place in the dog's words (%s)" % home_text.replace("\n", " / "))
 	check(home_text.contains(data.resident_name) and home_text.contains("贏"), "and how it went with the one who lived there")
 	check(not home_text.contains("/") and not home_text.contains("%"), "never as a bar or a fraction")
 

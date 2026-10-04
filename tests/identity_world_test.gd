@@ -111,6 +111,7 @@ func _test_adoption() -> void:
 	await _wait_for_scene(Game.RUN_MAP_3D_SCENE)
 	await _tree.physics_frame
 	var map := _tree.current_scene as RunMap3D
+	check_eq(map.human._bubble.text, str(Memories.recall_for(pair, &"shelter")["recall"]), "S06-10: the first walk remembers the shelter")
 	check_eq(map.human.fighter.display_name, "阿明", "S06-07: the walk's owner is the adopted human")
 	check_eq(map.human.fighter.stats.strength, pair.human.stats[&"strength"], "with their own hidden strength")
 	check_eq(map.human.fighter.shirt_color.to_html(false), pair.human.shirt_color.to_html(false), "and their own clothes")
@@ -133,6 +134,21 @@ func _test_adoption() -> void:
 	check(map.human.hold_time > 0.0, "used to the dog rummaging, the human just stops and waits")
 	check_eq(map.human._bubble.text, DataRegistry.get_habit(&"search_sigh").walk_line, "with a sigh of their own")
 	pair.habit_ids.erase(&"search_sigh")
+	point.cancel_search()
+	map.human.hold_time = 0.0
+	# S06-10: meeting a pair the two have history with brings it back.
+	var someone: OpponentPair3D = null
+	for p in map.coordinator.get_pairs():
+		if p.is_present() and p.is_idle():
+			someone = p
+			break
+	Memories.remember(pair, &"won_against", someone.encounter.id, 1, {"who": "他", "dog": "牠"})
+	map.dog.global_position = someone.global_position + Vector3(1.0, 0.1, 0.5)
+	map.human.global_position = someone.global_position + Vector3(2.0, 0.1, 1.0)
+	for i in 4:
+		await _tree.physics_frame
+	check_eq(map.human._bubble.text, str(Memories.recall_for(pair, someone.encounter.id)["recall"]), "S06-10: meeting them again, the human remembers")
+	pair.memories.pop_back()
 	# Persistence: a reload brings back the same pair, not a new one.
 	var before := JSON.stringify(pair.serialize())
 	SaveManager.load_game()

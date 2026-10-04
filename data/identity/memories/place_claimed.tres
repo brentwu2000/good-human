@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MemoryKindData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/memory_kind_data.gd" id="1_memory"]
+
+[resource]
+script = ExtResource("1_memory")
+id = &"place_claimed"
+category = 3
+importance = 3
+text = "{place}成了我們的地方。"
+recall_line = "這裡是我們的地方了。"

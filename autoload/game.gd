@@ -102,6 +102,7 @@ func choose_dog(dog: DogCandidate) -> void:
 func adopt(dog: DogCandidate, human: HumanCandidate, human_name: String = "", summary: String = "") -> void:
 	adopting_human = human
 	pair_state = PairState.adopted(dog, human, human_name, summary)
+	Memories.remember(pair_state, &"met", &"shelter", 0)
 	chosen_dog = null
 	save_pair()
 	goto_home()
@@ -143,6 +144,7 @@ func finish_run(result: RunResult, show_result: bool = true) -> void:
 		result.bond_closer = Bond.apply_walk(pair_state, result)
 		for habit in Habits.apply_walk(pair_state, result, DataRegistry.habits):
 			result.habits_formed.append(habit.id)
+		Memories.apply_walk(pair_state, result, int(SaveManager.data["statistics"]["runs"]) + 1)
 
 	var stats: Dictionary = SaveManager.data["statistics"]
 	stats["runs"] = int(stats["runs"]) + 1

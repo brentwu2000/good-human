@@ -70,7 +70,12 @@ func _greet(_seed: int) -> void:
 	if not Game.has_pair():
 		human.say("好，出去散步吧！")
 		return
-	human.say(Bond.greeting(Game.pair_state))
+	# S06-10: the very first walk remembers how they met.
+	var first := Memories.recall_for(Game.pair_state, &"shelter")
+	if int(SaveManager.data["statistics"]["runs"]) == 0 and not first.is_empty():
+		human.say(str(first["recall"]))
+	else:
+		human.say(Bond.greeting(Game.pair_state))
 	if Bond.pets_before_walk(Game.pair_state):
 		human.puppet.play_acknowledge(dog.global_position)
 		dog.play_petted()

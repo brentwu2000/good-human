@@ -109,5 +109,9 @@ static func deserialize(data: Variant) -> PairState:
 	if raw_memories is Array:
 		for memory: Variant in raw_memories:
 			if memory is Dictionary and memory.has("id"):
-				pair.memories.append(memory)
+				# JSON reads every number back as a float.
+				var cleaned: Dictionary = memory.duplicate(true)
+				for key in ["category", "run_index", "importance"]:
+					cleaned[key] = int(cleaned.get(key, 0))
+				pair.memories.append(cleaned)
 	return pair

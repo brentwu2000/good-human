@@ -10,6 +10,7 @@ func _ready() -> void:
 	_test_adoption_match()
 	_test_bond()
 	_test_habits()
+	_test_memories()
 	finish()
 
 
@@ -235,6 +236,40 @@ func _test_habits() -> void:
 	check(restored.habit_ids.has(&"social_ready") and Habits.progress(restored, sigh) == 3, "habits and their progress survive a save")
 	for habit in DataRegistry.habits:
 		check(not habit.home_text.is_empty() and not habit.walk_line.is_empty() and not habit.noticed_text.is_empty(), "%s can be seen and said" % habit.id)
+
+
+func _test_memories() -> void:
+	var pair := PairState.classic()
+	pair.human_custom_name = "阿明"
+	var met := Memories.remember(pair, &"met", &"shelter", 0)
+	check(not met.is_empty() and str(met["text"]).contains("阿明"), "S06-10: meeting is remembered, by name (%s)" % met.get("text", ""))
+	check(Memories.remember(pair, &"met", &"shelter", 0).is_empty(), "and only once")
+	for key in ["id", "category", "run_index", "participants", "place_id", "event_id", "presentation_key", "importance"]:
+		check(met.has(key), "a memory keeps its %s" % key)
+	var home := RunResult.new()
+	home.outcome = RunResult.Outcome.EXTRACTED
+	home.won_against.assign([&"enc_jogger", &"enc_rival"])
+	home.territories_claimed.append(&"banyan")
+	var added := Memories.apply_walk(pair, home, 1)
+	var kinds: Array[String] = []
+	for memory in added:
+		kinds.append(str(memory["kind"]))
+	check(kinds.has("first_home") and kinds.has("won_against") and kinds.has("place_claimed"), "a big walk leaves big memories (%s)" % ", ".join(kinds))
+	check(Memories.recall_for(pair, &"enc_jogger").is_empty(), "beating an ordinary jogger is not one of them")
+	check(not Memories.recall_for(pair, &"enc_rival").is_empty(), "beating 阿金 is")
+	check(str(Memories.recall_for(pair, &"banyan").get("recall", "")).contains("我們的地方"), "and the tree can bring it back")
+	check(Memories.apply_walk(pair, home, 2).is_empty(), "the same things are not remembered twice")
+	var lost := RunResult.new()
+	lost.outcome = RunResult.Outcome.DEFEATED
+	lost.lost_to = &"enc_old_master"
+	lost.defeated_by = "公園阿嬤"
+	Memories.apply_walk(pair, lost, 3)
+	check(str(Memories.recall_for(pair, &"enc_old_master").get("text", "")).contains("公園阿嬤"), "the first time the human went down, and to whom")
+	check(int(Memories.featured(pair).get("importance", 0)) == 3, "Home shows one of the biggest moments")
+	var restored := PairState.deserialize(pair.serialize())
+	check_eq(restored.memories.size(), pair.memories.size(), "memories survive a save")
+	for memory in pair.memories:
+		check(RegEx.create_from_string("[0-9%]").search(str(memory["text"])) == null, "remembered in words (%s)" % memory["text"])
 
 
 func _walk_with(event_ids: Array[StringName], searches: int) -> RunResult:

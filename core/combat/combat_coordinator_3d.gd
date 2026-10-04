@@ -429,7 +429,7 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 	run_manager.owner_busy = false
 	run_manager.set_owner_condition(0.0 if result == CombatSimulation.Result.DEFEAT else ended.simulation.fighters[CombatSimulation.PLAYER].hp_ratio())
 	if result in [CombatSimulation.Result.VICTORY, CombatSimulation.Result.DEFEAT]:
-		run_manager.record_fight(result == CombatSimulation.Result.VICTORY)
+		run_manager.record_fight(result == CombatSimulation.Result.VICTORY, encounter.id)
 	engagement = null
 	last_result = result
 	_hitstop_left = 0.0

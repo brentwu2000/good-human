@@ -57,6 +57,8 @@ var owner_busy: bool = false
 ## Sprint 06: fights finished on this walk (won / lost by the owner).
 var fights_won: int = 0
 var fights_lost: int = 0
+var won_against: Array[StringName] = []
+var lost_to: StringName = &""
 
 var _last_value: RunValue
 
@@ -108,6 +110,8 @@ func start_run(seed_value: int = fixed_seed) -> void:
 	owner_busy = false
 	fights_won = 0
 	fights_lost = 0
+	won_against.clear()
+	lost_to = &""
 	set_owner_condition(1.0)
 
 	_extraction_points.clear()
@@ -168,11 +172,14 @@ func set_owner_condition(ratio: float) -> void:
 
 
 ## A fight ended with a result (a broken-off one is neither).
-func record_fight(won: bool) -> void:
+func record_fight(won: bool, encounter_id: StringName = &"") -> void:
 	if won:
 		fights_won += 1
+		if not encounter_id.is_empty() and not won_against.has(encounter_id):
+			won_against.append(encounter_id)
 	else:
 		fights_lost += 1
+		lost_to = encounter_id
 
 
 ## Raises the owner's condition by `amount`, never past `cap`. Returns what was
@@ -328,6 +335,8 @@ func _build_result(outcome: RunResult.Outcome, extraction_id: StringName) -> Run
 	result.marked_territories.assign(marked_territories.keys())
 	result.fights_won = fights_won
 	result.searches = searched_points.size()
+	result.won_against = won_against.duplicate()
+	result.lost_to = lost_to
 	result.fights_lost = fights_lost
 	result.first_extraction_time = first_extraction_time
 	result.value_at_first_extraction = value_at_first_extraction.total() if value_at_first_extraction != null else 0

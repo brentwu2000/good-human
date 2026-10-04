@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MemoryKindData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/memory_kind_data.gd" id="1_memory"]
+
+[resource]
+script = ExtResource("1_memory")
+id = &"human_changed"
+category = 4
+importance = 1
+text = "{name}好像變了：「{what}」。"
+recall_line = ""

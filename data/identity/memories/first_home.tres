@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MemoryKindData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/memory_kind_data.gd" id="1_memory"]
+
+[resource]
+script = ExtResource("1_memory")
+id = &"first_home"
+category = 1
+importance = 2
+text = "第一次和{name}一起平安回到家。"
+recall_line = ""
