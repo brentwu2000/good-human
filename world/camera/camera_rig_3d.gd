@@ -30,7 +30,12 @@ enum Context { EXPLORE, TENSION, ACTIVE, CRISIS, AFFECTION, RELEASE }
 ## `pov` is how far the camera has moved inside the dog's head (ADR-015): 0 is
 ## the third-person chase shot, 1 is first person at dog eye height. The
 ## transition is always a blend, never a cut.
-const FRAMING: Dictionary = {"pivot": 0.8, "pitch": -9.0, "distance": 2.8, "fov": 70.0, "focus": 0.0, "pov": 0.0}
+## Walking (owner reference 視角.png, 2026-10-05): high behind the dog and
+## looking down the way ahead, so the dog sits small in the lower third and the
+## road it is heading for fills the screen. The pivot above the dog is what
+## places the camera; `dog_low` (degrees) then aims that far above the dog, so
+## it holds the same spot on screen however far a wall pulls the camera in.
+const FRAMING: Dictionary = {"pivot": 1.2, "pitch": -15.0, "distance": 4.2, "fov": 70.0, "focus": 0.0, "pov": 0.0, "dog_low": 14.0}
 ## A fight must read as a push-IN against the walking shot, so every combat
 ## context is closer and narrower than EXPLORE, not further away. (The first
 ## pass measured itself against the old 7.5 m pull-back instead of against
@@ -115,7 +120,9 @@ const CRISIS_CONDITION: float = 0.34
 ## exponential). Together with `follow_rate` this sets how tightly a held
 ## direction curves: lower is straighter, higher turns harder.
 @export var control_follow_rate: float = 1.2
-@export var collision_margin: float = 0.25
+## Kept clear of the wall it hit by more than a shop awning or sign sticks out
+## (those have no collision), or the high walking camera ends up sitting on one.
+@export var collision_margin: float = 0.6
 ## A wall may pull the camera in down to this distance; anything closer fades
 ## instead, so the camera stays low behind the dog.
 @export var collision_min_distance: float = 1.2
@@ -255,8 +262,9 @@ func _update(delta: float, instant: bool) -> void:
 	var t := 1.0 if instant or current.is_empty() else 1.0 - exp(-smoothing * delta)
 	if current.is_empty():
 		current = target.duplicate()
-	for key: String in ["pivot", "pitch", "distance", "fov", "focus"]:
-		current[key] = lerpf(current.get(key, target[key]), target[key], framing_t)
+	for key: String in ["pivot", "pitch", "distance", "fov", "focus", "dog_low"]:
+		var goal: float = target.get(key, 0.0)
+		current[key] = lerpf(current.get(key, goal), goal, framing_t)
 
 	if not instant:
 		_update_yaw(delta)
@@ -294,7 +302,7 @@ func _update(delta: float, instant: bool) -> void:
 ## Where the camera is pointed. Out of first person this is the chase
 ## composition; inside it, the fight itself, tracked softly.
 func _aim_point(delta: float, instant: bool) -> Vector3:
-	var target_offset := _keep_dog_in_frame(_composed_look(_focus)) - _focus
+	var target_offset := _keep_dog_in_frame(_composed_look(_walking_look(_focus))) - _focus
 	if instant or not _has_look:
 		_look_offset = target_offset
 		_has_look = true
@@ -371,6 +379,24 @@ func _boom_distance() -> float:
 
 func _flat_distance(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
+
+
+## Walking: aim `dog_low` degrees above the dog rather than at the pivot, so
+## the dog stays low in the frame with the way ahead filling it, at any boom
+## length. Fades out with `dog_low` as a fight's framing takes over.
+func _walking_look(anchor: Vector3) -> Vector3:
+	var low: float = current.get("dog_low", 0.0)
+	var full: float = FRAMING["dog_low"]
+	if low <= 0.01:
+		return anchor
+	var to_dog := (dog.global_position + Vector3(0, 0.25, 0)) - global_position
+	var flat := Vector2(to_dog.x, to_dog.z)
+	if flat.length() < 0.01:
+		return anchor
+	var elevation := atan2(to_dog.y, flat.length()) + deg_to_rad(full)
+	var heading := Vector3(flat.x, 0.0, flat.y).normalized()
+	var aim := (heading * cos(elevation) + Vector3.UP * sin(elevation)) * maxf(to_dog.length(), 1.0)
+	return anchor.lerp(global_position + aim, low / full)
 
 
 ## FocusAnchor (D4/P02-001) with a soft dead-zone (D4/P02-002). Out of combat

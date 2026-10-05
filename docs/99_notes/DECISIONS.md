@@ -26,6 +26,10 @@ The game is portrait (base viewport 720×1280, `canvas_items` stretch, `expand` 
 > Local decision (owner, 2026-09-28, during P04-04: "狗本來就不該是左右戰鬥重點").
 Barking and leash pulls must visibly change what happens in a fight and help the owner, but they are not what decides who wins: the owner's own strength, grown through the dog's training, does (Design Principles 5 and 6). Tuning and tests hold the dog's edge to "helps, within limits" rather than requiring it to swing a large share of fights.
 
+## ADR-L03 — Walking camera: high chase behind the dog
+> Local decision (owner, 2026-10-05, reference `.claude/視角.png`: "調整一下遊戲畫面視角").
+Amends ADR-010's walking shot only. The EXPLORE camera hangs higher and further back (pivot 1.2 m, pitch −15°, boom 4.2 m) and aims 14° above the dog, so the dog sits small in the lower third with the way ahead filling the screen, at any boom length. Fight framings (push-in, Combat Snap to dog POV) are unchanged.
+
 ## ADR-007 — Seamless real-time combat
 No separate Battle Scene: encounters, human combat, dog control and disengagement all happen in the Run World. Full record: `ADR_007_SEAMLESS_REALTIME_COMBAT.md`.
 

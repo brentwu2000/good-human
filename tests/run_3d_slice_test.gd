@@ -38,7 +38,7 @@ func _run() -> void:
 	coordinator.time_scale = 25.0
 	check(run.is_running() and run.dog_actor == dog, "3D walk running with the 3D dog")
 	check(rig.is_dog_visible(), "dog view: dog visible at start")
-	check(rig.global_position.y - dog.global_position.y < 1.6, "camera starts low behind the dog")
+	check(rig.global_position.y - dog.global_position.y < 2.6, "camera starts behind and above the dog, not overhead")
 	check(not map.find_child("ViewButton", true, false), "no view switch: dog view only")
 
 	# --- Camera-relative movement ------------------------------------------------
@@ -147,11 +147,11 @@ func _run() -> void:
 	rig.snap_behind_dog()
 	await _physics(2)
 	check(rig.collided and rig.is_dog_visible(), "wall pulls camera in, dog still visible")
-	check(rig.global_position.y - dog.global_position.y < 1.6, "camera stays low near walls")
+	check(rig.global_position.y - dog.global_position.y < 2.6, "camera does not climb near walls")
 	dog.global_position = Vector3(-12, 0.1, 4.8)
 	rig.snap()
 	await _physics(2)
-	check(not rig.collided and rig._faded.size() > 0 and rig.global_position.y - dog.global_position.y < 1.6, "too close to a wall, the wall fades")
+	check(not rig.collided and rig._faded.size() > 0 and rig.global_position.y - dog.global_position.y < 2.6, "too close to a wall, the wall fades")
 
 	# --- Search ------------------------------------------------------------------
 	var trash := map.get_node("SearchPoints/trash_street_east") as SearchPoint3D
