@@ -1,5 +1,26 @@
 # Breed-sheet dogs — preview only
 
+## Whole-face r10 candidate — 2026-10-04
+
+Codex ART reconstructed the pomeranian's anterior face over the original r6
+body, using the owner's original front sheet for the coherent facial map,
+including its original eye style. No new third-party source or generated image.
+The inherited skeleton/weight licence chain remains; new facial weights blend
+into the inherited rim weights. Preview only; the owner rejected r9's appearance,
+and r10's cheek/neck transitions still need work. See
+[r10 record](../../../docs/06_art/POMERANIAN_FACE_R10_2026-10-04.md).
+
+## Pomeranian r9 geometry revision — 2026-10-04
+
+The owner authorized facial geometry refinement in this session. Codex ART
+reduced the projecting bridge and shortened the nose, using the r8 muzzle atlas
+(same owner-made pomeranian reference for nose detail) and retaining r6 eye style.
+No new external source or generated eye mesh. Only position/normal attributes
+change relative to r8; topology, UVs, weights, skeleton and clips are preserved.
+Runtime `models/breeds/pomeranian.glb` is now r9; other breeds remain r6.
+The inherited licence chain and grade-B restrictions remain. Factory exports
+have not been overwritten. See [r9 report](../../../docs/06_art/POMERANIAN_FACE_R9_2026-10-04.md).
+
 Output of the AI 3D dog factory (`good_human_stylized_factory/scripts/batch_dogs.sh`),
 shown by `dog_lineup.tscn` (open with `tools/art/open_dog_lineup.bat`). The models now
 live in `assets/characters/dog/models/breeds/` and five of them are the opponent pairs'

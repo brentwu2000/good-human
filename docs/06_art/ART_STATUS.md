@@ -16,6 +16,35 @@ States: `RESEARCH`, `CANDIDATE`, `IN_PROGRESS`, `REVIEW`, `APPROVED`, `REJECTED`
 
 Codex Art owns this status file. Art work must not silently change game design.
 
+## Pomeranian whole-face revision r10 — 2026-10-04
+
+Owner approved r10 on 2026-10-04; it now replaces the runtime pomeranian used by
+enc_old_master (小白). Godot resolved the encounter to the published model and
+captured both materials and Idle/Walk/Sit. Geometry/texture quality remains B:
+cheek/mane and chin/neck transitions still need work.
+[Whole-face candidate and runtime comparisons](POMERANIAN_FACE_R10_2026-10-04.md).
+
+Frenchie r11 uses the same continuous-face method with breed-specific short muzzle
+proportions. REVIEW / B; staged separately for visual review, runtime Frenchie remains
+r6. [Repair record](FRENCHIE_FACE_R11_2026-10-04.md).
+[Repeatable workflow](DOG_WHOLE_FACE_REPAIR_WORKFLOW.md).
+
+## Pomeranian face geometry r9 — 2026-10-04
+
+Owner authorized face geometry edits. Reduced the projecting nasal bridge and
+shortened the nose while retaining r6-style eyes, topology, UVs, weights and all
+three clips. Game pomeranian updated after Blender/Godot review; other dogs are
+unchanged. REVIEW / B: ear surfaces, mouth/tongue seams, Sit and the inherited
+47k-triangle mesh remain unresolved. [r9 report](POMERANIAN_FACE_R9_2026-10-04.md).
+
+## Pomeranian muzzle candidate r8 — 2026-10-04
+
+Local texture cleanup and nose-detail pass staged separately in
+`assets/art_previews/dogs/candidates/r8/`; runtime remains r6. Blender and Godot
+comparisons show reduced projection artifacts, but the elongated nose and raised
+bridge need geometry repair. Candidate has not passed appearance review.
+See [r8 findings and comparison](POMERANIAN_MUZZLE_R8_2026-10-04.md).
+
 ## Blender implementation 2026-09-29
 
 [P04 / D5-01 implementation record](P04_BLENDER_IMPLEMENTATION_01.md): actual modular human GLB with 17 clips, Banyan GLB, opt-in human compatibility layer and a running ART showroom. Assets are grade B candidates; no S/final-art approval. Human and environment remain IN_PROGRESS because reference-quality finish and full runtime integration are outstanding. Existing dog model is reused for interaction staging.
@@ -62,4 +91,3 @@ pomeranian, corgi, golden); the player keeps `shiba_01`. Models moved to
 `assets/art_previews/dogs/PROVENANCE.md`. Still REVIEW / grade B art: the r6 report's
 mouth seams, ear gaps and face defects now show in the game. The rival's neckerchief
 is the greybox accessory placed on the golden's neck bone and wants an art pass.
-

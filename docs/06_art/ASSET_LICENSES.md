@@ -27,6 +27,20 @@ dog model/rig restrictions remain. Only the RGBA puppy-eye source is baked
 into preview atlases; earlier iris experiments are not consumed.
 
 ### Continuing asset rules
+
+2026-10-04: owner-approved Pomeranian r10 is published to the runtime breed path.
+Frenchie r11 is a separate review candidate. Both reconstruct the anterior face
+using the existing owner's breed front references and Codex-authored geometry;
+no new third-party source was imported. Existing factory/rig restrictions and
+grade B remain. See [workflow](DOG_WHOLE_FACE_REPAIR_WORKFLOW.md) and
+[Frenchie provenance and repair record](FRENCHIE_FACE_R11_2026-10-04.md).
+
+Pomeranian r9 (2026-10-04): Codex-authored local facial geometry adaptation and
+muzzle texture repair over the existing breed-factory model. Nose detail derives
+from the owner's original pomeranian front sheet; eye source remains the r6
+project-generated eye. No new third-party assets. Existing breed provenance,
+inherited rig/weight restrictions and grade B remain; see
+[r9 record](POMERANIAN_FACE_R9_2026-10-04.md).
 - Prefer CC0.
 - CC-BY is acceptable only when attribution requirements are recorded and satisfied.
 - NC and ND assets are prohibited.

@@ -1,0 +1,17 @@
+{
+  "source_sha256": "bb13695f1c1bc9d1cc9df3ea1768450d5ffcaa143ffe38dd468cab85081c41f8",
+  "result_sha256": "1879395e9919486e807212add6a286c4093bc56386e557d92aa2c8eb2ae5b140",
+  "vertices": 35562,
+  "triangles": 47169,
+  "moved_vertices": 2610,
+  "max_displacement_m": 0.05271301762044698,
+  "eye_core_moved_vertices": 0,
+  "changed_face_normal_over_90_degrees": 100,
+  "unchanged_other_binary_data": true,
+  "bones": 23,
+  "clips": [
+    "Idle",
+    "Sit",
+    "Walk"
+  ]
+}

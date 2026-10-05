@@ -53,7 +53,7 @@ Installed 2026-09-18. D01–D09 can run in parallel; D10 uses implementation cap
 | P03-D03 | Dog POV composition sheet | Design/Codex ART | REVIEW | P03-D01 style lock |
 | P03-D04 | Human motion silhouettes | Design/Codex ART | REVIEW | P03-D01 style lock |
 | P03-D05 | Hit/impact language | Design/Codex ART | REVIEW | integrated contact-local grading |
-| P03-D06 | Owner HEALTHY/HURT/CRITICAL/DOWN | Design/Codex ART | TODO | none |
+| P03-D06 | Owner HEALTHY/HURT/CRITICAL/DOWN | Design/Codex ART | IN_PROGRESS | none |
 | P03-D07 | Dog instinct feedback | Design/Codex ART | TODO | none |
 | P03-D08 | NPC/world reaction sheet | Design/Codex ART | TODO | none |
 | P03-D09 | Victory/defeat emotional beat | Design/Codex ART | TODO | none |
@@ -90,7 +90,7 @@ Installed 2026-09-28. Brief: `docs/06_art/SPRINT05_DESIGN_EXECUTION.md`. Design 
 | D5-07 | Territory World States | Design/Codex ART | IN_PROGRESS |
 | D5-08 | Ownership Reward Reveal | Design/Codex ART | IN_PROGRESS |
 | D5-09 | Target Screenshot 04 | Design/Codex ART | IN_PROGRESS |
-| D5-10 | Design Decision Pack | Design/Codex ART | TODO |
+| D5-10 | Design Decision Pack | Design/Codex ART | IN_PROGRESS |
 
 ## Sprint 06 Identity / Bond Design (Update 009)
 Installed 2026-09-29. Brief: `docs/06_art/SPRINT06_DESIGN_WORKSTREAM.md`. Design starts immediately; engineering waits for Greed/Territory Gate 01. Reuse the established Dog POV / P-04 combat language; do not reopen the combat camera.

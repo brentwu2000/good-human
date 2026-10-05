@@ -1,0 +1,18 @@
+{
+  "skeleton_nodes_and_bind_matrices_equal": true,
+  "animation_channels_keyframes_and_interpolation_equal": true,
+  "finite_used_geometry": true,
+  "weights_normalized_and_joint_indices_valid": true,
+  "primitives": [
+    {
+      "triangles": 41043,
+      "degenerate_triangles": 0,
+      "normal_min_length": 0.9999998807907104
+    },
+    {
+      "triangles": 9126,
+      "degenerate_triangles": 0,
+      "normal_min_length": 0.9999999403953552
+    }
+  ]
+}

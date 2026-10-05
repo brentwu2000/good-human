@@ -21,6 +21,9 @@ var rival_tag: MeshInstance3D
 var label: Label
 var risk_hud: PanelContainer
 var risk_copy: Label
+var review_panel: VBoxContainer
+var condition_actors: Array[Node3D] = []
+const CONDITION_NAMES := ["HEALTHY", "HURT", "CRITICAL", "DOWN"]
 var mode := 0
 var clip_index := 0
 var elapsed := 0.0
@@ -127,6 +130,22 @@ func _ready() -> void:
 	add_child(rival_tag)
 	rival_tag.position = Vector3(1.35, 0.72, -0.82)
 	rival_tag.visible = false
+	for i in range(4):
+		var actor: Node3D = HUMAN.new()
+		add_child(actor)
+		actor.position = Vector3(-1.65 + i * 1.1, 0, -0.7)
+		actor.scale = Vector3.ONE * 0.72
+		actor.play_clip("Down" if i == 3 else "Idle")
+		if i == 1:
+			actor.use_clip_layer(1.0)
+			actor.controls["Torso"].rotation.z = -0.16
+			actor.controls["Head"].rotation.z = 0.08
+		elif i == 2:
+			actor.use_clip_layer(1.0)
+			actor.controls["Hips"].rotation.z = -0.2
+			actor.controls["Torso"].rotation.z = -0.28
+			actor.controls["Head"].rotation.z = 0.16
+		condition_actors.append(actor)
 	camera = Camera3D.new()
 	camera.fov = 55
 	camera.near = 0.05
@@ -145,12 +164,13 @@ func _make_ui() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	var panel := VBoxContainer.new()
+	review_panel = panel
 	panel.position = Vector2(18, 18)
 	layer.add_child(panel)
 	label = Label.new()
 	label.add_theme_font_size_override("font_size", 22)
 	panel.add_child(label)
-	for pair: Array in [["1  Motion clips", 0], ["2  Footwork / dog POV", 1], ["3  Dog collision study", 2], ["4  Banyan landmark", 3], ["5  Personality comparison", 4], ["6  Greed moment", 5], ["7  Territory variants", 6]]:
+	for pair: Array in [["1  Motion clips", 0], ["2  Footwork / dog POV", 1], ["3  Dog collision study", 2], ["4  Banyan landmark", 3], ["5  Personality comparison", 4], ["6  Greed moment", 5], ["7  Territory variants", 6], ["8  Target screenshot 04", 7], ["9  Owner conditions", 8]]:
 		var button := Button.new()
 		button.text = pair[0]
 		button.pressed.connect(_set_mode.bind(pair[1]))
@@ -229,17 +249,25 @@ func _set_mode(value: int) -> void:
 	dog.position = Vector3(0, 0, 3.8 if mode == 1 else 1.5)
 	owner_actor.visible = mode != 3
 	rival.visible = mode in [1, 2, 4]
-	dog.visible = mode in [2, 5]
-	leash.visible = mode in [2, 5]
-	tree.visible = mode in [3, 5, 6]
+	dog.visible = mode in [2, 3, 5, 7]
+	leash.visible = mode in [2, 5, 7]
+	tree.visible = mode in [3, 5, 6, 7]
 	scent_visual.visible = mode in [3, 6]
-	greed_props.visible = mode == 5
-	rival_dog.visible = mode == 5
-	rival_pair_human.visible = mode == 5
-	rival_tag.visible = mode == 5
-	risk_hud.visible = mode == 5
+	greed_props.visible = mode in [5, 7]
+	rival_dog.visible = mode in [5, 7]
+	rival_pair_human.visible = mode in [5, 7]
+	rival_tag.visible = mode in [5, 7]
+	risk_hud.visible = mode in [5, 7]
+	review_panel.visible = mode not in [7, 8]
+	for actor in condition_actors:
+		actor.visible = mode == 8
 	if mode == 6:
 		scent_visual.set_state(TERRITORY_VARIANTS[territory_variant_index])
+	if mode == 3:
+		dog.position = Vector3(0.65, 0, -5.2)
+		dog_model.rotation.y = PI * 0.72
+		if dog_player != null and dog_player.has_animation("Idle"):
+			dog_player.play("Idle")
 	free_camera = false
 	if mode == 0:
 		owner_actor.position = Vector3.ZERO
@@ -252,8 +280,8 @@ func _set_mode(value: int) -> void:
 	else:
 		owner_actor.play_clip("Idle")
 		rival.play_clip("Block")
-	label.text = ["P-04 / " + CLIPS[clip_index], "P-04 / 8 second exchange", "P-04 / blocked and around", "D5-01 / Big Banyan · scent " + SCENT_STATES[scent_state_index], "P-04 / personality seeds", "D5-04 / Greed moment · safe exit ↔ temptation", "D5-07 / Territory variant · " + TERRITORY_VARIANTS[territory_variant_index]][mode]
-	if mode == 5:
+	label.text = ["P-04 / " + CLIPS[clip_index], "P-04 / 8 second exchange", "P-04 / blocked and around", "D5-01 / Big Banyan · scent " + SCENT_STATES[scent_state_index], "P-04 / personality seeds", "D5-04 / Greed moment · safe exit ↔ temptation", "D5-07 / Territory variant · " + TERRITORY_VARIANTS[territory_variant_index], "D5-09 / Target Screenshot 04 · one more thing", "P03-D06 / Owner conditions · HEALTHY / HURT / CRITICAL / DOWN"][mode]
+	if mode in [5, 7]:
 		risk_copy.text = "  UNBANKED 12  ·  one more thing"
 
 func _next_clip() -> void:
@@ -295,7 +323,7 @@ func _next_territory_variant() -> void:
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if event.keycode >= KEY_1 and event.keycode <= KEY_7:
+	if event.keycode >= KEY_1 and event.keycode <= KEY_9:
 		_set_mode(event.keycode - KEY_1)
 	elif event.keycode == KEY_SPACE:
 		_next_clip()
@@ -348,7 +376,7 @@ func _physics_process(delta: float) -> void:
 		owner_actor.position.z = minf(elapsed * 0.12, 0.55)
 		if owner_actor.player.current_animation != "Backstep":
 			owner_actor.play_clip("Backstep")
-	if mode == 5:
+	if mode in [5, 7]:
 		# Dog leans toward the scent while owner and safe exit remain readable.
 		dog.position = Vector3(0.2, 0, -0.15 + sin(elapsed * 2.0) * 0.03)
 		dog_model.rotation.y = PI * 0.82
@@ -358,13 +386,24 @@ func _physics_process(delta: float) -> void:
 		owner_actor.look_at(Vector3(0.5, 0, -1.1))
 		if owner_actor.player.current_animation != "Idle_Untrained":
 			owner_actor.play_clip("Idle_Untrained")
-	if mode in [3, 6]:
+	if mode == 3:
+		# Review-only sniff beat: the dog lowers and raises its head near the root cue.
+		dog_model.rotation.x = sin(elapsed * 3.2) * 0.08 - 0.10
+	if mode == 8:
+		camera.position = Vector3(0, 2.0, 4.6)
+		camera.fov = 58
+		camera.look_at(Vector3(0, 0.9, -0.7))
+	elif mode in [3, 6]:
 		camera.position = Vector3(2.5, 0.42, 1.2)
 		camera.look_at(tree.position + Vector3(0, 2.6, 0))
-	elif mode == 5:
+	elif mode in [5, 7]:
 		camera.position = Vector3(0.1, 3.1, 6.4)
-		camera.fov = 62
-		camera.look_at(Vector3(-0.65, 0.9, -1.8))
+		camera.fov = 62 if mode == 5 else 70
+		if mode == 7:
+			camera.position = dog.position + Vector3(0, 0.85, 3.3)
+			camera.look_at(Vector3(0.35, 0.8, -1.9))
+		else:
+			camera.look_at(Vector3(-0.65, 0.9, -1.8))
 	elif free_camera or mode == 1:
 		camera.position = dog.position + Vector3(0, 0.40, 0)
 		camera.look_at((owner_actor.position + rival.position) * 0.5 + Vector3(0, 1.05, 0))
@@ -374,7 +413,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		camera.position = Vector3(2.2 if mode == 0 else 0.1, 1.1, 3.7)
 		camera.look_at(Vector3(0, 0.95, 0))
-	if mode in [2, 5]:
+	if mode in [2, 5, 7]:
 		_update_leash()
 
 func _update_leash() -> void:
@@ -418,12 +457,16 @@ func _material(color: Color) -> StandardMaterial3D:
 	return material
 
 func _capture_sequence() -> void:
-	for view in [0, 1, 2, 3, 4, 5]:
+	for view in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
 		_set_mode(view)
 		if view == 3:
 			scent_state_index = 4
 			scent_visual.set_state("OWNED")
 			label.text = "D5-02/D5-03 / Banyan · OWNED + reward"
+		if view == 6:
+			territory_variant_index = 3
+			scent_visual.set_state("OWNED")
+			label.text = "D5-07 / Territory variant · OWNED"
 		await get_tree().create_timer(0.5).timeout
 		await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()

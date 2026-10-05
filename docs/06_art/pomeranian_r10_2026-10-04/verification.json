@@ -1,0 +1,18 @@
+{
+  "removed_faces": 6126,
+  "boundary_vertices": 234,
+  "new_face_vertices": 4681,
+  "new_face_triangles": 9126,
+  "total_triangles": 50169,
+  "unused_original_buffers_removed": true,
+  "body_seam_vertices_adjusted": 4524,
+  "skeleton_animation_data_preserved_accessor_ids_remapped": true,
+  "clips": [
+    "Idle",
+    "Sit",
+    "Walk"
+  ],
+  "source_sha256": "60a739df37fac2fa00d42e1dc42c33dee6eccaf5b4b58d63aad3c3d3cc7054a8",
+  "result_sha256": "f3380b10d780b8d31c6d87fad7576f408f88fb4b15fd14942ba29f75ded2db5d",
+  "bytes": 3130528
+}
