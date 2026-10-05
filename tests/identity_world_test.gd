@@ -48,8 +48,24 @@ func _test_shelter() -> void:
 	Input.action_press(&"move_right")
 	await _tree.process_frame
 	Input.action_release(&"move_right")
+	# Owner direction: looked at from the street, the pups run about the pen.
+	var before: Array[Vector3] = []
+	for p in shelter._pivots:
+		before.append(p.position)
+	for i in 180:
+		await _tree.process_frame
+	var moved := 0
+	for i in shelter._pivots.size():
+		if shelter._pivots[i].position.distance_to(before[i]) > 0.05:
+			moved += 1
+	check(moved > 0, "the pups run about the window pen (%d moved)" % moved)
+	for p in shelter._pivots:
+		check(p.position.z >= ShelterScene.PEN_MIN.y - 0.001 and p.position.z <= ShelterScene.PEN_MAX.y + 0.001, "and stay in the pen")
+	var at := shelter.selected
+	shelter.select_step(1)
+	check(shelter._pivots[shelter.selected].position.x <= shelter._pivots[at].position.x, "▶ watches the next pup to the right as seen from the street")
 	shelter.select(first + 1)
-	check_eq(shelter.selected, (first + 1) % ShelterScene.DOG_COUNT, "the player can look along the pens")
+	check_eq(shelter.selected, (first + 1) % ShelterScene.DOG_COUNT, "the player can look from pup to pup")
 	var picked := shelter.dogs[shelter.selected]
 	shelter.choose()
 	check(Game.chosen_dog == picked, "choosing hands that dog on to the adoption")

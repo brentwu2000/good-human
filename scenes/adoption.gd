@@ -1,9 +1,10 @@
 class_name AdoptionScene
 extends Node3D
 ## Sprint 06 (S06-03, D6-03; owner direction 2026-10-05: the dog at the
-## window, people walking past, now and then someone stopping to look). After
-## being chosen the pup is put in the pen by the clinic's front window, and the
-## player IS that pup, at pup height, looking out at the street. People go by.
+## window, people walking past, now and then someone stopping to look). The
+## pup picked from the street (ShelterScene) is in the pen by the clinic's front
+## window, and now the player IS that pup, at pup height, looking out at the
+## street the player just looked in from (ClinicWindow). People go by.
 ## Most do not stop. Now and then someone does, and looks in through the glass
 ## for a moment; the pup can only be itself at them — wag, sit, bark, bring a
 ## toy — and they answer the way they are (S06-05). The rest of the litter is
@@ -33,7 +34,7 @@ const PASSERS_BY: int = 5
 const LOOK_SECONDS: float = 9.0
 
 ## The glass is at z = WINDOW_Z; the pup sits at the origin inside.
-const WINDOW_Z: float = -1.3
+const WINDOW_Z: float = ClinicWindow.WINDOW_Z
 ## The pavement outside: where people walk, and where someone stops to look.
 const LANE_Z: float = -2.7
 const STOP := Vector3(0.0, 0.0, -1.95)
@@ -44,11 +45,11 @@ const DOOR_IN := Vector3(3.0, 0.0, -0.8)
 const EYE_HEIGHT: float = 0.36
 ## Where the litter starts in the pen (they wander from there).
 const LITTER_SPOTS: Array[Vector3] = [Vector3(-0.6, 0, -0.85), Vector3(0.55, 0, -1.0), Vector3(-0.15, 0, -0.5), Vector3(0.75, 0, -0.35)]
-const PUPPY_SCALE: float = 0.62
+const PUPPY_SCALE: float = ClinicWindow.PUPPY_SCALE
 ## The pen by the window (owner direction 2026-10-05: the pups run about in
 ## it, the player's own included). x and z limits; the glass is just beyond.
-const PEN_MIN := Vector2(-1.25, WINDOW_Z + 0.18)
-const PEN_MAX := Vector2(1.25, 0.25)
+const PEN_MIN := ClinicWindow.PEN_MIN
+const PEN_MAX := ClinicWindow.PEN_MAX
 const PUP_SPEED: float = 1.7
 const WANDER_SPEED: float = 1.1
 ## Pups keep at least this far apart (centre to centre, m).
@@ -150,7 +151,7 @@ func _ready() -> void:
 	_build_ui()
 	for i in PASSERS_BY:
 		_add_passer(i)
-	_say("（被放進了窗邊的小圍欄。外面的人來來去去。）")
+	_say("（現在，你就是圍欄裡的那隻小狗。外面的人來來去去。）")
 	_watch_the_street.call_deferred()
 
 
@@ -550,72 +551,10 @@ func _update_buttons() -> void:
 # --- The clinic and the street ------------------------------------------------------
 
 func _build_room() -> void:
-	var env := WorldEnvironment.new()
-	env.environment = Environment.new()
-	env.environment.background_mode = Environment.BG_COLOR
-	env.environment.background_color = Color(0.74, 0.84, 0.92)
-	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.environment.ambient_light_color = Color(0.86, 0.9, 0.92)
-	env.environment.ambient_light_energy = 0.8
-	add_child(env)
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-50, 150, 0)
-	sun.light_energy = 1.1
-	sun.shadow_enabled = true
-	add_child(sun)
-	# Inside: the clinic's tiled floor and the low pen the pup sits in.
-	add_child(Greybox.box(Vector3(8, 0.04, 3.0), Color(0.84, 0.86, 0.85), Vector3(0, -0.02, 0.2)))
-	var pen := Color(0.92, 0.92, 0.9)
-	for x in [-1.35, -0.45, 0.45, 1.35]:
-		add_child(Greybox.cylinder(0.015, 0.45, pen, Vector3(x, 0.225, PEN_MAX.y + 0.08)))
-	add_child(Greybox.box(Vector3(2.7, 0.025, 0.025), pen, Vector3(0, 0.44, PEN_MAX.y + 0.08)))
-	for z in [-0.9, -0.3]:
-		for x in [-1.35, 1.35]:
-			add_child(Greybox.cylinder(0.015, 0.45, pen, Vector3(x, 0.225, z)))
-	add_child(Greybox.box(Vector3(2.6, 0.02, 1.5), Color(0.78, 0.86, 0.92), Vector3(0, 0.01, -0.5)))
-	# The shop front: a low wall, a big pane of glass, frames, the door.
-	var frame := Color(0.32, 0.34, 0.36)
-	add_child(Greybox.box(Vector3(8, 0.35, 0.12), Color(0.9, 0.9, 0.88), Vector3(0, 0.175, WINDOW_Z)))
-	add_child(Greybox.box(Vector3(8, 0.5, 0.12), Color(0.9, 0.9, 0.88), Vector3(0, 2.65, WINDOW_Z)))
-	for x in [-3.0, -0.95, 0.95, 2.75, 3.85]:
-		add_child(Greybox.box(Vector3(0.07, 2.4, 0.1), frame, Vector3(x, 1.2, WINDOW_Z)))
-	add_child(Greybox.box(Vector3(8, 0.06, 0.1), frame, Vector3(0, 2.4, WINDOW_Z)))
-	add_child(Greybox.box(Vector3(8, 0.06, 0.1), frame, Vector3(0, 0.35, WINDOW_Z)))
-	var glass := MeshInstance3D.new()
-	var pane := BoxMesh.new()
-	pane.size = Vector3(8, 2.05, 0.02)
-	glass.mesh = pane
-	var glass_mat := StandardMaterial3D.new()
-	glass_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	glass_mat.albedo_color = Color(0.82, 0.92, 0.95, 0.16)
-	glass_mat.metallic = 0.2
-	glass_mat.roughness = 0.05
-	glass.material_override = glass_mat
-	glass.position = Vector3(0, 1.375, WINDOW_Z)
-	glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(glass)
-	# Light on the glass, so it reads as a pane between the pup and the street.
-	var shine := StandardMaterial3D.new()
-	shine.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	shine.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	shine.albedo_color = Color(1, 1, 1, 0.18)
-	for streak: Array in [[-0.55, 1.5, 0.09], [-0.38, 1.6, 0.04], [0.45, 1.1, 0.07]]:
-		var bar := MeshInstance3D.new()
-		var quad := BoxMesh.new()
-		quad.size = Vector3(float(streak[2]), 1.6, 0.005)
-		bar.mesh = quad
-		bar.material_override = shine
-		bar.position = Vector3(float(streak[0]), float(streak[1]), WINDOW_Z + 0.02)
-		bar.rotation.z = 0.5
-		bar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(bar)
-	# The clinic's name on the glass, read backwards from inside.
-	var sign := Greybox.label("毛毛動物醫院", 0.0, 64, Color(0.2, 0.45, 0.42, 0.85), 30.0)
-	sign.billboard = BaseMaterial3D.BILLBOARD_DISABLED
-	sign.pixel_size = 0.0022
-	sign.position = Vector3(0.0, 2.15, WINDOW_Z - 0.02)
-	sign.rotation.y = PI
-	add_child(sign)
+	# The same clinic window the player looked in through, from the inside.
+	ClinicWindow.build_light(self)
+	ClinicWindow.build_inside(self)
+	ClinicWindow.build_front(self)
 	_camera = Camera3D.new()
 	_camera.fov = 70.0
 	add_child(_camera)
@@ -626,27 +565,14 @@ func _build_room() -> void:
 	add_child(_toy)
 
 
-## The player's own pup: the same breed as at the cage, with a soft ring at
+## The player's own pup: the one picked from the street, with a soft ring at
 ## its feet so it can be told from its littermates.
 func _build_pup() -> void:
 	pup = DogVisual3D.build(dog)
 	pup.scale = Vector3.ONE * PUPPY_SCALE
 	pup.position = Vector3(0, 0, -0.1)
 	add_child(pup)
-	var ring := MeshInstance3D.new()
-	var disc := CylinderMesh.new()
-	disc.top_radius = 0.26
-	disc.bottom_radius = 0.26
-	disc.height = 0.005
-	ring.mesh = disc
-	var glow := StandardMaterial3D.new()
-	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	glow.albedo_color = Color(1.0, 0.92, 0.6, 0.35)
-	ring.material_override = glow
-	ring.position.y = 0.03
-	ring.scale = Vector3.ONE / PUPPY_SCALE
-	pup.add_child(ring)
+	ClinicWindow.ring(pup)
 
 
 ## The rest of the litter in the pen, each being itself.
@@ -694,21 +620,7 @@ func _process_litter(delta: float) -> void:
 
 
 func _build_street() -> void:
-	# Pavement, kerb, road, the shops across the street, a tree, a scooter.
-	add_child(Greybox.box(Vector3(20, 0.08, 2.6), Color(0.72, 0.7, 0.66), Vector3(0, -0.04, -2.65)))
-	add_child(Greybox.box(Vector3(20, 0.12, 0.2), Color(0.6, 0.6, 0.58), Vector3(0, 0.0, -4.0)))
-	add_child(Greybox.box(Vector3(20, 0.04, 6), Color(0.33, 0.34, 0.36), Vector3(0, -0.06, -7.0)))
-	for x in range(-9, 10, 3):
-		add_child(Greybox.box(Vector3(1.2, 0.01, 0.15), Color(0.9, 0.88, 0.8), Vector3(x, -0.03, -7.0)))
-	var shop_colors := [Color(0.85, 0.72, 0.6), Color(0.7, 0.78, 0.82), Color(0.88, 0.84, 0.7), Color(0.76, 0.7, 0.78)]
-	for i in 6:
-		var x := -10.0 + i * 4.0
-		add_child(Greybox.box(Vector3(3.8, 4.5, 1.0), shop_colors[i % shop_colors.size()], Vector3(x, 2.25, -11.0)))
-		add_child(Greybox.box(Vector3(2.6, 1.6, 0.05), Color(0.45, 0.55, 0.6), Vector3(x, 1.2, -10.48)))
-		add_child(Greybox.box(Vector3(3.0, 0.12, 0.9), Color(0.8, 0.35, 0.3) if i % 2 == 0 else Color(0.3, 0.55, 0.5), Vector3(x, 2.3, -10.1)))
-	add_child(Greybox.cylinder(0.12, 2.4, Color(0.45, 0.35, 0.25), Vector3(-4.5, 1.2, -3.7)))
-	add_child(Greybox.sphere(1.1, Color(0.35, 0.55, 0.32), Vector3(-4.5, 2.9, -3.7)))
-	add_child(Greybox.box(Vector3(0.5, 0.7, 1.4), Color(0.85, 0.85, 0.82), Vector3(5.5, 0.4, -3.5)))
+	ClinicWindow.build_street(self)
 
 
 func _build_ui() -> void:
