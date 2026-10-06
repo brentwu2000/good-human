@@ -18,6 +18,8 @@ var run_manager: RunManager
 @onready var _close_button: Button = %CloseButton
 @onready var _discard_button: Button = %DiscardButton
 @onready var _use_button: Button = %UseButton
+## P05-10: hold a weapon from the owner's bag, or put it away.
+var _hold_button: Button
 
 
 func _ready() -> void:
@@ -26,6 +28,12 @@ func _ready() -> void:
 	_close_button.pressed.connect(close)
 	_discard_button.pressed.connect(discard_selected)
 	_use_button.pressed.connect(use_selected_on_owner)
+	_hold_button = Button.new()
+	_hold_button.name = "HoldButton"
+	_hold_button.focus_mode = Control.FOCUS_NONE
+	_hold_button.visible = false
+	_hold_button.pressed.connect(toggle_hold_selected)
+	_use_button.get_parent().add_child(_hold_button)
 
 
 func setup(human: Inventory, dog: Inventory) -> void:
@@ -62,6 +70,11 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 		_discard_button.disabled = false
 		_use_button.visible = run_manager != null and stack.item.owner_recovery > 0.0
 		_use_button.disabled = run_manager == null or not run_manager.can_use_on_owner(inventory, index)
+		var weapon := DataRegistry.weapon_for_item(stack.item_id)
+		_hold_button.visible = run_manager != null and weapon != null and inventory == _human
+		_hold_button.text = "放下不拿" if run_manager != null and run_manager.equipped_stack == stack else "讓主人拿著"
+		if weapon != null:
+			_detail_label.text += "\n" + WeaponCompare.describe(weapon, stack.condition, run_manager.equipped_weapon if run_manager != null else null, Game.owner_fighter().skills)
 		_update_highlight()
 		return
 
@@ -91,6 +104,18 @@ func use_selected_on_owner() -> void:
 	_clear_selection()
 
 
+## P05-10: the owner holds the selected weapon, or puts it away.
+func toggle_hold_selected() -> void:
+	if _selected_inventory == null or run_manager == null:
+		return
+	var stack := _selected_inventory.stack_at(_selected_index)
+	if run_manager.equipped_stack == stack:
+		run_manager.unequip()
+	else:
+		run_manager.equip(stack)
+	_clear_selection()
+
+
 func _clear_selection() -> void:
 	_selected_inventory = null
 	_selected_index = -1
@@ -98,6 +123,8 @@ func _clear_selection() -> void:
 		_detail_label.text = "點一格選取物品，再點目標格移動。狗包的東西失敗也不會遺失。"
 		_discard_button.disabled = true
 		_use_button.visible = false
+		if _hold_button != null:
+			_hold_button.visible = false
 		_update_highlight()
 
 

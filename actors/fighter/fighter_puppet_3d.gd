@@ -728,6 +728,25 @@ func play_victory() -> void:
 
 ## P03-E11 (storyboard 09/10): the owner turns to the dog and crouches to it.
 ## The fight is over; the point of the beat is that it was for the dog.
+## P05-10: a quick crouch towards something on the ground and back up with
+## it in hand.
+func play_pick_up(at: Vector3) -> void:
+	if _body == null or _down:
+		return
+	var to := at - global_position
+	if Vector2(to.x, to.z).length() > 0.01:
+		rotation.y = atan2(-to.x, -to.z)
+	var tween := _new_tween()
+	if _hips != null:
+		tween.tween_property(_hips, "position:y", Greybox.HIP_HEIGHT - 0.35, 0.22).set_trans(Tween.TRANS_SINE)
+		tween.parallel().tween_property(_hips, "rotation:x", -0.45, 0.22)
+	var arm := _joint(_arms, 1)
+	if arm != null:
+		tween.parallel().tween_property(arm, "rotation:x", -0.9, 0.22)
+	tween.tween_interval(0.12)
+	tween.tween_callback(_reset_pose)
+
+
 func play_acknowledge(towards: Vector3) -> void:
 	_look_away_point = towards
 	_look_away_left = 2.2

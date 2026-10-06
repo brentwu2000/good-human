@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LootTableData" load_steps=21 format=3]
+[gd_resource type="Resource" script_class="LootTableData" load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://resources/loot_table_data.gd" id="1_table"]
 [ext_resource type="Script" path="res://resources/loot_entry.gd" id="2_entry"]
@@ -11,6 +11,8 @@
 [ext_resource type="Resource" path="res://data/items/old_running_shoes.tres" id="item_old_running_shoes"]
 [ext_resource type="Resource" path="res://data/items/old_sports_watch.tres" id="item_old_sports_watch"]
 [ext_resource type="Resource" path="res://data/items/mysterious_item.tres" id="item_mysterious_item"]
+
+[ext_resource type="Resource" path="res://data/items/broom.tres" id="item_broom"]
 
 [sub_resource type="Resource" id="entry_tennis_ball"]
 script = ExtResource("2_entry")
@@ -75,8 +77,15 @@ weight = 1
 min_quantity = 1
 max_quantity = 1
 
+[sub_resource type="Resource" id="entry_broom"]
+script = ExtResource("2_entry")
+item = ExtResource("item_broom")
+weight = 7
+min_quantity = 1
+max_quantity = 1
+
 [resource]
 script = ExtResource("1_table")
 id = &"residential_trash"
-entries = Array[ExtResource("2_entry")]([SubResource("entry_tennis_ball"), SubResource("entry_dog_treat"), SubResource("entry_sports_drink"), SubResource("entry_bandage"), SubResource("entry_dog_toy"), SubResource("entry_umbrella"), SubResource("entry_old_running_shoes"), SubResource("entry_old_sports_watch"), SubResource("entry_mysterious_item")])
+entries = Array[ExtResource("2_entry")]([SubResource("entry_tennis_ball"), SubResource("entry_dog_treat"), SubResource("entry_sports_drink"), SubResource("entry_bandage"), SubResource("entry_dog_toy"), SubResource("entry_umbrella"), SubResource("entry_old_running_shoes"), SubResource("entry_old_sports_watch"), SubResource("entry_mysterious_item"), SubResource("entry_broom")])
 nothing_weight = 25

@@ -63,6 +63,11 @@ func _ready() -> void:
 		_voice_territories(hud)
 	run_manager.run_started.connect(_greet)
 	run_manager.loot_gained.connect(_on_loot_gained)
+	# P05-10: finds to fight with are left lying where they were found, and
+	# whatever the owner holds is in their hand on the walk too.
+	run_manager.weapon_found.connect(_lay_down_weapon)
+	run_manager.weapon_changed.connect(func(weapon: WeaponData) -> void:
+		human.puppet.hold(weapon, run_manager.equipped_state()))
 
 
 ## S06-08: how the human sets off with their dog says how close they are.
@@ -106,6 +111,15 @@ func _apply_tension(level: float) -> void:
 		var point := node as ExtractionPoint3D
 		if point != null:
 			point.set_call(level)
+
+
+func _lay_down_weapon(stack: ItemStack, at: Vector3) -> void:
+	var found := WorldWeapon3D.new()
+	found.setup(stack, run_manager, human)
+	add_child(found)
+	# In front of the spot, on the ground, where the dog can stand over it.
+	found.global_position = Vector3(at.x, 0.0, at.z) + Vector3(0.0, 0.0, 0.9)
+	human.say("（%s——這個好像能用？）" % stack.item.display_name, Color(1.0, 0.95, 0.8), 2.0)
 
 
 func _on_loot_gained(item: ItemData, _quantity: int) -> void:

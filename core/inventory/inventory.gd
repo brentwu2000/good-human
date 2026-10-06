@@ -94,6 +94,20 @@ func add_stack(stack: ItemStack) -> int:
 	return remaining
 
 
+## P05-10: puts this very `stack` (a single, non-stackable thing such as a
+## weapon) in the first empty slot. Returns the slot, or -1 if none is free
+## or it cannot be held here.
+func place_stack(stack: ItemStack) -> int:
+	if stack == null or stack.item == null or stack.item.stackable or not accepts_item(stack.item):
+		return -1
+	for i in capacity:
+		if slots[i] == null:
+			slots[i] = stack
+			changed.emit()
+			return i
+	return -1
+
+
 ## Adds as much as fits (existing stacks first). Returns the amount NOT added.
 func add_item(item: ItemData, quantity: int = 1) -> int:
 	if item == null or quantity <= 0:

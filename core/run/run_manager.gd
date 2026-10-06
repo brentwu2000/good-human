@@ -22,6 +22,9 @@ signal owner_condition_changed(ratio: float)
 signal weapon_changed(weapon: WeaponData)
 ## P05-09: it wore out and broke.
 signal weapon_broke(weapon: WeaponData)
+## P05-10: a search turned up something to fight with. It is not put in the
+## bag by magic: it is left where it was found for the human to pick up.
+signal weapon_found(stack: ItemStack, at: Vector3)
 
 enum RunStatus { NOT_STARTED, RUNNING, EXTRACTED, FAILED }
 
@@ -238,6 +241,12 @@ func resolve_search(point: Node, stack: ItemStack) -> ItemStack:
 		search_empty.emit(point)
 		return null
 
+	# P05-10: something to fight with stays in the world, at the point, until
+	# the human picks it up.
+	if DataRegistry.weapon_for_item(stack.item_id) != null:
+		searched_points[point.search_id] = true
+		weapon_found.emit(stack, (point as Node3D).global_position if point is Node3D else Vector3.ZERO)
+		return null
 	var left := human_run_inventory.add_stack(stack)
 	var added := stack.quantity - left
 	if added > 0:
@@ -252,6 +261,25 @@ func resolve_search(point: Node, stack: ItemStack) -> ItemStack:
 
 
 # --- Weapons (P-05) -------------------------------------------------------------
+
+## P05-10: the human picks `stack` up off the ground and holds it. It goes
+## in their bag; if the bag is full, what they were holding is put down to
+## make room (a swap) and returned so the world can show it lying there.
+## {ok, dropped}.
+func take_weapon(stack: ItemStack) -> Dictionary:
+	if stack == null or DataRegistry.weapon_for_item(stack.item_id) == null:
+		return {"ok": false, "dropped": null}
+	var dropped: ItemStack = null
+	var at := human_run_inventory.place_stack(stack)
+	if at < 0 and equipped_stack != null:
+		dropped = equipped_stack
+		human_run_inventory.take_stack(human_run_inventory.slots.find(equipped_stack))
+		at = human_run_inventory.place_stack(stack)
+	if at < 0:
+		return {"ok": false, "dropped": null}
+	equip(stack)
+	return {"ok": true, "dropped": dropped}
+
 
 ## The owner holds `stack` (it must be a weapon in their bag). Returns false
 ## if it cannot be held.
