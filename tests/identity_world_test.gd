@@ -52,12 +52,16 @@ func _test_shelter() -> void:
 	var before: Array[Vector3] = []
 	for p in shelter._pivots:
 		before.append(p.position)
-	for i in 180:
-		await _tree.process_frame
+	# By time, not frames: headless frames can be very short.
 	var moved := 0
-	for i in shelter._pivots.size():
-		if shelter._pivots[i].position.distance_to(before[i]) > 0.05:
-			moved += 1
+	var waited := 0.0
+	while moved == 0 and waited < 6.0:
+		await _tree.process_frame
+		waited += _tree.root.get_process_delta_time()
+		moved = 0
+		for i in shelter._pivots.size():
+			if shelter._pivots[i].position.distance_to(before[i]) > 0.05:
+				moved += 1
 	check(moved > 0, "the pups run about the window pen (%d moved)" % moved)
 	for p in shelter._pivots:
 		check(p.position.z >= ShelterScene.PEN_MIN.y - 0.001 and p.position.z <= ShelterScene.PEN_MAX.y + 0.001, "and stay in the pen")
