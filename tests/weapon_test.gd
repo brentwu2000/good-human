@@ -16,6 +16,7 @@ func _ready() -> void:
 	await _test_contact()
 	_test_condition()
 	_test_lost_on_defeat()
+	_test_no_hud()
 	finish()
 
 
@@ -368,3 +369,61 @@ func _test_lost_on_defeat() -> void:
 	var lines: Array = result_screen.weapon_lines(result)
 	check(lines.size() == 1 and lines[0].contains("沒能帶回來"), "and the result says so (%s)" % ", ".join(lines))
 	run.queue_free()
+
+
+## P05-13 (gate: "all archetypes share same rhythm" is a Critical Fail; the
+## tester must tell reach, weight, defence and spacing without text). With
+## fight text off, nothing names a move; what differs is in the bodies — how
+## far apart they stand, how long a blow takes to come, how long the swinger
+## is left open after — and each weapon is in the hand.
+func _test_no_hud() -> void:
+	check(not FighterPuppet3D.show_combat_text, "P05-13: in normal play no fight text is shown")
+	var traits := {}
+	for id: StringName in [&"unarmed", &"umbrella", &"broom", &"old_dumbbell"]:
+		var weapon := DataRegistry.get_weapon(id)
+		var me := PLAYER.armed(weapon)
+		var c := {"gap": 0.0, "steps": 0, "windup": 0.0, "recovery": 0.0, "attacks": 0, "guards": 0}
+		for i in 12:
+			var fight := CombatSimulation.new(me, DELIVERY, 1700 + i)
+			fight.combat_event.connect(func(kind: StringName, side: int, skill: CombatSkillData, _v: float) -> void:
+				if kind != &"skill_started" or side != CombatSimulation.PLAYER or skill == null:
+					return
+				if skill.effect == CombatSkillData.Effect.ATTACK:
+					c["attacks"] += 1
+					c["windup"] += skill.windup
+					c["recovery"] += skill.recovery + skill.follow_through
+				elif skill.effect == CombatSkillData.Effect.BLOCK:
+					c["guards"] += 1)
+			while not fight.is_finished() and c["steps"] < 200000:
+				fight.step(1.0 / 60.0)
+				c["gap"] += fight.distance()
+				c["steps"] += 1
+		traits[id] = {"gap": c["gap"] / c["steps"], "windup": c["windup"] / maxi(c["attacks"], 1), "open": c["recovery"] / maxi(c["attacks"], 1)}
+	var bare: Dictionary = traits[&"unarmed"]
+	var umbrella: Dictionary = traits[&"umbrella"]
+	var broom: Dictionary = traits[&"broom"]
+	var dumbbell: Dictionary = traits[&"old_dumbbell"]
+	var summary := ", ".join(traits.keys().map(func(k: StringName) -> String: return "%s gap %.0f windup %.2f open %.2f" % [k, traits[k]["gap"], traits[k]["windup"], traits[k]["open"]]))
+	check(broom["gap"] > umbrella["gap"] + 3.0 and umbrella["gap"] > bare["gap"] - 3.0 and bare["gap"] > dumbbell["gap"] - 6.0, "spacing reads: the broom furthest out, then the umbrella, fists and the dumbbell close (%s)" % summary)
+	check(dumbbell["windup"] > bare["windup"] + 0.15 and dumbbell["open"] > bare["open"] + 0.2, "weight reads: the dumbbell's blows come slowest and leave them open longest")
+	check(umbrella["windup"] < bare["windup"], "and the umbrella's poke comes quicker than a fist")
+	var rhythms := [bare["windup"], umbrella["windup"], broom["windup"], dumbbell["windup"]]
+	var distinct := 0
+	for i in rhythms.size():
+		for j in range(i + 1, rhythms.size()):
+			if absf(rhythms[i] - rhythms[j]) > 0.03:
+				distinct += 1
+	check(distinct >= 5, "no two ways of fighting share a rhythm (%d of 6 pairs differ)" % distinct)
+	# The weapon is in the hand, and nothing is written over anyone.
+	for id: StringName in [&"umbrella", &"broom", &"old_dumbbell"]:
+		var puppet := FighterPuppet3D.new()
+		add_child(puppet)
+		puppet.apply(PLAYER)
+		puppet.hold(DataRegistry.get_weapon(id))
+		# In a fight the coordinator asks for the bar; with fight text off it stays hidden.
+		puppet.show_hp(true)
+		for skill in DataRegistry.get_weapon(id).moveset.skills():
+			puppet.play_windup(skill)
+		check(puppet._prop != null, "%s: seen in the hand" % id)
+		check(puppet._popup.text.is_empty() and not puppet._hp_label.visible, "%s: no move names and no health bar over them" % id)
+		puppet.queue_free()
