@@ -16,9 +16,25 @@ static func build(weapon: WeaponData) -> Node3D:
 	match weapon.archetype:
 		WeaponData.Archetype.UMBRELLA:
 			_umbrella(root)
+		WeaponData.Archetype.LONG_OBJECT:
+			_broom(root)
 		_:
 			root.add_child(Greybox.cylinder(0.02, 1.0, Color(0.5, 0.45, 0.4), Vector3(0, 0.45, 0)))
 	return root
+
+
+## A bamboo broom: a long handle and the bundled head out past the end.
+static func _broom(root: Node3D) -> void:
+	root.add_child(Greybox.cylinder(0.014, 1.25, Color(0.72, 0.6, 0.38), Vector3(0, 0.45, 0)))
+	var head := MeshInstance3D.new()
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.03
+	cone.bottom_radius = 0.13
+	cone.height = 0.38
+	head.mesh = cone
+	head.material_override = Greybox.material(Color(0.62, 0.55, 0.32))
+	head.position = Vector3(0, 1.24, 0)
+	root.add_child(head)
 
 
 ## A closed umbrella: a J handle in the fist, the shaft, the furled canopy

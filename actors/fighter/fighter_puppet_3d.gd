@@ -413,13 +413,14 @@ func play_windup(skill: CombatSkillData) -> void:
 ## hand, so a combination reads as one-two; otherwise the lead hand. Hooks and
 ## kicks come off either side.
 func _choose_side(skill: CombatSkillData) -> void:
-	match skill.animation_key:
+	var armed := held != null and not held.is_unarmed()
+	match skill.animation_key if not armed or skill.animation_key == &"kick" else &"":
 		&"punch":
 			_mirrored_attack = not _mirrored_attack if _time - _last_jab_at < 1.5 else false
 			_last_jab_at = _time
 		&"hook", &"kick":
 			# Holding something, the hook is thrown with it, from its side.
-			_mirrored_attack = _side_rng.randf() < 0.5 and (held == null or held.is_unarmed() or skill.animation_key == &"kick")
+			_mirrored_attack = _side_rng.randf() < 0.5
 		_:
 			# Weapon moves come from the hand that holds it.
 			_mirrored_attack = false

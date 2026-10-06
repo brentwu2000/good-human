@@ -22,6 +22,9 @@ enum Condition {
 @export var cooldown: float = 0.0
 ## Reach for attacks (arena units).
 @export var preferred_range: float = 70.0
+## P05-05: too close to use it. A pole cannot be swung at someone already
+## inside it, so the attack only starts from at least this far.
+@export var min_range: float = 0.0
 @export var animation_key: StringName
 
 @export_group("Timing")
@@ -57,6 +60,9 @@ enum Condition {
 ## How long a landed hit holds the fight still (s). P-04 ranges: light
 ## 0.04–0.07, heavy 0.06–0.10. A blocked one holds for a share of it.
 @export var hit_stop: float = 0.05
+## P05-05/06: how much of a block it goes through (0..1). Forearms stop a
+## fist; they do not stop much of a pole swung at them, or a dumbbell.
+@export_range(0.0, 1.0) var guard_break: float = 0.0
 ## Block: fraction of damage removed.
 @export_range(0.0, 1.0) var damage_reduction: float = 0.0
 ## Dodge: distance moved away from the opponent during active_time.

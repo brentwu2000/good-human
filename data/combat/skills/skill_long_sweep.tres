@@ -4,23 +4,26 @@
 
 [resource]
 script = ExtResource("1_skill")
-id = &"skill_umbrella_swing"
+id = &"skill_long_sweep"
 animation_key = &"swing"
-display_name = "快揮"
+display_name = "橫掃"
 effect = 0
 condition = 0
-priority = 9
+priority = 10
 cooldown = 2.5
-preferred_range = 104
+preferred_range = 128
+min_range = 78
 windup = 0.42
 active_time = 0.0
-recovery = 0.40
-strike_time = 0.10
+recovery = 0.45
+strike_time = 0.12
 contact_time = 0.08
-follow_through = 0.20
+follow_through = 0.22
 whiff_recovery = 0.35
 hit_stop = 0.07
-power = 1.85
-stagger = 4.0
-displacement = 5.0
+power = 2.05
+stagger = 3.0
+displacement = 32.0
 damage_reduction = 0.0
+reposition_distance = 0.0
+guard_break = 0.5

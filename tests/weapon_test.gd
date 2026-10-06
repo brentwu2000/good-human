@@ -10,6 +10,7 @@ func _ready() -> void:
 	_test_interface()
 	_test_unarmed_baseline()
 	_test_umbrella()
+	_test_long_object()
 	finish()
 
 
@@ -112,3 +113,39 @@ func _test_umbrella() -> void:
 	puppet.hold(null)
 	check(puppet._prop == null, "and empty-handed again without it")
 	puppet.queue_free()
+
+
+## P05-05: a long object controls the distance and is weak when crowded:
+## its real moves cannot start inside their minimum range, and up close all
+## it has is a shove that makes room.
+func _test_long_object() -> void:
+	var broom := DataRegistry.get_weapon(&"broom")
+	check(broom != null and broom.archetype == WeaponData.Archetype.LONG_OBJECT, "P05-05: the broom is a long object")
+	check(broom.item.size_class == ItemData.SizeClass.LARGE and not broom.item.is_safe_eligible(), "too big for the dog's backpack")
+	var thrust: CombatSkillData = load("res://data/combat/skills/skill_long_thrust.tres")
+	var shove: CombatSkillData = load("res://data/combat/skills/skill_long_butt.tres")
+	var poke: CombatSkillData = load("res://data/combat/skills/skill_umbrella_poke.tres")
+	check(thrust.preferred_range > poke.preferred_range, "it reaches further than the umbrella")
+	check(broom.moveset.ideal_min > DataRegistry.spacing.ideal_max + 30.0, "and wants the fight well out")
+	var held := PLAYER.armed(broom)
+	var sim := CombatSimulation.new(held, JOGGER, 8)
+	var me := sim.fighters[CombatSimulation.PLAYER]
+	sim.fighters[CombatSimulation.OPPONENT].position = me.position + 60.0
+	check(not sim._condition_met(me, thrust), "crowded at 0.6 m: no thrust")
+	check(sim._condition_met(me, shove), "only the shove")
+	check(shove.displacement > thrust.displacement and shove.power < thrust.power, "which makes room rather than hurting")
+	check(sim._approach_at(me) > 100.0, "closing in, they stop where the pole works, not at shove range (%.0f)" % sim._approach_at(me))
+	sim.fighters[CombatSimulation.OPPONENT].position = me.position + 120.0
+	check(sim._condition_met(me, thrust), "at 1.2 m the thrust lands")
+	var gaps := {"umbrella": 0.0, "broom": 0.0}
+	for i in 20:
+		for key: String in ["umbrella", "broom"]:
+			var fight := CombatSimulation.new(PLAYER.armed(DataRegistry.get_weapon(StringName(key))), JOGGER, 600 + i)
+			var total := 0.0
+			var steps := 0
+			while not fight.is_finished() and steps < 6000:
+				fight.step(1.0 / 60.0)
+				total += fight.distance()
+				steps += 1
+			gaps[key] += total / maxf(steps, 1)
+	check(gaps["broom"] > gaps["umbrella"] + 5.0, "a broom fight is held further out than an umbrella fight (%.0f vs %.0f)" % [gaps["broom"] / 20.0, gaps["umbrella"] / 20.0])

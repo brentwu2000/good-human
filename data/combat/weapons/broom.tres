@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/weapon_data.gd" id="1_weapon"]
+[ext_resource type="Resource" path="res://data/items/broom.tres" id="2_item"]
+[ext_resource type="Resource" path="res://data/combat/movesets/long_object.tres" id="3_moves"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"broom"
+display_name = "掃把"
+archetype = 2
+item = ExtResource("2_item")
+moveset = ExtResource("3_moves")
+condition_max = 30

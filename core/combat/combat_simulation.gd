@@ -312,9 +312,9 @@ func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
 	var target := _other(fighter)
 	match skill.condition:
 		CombatSkillData.Condition.TARGET_IN_RANGE:
-			return time >= fighter.ready_at and distance() <= skill.preferred_range
+			return time >= fighter.ready_at and distance() <= skill.preferred_range and distance() >= skill.min_range
 		CombatSkillData.Condition.TARGET_OPEN:
-			return time >= fighter.ready_at and distance() <= skill.preferred_range and _is_open(target)
+			return time >= fighter.ready_at and distance() <= skill.preferred_range and distance() >= skill.min_range and _is_open(target)
 		CombatSkillData.Condition.INCOMING_ATTACK:
 			# You react to a telegraph starting, not to it still being under
 			# way. Otherwise a longer wind-up is simply a longer free window for
@@ -365,13 +365,13 @@ func _footwork(fighter: CombatFighter, delta: float) -> void:
 		_continue_step(fighter, delta)
 		return
 	var d := distance()
-	if d > minf(_min_attack_range(fighter), fighter.ideal_max(spacing)) and _incoming(fighter):
+	if d > _approach_at(fighter) and _incoming(fighter):
 		# Nobody walks back into a blow they can see coming (P04-10: a leash
 		# pull or a dodge that got them clear must not be undone by their own
 		# feet). They hold until it is spent.
 		fighter.footwork = CombatFighter.Footwork.HOLD
 		return
-	if d > minf(_min_attack_range(fighter), fighter.ideal_max(spacing)):
+	if d > _approach_at(fighter):
 		fighter.footwork = CombatFighter.Footwork.APPROACH
 		if _move(fighter, fighter.move_speed * spacing.approach_speed * delta * _toward_opponent(fighter)):
 			return
@@ -462,10 +462,19 @@ func _line_direction() -> Vector2:
 	return Vector2(cos(line_angle), sin(line_angle))
 
 
+## How far out they stop closing in: inside their shortest reach and their
+## ideal distance. A move kept for being crowded (shorter than where the
+## weapon wants the fight) does not count, or a pole would walk in to
+## butt-strike range.
+func _approach_at(fighter: CombatFighter) -> float:
+	return minf(_min_attack_range(fighter), fighter.ideal_max(spacing))
+
+
 func _min_attack_range(fighter: CombatFighter) -> float:
+	var crowded_below := fighter.ideal_min(spacing) if fighter.data.weapon != null and not fighter.data.weapon.is_unarmed() else 0.0
 	var reach := INF
 	for skill in fighter.data.skills:
-		if skill != null and skill.effect == CombatSkillData.Effect.ATTACK:
+		if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and skill.preferred_range >= crowded_below:
 			reach = minf(reach, skill.preferred_range)
 	return reach * 0.9 if reach < INF else 0.0
 
@@ -613,7 +622,7 @@ func _resolve_attack(attacker: CombatFighter, skill: CombatSkillData) -> void:
 		damage *= _balance.opening_damage
 		combat_event.emit(&"opening", attacker.side, skill, damage)
 	if target.is_guarding():
-		damage *= 1.0 - target.action.damage_reduction
+		damage *= 1.0 - target.action.damage_reduction * (1.0 - skill.guard_break)
 		target.hp -= damage
 		_displace(target, skill.displacement * BLOCKED_DISPLACEMENT)
 		combat_event.emit(&"blocked", attacker.side, skill, damage)
