@@ -553,7 +553,7 @@ func _update_buttons() -> void:
 func _build_room() -> void:
 	# The same clinic window the player looked in through, from the inside.
 	ClinicWindow.build_light(self)
-	ClinicWindow.build_inside(self)
+	ClinicWindow.build_inside(self, false)
 	ClinicWindow.build_front(self)
 	_camera = Camera3D.new()
 	_camera.fov = 70.0

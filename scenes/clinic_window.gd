@@ -18,7 +18,9 @@ const PUPPY_SCALE: float = 0.62
 
 
 ## The clinic behind the pen: floor, back wall, the counter, the pen itself.
-static func build_inside(parent: Node3D) -> void:
+## `back_fence` off when the view is from inside the pen (AdoptionScene): the
+## rail behind the pup would cut across the view.
+static func build_inside(parent: Node3D, back_fence: bool = true) -> void:
 	parent.add_child(Greybox.box(Vector3(8, 0.04, 3.4), Color(0.76, 0.78, 0.77), Vector3(0, -0.02, 0.4)))
 	for x in range(-4, 5):
 		parent.add_child(Greybox.box(Vector3(0.012, 0.045, 3.4), Color(0.74, 0.77, 0.76), Vector3(x * 0.8, -0.015, 0.4)))
@@ -37,9 +39,10 @@ static func build_inside(parent: Node3D) -> void:
 	parent.add_child(Greybox.box(Vector3(0.45, 0.5, 0.06), Color(0.4, 0.55, 0.62), Vector3(2.0, 0.7, 1.82)))
 	# The pen: a low white fence on the inside, a blanket on the floor.
 	var pen := Color(0.92, 0.92, 0.9)
-	for x in [-1.35, -0.45, 0.45, 1.35]:
-		parent.add_child(Greybox.cylinder(0.015, 0.45, pen, Vector3(x, 0.225, PEN_MAX.y + 0.08)))
-	parent.add_child(Greybox.box(Vector3(2.7, 0.025, 0.025), pen, Vector3(0, 0.44, PEN_MAX.y + 0.08)))
+	if back_fence:
+		for x in [-1.35, -0.45, 0.45, 1.35]:
+			parent.add_child(Greybox.cylinder(0.015, 0.45, pen, Vector3(x, 0.225, PEN_MAX.y + 0.08)))
+		parent.add_child(Greybox.box(Vector3(2.7, 0.025, 0.025), pen, Vector3(0, 0.44, PEN_MAX.y + 0.08)))
 	for z in [-0.9, -0.3]:
 		for x in [-1.35, 1.35]:
 			parent.add_child(Greybox.cylinder(0.015, 0.45, pen, Vector3(x, 0.225, z)))
