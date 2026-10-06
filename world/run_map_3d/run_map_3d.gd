@@ -185,29 +185,46 @@ func _build_environment() -> void:
 
 
 func _build_street() -> void:
-	add_child(Greybox.solid_box(Vector3(64, 0.2, 120), Color(0.45, 0.45, 0.47), Vector3(0, -0.1, -30)))
-	add_child(Greybox.box(Vector3(64, 0.02, 7), Color(0.3, 0.3, 0.32), Vector3(0, 0.01, -2)))
+	# The ground's look is GroundMaterials (generated, world-space); the boxes
+	# and their collision are unchanged.
+	var ground := Greybox.solid_box(Vector3(64, 0.2, 120), Color(0.45, 0.45, 0.47), Vector3(0, -0.1, -30))
+	GroundMaterials.apply(ground, GroundMaterials.concrete())
+	add_child(ground)
+	var road := Greybox.box(Vector3(64, 0.02, 7), Color(0.3, 0.3, 0.32), Vector3(0, 0.01, -2))
+	GroundMaterials.apply(road, GroundMaterials.asphalt())
+	add_child(road)
 	for x in range(-28, 29, 4):
 		add_child(Greybox.box(Vector3(1.6, 0.03, 0.15), Color(0.9, 0.9, 0.85), Vector3(x, 0.02, -2)))
 	# Low curbs: actors can step onto the sidewalks.
-	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, 3)))
-	add_child(Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, -7)))
+	for z in [3.0, -7.0]:
+		var walk := Greybox.solid_box(Vector3(64, 0.05, 3), Color(0.7, 0.68, 0.64), Vector3(0, 0.025, z))
+		GroundMaterials.apply(walk, GroundMaterials.pavers())
+		add_child(walk)
 	for i in 5:
 		add_child(EnvironmentKit.building(Vector3(9, 6, 6), Color(0.62 + 0.05 * (i % 2), 0.55, 0.5), Vector3(-24.0 + i * 12.0, 3, 8.5), i))
 	# West blocks leave a 3 m alley at x = -14.5.
 	for x in [-20.0, -9.0, 9.0, 19.0]:
 		add_child(EnvironmentKit.building(Vector3(8, 5, 10), Color(0.55, 0.5, 0.48), Vector3(x, 2.5, -13.5), int(absf(x))))
-	add_child(Greybox.box(Vector3(3, 0.02, 10), Color(0.4, 0.37, 0.33), Vector3(-14.5, 0.02, -13.5)))
-	add_child(Greybox.box(Vector3(6, 0.02, 12), Color(0.62, 0.58, 0.5), Vector3(0, 0.02, -14)))
+	var alley := Greybox.box(Vector3(3, 0.02, 10), Color(0.4, 0.37, 0.33), Vector3(-14.5, 0.02, -13.5))
+	GroundMaterials.apply(alley, GroundMaterials.asphalt())
+	add_child(alley)
+	var approach := Greybox.box(Vector3(6, 0.02, 12), Color(0.62, 0.58, 0.5), Vector3(0, 0.02, -14))
+	GroundMaterials.apply(approach, GroundMaterials.pavers())
+	add_child(approach)
 	for x in [-27.0, -15.0, -3.0, 9.0, 21.0]:
 		add_child(EnvironmentKit.lamp(Vector3(x, 0.05, 4.0)))
 	add_child(EnvironmentKit.bus_stop(Vector3(20, 0.05, 3.0)))
 	_add_rest_spot(&"RestBusStop", Vector3(20, 0, 3.0))
 	# Map edges.
-	for x in [-32.0, 32.0]:
-		add_child(Greybox.solid_box(Vector3(1, 3, 120), Color(0.4, 0.4, 0.42), Vector3(x, 1.5, -30)))
-	add_child(Greybox.solid_box(Vector3(64, 3, 1), Color(0.4, 0.4, 0.42), Vector3(0, 1.5, 12)))
-	add_child(Greybox.solid_box(Vector3(64, 3, 1), Color(0.4, 0.4, 0.42), Vector3(0, 1.5, -70)))
+	var edges: Array[StaticBody3D] = [
+		Greybox.solid_box(Vector3(1, 3, 120), Color(0.4, 0.4, 0.42), Vector3(-32, 1.5, -30)),
+		Greybox.solid_box(Vector3(1, 3, 120), Color(0.4, 0.4, 0.42), Vector3(32, 1.5, -30)),
+		Greybox.solid_box(Vector3(64, 3, 1), Color(0.4, 0.4, 0.42), Vector3(0, 1.5, 12)),
+		Greybox.solid_box(Vector3(64, 3, 1), Color(0.4, 0.4, 0.42), Vector3(0, 1.5, -70)),
+	]
+	for edge in edges:
+		GroundMaterials.apply(edge, GroundMaterials.concrete())
+		add_child(edge)
 
 
 ## S05-02: the owner can catch their breath here.
@@ -221,7 +238,9 @@ func _add_rest_spot(spot_name: StringName, at: Vector3) -> void:
 
 
 func _build_park() -> void:
-	add_child(Greybox.box(Vector3(62, 0.03, 50), Color(0.36, 0.55, 0.33), Vector3(0, 0.02, -45)))
+	var lawn := Greybox.box(Vector3(62, 0.03, 50), Color(0.36, 0.55, 0.33), Vector3(0, 0.02, -45))
+	GroundMaterials.apply(lawn, GroundMaterials.grass())
+	add_child(lawn)
 	add_child(EnvironmentKit.park_gate(Vector3(0, 0, -20)))
 	for p: Vector3 in [Vector3(-8, 0, -28), Vector3(10, 0, -31), Vector3(-7, 0, -43), Vector3(13, 0, -50), Vector3(-13, 0, -54), Vector3(4, 0, -58)]:
 		if p == Vector3(-13, 0, -54):
