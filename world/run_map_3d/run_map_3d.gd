@@ -23,8 +23,16 @@ const EVENING_SKY := Color(0.9, 0.7, 0.56)
 const DAY_AMBIENT := Color(0.75, 0.75, 0.8)
 const EVENING_AMBIENT := Color(0.8, 0.68, 0.62)
 const EVENING_SUN := Color(1.0, 0.8, 0.6)
+## The sky overhead and at the horizon, day and evening (the walk's haze is
+## the horizon colour).
+const DAY_SKY_TOP := Color(0.36, 0.56, 0.82)
+const EVENING_SKY_TOP := Color(0.4, 0.42, 0.62)
+const DAY_HORIZON := Color(0.78, 0.84, 0.9)
+const EVENING_HORIZON := Color(0.96, 0.72, 0.52)
+const SKYLINE := preload("res://assets/environment/walk_kit/skyline.glb")
 var _environment: Environment
 var _sun: DirectionalLight3D
+var _sky: ProceduralSkyMaterial
 
 
 func _ready() -> void:
@@ -114,6 +122,10 @@ func _voice_territories(hud: Node) -> void:
 ## Presentation only: the mood of the walk, never its rules.
 func _apply_tension(level: float) -> void:
 	_environment.background_color = DAY_SKY.lerp(EVENING_SKY, level)
+	_sky.sky_top_color = DAY_SKY_TOP.lerp(EVENING_SKY_TOP, level)
+	_sky.sky_horizon_color = DAY_HORIZON.lerp(EVENING_HORIZON, level)
+	_sky.ground_horizon_color = _sky.sky_horizon_color
+	_environment.fog_light_color = _sky.sky_horizon_color
 	_environment.ambient_light_color = DAY_AMBIENT.lerp(EVENING_AMBIENT, level)
 	_sun.light_color = Color.WHITE.lerp(EVENING_SUN, level)
 	_sun.light_energy = lerpf(1.1, 0.95, level)
@@ -168,14 +180,31 @@ func _build_bark_button() -> void:
 func _build_environment() -> void:
 	var world_env := WorldEnvironment.new()
 	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.62, 0.75, 0.88)
+	# A real sky and a light haze over the distance, instead of a flat colour
+	# (Claude, art at the owner's request 2026-10-07). The city beyond the
+	# map's edges stands in that haze.
+	environment.background_mode = Environment.BG_SKY
+	environment.background_color = DAY_SKY
+	_sky = ProceduralSkyMaterial.new()
+	_sky.sky_top_color = DAY_SKY_TOP
+	_sky.sky_horizon_color = DAY_HORIZON
+	_sky.ground_horizon_color = DAY_HORIZON
+	_sky.ground_bottom_color = Color(0.4, 0.42, 0.4)
+	_sky.sun_angle_max = 20.0
+	environment.sky = Sky.new()
+	environment.sky.sky_material = _sky
+	environment.fog_enabled = true
+	environment.fog_light_color = DAY_HORIZON
+	environment.fog_density = 0.003
+	environment.fog_sky_affect = 0.0
+	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.75, 0.75, 0.8)
 	environment.ambient_light_energy = 0.6
 	world_env.environment = environment
 	add_child(world_env)
 	_environment = environment
+	add_child(SKYLINE.instantiate())
 	var sun := DirectionalLight3D.new()
 	_sun = sun
 	sun.rotation_degrees = Vector3(-55, 35, 0)

@@ -58,7 +58,7 @@ func _test_walk() -> void:
 	var tension := map.tension
 	check(tension != null, "the walk has a tension director")
 	var bus := map.get_node("ExtractionPoints/bus_stop") as ExtractionPoint3D
-	var sky_before: Color = map._environment.background_color
+	var sky_before: Color = map._sky.sky_horizon_color
 	await _frames(30)
 	check_eq(tension.level, 0.0, "calm while home is not yet open")
 
@@ -73,7 +73,7 @@ func _test_walk() -> void:
 			break
 	check(tension.target > 0.25, "carrying a lot far from an open exit is tense (%.2f)" % tension.target)
 	check(tension.level > 0.2, "and the walk eases into it (%.2f)" % tension.level)
-	check(map._environment.background_color != sky_before, "the sky turns towards evening")
+	check(map._sky.sky_horizon_color != sky_before, "the sky turns towards evening")
 	check(bus.call_strength > 0.2, "home calls more strongly (%.2f)" % bus.call_strength)
 	check_eq(run.run_rng.state, rng_state, "presentation only: the run's randomness is untouched")
 	check_eq(tension.debug_text().begins_with("Tension:"), true, "debug text")
