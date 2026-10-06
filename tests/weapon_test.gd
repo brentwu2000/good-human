@@ -15,6 +15,7 @@ func _ready() -> void:
 	_test_styles()
 	await _test_contact()
 	_test_condition()
+	_test_lost_on_defeat()
 	finish()
 
 
@@ -338,3 +339,32 @@ func _test_condition() -> void:
 	WeaponProp3D.show_condition(prop, WeaponCondition.State.GOOD)
 	check(is_zero_approx(prop.rotation.z), "a good one is straight")
 	prop.free()
+
+
+## P05-11: what the human carried and fought with is exposed — lost with the
+## rest of their bag on a defeat; only small things in the dog's backpack
+## come home.
+func _test_lost_on_defeat() -> void:
+	var run := RunManager.new()
+	run.report_to_game = false
+	run.auto_start = false
+	add_child(run)
+	run.start_run(5)
+	var umbrella := ItemStack.new(DataRegistry.get_item(&"umbrella"), 1)
+	umbrella.condition = 30
+	run.take_weapon(umbrella)
+	run.debug_give_item(&"tennis_ball", 1)
+	for i in run.human_run_inventory.capacity:
+		var stack := run.human_run_inventory.stack_at(i)
+		if stack != null and stack.item_id == &"tennis_ball":
+			run.human_run_inventory.move_item(i, run.dog_safe_inventory, 0)
+	run.defeat_run("阿金")
+	var result := run.run_result
+	var lost_ids := result.lost.map(func(s: ItemStack) -> StringName: return s.item_id)
+	var home_ids := result.to_stash.map(func(s: ItemStack) -> StringName: return s.item_id)
+	check(lost_ids.has(&"umbrella"), "P05-11: beaten, the umbrella they fought with is lost")
+	check(home_ids.has(&"tennis_ball") and not home_ids.has(&"umbrella"), "the dog's backpack still comes home, the umbrella never could")
+	var result_screen: GDScript = load("res://ui/run_result/run_result.gd")
+	var lines: Array = result_screen.weapon_lines(result)
+	check(lines.size() == 1 and lines[0].contains("沒能帶回來"), "and the result says so (%s)" % ", ".join(lines))
+	run.queue_free()

@@ -57,6 +57,9 @@ func show_result(result: RunResult) -> void:
 	_territory_card.visible = not places.is_empty()
 	_territory_label.text = "\n".join(places)
 
+	var held := weapon_lines(result)
+	if not held.is_empty():
+		_summary_label.text += "\n" + "\n".join(held)
 	var loot: Array[String] = []
 	loot.append("帶回來  $%d" % _value_of(result.to_stash))
 	loot.append_array(_describe(result.to_stash))
@@ -74,6 +77,19 @@ func show_result(result: RunResult) -> void:
 	var legacy_lines: Array[String] = training_lines(result.training)
 	legacy_lines.append_array(loot)
 	_items_label.text = "\n".join(legacy_lines)
+
+
+## P05-11: what became of what the human fought with — taken home, or lost
+## with the rest of their bag. Said in words, as worn as it was.
+static func weapon_lines(result: RunResult) -> Array[String]:
+	var lines: Array[String] = []
+	for stack in result.to_stash:
+		if DataRegistry.weapon_for_item(stack.item_id) != null:
+			lines.append("帶著%s回到家了。" % WeaponCondition.name_of(stack))
+	for stack in result.lost:
+		if DataRegistry.weapon_for_item(stack.item_id) != null:
+			lines.append("%s也沒能帶回來。" % stack.item.display_name)
+	return lines
 
 
 ## S05-09 (ADR-018): a mark counts only once the walk gets home, so the
@@ -137,7 +153,7 @@ func _describe(stacks: Array[ItemStack]) -> Array[String]:
 		lines.append("  （沒有）")
 	for stack in stacks:
 		var mark := "✨" if stack.item.rarity == ItemData.Rarity.RARE else ""
-		lines.append("  %s%s x%d  $%d" % [mark, stack.item.display_name, stack.quantity, stack.item.value * stack.quantity])
+		lines.append("  %s%s x%d  $%d" % [mark, WeaponCondition.name_of(stack), stack.quantity, stack.item.value * stack.quantity])
 	return lines
 
 

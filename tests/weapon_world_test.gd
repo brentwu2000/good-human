@@ -89,6 +89,29 @@ func _run() -> void:
 	await _frames(2)
 	var fighter := map.coordinator.engagement.simulation.fighters[CombatSimulation.PLAYER]
 	check(fighter.data.weapon == DataRegistry.get_weapon(&"broom"), "and fights with the broom")
+	map.coordinator.debug_force_result(CombatSimulation.Result.VICTORY)
+	await _frames(3)
+
+	# P05-11: carried home, it is banked as worn as it was.
+	run.equipped_stack.condition = 12
+	var stash_before := Game.home_stash.count_item(&"broom")
+	map.coordinator.time_scale = 50.0
+	run.extract(&"bus_stop")
+	await _wait_for_scene(Game.RUN_RESULT_SCENE)
+	check_eq(Game.home_stash.count_item(&"broom"), stash_before + 1, "P05-11: taken home, the broom is banked")
+	var banked: ItemStack = null
+	for stack in Game.home_stash.get_stacks():
+		if stack.item_id == &"broom":
+			banked = stack
+	check(banked != null and banked.condition == 12, "as worn as it was")
+	var result_screen: GDScript = load("res://ui/run_result/run_result.gd")
+	var lines: Array = result_screen.weapon_lines(Game.last_run_result)
+	check(lines.size() == 1 and lines[0].contains("掃把") and lines[0].contains("回到家"), "and the result says so (%s)" % ", ".join(lines))
+	check(Game.last_run_result.lost.filter(func(s: ItemStack) -> bool: return s.item_id == &"umbrella").is_empty(), "the umbrella left lying in the street was not carried, so it is neither banked nor counted lost")
+	var saved := Inventory.new(Game.home_stash.capacity)
+	saved.deserialize(SaveManager.data["stash"], DataRegistry.get_item)
+	var reloaded := saved.get_stacks().filter(func(s: ItemStack) -> bool: return s.item_id == &"broom")
+	check(not reloaded.is_empty() and reloaded[0].condition == 12, "and saved with its wear")
 	finish()
 
 

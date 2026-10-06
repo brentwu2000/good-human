@@ -25,4 +25,4 @@ func open(stash: Inventory) -> void:
 func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 	var stack := inventory.stack_at(index)
 	_grid.set_selected(index if stack != null else -1)
-	_detail_label.text = "點物品看說明" if stack == null else "%s x%d：%s" % [stack.item.display_name, stack.quantity, stack.item.description]
+	_detail_label.text = "點物品看說明" if stack == null else "%s x%d：%s" % [WeaponCondition.name_of(stack), stack.quantity, stack.item.description]

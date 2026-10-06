@@ -45,5 +45,14 @@ static func roll_found(weapon: WeaponData, run_seed: int, place: StringName) -> 
 	return maxi(1, roundi(weapon.condition_max * rng.randf_range(DataRegistry.balance.weapon_found_min, 1.0)))
 
 
+## A weapon's name with how worn it is, 「雨傘（有點舊了）」; anything else
+## just its name.
+static func name_of(stack: ItemStack) -> String:
+	var weapon := DataRegistry.weapon_for_item(stack.item_id) if stack != null else null
+	if weapon == null or weapon.condition_max <= 0:
+		return stack.item.display_name if stack != null else ""
+	return "%s（%s）" % [stack.item.display_name, label(state(weapon, left(weapon, stack)))]
+
+
 static func label(current: State) -> String:
 	return ["完好", "有點舊了", "快壞了", "壞掉了"][current]
