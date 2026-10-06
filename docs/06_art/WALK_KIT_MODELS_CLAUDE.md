@@ -9,3 +9,9 @@ Models (`tools/art/build_walk_kit.py` → `assets/environment/walk_kit/`; source
 Ground (`world/environment/ground_materials.gd`): textures generated in code and laid in world space (triplanar), so scale is constant on any box — asphalt (road, alley), concrete pavers 0.5 m (pavements, the park approach), grass (park), concrete (base, map edges). Collision boxes unchanged.
 
 Grade B; not final approval. Codex: the greybox builders are untouched underneath, and any of these can be replaced piece by piece in `EnvironmentKit.MODELS`.
+
+## Sky, distance and street clutter (2026-10-07)
+
+- Sky: `ProceduralSkyMaterial` (day top / horizon colours) that the walk's tension turns towards evening together with the light, plus a light distance haze (`fog_density` 0.003, horizon-coloured) and filmic tonemapping. `run_tension_test` now checks the sky itself turns.
+- Distance (`tools/art/build_skyline.py` → `walk_kit/skyline.glb`, one mesh): a ring of apartment blocks of mixed heights 8–40 m outside the map's edges, window bands facing in, rooftop water tanks; a line of tall trees past the park's far end with blocks behind. Seen through the haze.
+- Clutter (`tools/art/build_street_clutter.py` → `walk_kit/clutter/*.glb`): scooters, glazed pot plants, light-box signs, a chalk A-board, red plastic stools, a traffic cone, utility boxes. Placed by `RunMap3D.CLUTTER` against the shop fronts and the far pavement, clear of the dog's start, the owner, the search spots, lamps and the bus stop. Scooters and utility boxes are solid (the dog goes round them) and in the camera's fade group, like trees.

@@ -38,6 +38,7 @@ var _sky: ProceduralSkyMaterial
 func _ready() -> void:
 	_build_environment()
 	_build_street()
+	_build_street_clutter()
 	_build_park()
 	rig = CameraRig3D.new()
 	add_child(rig)
@@ -254,6 +255,61 @@ func _build_street() -> void:
 	for edge in edges:
 		GroundMaterials.apply(edge, GroundMaterials.concrete())
 		add_child(edge)
+
+
+## The lane's clutter (Claude, art at the owner's request 2026-10-07): parked
+## scooters, pot plants, light-box signs, an A-board, plastic stools, a cone,
+## utility boxes — kept against the shop fronts, out of the way of the walk,
+## its search spots and its people. The big ones are solid (the dog goes
+## round them) and fade for the camera like trees do.
+const CLUTTER_DIR := "res://assets/environment/walk_kit/clutter/%s.glb"
+const CLUTTER: Array = [
+	# [piece, x, z, yaw, solid size (or zero)]
+	[&"scooter", -21.6, 5.0, 0.0, Vector3(1.6, 1.1, 0.6)],
+	[&"scooter", -20.4, 5.05, 0.05, Vector3(1.6, 1.1, 0.6)],
+	[&"scooter", -9.6, 5.0, PI, Vector3(1.6, 1.1, 0.6)],
+	[&"scooter", 3.6, 5.0, 0.0, Vector3(1.6, 1.1, 0.6)],
+	[&"scooter", 14.6, 5.05, PI, Vector3(1.6, 1.1, 0.6)],
+	[&"scooter", -6.0, -8.4, 0.0, Vector3(1.6, 1.1, 0.6)],
+	[&"scooter", 4.6, -8.4, PI, Vector3(1.6, 1.1, 0.6)],
+	[&"potted_plant", -26.0, 5.1, 0.0, Vector3.ZERO],
+	[&"potted_plant", -17.8, 5.1, 0.0, Vector3.ZERO],
+	[&"potted_plant", -5.4, 5.1, 0.0, Vector3.ZERO],
+	[&"potted_plant", 6.9, 5.1, 0.0, Vector3.ZERO],
+	[&"potted_plant", 18.2, 5.1, 0.0, Vector3.ZERO],
+	[&"potted_plant", -18.0, -8.5, 0.0, Vector3.ZERO],
+	[&"potted_plant", 8.4, -8.5, 0.0, Vector3.ZERO],
+	[&"light_box_sign", -14.0, 5.0, 0.0, Vector3.ZERO],
+	[&"light_box_sign", 2.2, 5.0, 0.3, Vector3.ZERO],
+	[&"light_box_sign", 12.8, 5.0, -0.2, Vector3.ZERO],
+	[&"a_board", -2.2, 4.85, 0.2, Vector3.ZERO],
+	[&"a_board", 10.6, 4.85, -0.15, Vector3.ZERO],
+	[&"plastic_stool", -23.6, 5.0, 0.0, Vector3.ZERO],
+	[&"plastic_stool", -23.0, 5.15, 0.4, Vector3.ZERO],
+	[&"plastic_stool", 26.0, 5.0, 0.0, Vector3.ZERO],
+	[&"cone", -12.9, -8.1, 0.0, Vector3.ZERO],
+	[&"utility_box", -29.6, 5.0, 0.0, Vector3(0.8, 1.35, 0.45)],
+	[&"utility_box", 29.0, -8.4, PI, Vector3(0.8, 1.35, 0.45)],
+]
+
+
+func _build_street_clutter() -> void:
+	for entry: Array in CLUTTER:
+		var piece := (load(CLUTTER_DIR % entry[0]) as PackedScene).instantiate() as Node3D
+		var at := Vector3(float(entry[1]), 0.0, float(entry[2]))
+		var solid: Vector3 = entry[4]
+		if solid != Vector3.ZERO:
+			var body := Greybox.solid_box(solid, Color.WHITE, at + Vector3(0, solid.y * 0.5, 0), Greybox.FADE_GROUP)
+			for mesh in body.find_children("*", "MeshInstance3D", true, false):
+				(mesh as MeshInstance3D).visible = false
+			body.rotation.y = float(entry[3])
+			piece.position = Vector3(0, -solid.y * 0.5, 0)
+			body.add_child(piece)
+			add_child(body)
+		else:
+			piece.position = at
+			piece.rotation.y = float(entry[3])
+			add_child(piece)
 
 
 ## S05-02: the owner can catch their breath here.
