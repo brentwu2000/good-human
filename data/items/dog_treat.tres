@@ -12,3 +12,4 @@ rarity = 0
 stackable = true
 max_stack = 10
 value = 8
+loot_class = 4

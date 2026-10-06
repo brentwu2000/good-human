@@ -13,3 +13,4 @@ stackable = true
 max_stack = 5
 value = 12
 owner_recovery = 0.2
+loot_class = 4

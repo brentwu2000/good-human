@@ -66,7 +66,12 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 		return
 
 	if inventory != _selected_inventory or index != _selected_index:
-		_selected_inventory.move_item(_selected_index, inventory, index)
+		var moving := _selected_inventory.stack_at(_selected_index)
+		if not _selected_inventory.move_item(_selected_index, inventory, index) and moving != null and not inventory.accepts_item(moving.item):
+			_clear_selection()
+			# P05-01: said, not silently refused.
+			_detail_label.text = "%s太大了，狗狗的背包裝不下。只能讓主人拿著。" % moving.item.display_name
+			return
 	_clear_selection()
 
 

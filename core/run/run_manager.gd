@@ -70,6 +70,9 @@ func _ready() -> void:
 	var balance := DataRegistry.balance
 	human_run_inventory = Inventory.new(balance.human_run_slots)
 	dog_safe_inventory = Inventory.new(balance.dog_safe_slots)
+	# P05-01 / P05-12: a dog's backpack is small. An umbrella or a pipe is
+	# carried by the human, exposed, until it gets home.
+	dog_safe_inventory.accepts = func(item: ItemData) -> bool: return item.is_safe_eligible()
 	training = TrainingTracker.new(DataRegistry.training)
 	human_run_inventory.changed.connect(_emit_value_changed)
 	dog_safe_inventory.changed.connect(_emit_value_changed)

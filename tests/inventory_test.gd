@@ -20,6 +20,7 @@ func _ready() -> void:
 	_test_serialize_round_trip()
 	_test_deserialize_bad_data()
 	_test_changed_signal()
+	_test_dog_backpack_size()
 	finish()
 
 
@@ -158,3 +159,31 @@ func _item(id: StringName, stackable: bool, max_stack: int) -> ItemData:
 	item.stackable = stackable
 	item.max_stack = max_stack
 	return item
+
+
+## P05-01 / P05-12: the dog's backpack takes only small things. A large find
+## (an umbrella) stays with the human, exposed, and every way in is closed.
+func _test_dog_backpack_size() -> void:
+	var umbrella := DataRegistry.get_item(&"umbrella")
+	var ball_item := DataRegistry.get_item(&"tennis_ball")
+	check(umbrella.loot_class == ItemData.LootClass.WEAPON and umbrella.size_class == ItemData.SizeClass.LARGE, "the umbrella is a large weapon")
+	check(not umbrella.is_safe_eligible() and ball_item.is_safe_eligible(), "a tennis ball fits the dog's backpack, an umbrella does not")
+	var run := RunManager.new()
+	run._ready()
+	var dog_bag := run.dog_safe_inventory
+	var human_bag := run.human_run_inventory
+	check_eq(dog_bag.add_item(umbrella), 1, "adding an umbrella to the dog's backpack is refused")
+	check_eq(dog_bag.space_for(umbrella), 0, "and it reports no space for one")
+	check_eq(dog_bag.add_item(ball_item), 0, "a ball goes in")
+	human_bag.add_item(umbrella)
+	var at := 0
+	check(not human_bag.move_item(at, dog_bag, 1), "moving the umbrella into an empty backpack slot is refused")
+	check(not human_bag.move_item(at, dog_bag), "or into any slot")
+	check(not human_bag.swap_item(at, dog_bag, 0), "or swapping it for the ball")
+	check_eq(human_bag.count_item(&"umbrella"), 1, "it stays in the human's bag")
+	check(dog_bag.move_item(0, human_bag), "small things still move out of the backpack")
+	check(human_bag.accepts_item(umbrella), "the human's bag takes anything")
+	run.free()
+	for id in DataRegistry.get_all_item_ids():
+		var item := DataRegistry.get_item(id)
+		check(item.loot_class != ItemData.LootClass.WEAPON or item.size_class != ItemData.SizeClass.SMALL, "%s: no weapon is small enough to hide in the backpack" % id)

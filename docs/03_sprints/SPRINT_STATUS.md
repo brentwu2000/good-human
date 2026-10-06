@@ -503,7 +503,7 @@ Apply after P-04/PATCH03 and before completing Sprint 05 engineering. Engineerin
 
 | ID | Task | Status |
 |---|---|---|
-| P05-01 | Loot ownership | TODO |
+| P05-01 | Loot ownership | REVIEW |
 | P05-02 | Weapon archetype interface | TODO |
 | P05-03 | Unarmed adapter | TODO |
 | P05-04 | Umbrella | TODO |
@@ -519,6 +519,7 @@ Apply after P-04/PATCH03 and before completing Sprint 05 engineering. Engineerin
 | P05-14 | Fresh Codex QA | TODO |
 
 ## P-05 Engineering Notes (Claude)
+- P05-01: the ownership flow already existed in effect: WORLD (a search point's pre-rolled loot) → HUMAN_CARRIED_UNBANKED (every find lands in the owner's bag; lost on defeat) → HOME_STASH (on extraction); DOG_SAFE is the dog's 2-slot backpack, kept on defeat, which only the bag panel moves things into. What was missing is that anything fitted in it. `ItemData` gains `loot_class` (WEAPON / HUMAN_GEAR / DOG_GEAR / VALUABLE per P-05, plus SUPPLY for the existing food, medicine and training kit, which the P-05 list does not name) and `size_class` (SMALL / MEDIUM / LARGE); only SMALL is `is_safe_eligible()`. `Inventory.accepts` is an optional filter honoured by add / move / swap / space_for; the run's dog backpack takes only safe-eligible items, and the bag panel says 「雨傘太大了，狗狗的背包裝不下。只能讓主人拿著。」 instead of silently refusing. All 14 items classified: umbrella WEAPON LARGE; boxing gloves, old running shoes HUMAN_GEAR MEDIUM; jump rope and the Banyan frisbee MEDIUM; the rest SMALL. `ItemData.type` stays (nothing reads it). Test: `inventory_test` (+16).
 - To reconcile when engineering starts: the spec keeps "seamless Dog POV combat" authoritative, but the owner has since moved fights to the low over-the-shoulder shot (ADR-L04, 2026-10-06), so P-05's weapon readability is judged in that shot. Much of P05-01 / P05-11 / P05-12 already exists in part (Sprint 01 Inventory, dog safe slots, SAFE/UNBANKED run value from P4-001..P4-010); each task should first check what is there.
 
 ## Sprint 05 — GREED / TERRITORY EXECUTION (Update 008)

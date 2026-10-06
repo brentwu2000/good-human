@@ -8,11 +8,19 @@ signal changed
 var capacity: int
 ## Each slot is an ItemStack or null.
 var slots: Array[ItemStack] = []
+## P05-01: what this container can physically hold, as `func(item) -> bool`.
+## Unset, it takes anything (the owner's bag, the Home stash); the dog's
+## backpack takes only small things.
+var accepts: Callable
 
 
 func _init(p_capacity: int) -> void:
 	capacity = maxi(p_capacity, 0)
 	slots.resize(capacity)
+
+
+func accepts_item(item: ItemData) -> bool:
+	return item != null and (not accepts.is_valid() or bool(accepts.call(item)))
 
 
 func stack_at(index: int) -> ItemStack:
@@ -49,6 +57,8 @@ func total_value() -> int:
 
 ## How many of `item` could be added right now.
 func space_for(item: ItemData) -> int:
+	if not accepts_item(item):
+		return 0
 	var limit := item.get_stack_limit()
 	var space := 0
 	for stack in slots:
@@ -67,6 +77,8 @@ func has_space(item: ItemData, quantity: int = 1) -> bool:
 func add_item(item: ItemData, quantity: int = 1) -> int:
 	if item == null or quantity <= 0:
 		return maxi(quantity, 0)
+	if not accepts_item(item):
+		return quantity
 	var remaining := quantity
 	var limit := item.get_stack_limit()
 	for stack in slots:
@@ -143,7 +155,7 @@ func move_item(from_index: int, target: Inventory, to_index: int = -1) -> bool:
 		_set_quantity(from_index, left)
 		return true
 
-	if not target._valid(to_index):
+	if not target._valid(to_index) or not target.accepts_item(stack.item):
 		return false
 	var other := target.slots[to_index]
 	if other == null:
@@ -164,6 +176,11 @@ func swap_item(index_a: int, target: Inventory, index_b: int) -> bool:
 	if target == null or not _valid(index_a) or not target._valid(index_b):
 		return false
 	if target == self and index_a == index_b:
+		return false
+	# Both ends must be allowed where they land.
+	if slots[index_a] != null and not target.accepts_item(slots[index_a].item):
+		return false
+	if target.slots[index_b] != null and not accepts_item(target.slots[index_b].item):
 		return false
 	var a := slots[index_a]
 	slots[index_a] = target.slots[index_b]

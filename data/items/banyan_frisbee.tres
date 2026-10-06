@@ -12,3 +12,4 @@ rarity = 2
 stackable = false
 max_stack = 1
 value = 150
+size_class = 1
