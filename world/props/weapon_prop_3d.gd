@@ -13,6 +13,31 @@ const TIP := {
 }
 
 
+## P05-09 (placeholder for D5W-07): WORN sags a little and dulls; CRITICAL
+## is visibly bent and dark. Applied to the prop's own pose and colours.
+static func show_condition(prop: Node3D, condition: WeaponCondition.State) -> void:
+	var bend := 0.0
+	var dull := 0.0
+	match condition:
+		WeaponCondition.State.WORN:
+			bend = 0.08
+			dull = 0.25
+		WeaponCondition.State.CRITICAL:
+			bend = 0.28
+			dull = 0.5
+	prop.rotation.z = bend
+	prop.set_meta("condition", condition)
+	for child in prop.get_children():
+		var mesh := child as MeshInstance3D
+		if mesh == null or mesh.material_override == null:
+			continue
+		if not mesh.has_meta("base_color"):
+			mesh.material_override = mesh.material_override.duplicate()
+			mesh.set_meta("base_color", (mesh.material_override as StandardMaterial3D).albedo_color)
+		var base: Color = mesh.get_meta("base_color")
+		(mesh.material_override as StandardMaterial3D).albedo_color = base.darkened(dull)
+
+
 ## A placeholder for `weapon`, or null for bare hands.
 static func build(weapon: WeaponData) -> Node3D:
 	if weapon == null or weapon.is_unarmed():

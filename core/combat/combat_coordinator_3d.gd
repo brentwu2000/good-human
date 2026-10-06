@@ -157,8 +157,9 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	var lateral := 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
 	# P05-02: the owner fights with whatever they are holding, and is seen
 	# holding it.
-	human.puppet.hold(run_manager.equipped_weapon)
-	var sim := CombatSimulation.new(human.fighter.armed(run_manager.equipped_weapon), opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
+	human.puppet.hold(run_manager.equipped_weapon, run_manager.equipped_state())
+	var held := human.fighter.armed(run_manager.equipped_weapon, WeaponCondition.power_scale(run_manager.equipped_state()))
+	var sim := CombatSimulation.new(held, opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
 	sim.set_lateral(lateral)
 	# S05-02: the owner starts the fight in whatever state the walk left them.
 	var owner_fighter := sim.fighters[CombatSimulation.PLAYER]
@@ -384,6 +385,13 @@ func _sync() -> void:
 func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amount: float) -> void:
 	var own := human.puppet
 	var theirs := engagement.pair.human_puppet
+	# P05-09: every blow landed with what they hold, or taken on it, wears it.
+	if kind in [&"hit", &"blocked"] and run_manager.equipped_weapon != null and run_manager.equipped_weapon.moveset != null:
+		var guard := engagement.simulation.fighters[CombatSimulation.PLAYER].action
+		var held_moves := run_manager.equipped_weapon.moveset.skills()
+		if (side == CombatSimulation.PLAYER and held_moves.has(skill)) or (kind == &"blocked" and side == CombatSimulation.OPPONENT and held_moves.has(guard)):
+			run_manager.wear_equipped()
+			own.show_condition(run_manager.equipped_state())
 	var actor := own if side == CombatSimulation.PLAYER else theirs
 	var other := theirs if side == CombatSimulation.PLAYER else own
 	match kind:
@@ -447,6 +455,11 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 	engagement = null
 	last_result = result
 	_hitstop_left = 0.0
+	# P05-09: worn out in that fight, it gives way now.
+	var worn := run_manager.equipped_weapon
+	if run_manager.break_if_worn_out():
+		human.puppet.hold(null)
+		human.say("（%s壞掉了……）" % worn.display_name, Color(0.9, 0.85, 0.75), 2.0)
 	release_left = RELEASE_SECONDS
 	opponent.end_combat(result)
 	match result:

@@ -146,7 +146,7 @@ func can_start_run() -> bool:
 func finish_run(result: RunResult, show_result: bool = true) -> void:
 	var stash_before := home_stash.total_value()
 	for stack in result.to_stash:
-		var left := home_stash.add_item(stack.item, stack.quantity)
+		var left := home_stash.add_stack(stack)
 		if left > 0:
 			result.stash_overflow.append(ItemStack.new(stack.item, left))
 	result.banked_value_delta = home_stash.total_value() - stash_before

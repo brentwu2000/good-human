@@ -9,18 +9,21 @@ extends Resource
 @export var skills: Array[CombatSkillData] = []
 ## P05-02: what they are holding. Null = their bare hands (UNARMED).
 @export var weapon: WeaponData
+## P05-09: how much of its power the held weapon still has (worn).
+var weapon_power: float = 1.0
 ## P05-07: how they use it. Null = untrained.
 @export var style: CombatStyleData
 
 ## P05-02/03: this fighter holding `held`. Unarmed (null, or the UNARMED
 ## archetype) is this same fighter, untouched — the P-04 baseline. Otherwise a
 ## copy whose skills are the weapon's moveset; the original is never changed.
-func armed(held: WeaponData) -> FighterData:
+func armed(held: WeaponData, power: float = 1.0) -> FighterData:
 	if held == null or held.is_unarmed():
 		return self
 	var copy := duplicate() as FighterData
 	copy.skills = held.moveset.skills()
 	copy.weapon = held
+	copy.weapon_power = power
 	return copy
 
 

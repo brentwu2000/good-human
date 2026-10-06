@@ -73,6 +73,27 @@ func has_space(item: ItemData, quantity: int = 1) -> bool:
 	return space_for(item) >= quantity
 
 
+## P05-09: adds `stack` keeping what is particular to it (a weapon's
+## condition). Returns the amount NOT added.
+func add_stack(stack: ItemStack) -> int:
+	if stack == null or stack.item == null:
+		return 0
+	if stack.condition < 0 or stack.item.stackable or not accepts_item(stack.item):
+		return add_item(stack.item, stack.quantity)
+	var remaining := stack.quantity
+	for i in capacity:
+		if remaining == 0:
+			break
+		if slots[i] == null:
+			var one := ItemStack.new(stack.item, 1)
+			one.condition = stack.condition
+			slots[i] = one
+			remaining -= 1
+	if remaining != stack.quantity:
+		changed.emit()
+	return remaining
+
+
 ## Adds as much as fits (existing stacks first). Returns the amount NOT added.
 func add_item(item: ItemData, quantity: int = 1) -> int:
 	if item == null or quantity <= 0:
@@ -149,7 +170,7 @@ func move_item(from_index: int, target: Inventory, to_index: int = -1) -> bool:
 		return false
 
 	if to_index == -1:
-		var left := target.add_item(stack.item, stack.quantity)
+		var left := target.add_stack(stack)
 		if left == stack.quantity:
 			return false
 		_set_quantity(from_index, left)
@@ -227,14 +248,18 @@ func deserialize(data: Array, lookup: Callable) -> void:
 		if item == null or quantity <= 0:
 			continue
 		var slot := _to_int(entry.get("slot"), -1)
+		var condition := _to_int(entry.get("condition"), -1)
 		if _valid(slot) and slots[slot] == null:
 			var in_slot := mini(quantity, item.get_stack_limit())
 			slots[slot] = ItemStack.new(item, in_slot)
+			slots[slot].condition = condition if not item.stackable else -1
 			quantity -= in_slot
 		if quantity > 0:
-			overflow.append(ItemStack.new(item, quantity))
+			var rest := ItemStack.new(item, quantity)
+			rest.condition = condition if not item.stackable else -1
+			overflow.append(rest)
 	for stack in overflow:
-		add_item(stack.item, stack.quantity)
+		add_stack(stack)
 	changed.emit()
 
 

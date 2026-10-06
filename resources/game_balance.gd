@@ -73,6 +73,13 @@ extends Resource
 @export_range(0.0, 1.0) var close_in_chance: float = 0.6
 ## How long a decision to step in holds before they think again (s).
 @export var close_in_seconds: float = 0.8
+## P05-09 weapon condition: below these shares of its use a weapon reads WORN
+## / CRITICAL; critical, its blows land at this share of their power.
+@export_range(0.0, 1.0) var weapon_worn_below: float = 0.6
+@export_range(0.0, 1.0) var weapon_critical_below: float = 0.3
+@export_range(0.0, 1.0) var weapon_critical_power: float = 0.85
+## Found in the street, a weapon has between this share of its use and all.
+@export_range(0.0, 1.0) var weapon_found_min: float = 0.4
 ## Once engaged, the player's human breaks away when the dog is this far away.
 @export var disengage_distance: float = 400.0
 ## Fights longer than this end as ABORTED.

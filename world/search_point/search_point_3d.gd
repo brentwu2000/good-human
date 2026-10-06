@@ -51,6 +51,11 @@ func prepare(run: RunManager) -> void:
 	_run = run
 	cancel_search()
 	_pending_loot = loot_table.roll(run.run_rng) if loot_table != null else null
+	# P05-09: a weapon lying in the street is not new.
+	if _pending_loot != null:
+		var weapon := DataRegistry.weapon_for_item(_pending_loot.item_id)
+		if weapon != null:
+			_pending_loot.condition = WeaponCondition.roll_found(weapon, run.run_seed, search_id)
 	_has_rolled = true
 	_visual.scale = Vector3.ONE
 	Greybox.set_faded(_visual, false)

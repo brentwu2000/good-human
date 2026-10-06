@@ -104,6 +104,7 @@ func _init(fighter_data: FighterData, fighter_side: int, balance: GameBalance) -
 	action_interval = data.stats.action_interval(balance)
 	if data.weapon != null and not data.weapon.is_unarmed():
 		move_speed_scale = data.weapon.moveset.move_speed_scale
+		attack *= data.weapon_power
 	move_speed = data.stats.move_speed(balance) * move_speed_scale
 	stability = data.stats.stability(balance)
 

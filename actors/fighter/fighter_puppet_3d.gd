@@ -125,8 +125,9 @@ func apply(fighter: FighterData) -> void:
 ## P-05: puts `weapon` in their lead hand (null: empty-handed). A skeletal
 ## body carries it on the hand bone, so it follows every clip; the greybox
 ## carries it at the end of the arm.
-func hold(weapon: WeaponData) -> void:
+func hold(weapon: WeaponData, condition: WeaponCondition.State = WeaponCondition.State.GOOD) -> void:
 	if weapon == held and (_prop != null) == (weapon != null and not weapon.is_unarmed()):
+		show_condition(condition)
 		return
 	held = weapon
 	if _prop != null:
@@ -139,6 +140,7 @@ func hold(weapon: WeaponData) -> void:
 	_prop = WeaponProp3D.build(weapon)
 	if _prop == null or _body == null:
 		return
+	show_condition(condition)
 	var skeletal := _body as P04HumanVisual
 	if skeletal != null and skeletal.skeleton != null and skeletal.skeleton.find_bone(WEAPON_HAND) >= 0:
 		var grip := BoneAttachment3D.new()
@@ -151,6 +153,12 @@ func hold(weapon: WeaponData) -> void:
 		_prop.position = Vector3(0, -0.55, 0)
 		_prop.rotation.x = -PI * 0.5
 		arm.add_child(_prop)
+
+
+## P05-09 (D5W-07): how worn it is reads on the object itself.
+func show_condition(condition: WeaponCondition.State) -> void:
+	if _prop != null:
+		WeaponProp3D.show_condition(_prop, condition)
 
 
 func _process(delta: float) -> void:

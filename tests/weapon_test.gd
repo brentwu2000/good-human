@@ -14,6 +14,7 @@ func _ready() -> void:
 	_test_heavy_blunt()
 	_test_styles()
 	await _test_contact()
+	_test_condition()
 	finish()
 
 
@@ -280,3 +281,60 @@ func _test_contact() -> void:
 			else:
 				check(reach - drawn <= hook_allowance, "%s: a swing reaching %.2f m is drawn to %.2f m (hook allowance)" % [skill.id, reach, drawn])
 			puppet.queue_free()
+
+
+## P05-09: GOOD / WORN / CRITICAL / BROKEN. It travels with the very thing
+## carried, wears with every blow, hits softer when critical, shows on the
+## object, and breaks out of the human's hands and bag.
+func _test_condition() -> void:
+	var umbrella := DataRegistry.get_weapon(&"umbrella")
+	var full := umbrella.condition_max
+	check(full > 0, "P05-09: the umbrella wears")
+	check_eq(WeaponCondition.state(umbrella, full), WeaponCondition.State.GOOD, "new is good")
+	check_eq(WeaponCondition.state(umbrella, int(full * 0.5)), WeaponCondition.State.WORN, "half used is worn")
+	check_eq(WeaponCondition.state(umbrella, 2), WeaponCondition.State.CRITICAL, "nearly gone is critical")
+	check_eq(WeaponCondition.state(umbrella, 0), WeaponCondition.State.BROKEN, "nothing left is broken")
+	var found := WeaponCondition.roll_found(umbrella, 77, &"bench_park")
+	check(found >= int(full * DataRegistry.balance.weapon_found_min) and found <= full, "found in the street it is somewhere between worn and new (%d of %d)" % [found, full])
+	check_eq(WeaponCondition.roll_found(umbrella, 77, &"bench_park"), found, "the same find on the same walk is the same umbrella")
+	# It travels with the thing.
+	var bag := Inventory.new(4)
+	var stash := Inventory.new(4)
+	var one := ItemStack.new(umbrella.item, 1)
+	one.condition = 7
+	bag.add_stack(one)
+	check_eq(bag.stack_at(0).condition, 7, "carried, it keeps its wear")
+	bag.move_item(0, stash)
+	check_eq(stash.stack_at(0).condition, 7, "and taken home")
+	var saved := Inventory.new(4)
+	saved.deserialize(stash.serialize(), DataRegistry.get_item)
+	check_eq(saved.stack_at(0).condition, 7, "and saved and loaded")
+	# Held, worn and broken.
+	var run := RunManager.new()
+	run._ready()
+	run.human_run_inventory.add_stack(one)
+	var held := run.human_run_inventory.stack_at(0)
+	check(run.equip(held) and run.equipped_weapon == umbrella, "the owner holds it")
+	check(not run.equip(ItemStack.new(umbrella.item, 1)), "only something actually in their bag")
+	held.condition = 2
+	check_eq(run.equipped_state(), WeaponCondition.State.CRITICAL, "critical")
+	var soft := CombatSimulation.new(PLAYER.armed(umbrella, WeaponCondition.power_scale(run.equipped_state())), JOGGER, 1)
+	var sound := CombatSimulation.new(PLAYER.armed(umbrella), JOGGER, 1)
+	check(soft.fighters[0].attack < sound.fighters[0].attack, "a critical umbrella hits softer")
+	run.wear_equipped(5)
+	check_eq(held.condition, 0, "worn to nothing")
+	check(run.break_if_worn_out(), "and it breaks")
+	check(run.equipped_weapon == null and run.human_run_inventory.count_item(&"umbrella") == 0, "out of their hands and their bag")
+	check(not run.break_if_worn_out(), "once")
+	run.human_run_inventory.add_stack(one)
+	run.equip(run.human_run_inventory.stack_at(0))
+	run.human_run_inventory.take_stack(0)
+	check(run.equipped_weapon == null, "thrown away, it is no longer held")
+	run.free()
+	# Seen on the object.
+	var prop := WeaponProp3D.build(umbrella)
+	WeaponProp3D.show_condition(prop, WeaponCondition.State.CRITICAL)
+	check(prop.rotation.z > 0.2, "a critical umbrella is visibly bent")
+	WeaponProp3D.show_condition(prop, WeaponCondition.State.GOOD)
+	check(is_zero_approx(prop.rotation.z), "a good one is straight")
+	prop.free()

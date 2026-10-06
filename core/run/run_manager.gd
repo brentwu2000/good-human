@@ -18,6 +18,10 @@ signal value_changed(value: RunValue)
 signal run_ended(result: RunResult)
 ## S05-02: the owner's condition (0..1) changed. It carries from fight to fight.
 signal owner_condition_changed(ratio: float)
+## P-05: what the owner holds changed (equipped, dropped, worn further).
+signal weapon_changed(weapon: WeaponData)
+## P05-09: it wore out and broke.
+signal weapon_broke(weapon: WeaponData)
 
 enum RunStatus { NOT_STARTED, RUNNING, EXTRACTED, FAILED }
 
@@ -55,6 +59,8 @@ var owner_condition: float = 1.0
 ## P05-02: what the owner is holding this walk. Null = bare hands. Picking
 ## up / equipping / swapping is P05-10.
 var equipped_weapon: WeaponData
+## P05-09: the very thing in the owner's bag they are holding (its condition).
+var equipped_stack: ItemStack
 ## The owner is fighting: the fight owns their health until it ends.
 var owner_busy: bool = false
 ## Sprint 06: fights finished on this walk (won / lost by the owner).
@@ -78,6 +84,7 @@ func _ready() -> void:
 	dog_safe_inventory.accepts = func(item: ItemData) -> bool: return item.is_safe_eligible()
 	training = TrainingTracker.new(DataRegistry.training)
 	human_run_inventory.changed.connect(_emit_value_changed)
+	human_run_inventory.changed.connect(_check_still_holding)
 	dog_safe_inventory.changed.connect(_emit_value_changed)
 	if dog_actor == null:
 		dog_actor = dog
@@ -231,7 +238,7 @@ func resolve_search(point: Node, stack: ItemStack) -> ItemStack:
 		search_empty.emit(point)
 		return null
 
-	var left := human_run_inventory.add_item(stack.item, stack.quantity)
+	var left := human_run_inventory.add_stack(stack)
 	var added := stack.quantity - left
 	if added > 0:
 		loot_gained.emit(stack.item, added)
@@ -239,7 +246,69 @@ func resolve_search(point: Node, stack: ItemStack) -> ItemStack:
 		searched_points[point.search_id] = true
 		return null
 	loot_blocked.emit(stack.item, left)
-	return ItemStack.new(stack.item, left)
+	var rest := ItemStack.new(stack.item, left)
+	rest.condition = stack.condition
+	return rest
+
+
+# --- Weapons (P-05) -------------------------------------------------------------
+
+## The owner holds `stack` (it must be a weapon in their bag). Returns false
+## if it cannot be held.
+func equip(stack: ItemStack) -> bool:
+	var weapon := DataRegistry.weapon_for_item(stack.item_id) if stack != null else null
+	if weapon == null or not human_run_inventory.slots.has(stack):
+		return false
+	equipped_stack = stack
+	equipped_weapon = weapon
+	weapon_changed.emit(weapon)
+	return true
+
+
+func unequip() -> void:
+	if equipped_weapon == null and equipped_stack == null:
+		return
+	equipped_stack = null
+	equipped_weapon = null
+	weapon_changed.emit(null)
+
+
+## How worn what they hold is.
+func equipped_state() -> WeaponCondition.State:
+	return WeaponCondition.state(equipped_weapon, WeaponCondition.left(equipped_weapon, equipped_stack))
+
+
+## P05-09: a blow landed with it or taken on it wears it by `amount`. It
+## breaks once the fight is over (`break_if_worn_out`).
+func wear_equipped(amount: int = 1) -> void:
+	if equipped_weapon == null or equipped_stack == null or equipped_weapon.condition_max <= 0:
+		return
+	var before := equipped_state()
+	equipped_stack.condition = maxi(WeaponCondition.left(equipped_weapon, equipped_stack) - amount, 0)
+	if equipped_state() != before:
+		weapon_changed.emit(equipped_weapon)
+
+
+## Worn to nothing: it is gone from the bag and their hands. Returns true if
+## it broke.
+func break_if_worn_out() -> bool:
+	if equipped_stack == null or equipped_state() != WeaponCondition.State.BROKEN:
+		return false
+	var broken := equipped_weapon
+	var at := human_run_inventory.slots.find(equipped_stack)
+	equipped_stack = null
+	equipped_weapon = null
+	if at >= 0:
+		human_run_inventory.remove_at(at)
+	weapon_broke.emit(broken)
+	weapon_changed.emit(null)
+	return true
+
+
+## Dropped or thrown away: no longer held.
+func _check_still_holding() -> void:
+	if equipped_stack != null and not human_run_inventory.slots.has(equipped_stack):
+		unequip()
 
 
 # --- Training -----------------------------------------------------------------
@@ -268,7 +337,7 @@ func grant_reward(table: LootTableData) -> ItemStack:
 	var stack := table.roll(run_rng)
 	if stack == null:
 		return null
-	var left := human_run_inventory.add_item(stack.item, stack.quantity)
+	var left := human_run_inventory.add_stack(stack)
 	if stack.quantity - left > 0:
 		loot_gained.emit(stack.item, stack.quantity - left)
 	if left > 0:
