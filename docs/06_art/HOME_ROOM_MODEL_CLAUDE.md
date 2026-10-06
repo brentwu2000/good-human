@@ -1,0 +1,5 @@
+# Home Room, Modelled — Claude (owner request, 2026-10-06)
+
+The environment part of D6-06 (Pair Identity Home): the room shown at the top of Home, where the human stands with the dog at their feet. Built by script in a separate headless Blender (`tools/art/build_home_room.py` → `assets/environment/home/home_room.glb`; source in `good-human-3d-pipeline/blender/environment/home/`), in the game's coordinates around where `home.gd` stands the two of them and its camera.
+
+A small, lived-in apartment living room: oak plank floor and a cream rug with a rust border, warm walls, a window with linen curtains and daylight, a teal sofa with a mustard pillow, a walnut coffee table with a mug and a book, a low bookcase of books, a framed photo on the wall (the place for the remembered moment, S06-10), the dog's bed by the window with its cushion, blanket and a toy, the leash on its hook by the door, a floor lamp and a potted plant. One mesh; filmic tonemapping on the room's light. Grade B; not final approval. The rest of D6-06 (how the pair's identity reads) stays open.

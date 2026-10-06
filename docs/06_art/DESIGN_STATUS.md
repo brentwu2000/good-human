@@ -104,7 +104,7 @@ Installed 2026-09-29. Brief: `docs/06_art/SPRINT06_DESIGN_WORKSTREAM.md`. Design
 | D6-03 | Dog POV Adoption | Design/Codex ART; environment models Claude | IN_PROGRESS |
 | D6-04 | Human Candidate System | Design/Codex ART | TODO |
 | D6-05 | Adoption Reactions | Design/Codex ART | TODO |
-| D6-06 | Pair Identity Home | Design/Codex ART | TODO |
+| D6-06 | Pair Identity Home | Design/Codex ART; room model Claude | IN_PROGRESS |
 | D6-07 | Habit Readability | Design/Codex ART | TODO |
 | D6-08 | Memory Presentation | Design/Codex ART | TODO |
 | D6-09 | Target Screenshot 05 — MY HUMAN | Design/Codex ART | TODO |

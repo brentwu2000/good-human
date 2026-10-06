@@ -21,6 +21,7 @@ extends Control
 @onready var _pair_label: Label = %PairLabel
 
 var _dog_visual: Node3D
+const HOME_ROOM := preload("res://assets/environment/home/home_room.glb")
 var _carry_button: Button
 
 
@@ -95,17 +96,16 @@ func _build_pair_view() -> void:
 	env.environment.background_color = Color(0.93, 0.86, 0.74)
 	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.environment.ambient_light_color = Color(0.95, 0.86, 0.76)
-	env.environment.ambient_light_energy = 0.75
+	env.environment.ambient_light_energy = 0.6
+	env.environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	world.add_child(env)
 	var lamp := DirectionalLight3D.new()
 	lamp.rotation_degrees = Vector3(-40, 30, 0)
 	lamp.light_color = Color(1.0, 0.93, 0.82)
 	lamp.shadow_enabled = true
 	world.add_child(lamp)
-	world.add_child(Greybox.box(Vector3(6, 0.05, 4), Color(0.6, 0.45, 0.32), Vector3(0, -0.025, -0.5)))
-	world.add_child(Greybox.box(Vector3(6, 3, 0.1), Color(0.95, 0.9, 0.8), Vector3(0, 1.5, -1.8)))
-	world.add_child(Greybox.box(Vector3(1.6, 0.45, 0.7), Color(0.42, 0.55, 0.52), Vector3(-1.6, 0.225, -1.3)))
-	world.add_child(Greybox.box(Vector3(1.0, 0.03, 0.7), Color(0.85, 0.7, 0.55), Vector3(0.55, 0.015, -0.2)))
+	# D6-06: the room they live in (tools/art/build_home_room.py).
+	world.add_child(HOME_ROOM.instantiate())
 	var owner_body := FighterPuppet3D.new()
 	world.add_child(owner_body)
 	owner_body.apply(Game.owner_fighter())
