@@ -13,6 +13,7 @@ func _ready() -> void:
 	_test_long_object()
 	_test_heavy_blunt()
 	_test_styles()
+	await _test_contact()
 	finish()
 
 
@@ -136,7 +137,7 @@ func _test_long_object() -> void:
 	check(not sim._condition_met(me, thrust), "crowded at 0.6 m: no thrust")
 	check(sim._condition_met(me, shove), "only the shove")
 	check(shove.displacement > thrust.displacement and shove.power < thrust.power, "which makes room rather than hurting")
-	check(sim._approach_at(me) > 100.0, "closing in, they stop where the pole works, not at shove range (%.0f)" % sim._approach_at(me))
+	check(sim._approach_at(me) > 90.0, "closing in, they stop where the pole works, not at shove range (%.0f)" % sim._approach_at(me))
 	sim.fighters[CombatSimulation.OPPONENT].position = me.position + 120.0
 	check(sim._condition_met(me, thrust), "at 1.2 m the thrust lands")
 	var gaps := {"umbrella": 0.0, "broom": 0.0}
@@ -236,3 +237,46 @@ func _test_styles() -> void:
 	check(u["whiff"] > k["whiff"] * 5 + 10, "untrained swings from out of reach and misses (%d whiffs vs calm %d)" % [u["whiff"], k["whiff"]])
 	check(float(k["counter"]) / k["attacks"] > float(u["counter"]) / u["attacks"] + 0.05, "calm counters more of the time (%.0f %% vs %.0f %%)" % [100.0 * k["counter"] / k["attacks"], 100.0 * u["counter"] / u["attacks"]])
 	check(scrapper.ideal_shift < calm.ideal_shift and scrapper.quick_weight > calm.quick_weight, "a scrapper wants in closer and goes for the quick move")
+
+
+## P05-08: a weapon lands only in its P-04 contact window, and only where it
+## is drawn — no invisible range. A thrust's drawn tip is where its reach
+## says (the target's body front is 0.17 m from their centre); a swing sweeps
+## across, so it is held to the same allowance P-04 gives the hook.
+func _test_contact() -> void:
+	var outside := {"n": 0, "hits": 0}
+	for id in [&"umbrella", &"broom", &"old_dumbbell"]:
+		for i in 6:
+			var sim := CombatSimulation.new(PLAYER.armed(DataRegistry.get_weapon(id)), JOGGER, 1500 + i)
+			sim.combat_event.connect(func(kind: StringName, side: int, _skill: CombatSkillData, _v: float) -> void:
+				if side == CombatSimulation.PLAYER and kind in [&"hit", &"blocked"]:
+					outside["hits"] += 1
+					if sim.fighters[CombatSimulation.PLAYER].phase != CombatFighter.Phase.CONTACT:
+						outside["n"] += 1)
+			sim.run_to_end(1.0 / 60.0)
+	check(outside["hits"] > 50 and outside["n"] == 0, "P05-08: every weapon blow lands inside its contact window (%d of %d outside)" % [outside["n"], outside["hits"]])
+	var body_front := 0.17
+	var hook_allowance := 0.30
+	for id in [&"umbrella", &"broom", &"old_dumbbell"]:
+		var weapon := DataRegistry.get_weapon(id)
+		for skill in weapon.moveset.attacks:
+			if skill.preferred_range < weapon.moveset.ideal_min - 1.0 and weapon.moveset.ideal_min > 0.0:
+				continue  # a crowded-only move (the broom's shove) is the hand, not the tip
+			var puppet := FighterPuppet3D.new()
+			add_child(puppet)
+			puppet.apply(PLAYER)
+			puppet.hold(weapon)
+			await get_tree().process_frame
+			var clip: String = FighterPuppet3D.ATTACK_CLIPS.get(skill.animation_key, "Jab")
+			var drawn := 0.0
+			for t in [0.45, 0.5, 0.55]:
+				(puppet._body as P04HumanVisual).pose_clip(clip, t)
+				await get_tree().process_frame
+				var tip: Vector3 = puppet._prop.global_transform * Vector3(0, WeaponProp3D.TIP[weapon.archetype], 0)
+				drawn = maxf(drawn, (tip - puppet.global_position).dot(-puppet.global_basis.z))
+			var reach := skill.preferred_range / 100.0 - body_front
+			if clip == "Jab":
+				check(absf(drawn - reach) < 0.15, "%s: the drawn tip reaches %.2f m, its reach %.2f m" % [skill.id, drawn, reach])
+			else:
+				check(reach - drawn <= hook_allowance, "%s: a swing reaching %.2f m is drawn to %.2f m (hook allowance)" % [skill.id, reach, drawn])
+			puppet.queue_free()

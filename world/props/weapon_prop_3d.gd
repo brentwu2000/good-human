@@ -5,6 +5,14 @@ extends RefCounted
 ## hand bone it points the way the forearm does: forward on a poke, up in a
 ## guard.
 
+## How far along +Y from the grip the drawn weapon ends (its striking tip).
+const TIP := {
+	WeaponData.Archetype.UMBRELLA: 0.6,
+	WeaponData.Archetype.LONG_OBJECT: 0.79,
+	WeaponData.Archetype.HEAVY_BLUNT: 0.12,
+}
+
+
 ## A placeholder for `weapon`, or null for bare hands.
 static func build(weapon: WeaponData) -> Node3D:
 	if weapon == null or weapon.is_unarmed():
@@ -33,9 +41,11 @@ static func _dumbbell(root: Node3D) -> void:
 		root.add_child(Greybox.cylinder(0.08, 0.05, iron, Vector3(x, 0.04, 0), Vector3(0, 0, PI * 0.5)))
 
 
-## A bamboo broom: a long handle and the bundled head out past the end.
+## A bamboo broom, held halfway up the handle like a stick (P05-08: so the
+## drawn head is where the thrust's reach says it is): handle behind the fist,
+## the rest and the bundled head out in front.
 static func _broom(root: Node3D) -> void:
-	root.add_child(Greybox.cylinder(0.014, 1.25, Color(0.72, 0.6, 0.38), Vector3(0, 0.45, 0)))
+	root.add_child(Greybox.cylinder(0.014, 1.15, Color(0.72, 0.6, 0.38), Vector3(0, -0.12, 0)))
 	var head := MeshInstance3D.new()
 	var cone := CylinderMesh.new()
 	cone.top_radius = 0.03
@@ -43,24 +53,25 @@ static func _broom(root: Node3D) -> void:
 	cone.height = 0.38
 	head.mesh = cone
 	head.material_override = Greybox.material(Color(0.62, 0.55, 0.32))
-	head.position = Vector3(0, 1.24, 0)
+	head.position = Vector3(0, 0.6, 0)
 	root.add_child(head)
 
 
-## A closed umbrella: a J handle in the fist, the shaft, the furled canopy
-## (widest near the handle end) and the metal tip.
+## A closed folding umbrella (P05-08: sized so the drawn tip is where the
+## poke's reach says it is): a J handle in the fist, the shaft, the furled
+## canopy (widest near the handle end) and the metal tip.
 static func _umbrella(root: Node3D) -> void:
 	var canopy := Color(0.16, 0.2, 0.32)
 	root.add_child(Greybox.box(Vector3(0.03, 0.1, 0.03), Color(0.35, 0.22, 0.12), Vector3(0, -0.02, 0)))
 	root.add_child(Greybox.box(Vector3(0.03, 0.03, 0.08), Color(0.35, 0.22, 0.12), Vector3(0, -0.07, 0.03)))
-	root.add_child(Greybox.cylinder(0.009, 0.82, Color(0.25, 0.25, 0.27), Vector3(0, 0.4, 0)))
+	root.add_child(Greybox.cylinder(0.009, 0.56, Color(0.25, 0.25, 0.27), Vector3(0, 0.28, 0)))
 	var furl := MeshInstance3D.new()
 	var cone := CylinderMesh.new()
 	cone.top_radius = 0.012
-	cone.bottom_radius = 0.055
-	cone.height = 0.56
+	cone.bottom_radius = 0.05
+	cone.height = 0.38
 	furl.mesh = cone
 	furl.material_override = Greybox.material(canopy)
-	furl.position = Vector3(0, 0.46, 0)
+	furl.position = Vector3(0, 0.33, 0)
 	root.add_child(furl)
-	root.add_child(Greybox.cylinder(0.006, 0.07, Color(0.75, 0.75, 0.78), Vector3(0, 0.84, 0)))
+	root.add_child(Greybox.cylinder(0.006, 0.06, Color(0.75, 0.75, 0.78), Vector3(0, 0.57, 0)))

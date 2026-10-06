@@ -13,5 +13,5 @@ script = ExtResource("1_moves")
 id = &"umbrella"
 attacks = Array[ExtResource("6_skill")]([ExtResource("2_poke"), ExtResource("3_swing"), ExtResource("4_counter")])
 defenses = Array[ExtResource("6_skill")]([ExtResource("5_guard"), ExtResource("7_dodge")])
-ideal_min = 86.0
-ideal_max = 100.0
+ideal_min = 90.0
+ideal_max = 104.0
