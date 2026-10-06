@@ -64,6 +64,8 @@ var in_combo: bool = false
 var combo_count: int = 0
 ## Decided to step in to hand range: no kicking from out there until then.
 var closing_until: float = -1.0
+## P05-06: what they hold weighs on their feet (applied after move_speed).
+var move_speed_scale: float = 1.0
 
 
 ## P05-02: where this fighter wants to stand, by what they hold.
@@ -84,7 +86,9 @@ func _init(fighter_data: FighterData, fighter_side: int, balance: GameBalance) -
 	hp = max_hp
 	attack = data.stats.attack(balance)
 	action_interval = data.stats.action_interval(balance)
-	move_speed = data.stats.move_speed(balance)
+	if data.weapon != null and not data.weapon.is_unarmed():
+		move_speed_scale = data.weapon.moveset.move_speed_scale
+	move_speed = data.stats.move_speed(balance) * move_speed_scale
 	stability = data.stats.stability(balance)
 
 

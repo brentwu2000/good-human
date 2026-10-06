@@ -11,6 +11,7 @@ func _ready() -> void:
 	_test_unarmed_baseline()
 	_test_umbrella()
 	_test_long_object()
+	_test_heavy_blunt()
 	finish()
 
 
@@ -149,3 +150,32 @@ func _test_long_object() -> void:
 				steps += 1
 			gaps[key] += total / maxf(steps, 1)
 	check(gaps["broom"] > gaps["umbrella"] + 5.0, "a broom fight is held further out than an umbrella fight (%.0f vs %.0f)" % [gaps["broom"] / 20.0, gaps["umbrella"] / 20.0])
+
+
+## P05-06: heavy blunt is commitment — slow to start, slow to recover, heavy
+## on the feet, and it goes through a guard.
+func _test_heavy_blunt() -> void:
+	var dumbbell := DataRegistry.get_weapon(&"old_dumbbell")
+	check(dumbbell != null and dumbbell.archetype == WeaponData.Archetype.HEAVY_BLUNT, "P05-06: the old dumbbell is heavy blunt")
+	check(not dumbbell.item.is_safe_eligible(), "and not something for the dog's backpack")
+	var kick: CombatSkillData = load("res://data/combat/skills/skill_kick.tres")
+	for skill in dumbbell.moveset.attacks:
+		check(skill.is_heavy(), "%s is a heavy blow" % skill.id)
+		check(skill.windup >= 0.6 and skill.recovery > kick.recovery, "%s commits: long wind-up, longer recovery than a kick" % skill.id)
+		check(skill.guard_break >= 0.7, "%s goes through a guard" % skill.id)
+	var held := PLAYER.armed(dumbbell)
+	var bare := CombatSimulation.new(PLAYER, JOGGER, 2)
+	var heavy := CombatSimulation.new(held, JOGGER, 2)
+	check(heavy.fighters[0].move_speed < bare.fighters[0].move_speed * 0.8, "it slows their feet")
+	# Through a block: the same blow, blocked by a fist guard, still hurts.
+	var block: CombatSkillData = load("res://data/combat/skills/skill_block.tres")
+	var smash: CombatSkillData = load("res://data/combat/skills/skill_heavy_smash.tres")
+	var through := 1.0 - block.damage_reduction * (1.0 - smash.guard_break)
+	check(through > 0.8, "a blocked smash still lands %.0f %% of itself" % (through * 100.0))
+	var wins := {"bare": 0, "dumbbell": 0}
+	for i in 30:
+		for key: String in ["bare", "dumbbell"]:
+			var fight := CombatSimulation.new(held if key == "dumbbell" else PLAYER, DELIVERY, 800 + i)
+			if fight.run_to_end() == CombatSimulation.Result.VICTORY:
+				wins[key] += 1
+	check(wins["dumbbell"] >= wins["bare"], "against the tough Delivery Worker it helps (%d vs %d of 30)" % [wins["dumbbell"], wins["bare"]])

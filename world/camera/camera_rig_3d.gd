@@ -498,7 +498,8 @@ func _update_yaw(delta: float) -> void:
 ## The yaw that looks from behind the dog at the fight, or null outside one
 ## (or with the dog standing right in the middle of it).
 func _fight_yaw() -> Variant:
-	if context in [Context.EXPLORE, Context.RELEASE] or owner_actor == null:
+	# The dog-eye option aims through the eyes instead (ADR-015 as it was).
+	if combat_pov or context in [Context.EXPLORE, Context.RELEASE] or owner_actor == null:
 		return null
 	var centre := combat_center()
 	var to_fight := centre - dog.global_position

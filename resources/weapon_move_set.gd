@@ -12,6 +12,8 @@ extends Resource
 ## the ordinary hand-to-hand spacing (`SpacingData`).
 @export var ideal_min: float = -1.0
 @export var ideal_max: float = -1.0
+## P05-06: how it weighs on their feet. A dumbbell slows every step.
+@export var move_speed_scale: float = 1.0
 
 
 func skills() -> Array[CombatSkillData]:

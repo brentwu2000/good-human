@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"old_dumbbell"
+display_name = "舊啞鈴"
+description = "公園健身角留下來的啞鈴。很重。"
+type = 4
+rarity = 1
+stackable = false
+max_stack = 1
+value = 20
+loot_class = 1
+size_class = 1

@@ -17,7 +17,7 @@ signal bumped(from: Vector3)
 ## Codex's authored combat clips (P-04 + ART), by attack, reaction and footwork.
 ## P05-04: until Codex's D5W-02 umbrella motion, the umbrella's poke rides
 ## the jab (the arm thrusts out) and its swing the hook (the arm sweeps across).
-const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Jab", &"swing": "HeavyHook"}
+const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Jab", &"swing": "HeavyHook", &"smash": "Jab"}
 ## The hand a weapon is held in: the lead hand, the one the jab clip drives.
 const WEAPON_HAND := "hand_l"
 const REACTION_CLIPS := {
@@ -388,6 +388,14 @@ func play_windup(skill: CombatSkillData) -> void:
 		&"dodge":
 			if _torso != null:
 				tween.tween_property(_torso, "rotation:z", 0.4 * _turn, 0.1)
+		&"smash":
+			# P05-06: the dumbbell goes up over the head and the body leans
+			# back under it — the longest, plainest telegraph in the game.
+			var arm := _joint(_arms, _limb)
+			if arm != null:
+				tween.tween_property(arm, "rotation:x", -2.6, skill.windup).set_trans(Tween.TRANS_SINE)
+			if _torso != null:
+				tween.parallel().tween_property(_torso, "rotation:x", -0.25, skill.windup)
 		&"hook", &"swing":
 			# P04-04: the whole upper body loads up. Shoulders and hips turn
 			# away and the arm comes up and out to the side — it has to be
@@ -434,6 +442,9 @@ func play_strike(skill: CombatSkillData) -> void:
 	if skill.animation_key in [&"hook", &"swing"]:
 		_play_hook_strike(skill)
 		return
+	if skill.animation_key == &"smash":
+		_play_smash_strike(skill)
+		return
 	if skill.animation_key == &"kick":
 		_play_kick_strike(skill)
 		return
@@ -447,6 +458,23 @@ func play_strike(skill: CombatSkillData) -> void:
 		tween.parallel().tween_property(_torso, "rotation:x", -0.12 if kick else 0.0, 0.08)
 	tween.parallel().tween_property(_body, "position:z", -0.2 if kick else -0.12, 0.08)
 	tween.tween_interval(0.08)
+	tween.tween_callback(_reset_pose)
+
+
+## P05-06: the smash comes down from over the head, the body folding after
+## it, and stays down through the long follow-through.
+func _play_smash_strike(skill: CombatSkillData) -> void:
+	var tween := _new_tween()
+	var out := skill.strike_time + skill.contact_time
+	var arm := _joint(_arms, _limb)
+	if arm != null:
+		arm.rotation.x = -2.6
+		tween.tween_property(arm, "rotation:x", -0.6, out).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	if _torso != null:
+		_torso.rotation.x = -0.25
+		tween.parallel().tween_property(_torso, "rotation:x", 0.35, out)
+	tween.parallel().tween_property(_body, "position:z", -0.12, out)
+	tween.tween_interval(skill.follow_through)
 	tween.tween_callback(_reset_pose)
 
 

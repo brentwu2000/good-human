@@ -5,8 +5,8 @@ const SPRINT_ITEMS: Array[StringName] = [
 	&"tennis_ball", &"dog_treat", &"sports_drink", &"bandage", &"old_running_shoes", &"umbrella",
 	&"jump_rope", &"hand_grip", &"dog_toy", &"old_sports_watch", &"boxing_gloves", &"mysterious_item",
 	&"half_tennis_ball", &"banyan_frisbee",
-	# P05-05: the broom, a long object to fight with.
-	&"broom",
+	# P-05: the broom (long object) and the old dumbbell (heavy blunt).
+	&"broom", &"old_dumbbell",
 ]
 const TABLE_PATHS: Array[String] = [
 	"res://data/loot_tables/residential_trash.tres",

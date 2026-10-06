@@ -18,9 +18,19 @@ static func build(weapon: WeaponData) -> Node3D:
 			_umbrella(root)
 		WeaponData.Archetype.LONG_OBJECT:
 			_broom(root)
+		WeaponData.Archetype.HEAVY_BLUNT:
+			_dumbbell(root)
 		_:
 			root.add_child(Greybox.cylinder(0.02, 1.0, Color(0.5, 0.45, 0.4), Vector3(0, 0.45, 0)))
 	return root
+
+
+## An old dumbbell: a short bar across the fist, a plate at each end.
+static func _dumbbell(root: Node3D) -> void:
+	var iron := Color(0.22, 0.22, 0.24)
+	root.add_child(Greybox.cylinder(0.016, 0.3, Color(0.55, 0.55, 0.57), Vector3(0, 0.04, 0), Vector3(0, 0, PI * 0.5)))
+	for x in [-0.13, 0.13]:
+		root.add_child(Greybox.cylinder(0.08, 0.05, iron, Vector3(x, 0.04, 0), Vector3(0, 0, PI * 0.5)))
 
 
 ## A bamboo broom: a long handle and the bundled head out past the end.
