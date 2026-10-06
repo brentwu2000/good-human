@@ -170,7 +170,7 @@ func _update_toon_button(button: Button) -> void:
 
 
 func _update_camera_button(button: Button) -> void:
-	button.text = "戰鬥鏡頭：狗視角" if CameraRig3D.combat_pov else "戰鬥鏡頭：P-02 第三人稱"
+	button.text = "戰鬥鏡頭：狗眼" if CameraRig3D.combat_pov else "戰鬥鏡頭：越肩"
 
 
 func _bind(button: Button, action: Callable) -> void:

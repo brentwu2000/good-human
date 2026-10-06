@@ -142,14 +142,22 @@ func _test_dog_instinct() -> void:
 	check(absf(dog._visual.rotation.x) < 0.02, "head back up")
 
 
-## D4/P02-011/012: the P-02 owner-focused third person, for the comparison.
+## ADR-L04: the fight is shot low over the dog's shoulder; the dog-eye snap
+## stays available from the debug panel.
 func _test_camera_comparison() -> void:
 	var rig := map.rig
 	coordinator.blows_landed = 1
+	check(not CameraRig3D.combat_pov, "ADR-L04: the over-the-shoulder shot is the default fight camera")
 	CameraRig3D.combat_pov = false
 	await _physics(90)
 	check_eq(rig.context, CameraRig3D.Context.ACTIVE, "the fight proper")
-	check(rig.pov < 0.05, "the P-02 camera stays in third person (pov %.2f)" % rig.pov)
+	check(rig.pov < 0.05, "the fight stays in third person (pov %.2f)" % rig.pov)
+	check(rig.camera.global_position.y - dog.global_position.y < 1.3, "low, about the height of the dog's back to an adult's hip (%.2f m)" % (rig.camera.global_position.y - dog.global_position.y))
+	var pair := coordinator.engagement.pair
+	for who: Array in [[map.human.global_position, "the owner"], [pair.human_global_position(), "the opponent"]]:
+		var at: Vector3 = who[0]
+		check(rig.camera.is_position_in_frustum(at + Vector3(0, 0.1, 0)) and rig.camera.is_position_in_frustum(at + Vector3(0, 1.5, 0)), "%s is seen head to foot" % who[1])
+	check(rig.is_dog_visible(), "and the dog is in the foreground")
 	CameraRig3D.combat_pov = true
 	await _physics(90)
 	check(rig.pov > 0.9, "the Dog POV camera snaps into the dog's eyes (pov %.2f)" % rig.pov)

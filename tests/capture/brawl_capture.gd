@@ -40,8 +40,10 @@ func _run() -> void:
 	DirAccess.make_dir_recursive_absolute("user://captures")
 	if FileAccess.file_exists(SaveManager.save_path):
 		DirAccess.remove_absolute(SaveManager.save_path)
+	Game.use_classic_pair_when_missing = true
 	FighterPuppet3D.show_combat_text = false
-	CameraRig3D.combat_pov = case_name != "p02_snap"
+	# ADR-L04: the shipped fight camera (low, over the dog's shoulder).
+	CameraRig3D.combat_pov = false
 	var placeholder := Node.new()
 	_tree.root.add_child(placeholder)
 	_tree.current_scene = placeholder

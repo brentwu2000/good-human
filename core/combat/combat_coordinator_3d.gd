@@ -481,7 +481,7 @@ func debug_set_owner_condition(ratio: float) -> void:
 
 ## Debug overlay line: the camera's framing and the owner's condition.
 func debug_text() -> String:
-	var rig_text := "camera %s pov %.2f %s" % [CameraRig3D.Context.keys()[camera.context], camera.pov, "DOG-POV" if CameraRig3D.combat_pov else "P-02 3rd"] if camera != null else "camera -"
+	var rig_text := "camera %s pov %.2f %s" % [CameraRig3D.Context.keys()[camera.context], camera.pov, "DOG-POV" if CameraRig3D.combat_pov else "over-shoulder"] if camera != null else "camera -"
 	var owner_text := "owner %s %.0f%%" % [FighterPuppet3D.Condition.keys()[human.puppet.condition_state()], owner_condition() * 100.0] if engagement != null else "owner -"
 	return "Combat: %s  %s" % [rig_text, owner_text]
 

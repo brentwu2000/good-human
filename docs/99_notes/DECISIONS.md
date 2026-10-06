@@ -44,3 +44,7 @@ Evaluated in P-01; owner first chose switchable top-down + dog view, then after 
 
 ## ADR-011 — Dog agency over QTE
 Combat participation comes from continuous dog movement and contextual world actions (Bark, Leash Pull), not isolated QTE prompts. Full record: `ADR_011_DOG_AGENCY_OVER_QTE.md`.
+
+## ADR-L04 — Fight camera: low over the dog's shoulder
+> Local decision (owner, 2026-10-06, choosing between options after reviewing captures: 「低角度越肩」).
+Amends ADR-015 (still PROPOSED, adoption pending readability review). Captures of real fights in dog-eye first person failed that review: the dog stands within a metre of the fighters, so the view is trousers and shoes and nobody can tell who struck or whether it landed. Fights are now shot from behind the dog at about 0.8–1 m, 2–2.7 m back; the view turns to look past the dog at the fight, swung about halfway to side-on to the two fighters so they stand side by side, and aims at chest height so both are seen head to foot with the dog in the lower foreground. Circling the fight orbits the camera with it. The dog-eye snap stays available from the debug panel (`CameraRig3D.combat_pov`).

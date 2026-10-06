@@ -41,13 +41,19 @@ const FRAMING: Dictionary = {"pivot": 1.2, "pitch": -15.0, "distance": 4.2, "fov
 ## pass measured itself against the old 7.5 m pull-back instead of against
 ## walking, so it pulled back 1.8 m while narrowing 8° — the two cancelled and
 ## a fight looked like an ordinary walk.)
+## ADR-L04 (owner, 2026-10-06): the fight is shot low over the dog's shoulder,
+## not from inside its eyes. The camera stays behind the dog at about knee-to-
+## hip height and turns to look past it at the fight, so the dog sits in the
+## lower foreground and both people are seen whole: every blow, block and
+## stumble reads, and the dog's height still makes them big. (Dog-eye first
+## person, `pov`, stays as a debug option: `combat_pov`.)
 const CONTEXT_FRAMING: Dictionary = {
 	Context.EXPLORE: FRAMING,
-	Context.TENSION: {"pivot": 0.95, "pitch": -11.0, "distance": 2.35, "fov": 62.0, "focus": 0.50, "pov": 0.0},
-	Context.ACTIVE: {"pivot": 1.00, "pitch": -12.0, "distance": 2.00, "fov": 66.0, "focus": 1.00, "pov": 1.0},
-	Context.CRISIS: {"pivot": 0.95, "pitch": -10.0, "distance": 1.75, "fov": 58.0, "focus": 1.00, "pov": 1.0},
-	Context.AFFECTION: {"pivot": 1.00, "pitch": -10.0, "distance": 1.90, "fov": 52.0, "focus": 1.00, "pov": 1.0},
-	Context.RELEASE: {"pivot": 1.00, "pitch": -14.0, "distance": 3.10, "fov": 66.0, "focus": 0.60, "pov": 0.0},
+	Context.TENSION: {"pivot": 0.85, "pitch": -8.0, "distance": 2.70, "fov": 60.0, "focus": 0.60, "pov": 0.0, "subject": 1.1},
+	Context.ACTIVE: {"pivot": 0.80, "pitch": -7.0, "distance": 2.30, "fov": 60.0, "focus": 1.00, "pov": 1.0, "subject": 1.15},
+	Context.CRISIS: {"pivot": 0.75, "pitch": -6.0, "distance": 2.00, "fov": 56.0, "focus": 1.00, "pov": 1.0, "subject": 1.05},
+	Context.AFFECTION: {"pivot": 0.75, "pitch": -6.0, "distance": 2.00, "fov": 54.0, "focus": 1.00, "pov": 1.0, "subject": 1.1},
+	Context.RELEASE: {"pivot": 1.00, "pitch": -12.0, "distance": 3.10, "fov": 66.0, "focus": 0.60, "pov": 0.0, "subject": 1.0},
 }
 ## A tight shot only works while the dog is near the fight. Past this far from
 ## the owner (m) the boom gives ground so the fight stays in the picture, at
@@ -158,7 +164,16 @@ var context: Context = Context.EXPLORE
 ## owner-focused third person it is compared against (ADR-014, P-02). A build
 ## exported with the `p02_camera` feature (preset "Windows Desktop QA P-02")
 ## starts with it off, for the blind comparison; the debug panel flips it.
-static var combat_pov: bool = not OS.has_feature("p02_camera")
+## ADR-L04: off by default (the low over-the-shoulder shot); the debug panel
+## turns the dog-eye snap back on for comparison.
+static var combat_pov: bool = false
+## In a fight the view turns to look past the dog at the fight at this rate
+## (per second, exponential), so circling the fight orbits the camera with it.
+@export var fight_turn_rate: float = 2.2
+## How far (0..1) the fight view swings from straight past the dog towards
+## side-on to the two fighters, so they stand side by side on screen instead
+## of one hidden behind the other.
+@export_range(0.0, 1.0) var fight_side_on: float = 0.55
 
 ## 0..1 blend into the dog's eyes, eased separately from the rest of the framing.
 var pov: float = 0.0
@@ -262,7 +277,7 @@ func _update(delta: float, instant: bool) -> void:
 	var t := 1.0 if instant or current.is_empty() else 1.0 - exp(-smoothing * delta)
 	if current.is_empty():
 		current = target.duplicate()
-	for key: String in ["pivot", "pitch", "distance", "fov", "focus", "dog_low"]:
+	for key: String in ["pivot", "pitch", "distance", "fov", "focus", "dog_low", "subject"]:
 		var goal: float = target.get(key, 0.0)
 		current[key] = lerpf(current.get(key, goal), goal, framing_t)
 
@@ -408,9 +423,12 @@ func _composed_look(anchor: Vector3) -> Vector3:
 	var focus: float = current.get("focus", 0.0) * focus_weight
 	if focus <= 0.0 or owner_actor == null:
 		return anchor
-	var subject := owner_actor.global_position + Vector3(0, current["pivot"], 0)
+	# Waist-to-chest height on the people, not the camera's own low pivot,
+	# so a low camera still frames them head to foot.
+	var height := Vector3(0, float(current.get("subject", current["pivot"])), 0)
+	var subject := owner_actor.global_position + height
 	if coordinator != null and coordinator.pair != null:
-		subject = subject.lerp(coordinator.pair.human_global_position() + Vector3(0, current["pivot"], 0), 0.3)
+		subject = subject.lerp(coordinator.pair.human_global_position() + height, 0.4)
 	var offset := subject - anchor
 	var distance := offset.length()
 	if distance <= focus_dead_zone:
@@ -464,9 +482,41 @@ func _update_yaw(delta: float) -> void:
 		yaw -= turn * manual_turn_speed * delta
 		_manual_hold = manual_hold_seconds
 	_manual_hold -= delta
-	if _manual_hold > 0.0 or dog.planar_speed() < 0.3:
+	if _manual_hold > 0.0:
+		return
+	# ADR-L04: in a fight the camera looks past the dog at the fight, wherever
+	# the dog is facing, so the fight stays in front of the player.
+	var at_fight: Variant = _fight_yaw()
+	if at_fight != null:
+		yaw = lerp_angle(yaw, float(at_fight), 1.0 - exp(-fight_turn_rate * delta))
+		return
+	if dog.planar_speed() < 0.3:
 		return
 	yaw = lerp_angle(yaw, dog.heading(), 1.0 - exp(-follow_rate * follow_weight() * delta))
+
+
+## The yaw that looks from behind the dog at the fight, or null outside one
+## (or with the dog standing right in the middle of it).
+func _fight_yaw() -> Variant:
+	if context in [Context.EXPLORE, Context.RELEASE] or owner_actor == null:
+		return null
+	var centre := combat_center()
+	var to_fight := centre - dog.global_position
+	to_fight.y = 0.0
+	if to_fight.length() < 0.4:
+		return null
+	var past_dog := atan2(-to_fight.x, -to_fight.z)
+	if coordinator == null or coordinator.pair == null or context == Context.AFFECTION:
+		return past_dog
+	var line := coordinator.pair.human_global_position() - owner_actor.global_position
+	line.y = 0.0
+	if line.length() < 0.1:
+		return past_dog
+	# Across the fighters' line, from the dog's side of it.
+	var across := Vector3(line.z, 0.0, -line.x).normalized()
+	if across.dot(to_fight) < 0.0:
+		across = -across
+	return lerp_angle(past_dog, atan2(-across.x, -across.z), fight_side_on)
 
 
 ## 0..1: how strongly the camera should ease behind the dog right now:

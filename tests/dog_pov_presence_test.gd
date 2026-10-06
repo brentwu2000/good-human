@@ -33,6 +33,8 @@ func _ready() -> void:
 
 func _run() -> void:
 	_tree = get_tree()
+	# The dog-eye snap is now a debug option (ADR-L04); this test still covers it.
+	CameraRig3D.combat_pov = true
 	DirAccess.make_dir_recursive_absolute(TEST_SAVE.get_base_dir())
 	if FileAccess.file_exists(TEST_SAVE):
 		DirAccess.remove_absolute(TEST_SAVE)
