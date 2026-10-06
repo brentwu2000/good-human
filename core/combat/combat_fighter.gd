@@ -66,6 +66,17 @@ var combo_count: int = 0
 var closing_until: float = -1.0
 
 
+## P05-02: where this fighter wants to stand, by what they hold.
+func ideal_min(spacing: SpacingData) -> float:
+	var moves: WeaponMoveSet = data.weapon.moveset if data.weapon != null and not data.weapon.is_unarmed() else null
+	return moves.ideal_min if moves != null and moves.ideal_min >= 0.0 else spacing.ideal_min
+
+
+func ideal_max(spacing: SpacingData) -> float:
+	var moves: WeaponMoveSet = data.weapon.moveset if data.weapon != null and not data.weapon.is_unarmed() else null
+	return moves.ideal_max if moves != null and moves.ideal_max >= 0.0 else spacing.ideal_max
+
+
 func _init(fighter_data: FighterData, fighter_side: int, balance: GameBalance) -> void:
 	data = fighter_data
 	side = fighter_side

@@ -52,6 +52,9 @@ var value_at_first_extraction: RunValue
 ## whole walk instead of filling up before every fight. It comes back only a
 ## little on its own; scenes (rest spots) and items do the rest.
 var owner_condition: float = 1.0
+## P05-02: what the owner is holding this walk. Null = bare hands. Picking
+## up / equipping / swapping is P05-10.
+var equipped_weapon: WeaponData
 ## The owner is fighting: the fight owns their health until it ends.
 var owner_busy: bool = false
 ## Sprint 06: fights finished on this walk (won / lost by the owner).

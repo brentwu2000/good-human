@@ -15,6 +15,7 @@ const DOG_TRAITS_DIR: String = "res://data/identity/dog_traits"
 const HUMAN_BACKGROUNDS_DIR: String = "res://data/identity/human_backgrounds"
 const HABITS_DIR: String = "res://data/identity/habits"
 const MEMORY_KINDS_DIR: String = "res://data/identity/memories"
+const WEAPONS_DIR: String = "res://data/combat/weapons"
 
 var balance: GameBalance
 var training: TrainingBalance
@@ -35,6 +36,8 @@ var memory_kinds: Array[MemoryKindData] = []
 var _territories: Dictionary[StringName, TerritoryData] = {}
 
 var _items: Dictionary[StringName, ItemData] = {}
+## P-05: what a human can fight with, by id (unarmed included).
+var _weapons: Dictionary[StringName, WeaponData] = {}
 var _training_events: Dictionary[StringName, TrainingEventData] = {}
 
 
@@ -45,6 +48,7 @@ func _ready() -> void:
 	presence = load(PRESENCE_PATH) as PresenceData
 	spacing = load(SPACING_PATH) as SpacingData
 	_load_items()
+	_load_weapons()
 	_load_training_events()
 	_load_temptations()
 	_load_territories()
@@ -59,6 +63,35 @@ func get_training_event(event_id: StringName) -> TrainingEventData:
 	if not _training_events.has(event_id):
 		push_error("DataRegistry: unknown training event %s" % event_id)
 	return _training_events.get(event_id)
+
+
+func get_weapon(weapon_id: StringName) -> WeaponData:
+	return _weapons.get(weapon_id)
+
+
+## The weapon a carried item is, or null if it is not one.
+func weapon_for_item(item_id: StringName) -> WeaponData:
+	for weapon: WeaponData in _weapons.values():
+		if weapon.item != null and weapon.item.id == item_id:
+			return weapon
+	return null
+
+
+func get_all_weapon_ids() -> Array[StringName]:
+	var ids: Array[StringName] = []
+	ids.assign(_weapons.keys())
+	return ids
+
+
+func _load_weapons() -> void:
+	for file_name in ResourceLoader.list_directory(WEAPONS_DIR):
+		if not file_name.ends_with(".tres"):
+			continue
+		var weapon := load(WEAPONS_DIR.path_join(file_name)) as WeaponData
+		if weapon == null or _weapons.has(weapon.id):
+			push_error("DataRegistry: bad or duplicate weapon %s" % file_name)
+			continue
+		_weapons[weapon.id] = weapon
 
 
 func get_item(item_id: StringName) -> ItemData:

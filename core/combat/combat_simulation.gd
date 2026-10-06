@@ -363,13 +363,13 @@ func _footwork(fighter: CombatFighter, delta: float) -> void:
 		_continue_step(fighter, delta)
 		return
 	var d := distance()
-	if d > minf(_min_attack_range(fighter), spacing.ideal_max) and _incoming(fighter):
+	if d > minf(_min_attack_range(fighter), fighter.ideal_max(spacing)) and _incoming(fighter):
 		# Nobody walks back into a blow they can see coming (P04-10: a leash
 		# pull or a dodge that got them clear must not be undone by their own
 		# feet). They hold until it is spent.
 		fighter.footwork = CombatFighter.Footwork.HOLD
 		return
-	if d > minf(_min_attack_range(fighter), spacing.ideal_max):
+	if d > minf(_min_attack_range(fighter), fighter.ideal_max(spacing)):
 		fighter.footwork = CombatFighter.Footwork.APPROACH
 		if _move(fighter, fighter.move_speed * spacing.approach_speed * delta * _toward_opponent(fighter)):
 			return
@@ -378,7 +378,7 @@ func _footwork(fighter: CombatFighter, delta: float) -> void:
 		if not _circle(fighter, spacing.circle_speed * delta * fighter.lateral):
 			fighter.lateral = -fighter.lateral
 		return
-	if d < spacing.ideal_min:
+	if d < fighter.ideal_min(spacing):
 		_begin_step(fighter, CombatFighter.Footwork.BACKSTEP, spacing.backstep_distance, spacing.backstep_seconds)
 		_continue_step(fighter, delta)
 		return

@@ -144,7 +144,8 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	_axis = gap.normalized() if gap.length() > 0.01 else Vector3.FORWARD
 	_side_axis = Vector3.UP.cross(_axis)
 	var lateral := 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
-	var sim := CombatSimulation.new(human.fighter, opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
+	# P05-02: the owner fights with whatever they are holding.
+	var sim := CombatSimulation.new(human.fighter.armed(run_manager.equipped_weapon), opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
 	sim.set_lateral(lateral)
 	# S05-02: the owner starts the fight in whatever state the walk left them.
 	var owner_fighter := sim.fighters[CombatSimulation.PLAYER]
@@ -328,7 +329,7 @@ func _dog_counts() -> bool:
 ## range again.
 func _update_dog_block(delta: float) -> void:
 	var sim := engagement.simulation
-	var want_to_close := sim.distance() > sim.spacing.ideal_max
+	var want_to_close := sim.distance() > sim.fighters[CombatSimulation.PLAYER].ideal_max(sim.spacing)
 	if not want_to_close:
 		_kept_apart_left = 0.0
 		return
