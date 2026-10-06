@@ -66,7 +66,7 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 			return
 		_selected_inventory = inventory
 		_selected_index = index
-		_detail_label.text = "%s（$%d）：%s\n再點一格移動，或按「丟掉」" % [stack.item.display_name, stack.item.value, stack.item.description]
+		_detail_label.text = "%s（$%d）：%s\n%s\n再點一格移動，或按「丟掉」" % [WeaponCondition.name_of(stack), stack.item.value, stack.item.description, safe_line(stack.item)]
 		_discard_button.disabled = false
 		_use_button.visible = run_manager != null and stack.item.owner_recovery > 0.0
 		_use_button.disabled = run_manager == null or not run_manager.can_use_on_owner(inventory, index)
@@ -86,6 +86,13 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 			_detail_label.text = "%s太大了，狗狗的背包裝不下。只能讓主人拿著。" % moving.item.display_name
 			return
 	_clear_selection()
+
+
+## P05-12: whether it can be kept safe in the dog's backpack, said plainly.
+static func safe_line(item: ItemData) -> String:
+	if item.is_safe_eligible():
+		return "🐾 小東西：放進狗狗背包，就算主人被打倒也帶得回家。"
+	return "🧍 太大了，狗狗背包裝不下：只能讓主人拿著，打輸了就會丟。"
 
 
 ## Throws away the selected stack (frees a slot for better loot).

@@ -21,6 +21,7 @@ func _ready() -> void:
 	_test_deserialize_bad_data()
 	_test_changed_signal()
 	_test_dog_backpack_size()
+	_test_backpack_said()
 	finish()
 
 
@@ -187,3 +188,29 @@ func _test_dog_backpack_size() -> void:
 	for id in DataRegistry.get_all_item_ids():
 		var item := DataRegistry.get_item(id)
 		check(item.loot_class != ItemData.LootClass.WEAPON or item.size_class != ItemData.SizeClass.SMALL, "%s: no weapon is small enough to hide in the backpack" % id)
+
+
+## P05-12: the choice reads in the bag itself — the backpack's empty slots
+## say small things only, a large find is marked, and selecting something
+## says whether the backpack would keep it safe.
+func _test_backpack_said() -> void:
+	var panel := (load("res://ui/inventory/inventory_panel.tscn") as PackedScene).instantiate() as InventoryPanel
+	add_child(panel)
+	var run := RunManager.new()
+	run._ready()
+	run.human_run_inventory.add_item(DataRegistry.get_item(&"umbrella"))
+	run.human_run_inventory.add_item(DataRegistry.get_item(&"tennis_ball"))
+	panel.setup(run.human_run_inventory, run.dog_safe_inventory)
+	var dog_grid := panel.get_node("%DogGrid") as InventoryGrid
+	var human_grid := panel.get_node("%HumanGrid") as InventoryGrid
+	check(dog_grid.get_slot_button(0).text.contains("小東西"), "P05-12: the backpack's empty slots say small things only")
+	check(human_grid.get_slot_button(0).text.contains("大件"), "the umbrella is marked as a large thing")
+	check(not human_grid.get_slot_button(1).text.contains("大件"), "the ball is not")
+	panel.select_slot(run.human_run_inventory, 0)
+	var detail := panel.get_node("%DetailLabel") as Label
+	check(detail.text.contains("裝不下") and detail.text.contains("打輸"), "selecting the umbrella says only the human can carry it, and it is lost on a defeat")
+	panel.select_slot(run.human_run_inventory, 0)
+	panel.select_slot(run.human_run_inventory, 1)
+	check(detail.text.contains("帶得回家"), "selecting the ball says the backpack keeps it safe")
+	panel.queue_free()
+	run.free()

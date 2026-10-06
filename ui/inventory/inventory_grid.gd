@@ -33,11 +33,15 @@ func refresh() -> void:
 		var button := _buttons[i]
 		var stack := inventory.stack_at(i)
 		if stack == null:
-			button.text = "—"
+			# P05-12: the dog's backpack says what it can take.
+			button.text = "（小東西）" if inventory.accepts.is_valid() else "—"
 		elif stack.quantity > 1:
 			button.text = "%s\nx%d" % [stack.item.display_name, stack.quantity]
 		else:
 			button.text = stack.item.display_name
+		# P05-12: too big for the dog's backpack — only the human can carry it.
+		if stack != null and not stack.item.is_safe_eligible():
+			button.text += "\n（大件）"
 		var text_color := Color(0.6, 0.6, 0.6) if stack == null else stack.item.get_rarity_color()
 		button.add_theme_color_override("font_color", text_color)
 		button.add_theme_color_override("font_hover_color", text_color)
