@@ -111,11 +111,13 @@ Installed 2026-09-29. Brief: `docs/06_art/SPRINT06_DESIGN_WORKSTREAM.md`. Design
 ## P-05 Street Loot & Improvised Weapons Design (Update 010)
 Installed 2026-10-06. Brief: `docs/06_art/P05_DESIGN_WORKSTREAM.md`. Runs in parallel with engineering; Umbrella is the signature priority. No production-scale catalog yet.
 
+> Owner (2026-10-06, later): 「codex在處理狗狗的建模，你這邊能幫忙其他部分的美術嗎」 — Claude takes D5W-01: runtime models for the umbrella, broom and old dumbbell (`tools/art/build_p05_weapons.py` → `assets/props/weapons/*.glb`, wired as `WeaponData.world_prefab`). Grade B, not final approval.
+
 > Owner (2026-10-06): 「美術的部分都先跳過，把機制寫入」 — all D5W deliverables are skipped for now; engineering uses placeholder props, borrowed clips and procedural poses. Status stays TODO for Codex to pick up later.
 
 | ID | Deliverable | Owner | Status |
 |---|---|---|---|
-| D5W-01 | Weapon Silhouette | Design/Codex ART | TODO |
+| D5W-01 | Weapon Silhouette | Claude ART (owner request) | REVIEW |
 | D5W-02 | Umbrella Motion | Design/Codex ART | TODO |
 | D5W-03 | Long Object Motion | Design/Codex ART | TODO |
 | D5W-04 | Heavy Object Motion | Design/Codex ART | TODO |

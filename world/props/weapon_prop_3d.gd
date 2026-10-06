@@ -27,15 +27,24 @@ static func show_condition(prop: Node3D, condition: WeaponCondition.State) -> vo
 			dull = 0.5
 	prop.rotation.z = bend
 	prop.set_meta("condition", condition)
-	for child in prop.get_children():
-		var mesh := child as MeshInstance3D
-		if mesh == null or mesh.material_override == null:
-			continue
-		if not mesh.has_meta("base_color"):
-			mesh.material_override = mesh.material_override.duplicate()
-			mesh.set_meta("base_color", (mesh.material_override as StandardMaterial3D).albedo_color)
-		var base: Color = mesh.get_meta("base_color")
-		(mesh.material_override as StandardMaterial3D).albedo_color = base.darkened(dull)
+	# Placeholder pieces carry an override; a modelled prop carries its own
+	# surface materials. Either way each gets its own copy before it dulls.
+	for node in prop.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		for surface in mesh.get_surface_override_material_count() if mesh.material_override == null else 1:
+			var current: Material = mesh.material_override if mesh.material_override != null else mesh.get_active_material(surface)
+			var material := current as StandardMaterial3D
+			if material == null:
+				continue
+			var key := "base_color_%d" % surface
+			if not mesh.has_meta(key):
+				material = material.duplicate() as StandardMaterial3D
+				if mesh.material_override != null:
+					mesh.material_override = material
+				else:
+					mesh.set_surface_override_material(surface, material)
+				mesh.set_meta(key, material.albedo_color)
+			material.albedo_color = (mesh.get_meta(key) as Color).darkened(dull)
 
 
 ## A placeholder for `weapon`, or null for bare hands.

@@ -204,13 +204,19 @@ func _put_up_birds() -> void:
 		tween.tween_callback(bird.queue_free)
 
 
-## A little dust at someone's feet.
+## A little dust at someone's feet: low, thin, gone in half a second.
 func _dust(at: Vector3) -> void:
-	for i in 5:
-		var puff := Greybox.sphere(0.07, Color(0.72, 0.68, 0.6), Vector3(at.x, 0.06, at.z) + Vector3(randf_range(-0.25, 0.25), 0.0, randf_range(-0.25, 0.25)))
+	for i in 4:
+		var puff := Greybox.sphere(0.05, Color(0.66, 0.62, 0.55), Vector3(at.x, 0.04, at.z) + Vector3(randf_range(-0.22, 0.22), 0.0, randf_range(-0.22, 0.22)))
 		puff.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var haze := StandardMaterial3D.new()
+		haze.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		haze.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		haze.albedo_color = Color(0.66, 0.62, 0.55, 0.35)
+		puff.material_override = haze
+		puff.scale = Vector3(1.0, 0.45, 1.0)
 		get_parent().add_child(puff)
 		var tween := puff.create_tween()
-		tween.tween_property(puff, "scale", Vector3.ONE * randf_range(2.5, 4.0), 0.5).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(puff, "position:y", 0.25, 0.5)
+		tween.tween_property(puff, "scale", Vector3(2.2, 0.9, 2.2), 0.5).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(haze, "albedo_color:a", 0.0, 0.5)
 		tween.tween_callback(puff.queue_free)
