@@ -26,3 +26,4 @@ stagger = 9.0
 displacement = 30.0
 guard_break = 0.85
 damage_reduction = 0.0
+heavy = true

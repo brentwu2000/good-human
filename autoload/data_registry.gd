@@ -16,6 +16,7 @@ const HUMAN_BACKGROUNDS_DIR: String = "res://data/identity/human_backgrounds"
 const HABITS_DIR: String = "res://data/identity/habits"
 const MEMORY_KINDS_DIR: String = "res://data/identity/memories"
 const WEAPONS_DIR: String = "res://data/combat/weapons"
+const STYLES_DIR: String = "res://data/combat/styles"
 
 var balance: GameBalance
 var training: TrainingBalance
@@ -38,6 +39,7 @@ var _territories: Dictionary[StringName, TerritoryData] = {}
 var _items: Dictionary[StringName, ItemData] = {}
 ## P-05: what a human can fight with, by id (unarmed included).
 var _weapons: Dictionary[StringName, WeaponData] = {}
+var _styles: Dictionary = {}
 var _training_events: Dictionary[StringName, TrainingEventData] = {}
 
 
@@ -63,6 +65,17 @@ func get_training_event(event_id: StringName) -> TrainingEventData:
 	if not _training_events.has(event_id):
 		push_error("DataRegistry: unknown training event %s" % event_id)
 	return _training_events.get(event_id)
+
+
+## P05-07: the data for a combat style.
+func combat_style(style: CombatStyleData.Style) -> CombatStyleData:
+	if _styles.is_empty():
+		for file_name in ResourceLoader.list_directory(STYLES_DIR):
+			if file_name.ends_with(".tres"):
+				var data := load(STYLES_DIR.path_join(file_name)) as CombatStyleData
+				if data != null:
+					_styles[data.style] = data
+	return _styles.get(style)
 
 
 func get_weapon(weapon_id: StringName) -> WeaponData:

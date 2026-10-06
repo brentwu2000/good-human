@@ -24,3 +24,4 @@ power = 1.8
 stagger = 5.5
 damage_reduction = 0.0
 reposition_distance = 0.0
+heavy = true

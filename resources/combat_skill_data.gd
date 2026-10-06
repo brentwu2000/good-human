@@ -25,6 +25,8 @@ enum Condition {
 ## P05-05: too close to use it. A pole cannot be swung at someone already
 ## inside it, so the attack only starts from at least this far.
 @export var min_range: float = 0.0
+## A big committed blow (see `is_heavy`).
+@export var heavy: bool = false
 @export var animation_key: StringName
 
 @export_group("Timing")
@@ -70,6 +72,8 @@ enum Condition {
 
 
 ## A heavy blow: the dog senses it coming and it lands as a heavy hit. Was
-## "hook or kick" by name; now by weight, so weapons follow the same rule.
+## "hook or kick" by name; now marked in the data (`heavy`), so weapons follow
+## the same rule. Not by power: a quick umbrella poke can hit hard and still
+## be a light, quick thing.
 func is_heavy() -> bool:
-	return effect == Effect.ATTACK and power >= 1.25
+	return effect == Effect.ATTACK and heavy

@@ -25,3 +25,4 @@ stagger = 4.0
 displacement = 8.0
 damage_reduction = 0.0
 reposition_distance = 0.0
+heavy = true

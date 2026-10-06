@@ -66,17 +66,33 @@ var combo_count: int = 0
 var closing_until: float = -1.0
 ## P05-06: what they hold weighs on their feet (applied after move_speed).
 var move_speed_scale: float = 1.0
+## P05-07: how far their style moves where they stand, armed (units).
+var style_shift: float = 0.0
+var style_jitter_left: float = 0.0
 
 
-## P05-02: where this fighter wants to stand, by what they hold.
+## P05-02: where this fighter wants to stand, by what they hold — and, armed,
+## by how they hold it (P05-07).
 func ideal_min(spacing: SpacingData) -> float:
-	var moves: WeaponMoveSet = data.weapon.moveset if data.weapon != null and not data.weapon.is_unarmed() else null
-	return moves.ideal_min if moves != null and moves.ideal_min >= 0.0 else spacing.ideal_min
+	var moves: WeaponMoveSet = data.weapon.moveset if is_armed() else null
+	return (moves.ideal_min if moves != null and moves.ideal_min >= 0.0 else spacing.ideal_min) + style_shift
 
 
 func ideal_max(spacing: SpacingData) -> float:
-	var moves: WeaponMoveSet = data.weapon.moveset if data.weapon != null and not data.weapon.is_unarmed() else null
-	return moves.ideal_max if moves != null and moves.ideal_max >= 0.0 else spacing.ideal_max
+	var moves: WeaponMoveSet = data.weapon.moveset if is_armed() else null
+	return (moves.ideal_max if moves != null and moves.ideal_max >= 0.0 else spacing.ideal_max) + style_shift
+
+
+func is_armed() -> bool:
+	return data.weapon != null and not data.weapon.is_unarmed()
+
+
+## P05-07: their style while armed (untrained when none is set); null bare
+## handed, where the P-04 baseline applies untouched.
+func armed_style() -> CombatStyleData:
+	if not is_armed():
+		return null
+	return data.style if data.style != null else DataRegistry.combat_style(CombatStyleData.Style.UNTRAINED)
 
 
 func _init(fighter_data: FighterData, fighter_side: int, balance: GameBalance) -> void:

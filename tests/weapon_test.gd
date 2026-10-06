@@ -12,6 +12,7 @@ func _ready() -> void:
 	_test_umbrella()
 	_test_long_object()
 	_test_heavy_blunt()
+	_test_styles()
 	finish()
 
 
@@ -41,7 +42,7 @@ func _test_interface() -> void:
 	var sim := CombatSimulation.new(held, JOGGER, 3)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
-	check_eq(me.ideal_min(sim.spacing), 90.0, "the weapon sets where they want to stand")
+	check_eq(me.ideal_min(sim.spacing) - me.style_shift, 90.0, "the weapon sets where they want to stand")
 	check_eq(them.ideal_max(sim.spacing), sim.spacing.ideal_max, "the other fighter keeps hand-to-hand spacing")
 
 
@@ -179,3 +180,59 @@ func _test_heavy_blunt() -> void:
 			if fight.run_to_end() == CombatSimulation.Result.VICTORY:
 				wins[key] += 1
 	check(wins["dumbbell"] >= wins["bare"], "against the tough Delivery Worker it helps (%d vs %d of 30)" % [wins["dumbbell"], wins["bare"]])
+
+
+## P05-07: the same umbrella in different hands. Untrained misjudges its
+## reach, swings from out of range and is left open; calm waits and
+## counters; a scrapper gets in closer. Bare hands ignore style entirely.
+func _test_styles() -> void:
+	var untrained := DataRegistry.combat_style(CombatStyleData.Style.UNTRAINED)
+	var calm := DataRegistry.combat_style(CombatStyleData.Style.CALM)
+	var scrapper := DataRegistry.combat_style(CombatStyleData.Style.SCRAPPER)
+	check(untrained != null and calm != null and scrapper != null, "P05-07: three styles are data")
+	# Who the owner grows into.
+	var balance := DataRegistry.training
+	var fresh := HumanGrowth.new()
+	check(GrowthResolver.combat_style(fresh, balance, [&"patient"]) == untrained, "untrained until the dog has trained them")
+	var trained := HumanGrowth.new()
+	for tag in [TrainingEventData.Tag.RUN, TrainingEventData.Tag.ENDURE, TrainingEventData.Tag.COURAGE]:
+		trained.growth[TrainingEventData.tag_name(tag)] = balance.trait_full_growth
+	check(GrowthResolver.combat_style(trained, balance, [&"patient", &"gentle"]) == calm, "then a patient, gentle human fights calm")
+	check(GrowthResolver.combat_style(trained, balance, [&"energetic", &"bold"]) == scrapper, "and an energetic, bold one scraps")
+	# Bare hands: the P-04 baseline, whatever their style.
+	var styled := PLAYER.duplicate() as FighterData
+	styled.style = scrapper
+	var a := CombatSimulation.new(PLAYER, JOGGER, 21)
+	var b := CombatSimulation.new(styled, JOGGER, 21)
+	a.run_to_end()
+	b.run_to_end()
+	check(a.result == b.result and is_equal_approx(a.time, b.time), "bare-handed, style changes nothing")
+	# Armed: the same umbrella fights differently.
+	var umbrella := DataRegistry.get_weapon(&"umbrella")
+	var stats := {}
+	for style: CombatStyleData in [untrained, calm, scrapper]:
+		var me := PLAYER.armed(umbrella)
+		me.style = style
+		var c := {"whiff": 0, "counter": 0, "attacks": 0, "gap": 0.0, "steps": 0}
+		for i in 30:
+			var fight := CombatSimulation.new(me, DELIVERY, 1200 + i)
+			fight.combat_event.connect(func(kind: StringName, side: int, skill: CombatSkillData, _v: float) -> void:
+				if side != CombatSimulation.PLAYER or skill == null:
+					return
+				if kind == &"missed":
+					c["whiff"] += 1
+				elif kind == &"skill_started" and skill.effect == CombatSkillData.Effect.ATTACK:
+					c["attacks"] += 1
+					if skill.condition == CombatSkillData.Condition.TARGET_OPEN:
+						c["counter"] += 1)
+			while not fight.is_finished() and c["steps"] < 400000:
+				fight.step(1.0 / 60.0)
+				c["gap"] += fight.distance()
+				c["steps"] += 1
+		stats[style.style] = c
+	var u: Dictionary = stats[CombatStyleData.Style.UNTRAINED]
+	var k: Dictionary = stats[CombatStyleData.Style.CALM]
+	var sc: Dictionary = stats[CombatStyleData.Style.SCRAPPER]
+	check(u["whiff"] > k["whiff"] * 5 + 10, "untrained swings from out of reach and misses (%d whiffs vs calm %d)" % [u["whiff"], k["whiff"]])
+	check(float(k["counter"]) / k["attacks"] > float(u["counter"]) / u["attacks"] + 0.05, "calm counters more of the time (%.0f %% vs %.0f %%)" % [100.0 * k["counter"] / k["attacks"], 100.0 * u["counter"] / u["attacks"]])
+	check(scrapper.ideal_shift < calm.ideal_shift and scrapper.quick_weight > calm.quick_weight, "a scrapper wants in closer and goes for the quick move")

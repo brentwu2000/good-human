@@ -9,6 +9,8 @@ extends Resource
 @export var skills: Array[CombatSkillData] = []
 ## P05-02: what they are holding. Null = their bare hands (UNARMED).
 @export var weapon: WeaponData
+## P05-07: how they use it. Null = untrained.
+@export var style: CombatStyleData
 
 ## P05-02/03: this fighter holding `held`. Unarmed (null, or the UNARMED
 ## archetype) is this same fighter, untouched — the P-04 baseline. Otherwise a

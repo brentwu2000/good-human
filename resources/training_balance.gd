@@ -29,6 +29,9 @@ extends Resource
 @export_group("Visible behaviour")
 ## Growth in the matching tag at which a trait reaches its trained value.
 @export var trait_full_growth: float = 4.0
+## P05-07: average trait progress (0..1) past which the human has a fighting
+## style of their own instead of fighting untrained.
+@export var style_trained_at: float = 0.4
 ## Progress granted by the perk that completes a trait.
 @export_range(0.0, 1.0) var perk_trait_progress: float = 1.0
 ## Seconds of being dragged fast before the owner stumbles (RUN).

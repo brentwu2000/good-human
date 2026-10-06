@@ -78,6 +78,21 @@ func _init(player: FighterData, opponent: FighterData, rng_seed: int, balance: G
 	fighters = [CombatFighter.new(player, PLAYER, _balance), CombatFighter.new(opponent, OPPONENT, _balance)]
 	fighters[PLAYER].position = -start_distance / 2.0
 	fighters[OPPONENT].position = start_distance / 2.0
+	for fighter in fighters:
+		_restyle_spacing(fighter)
+
+
+## P05-07: where an armed fighter's style puts them. Untrained, it wanders —
+## sometimes too close, sometimes too far — re-picked every few seconds.
+func _restyle_spacing(fighter: CombatFighter) -> void:
+	var style := fighter.armed_style()
+	if style == null:
+		fighter.style_shift = 0.0
+		return
+	fighter.style_shift = style.ideal_shift
+	if style.ideal_jitter > 0.0:
+		fighter.style_shift += _rng.randf_range(-style.ideal_jitter, style.ideal_jitter * 0.5)
+		fighter.style_jitter_left = style.jitter_seconds
 
 
 func is_finished() -> bool:
@@ -107,6 +122,10 @@ func step(delta: float) -> void:
 	for fighter in fighters:
 		_tick_cooldowns(fighter, delta)
 		_yank(fighter, delta)
+		if fighter.style_jitter_left > 0.0:
+			fighter.style_jitter_left -= delta
+			if fighter.style_jitter_left <= 0.0:
+				_restyle_spacing(fighter)
 	for fighter in fighters:
 		_advance(fighter, delta)
 		if is_finished():
@@ -263,6 +282,15 @@ func choose_skill(fighter: CombatFighter) -> CombatSkillData:
 	var total := 0.0
 	var valid: Array[CombatSkillData] = []
 	var weights: Array[float] = []
+	# P05-07: armed, their style leans the choice (bare hands: untouched).
+	var style := fighter.armed_style()
+	var quickest := INF
+	var biggest := 0.0
+	if style != null:
+		for skill in fighter.data.skills:
+			if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and fighter.cooldown_left(skill) <= 0.0 and _condition_met(fighter, skill):
+				quickest = minf(quickest, skill.windup)
+				biggest = maxf(biggest, skill.power)
 	for skill in fighter.data.skills:
 		if skill == null or skill.effect != CombatSkillData.Effect.ATTACK or fighter.cooldown_left(skill) > 0.0 or not _condition_met(fighter, skill):
 			continue
@@ -272,6 +300,15 @@ func choose_skill(fighter: CombatFighter) -> CombatSkillData:
 		var weight := float(skill.priority)
 		if skill.id == fighter.last_attack:
 			weight *= _balance.repeat_weight
+		if style != null:
+			if skill.condition == CombatSkillData.Condition.TARGET_OPEN:
+				weight *= style.counter_weight
+			elif skill.is_heavy() and not _is_open(target):
+				weight *= style.heavy_unopened_weight
+			if is_equal_approx(skill.windup, quickest):
+				weight *= style.quick_weight
+			if is_equal_approx(skill.power, biggest):
+				weight *= style.biggest_weight
 		valid.append(skill)
 		weights.append(weight)
 		total += weight
@@ -310,11 +347,14 @@ func _is_open(target: CombatFighter) -> bool:
 
 func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
 	var target := _other(fighter)
+	# P05-07: what they believe the weapon reaches. Contact uses the real reach.
+	var style := fighter.armed_style()
+	var reach := skill.preferred_range * (1.0 + (style.reach_misjudge if style != null else 0.0))
 	match skill.condition:
 		CombatSkillData.Condition.TARGET_IN_RANGE:
-			return time >= fighter.ready_at and distance() <= skill.preferred_range and distance() >= skill.min_range
+			return time >= fighter.ready_at and distance() <= reach and distance() >= skill.min_range
 		CombatSkillData.Condition.TARGET_OPEN:
-			return time >= fighter.ready_at and distance() <= skill.preferred_range and distance() >= skill.min_range and _is_open(target)
+			return time >= fighter.ready_at and distance() <= reach and distance() >= skill.min_range and _is_open(target)
 		CombatSkillData.Condition.INCOMING_ATTACK:
 			# You react to a telegraph starting, not to it still being under
 			# way. Otherwise a longer wind-up is simply a longer free window for
@@ -550,6 +590,10 @@ func _phase_done(fighter: CombatFighter) -> void:
 			_enter(fighter, CombatFighter.Phase.FOLLOW_THROUGH, skill.follow_through)
 		CombatFighter.Phase.FOLLOW_THROUGH:
 			var whiff := 0.0 if fighter.connected or fighter.whiff_excused else skill.whiff_recovery
+			# P05-07: overreach they have (or have not) learned to manage.
+			var style := fighter.armed_style()
+			if style != null and whiff > 0.0:
+				whiff = maxf(whiff + style.whiff_extra, 0.0)
 			_enter(fighter, CombatFighter.Phase.RECOVERY, skill.recovery + whiff)
 		CombatFighter.Phase.ACTIVE:
 			_enter(fighter, CombatFighter.Phase.RECOVERY, skill.recovery)

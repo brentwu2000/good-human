@@ -47,6 +47,26 @@ static func apply_to_fighter(base: FighterData, growth: HumanGrowth, balance: Tr
 	return fighter
 
 
+## P05-07: how the human uses a weapon. Untrained until the dog has trained
+## them some; then the style their personality leans to (`tags`: personality
+## tags and tendencies), CALM on a tie.
+static func combat_style(growth: HumanGrowth, balance: TrainingBalance, tags: Array[StringName]) -> CombatStyleData:
+	var progress := 0.0
+	for key: StringName in [&"stumble", &"recovery", &"hesitation"]:
+		progress += clampf(trait_progress(growth, balance, key), 0.0, 1.0) / 3.0
+	if progress < balance.style_trained_at:
+		return DataRegistry.combat_style(CombatStyleData.Style.UNTRAINED)
+	var calm := DataRegistry.combat_style(CombatStyleData.Style.CALM)
+	var scrapper := DataRegistry.combat_style(CombatStyleData.Style.SCRAPPER)
+	var lean := 0
+	for tag in tags:
+		if calm.leaning_tags.has(tag):
+			lean += 1
+		if scrapper.leaning_tags.has(tag):
+			lean -= 1
+	return calm if lean >= 0 else scrapper
+
+
 ## 0 = untrained, 1 = fully trained, for one behaviour trait.
 static func trait_progress(growth: HumanGrowth, balance: TrainingBalance, trait_key: StringName) -> float:
 	var progress := 0.0

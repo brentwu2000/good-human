@@ -103,6 +103,15 @@ func can_provoke(_pair: OpponentPair3D) -> bool:
 	return run_manager.is_running() and human.is_following() and _defeat_left < 0.0 and engagement == null
 
 
+## The adopted human's personality (S06); none for the classic owner.
+func _owner_tags() -> Array[StringName]:
+	var tags: Array[StringName] = []
+	if Game.pair_state != null and Game.pair_state.human != null:
+		tags.append_array(Game.pair_state.human.personality_tags)
+		tags.append_array(Game.pair_state.human.hidden_tendencies)
+	return tags
+
+
 func _on_run_started(_seed: int) -> void:
 	engagement = null
 	_apply_owner_condition()
@@ -111,6 +120,8 @@ func _on_run_started(_seed: int) -> void:
 	human.set_state(HumanFollower3D.State.FOLLOW)
 	if _base_fighter != null:
 		human.fighter = GrowthResolver.apply_to_fighter(_base_fighter, Game.human_growth, DataRegistry.training)
+		# P05-07: how they will use anything they pick up on this walk.
+		human.fighter.style = GrowthResolver.combat_style(Game.human_growth, DataRegistry.training, _owner_tags())
 	_pairs.clear()
 	for node in get_tree().get_nodes_in_group(OpponentPair3D.GROUP):
 		var p := node as OpponentPair3D

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CombatStyleData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat_style_data.gd" id="1_style"]
+
+[resource]
+script = ExtResource("1_style")
+style = 2
+ideal_shift = 0.0
+ideal_jitter = 0.0
+heavy_unopened_weight = 0.8
+counter_weight = 2.5
+quick_weight = 1.0
+biggest_weight = 1.0
+whiff_extra = -0.1
+leaning_tags = Array[StringName]([&"patient", &"gentle", &"caring", &"tidy", &"worrier", &"homebody", &"tired"])

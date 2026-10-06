@@ -27,3 +27,4 @@ displacement = 22.0
 damage_reduction = 0.0
 reposition_distance = 0.0
 guard_break = 0.6
+heavy = true
