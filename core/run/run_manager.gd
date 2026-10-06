@@ -148,6 +148,9 @@ func start_run(seed_value: int = fixed_seed) -> void:
 		point.prepare(self)
 
 	run_status = RunStatus.RUNNING
+	# P-05: a weapon brought from home is in the human's hand from the start.
+	if report_to_game:
+		Game.hand_out_carried(self)
 	_update_extractions()
 	run_started.emit(run_seed)
 	_emit_value_changed()

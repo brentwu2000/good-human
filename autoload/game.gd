@@ -138,6 +138,53 @@ func start_run_3d() -> void:
 	_change_scene(RUN_MAP_3D_SCENE)
 
 
+# --- P-05: taking a banked weapon out again -----------------------------------
+
+## The stash slot of the weapon the human takes on the next walk, or -1 for
+## bare hands. Chosen at Home; once taken out it is exposed again.
+var carry_out_slot: int = -1
+
+
+## Stash slots holding something to fight with.
+func carry_out_choices() -> Array[int]:
+	var slots: Array[int] = []
+	for i in home_stash.capacity:
+		var stack := home_stash.stack_at(i)
+		if stack != null and DataRegistry.weapon_for_item(stack.item_id) != null:
+			slots.append(i)
+	return slots
+
+
+## Bare hands → each banked weapon in turn → bare hands.
+func next_carry_out() -> void:
+	var choices := carry_out_choices()
+	var at := choices.find(carry_out_slot)
+	carry_out_slot = -1 if at + 1 >= choices.size() else choices[at + 1]
+
+
+## What the human will carry, or null.
+func carry_out_stack() -> ItemStack:
+	if carry_out_slot < 0 or not carry_out_choices().has(carry_out_slot):
+		return null
+	return home_stash.stack_at(carry_out_slot)
+
+
+## The walk begins: the chosen weapon leaves the stash and goes in the human's
+## hand — in their bag, exposed, like anything found on the way. Saved at
+## once, so quitting mid-walk cannot keep it safe at home as well.
+func hand_out_carried(run: RunManager) -> void:
+	var stack := carry_out_stack()
+	carry_out_slot = -1
+	if stack == null:
+		return
+	home_stash.take_stack(home_stash.slots.find(stack))
+	if not bool(run.take_weapon(stack)["ok"]):
+		home_stash.add_stack(stack)
+		return
+	SaveManager.data["stash"] = home_stash.serialize()
+	SaveManager.save_game()
+
+
 func can_start_run() -> bool:
 	return ResourceLoader.exists(RUN_MAP_SCENE)
 

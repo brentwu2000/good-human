@@ -112,6 +112,31 @@ func _run() -> void:
 	saved.deserialize(SaveManager.data["stash"], DataRegistry.get_item)
 	var reloaded := saved.get_stacks().filter(func(s: ItemStack) -> bool: return s.item_id == &"broom")
 	check(not reloaded.is_empty() and reloaded[0].condition == 12, "and saved with its wear")
+
+	# Owner direction (2026-10-06): a banked weapon can be taken out again.
+	Game.goto_home()
+	await _wait_for_scene(Game.HOME_SCENE)
+	var home := _tree.current_scene
+	var carry := home.find_child("CarryButton", true, false) as Button
+	check(carry != null and carry.visible and carry.text.contains("空手"), "Home offers to take a banked weapon out (%s)" % (carry.text if carry != null else "none"))
+	carry.pressed.emit()
+	check(carry.text.contains("掃把") and carry.text.contains("會丟"), "tapping picks the broom, and says it can be lost (%s)" % carry.text)
+	home.get_node("%Walk3DButton").pressed.emit()
+	await _wait_for_scene(Game.RUN_MAP_3D_SCENE)
+	await _frames(5)
+	map = _tree.current_scene as RunMap3D
+	run = map.run_manager
+	check(run.equipped_weapon == DataRegistry.get_weapon(&"broom"), "the walk starts with the broom in hand")
+	check_eq(run.equipped_stack.condition, 12, "the same broom, as worn as it was")
+	check_eq(Game.home_stash.count_item(&"broom"), 0, "it has left the stash: exposed again")
+	var on_disk := Inventory.new(Game.home_stash.capacity)
+	on_disk.deserialize(SaveManager.data["stash"], DataRegistry.get_item)
+	check_eq(on_disk.count_item(&"broom"), 0, "and the save already says so")
+	check(map.human.puppet._prop != null, "seen in their hand")
+	map.coordinator.time_scale = 50.0
+	run.defeat_run("測試")
+	await _wait_for_scene(Game.RUN_RESULT_SCENE)
+	check_eq(Game.home_stash.count_item(&"broom"), 0, "lost with the walk, it is gone for good")
 	finish()
 
 

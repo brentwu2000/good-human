@@ -21,11 +21,23 @@ extends Control
 @onready var _pair_label: Label = %PairLabel
 
 var _dog_visual: Node3D
+var _carry_button: Button
 
 
 func _ready() -> void:
 	_walk_button.pressed.connect(_on_walk_pressed)
 	_walk_3d_button.pressed.connect(Game.start_run_3d)
+	# P-05: take a banked weapon out again (and risk it again).
+	_carry_button = Button.new()
+	_carry_button.name = "CarryButton"
+	_carry_button.custom_minimum_size = Vector2(0, 56)
+	_carry_button.add_theme_font_size_override("font_size", 22)
+	_carry_button.focus_mode = Control.FOCUS_NONE
+	_carry_button.pressed.connect(func() -> void:
+		Game.next_carry_out()
+		_refresh())
+	_walk_3d_button.get_parent().add_child(_carry_button)
+	_walk_3d_button.get_parent().move_child(_carry_button, _walk_3d_button.get_index() + 1)
 	_view_stash_button.pressed.connect(func() -> void: _stash_panel.open(Game.home_stash))
 	# Sprint 06: a save is one pair, so meeting a new dog means starting over.
 	_new_game_button.pressed.connect(_new_game_confirm.popup_centered)
@@ -48,6 +60,16 @@ func _refresh() -> void:
 	_pair_label.text = pair_text()
 	_pair_label.visible = not _pair_label.text.is_empty()
 	_territory_label.visible = not _territory_label.text.is_empty()
+	_carry_button.visible = not Game.carry_out_choices().is_empty()
+	_carry_button.text = carry_text()
+
+
+## 「帶著出門：雨傘（有點舊了）」 — tapping cycles through banked weapons.
+static func carry_text() -> String:
+	var stack := Game.carry_out_stack()
+	if stack == null:
+		return "帶著出門：空手（點一下換）"
+	return "帶著出門：%s（打輸了會丟）" % WeaponCondition.name_of(stack)
 
 
 func _process(delta: float) -> void:
