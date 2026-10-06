@@ -28,6 +28,9 @@ enum Style { UNTRAINED, SCRAPPER, CALM }
 @export var reach_misjudge: float = 0.0
 ## Extra recovery after a whiff (s): overreach they have not learned to avoid.
 @export var whiff_extra: float = 0.0
+## P-05 / Sprint 05 greed revision: the kinds of weapon this style does well
+## with ("a weapon fitting the current human/style"). Untrained: none.
+@export var suited_archetypes: Array[WeaponData.Archetype] = []
 ## Who grows into this style once trained: personality tags and tendencies
 ## of the human (S06 backgrounds).
 @export var leaning_tags: Array[StringName] = []

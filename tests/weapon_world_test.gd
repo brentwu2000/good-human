@@ -84,6 +84,26 @@ func _run() -> void:
 	check(left.size() == 1 and left[0].weapon == DataRegistry.get_weapon(&"umbrella"), "put down on the ground where the broom was")
 	check_eq(left[0].stack.condition, 25, "the same umbrella, as worn as it was")
 
+	# Sprint 05 greed revision: what they hold is named, not only counted.
+	var hud := map.get_node("RunHUD")
+	check((hud.get_node("%BagButton") as Button).text.contains("掃把"), "the bag button names the broom in hand, not only its price")
+	# A trained scrapper does well with an umbrella, not a broom: the umbrella
+	# lying in the street suits them better, and staying out for it is offered.
+	# (A calm human does well with a broom already: nothing better there.)
+	var director := map.get_node("TemptationDirector") as TemptationDirector
+	map.human.fighter.style = DataRegistry.combat_style(CombatStyleData.Style.CALM)
+	check(director.better_weapon_spot() == null, "holding a broom, a calm human is not tempted by the umbrella")
+	map.human.fighter.style = DataRegistry.combat_style(CombatStyleData.Style.SCRAPPER)
+	check(director.better_weapon_spot() == _world_weapons()[0], "a scrapper is: the umbrella in the street suits them better than the broom")
+	map.human.fighter.style = DataRegistry.combat_style(CombatStyleData.Style.UNTRAINED)
+	check(director.better_weapon_spot() == null, "an untrained human is not tempted: weapons do not suit them yet")
+	map.human.fighter.style = DataRegistry.combat_style(CombatStyleData.Style.SCRAPPER)
+	var template: TemptationData = load("res://data/greed/temptations/better_weapon.tres")
+	director.offer(template, run.elapsed_time)
+	check(_world_weapons()[0]._calling, "offered, the umbrella calls from where it lies")
+	director._stop_calling()
+	check(not _world_weapons()[0]._calling, "and stops when the offer ends")
+
 	# And it is what they fight with.
 	map.coordinator.start_engagement(map.coordinator.get_pairs()[0])
 	await _frames(2)

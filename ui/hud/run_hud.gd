@@ -145,6 +145,12 @@ func _on_run_started(_run_seed: int) -> void:
 	for inventory in [run_manager.human_run_inventory, run_manager.dog_safe_inventory]:
 		if not inventory.changed.is_connected(_update_bag_button):
 			inventory.changed.connect(_update_bag_button)
+	if not run_manager.weapon_changed.is_connected(_on_weapon_changed):
+		run_manager.weapon_changed.connect(_on_weapon_changed)
+	_update_bag_button()
+
+
+func _on_weapon_changed(_weapon: WeaponData) -> void:
 	_update_bag_button()
 
 
@@ -279,6 +285,10 @@ func _update_bag_button() -> void:
 	var text := "🎒 %d/%d  $%d" % [value.unbanked_slots, value.unbanked_capacity, value.unbanked_value]
 	if value.safe_value > 0:
 		text += "  🔒$%d" % value.safe_value
+	# Sprint 05 greed revision: what the human fights with is not flattened
+	# into the money total; it is named.
+	if run_manager.equipped_weapon != null:
+		text += "  ✋%s" % WeaponCondition.name_of(run_manager.equipped_stack)
 	_bag_button.text = text
 
 

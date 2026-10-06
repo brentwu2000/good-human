@@ -38,6 +38,22 @@ static func describe(found: WeaponData, condition: int, held: WeaponData, fists:
 	return "%s（%s）：%s" % [found.display_name, state, "・".join(words) if not words.is_empty() else "差不多"]
 
 
+## Sprint 05 greed revision (P-05): would `candidate` (with `condition` use
+## left) suit this human better than what they hold? Only for a trained style
+## that does well with its kind — and then if they hold nothing, hold a kind
+## that suits them less, or hold the same kind worn out while this is not.
+static func suits_better(candidate: WeaponData, condition: int, style: CombatStyleData, held: WeaponData, held_condition: int) -> bool:
+	if candidate == null or style == null or not style.suited_archetypes.has(candidate.archetype):
+		return false
+	if held == null or held.is_unarmed():
+		return true
+	if not style.suited_archetypes.has(held.archetype):
+		return true
+	var mine := WeaponCondition.state(held, held_condition)
+	var theirs := WeaponCondition.state(candidate, condition if condition >= 0 else candidate.condition_max)
+	return held.archetype == candidate.archetype and mine >= WeaponCondition.State.CRITICAL and theirs <= WeaponCondition.State.WORN
+
+
 static func _more(a: float, b: float, margin: float, more: String, less: String) -> String:
 	if a > b * (1.0 + margin):
 		return more

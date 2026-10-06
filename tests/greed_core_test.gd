@@ -30,7 +30,8 @@ func _run() -> void:
 ## P4-004: the five templates the sprint asks for, each answerable by the world.
 func _test_templates() -> void:
 	var templates := DataRegistry.temptations
-	check_eq(templates.size(), 5, "five temptation templates")
+	# Sprint 05 greed revision (P-05): plus a weapon that suits the human better.
+	check_eq(templates.size(), 6, "six temptation templates")
 	var ids: Array[StringName] = []
 	for template in templates:
 		ids.append(template.id)
@@ -38,7 +39,7 @@ func _test_templates() -> void:
 		check(template.weight > 0.0, "%s can be picked" % template.id)
 		check(template.expiry > 0.0, "%s stops standing eventually" % template.id)
 		check(template.cooldown >= template.expiry, "%s does not repeat while still standing" % template.id)
-	for expected: StringName in [&"banyan_opportunity", &"one_more_search", &"rare_scent_after_extract", &"rival_after_extract", &"special_event_nearby"]:
+	for expected: StringName in [&"banyan_opportunity", &"one_more_search", &"rare_scent_after_extract", &"rival_after_extract", &"special_event_nearby", &"better_weapon"]:
 		check(ids.has(expected), "template %s exists" % expected)
 
 

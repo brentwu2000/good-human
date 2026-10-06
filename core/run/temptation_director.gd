@@ -31,6 +31,9 @@ const BETWEEN_OFFERS: float = 30.0
 var current: TemptationData
 ## S05-04: the place the current offer is about, calling the dog in the world.
 var calling_point: TerritoryPoint3D
+## P-05: the spot (a search point or a weapon lying in the street) holding the
+## weapon the current offer is about.
+var calling_weapon: Node3D
 var offered_ids: Dictionary[StringName, float] = {}
 
 var _next_attempt: float = 0.0
@@ -91,6 +94,10 @@ func offer(choice: TemptationData, now: float) -> void:
 	current = choice
 	offered_ids[choice.id] = now
 	_offer_expires_at = now + choice.expiry
+	if choice.needs == TemptationData.Needs.BETTER_WEAPON:
+		calling_weapon = better_weapon_spot()
+		if calling_weapon != null and calling_weapon.has_method(&"set_calling"):
+			calling_weapon.set_calling(true)
 	if choice.needs == TemptationData.Needs.TERRITORY:
 		# World cue before words: the place itself calls (S05-04).
 		calling_point = _territory_worth_returning()
@@ -103,6 +110,32 @@ func _stop_calling() -> void:
 	if calling_point != null and is_instance_valid(calling_point):
 		calling_point.set_calling(false)
 	calling_point = null
+	if calling_weapon != null and is_instance_valid(calling_weapon) and calling_weapon.has_method(&"set_calling"):
+		calling_weapon.set_calling(false)
+	calling_weapon = null
+
+
+## P-05 / Sprint 05 greed revision: where something that suits the human
+## better than what they hold already is — lying in the street, or waiting at
+## a spot not yet searched (its loot is rolled at the start of the walk).
+func better_weapon_spot() -> Node3D:
+	var human := coordinator.get("human") as HumanFollower3D if coordinator != null else null
+	var style: CombatStyleData = human.fighter.style if human != null and human.fighter != null else null
+	var held := run_manager.equipped_weapon
+	var held_left := WeaponCondition.left(held, run_manager.equipped_stack)
+	for node in _in_run(&"world_weapons"):
+		var lying := node as WorldWeapon3D
+		if lying != null and not lying.is_queued_for_deletion() and WeaponCompare.suits_better(lying.weapon, lying.stack.condition, style, held, held_left):
+			return lying
+	for node in _in_run(SearchPoint.GROUP):
+		var point := node as SearchPoint3D
+		if point == null or not point.can_interact(run_manager):
+			continue
+		var stack := point.pending_loot()
+		var weapon := DataRegistry.weapon_for_item(stack.item_id) if stack != null else null
+		if weapon != null and WeaponCompare.suits_better(weapon, stack.condition, style, held, held_left):
+			return point
+	return null
 
 
 func _territory_worth_returning() -> TerritoryPoint3D:
@@ -169,6 +202,8 @@ func _world_offers(needs: TemptationData.Needs, value: RunValue) -> bool:
 			# A place the dog knows and has not made its own, not yet marked
 			# today (S05-03: the Banyan as a reason to stay).
 			return _territory_worth_returning() != null
+		TemptationData.Needs.BETTER_WEAPON:
+			return better_weapon_spot() != null
 	return false
 
 

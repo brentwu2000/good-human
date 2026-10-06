@@ -18,6 +18,7 @@ enum Needs {
 	UNSEARCHED_POINT,   ## somewhere still worth a sniff, with room in the bag
 	SQUIRREL,           ## a squirrel about
 	TERRITORY,          ## an unclaimed or contested territory (P4-005)
+	BETTER_WEAPON,      ## P-05: something out there that suits the human better than what they hold
 }
 
 @export var id: StringName

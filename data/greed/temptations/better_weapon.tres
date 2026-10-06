@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="TemptationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/temptation_data.gd" id="1_temptation"]
+
+[resource]
+script = ExtResource("1_temptation")
+id = &"better_weapon"
+dog_text = "那邊有個東西……主人拿著那個，一定打得更順手。"
+world_hint = "適合主人的東西"
+needs = 6
+weight = 1.4
+cooldown = 120.0
+expiry = 60.0
+min_unbanked_value = 0

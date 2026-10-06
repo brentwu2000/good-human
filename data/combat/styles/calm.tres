@@ -13,3 +13,4 @@ quick_weight = 1.0
 biggest_weight = 1.0
 whiff_extra = -0.1
 leaning_tags = Array[StringName]([&"patient", &"gentle", &"caring", &"tidy", &"worrier", &"homebody", &"tired"])
+suited_archetypes = Array[int]([1, 2])

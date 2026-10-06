@@ -17,6 +17,8 @@ var human: HumanFollower3D
 
 var _prop: Node3D
 var _label: Label3D
+## P-05 greed: it suits the human; it calls from further away.
+var _calling: bool = false
 
 
 func setup(found: ItemStack, run_manager: RunManager, owner_actor: HumanFollower3D) -> void:
@@ -43,9 +45,16 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	var dog := run.dog_actor as Node3D if run != null else null
-	_label.visible = dog != null and dog.global_position.distance_to(global_position) < SHOW_WITHIN
-	if _label.visible:
+	var near := dog != null and dog.global_position.distance_to(global_position) < SHOW_WITHIN
+	_label.visible = near or _calling
+	if near:
 		_label.text = describe() + ("" if owner_near() else "\n（帶主人過來）")
+	elif _calling:
+		_label.text = "❗"
+
+
+func set_calling(on: bool) -> void:
+	_calling = on
 
 
 func describe() -> String:

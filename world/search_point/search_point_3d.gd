@@ -19,6 +19,7 @@ var _progress: float = 0.0
 var _pending_loot: ItemStack
 var _has_rolled: bool = false
 var _time: float = 0.0
+var _calling: bool = false
 
 var _visual: Node3D
 var _name_label: Label3D
@@ -59,6 +60,17 @@ func prepare(run: RunManager) -> void:
 	_has_rolled = true
 	_visual.scale = Vector3.ONE
 	Greybox.set_faded(_visual, false)
+	_update_scent()
+
+
+## P-05: what is waiting here, if anything (rolled at the start of the walk).
+func pending_loot() -> ItemStack:
+	return _pending_loot if _has_rolled else null
+
+
+## P-05 greed: this spot holds something that suits the human; it calls.
+func set_calling(on: bool) -> void:
+	_calling = on
 	_update_scent()
 
 
@@ -149,6 +161,9 @@ func _update_scent() -> void:
 		_:
 			_scent.text = "〰"
 	_scent.modulate = ItemData.rarity_color(rarity) if rarity >= 0 else Color(0.92, 0.92, 0.92)
+	if _calling and not searched:
+		_scent.text = "❗" + _scent.text
+		_scent.modulate = Color(1.0, 0.85, 0.4)
 
 
 func _show_popup(text: String, popup_color: Color) -> void:
