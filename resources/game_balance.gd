@@ -54,6 +54,25 @@ extends Resource
 ## How long that opening stays open after they stop looking away (s): long
 ## enough for the owner's next blow, not for a combination (ADR-L02).
 @export var opening_grace: float = 1.2
+## Combinations (owner, 2026-10-06: 「戰鬥動作太單一」): after a jab that
+## connects (lands or is blocked) a fighter may throw straight on with a hand
+## — another jab or the hook — instead of stepping off. At most `combo_max`
+## follow-ups, each after only `combo_gap` seconds.
+@export_range(0.0, 1.0) var combo_chance: float = 0.65
+@export var combo_max: int = 2
+@export var combo_gap: float = 0.1
+## Into an opening (a bark, someone recovering from a swing) the heaviest blow
+## is likeliest, not certain: this often, otherwise the usual weighted choice.
+@export_range(0.0, 1.0) var opening_heavy_chance: float = 0.3
+## The attack a fighter has just thrown counts this much less next time, so
+## they mix it up rather than repeat.
+@export_range(0.0, 1.0) var repeat_weight: float = 0.4
+## Out of reach of the hands but in reach of a kick, a fighter usually steps
+## in to use their hands (this often) rather than kicking from where they
+## are, so the long kick is a choice and not what every gap turns into.
+@export_range(0.0, 1.0) var close_in_chance: float = 0.6
+## How long a decision to step in holds before they think again (s).
+@export var close_in_seconds: float = 0.8
 ## Once engaged, the player's human breaks away when the dog is this far away.
 @export var disengage_distance: float = 400.0
 ## Fights longer than this end as ABORTED.

@@ -46,6 +46,16 @@ var _body: Node3D
 ## Down clips outside the fight's procedural choreography; this is the one
 ## playing, or empty while the choreography drives the joints.
 var _ambient_clip: String = ""
+## Owner, 2026-10-06 (「戰鬥動作太單一」): which side an attack comes from.
+## Jabs alternate hands through a combination (a jab, then the rear-hand
+## cross); hooks and kicks come off either side. Presentation only.
+var _mirrored_attack: bool = false
+## The arm or leg (index into `_arms` / `_legs`) and the turn direction the
+## choreography uses for the current attack.
+var _limb: int = 1
+var _turn: float = 1.0
+var _last_jab_at: float = -9.0
+var _side_rng := RandomNumberGenerator.new()
 var _hp_label: Label3D
 ## The fight wants the health bar shown; it only is with fight text on.
 var _hp_wanted: bool = false
@@ -206,7 +216,8 @@ func drive_combat_clip(fighter: CombatFighter) -> void:
 		return
 	var skill := fighter.action
 	if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and not fighter.is_idle():
-		skeletal.pose_clip(ATTACK_CLIPS.get(skill.animation_key, "Jab"), _attack_progress(fighter, skill))
+		var clip: String = ATTACK_CLIPS.get(skill.animation_key, "Jab")
+		skeletal.pose_clip(skeletal.mirrored(clip) if _mirrored_attack else clip, _attack_progress(fighter, skill))
 		return
 	if fighter.is_guarding():
 		skeletal.pose_clip("Block", 0.5)
@@ -314,13 +325,14 @@ func play_motion(delta: float) -> void:
 ## turns into it. This is what the player and the dog are reading.
 func play_windup(skill: CombatSkillData) -> void:
 	_log(skill.display_name)
+	_choose_side(skill)
 	var tween := _new_tween()
 	match skill.animation_key:
 		&"kick":
 			# P04-05: the leg chambers — it comes up off the ground in front
 			# of them while the upper body leans back to balance it. Standing
 			# on one leg is the commitment the dog can read.
-			var leg := _joint(_legs, 1)
+			var leg := _joint(_legs, _limb)
 			if leg != null:
 				tween.tween_property(leg, "rotation:x", -0.8, skill.windup).set_trans(Tween.TRANS_SINE)
 			if _torso != null:
@@ -333,26 +345,42 @@ func play_windup(skill: CombatSkillData) -> void:
 					tween.parallel().tween_property(arm, "rotation:x", -1.5, 0.12)
 		&"dodge":
 			if _torso != null:
-				tween.tween_property(_torso, "rotation:z", 0.4, 0.1)
+				tween.tween_property(_torso, "rotation:z", 0.4 * _turn, 0.1)
 		&"hook":
 			# P04-04: the whole upper body loads up. Shoulders and hips turn
 			# away and the arm comes up and out to the side — it has to be
 			# readable from across a street, because it is the blow worth
 			# barking at.
-			var arm := _joint(_arms, 1)
+			var arm := _joint(_arms, _limb)
 			if arm != null:
-				tween.tween_property(arm, "rotation:z", 1.15, skill.windup).set_trans(Tween.TRANS_SINE)
+				tween.tween_property(arm, "rotation:z", 1.15 * _turn, skill.windup).set_trans(Tween.TRANS_SINE)
 				tween.parallel().tween_property(arm, "rotation:x", 0.35, skill.windup)
 			if _torso != null:
-				tween.parallel().tween_property(_torso, "rotation:y", 0.55, skill.windup).set_trans(Tween.TRANS_SINE)
+				tween.parallel().tween_property(_torso, "rotation:y", 0.55 * _turn, skill.windup).set_trans(Tween.TRANS_SINE)
 			if _hips != null:
-				tween.parallel().tween_property(_hips, "rotation:y", 0.25, skill.windup)
+				tween.parallel().tween_property(_hips, "rotation:y", 0.25 * _turn, skill.windup)
 		_:
-			var arm := _joint(_arms, 1)
+			var arm := _joint(_arms, _limb)
 			if arm != null:
 				tween.tween_property(arm, "rotation:x", 0.75, skill.windup).set_trans(Tween.TRANS_SINE)
 			if _torso != null:
-				tween.parallel().tween_property(_torso, "rotation:y", -0.25, skill.windup)
+				tween.parallel().tween_property(_torso, "rotation:y", -0.25 * _turn, skill.windup)
+
+
+## Which side this attack comes off. A jab soon after another is the other
+## hand, so a combination reads as one-two; otherwise the lead hand. Hooks and
+## kicks come off either side.
+func _choose_side(skill: CombatSkillData) -> void:
+	match skill.animation_key:
+		&"punch":
+			_mirrored_attack = not _mirrored_attack if _time - _last_jab_at < 1.5 else false
+			_last_jab_at = _time
+		&"hook", &"kick":
+			_mirrored_attack = _side_rng.randf() < 0.5
+		_:
+			return
+	_limb = 0 if _mirrored_attack else 1
+	_turn = -1.0 if _mirrored_attack else 1.0
 
 
 ## The strike itself: the limb swings through, the body follows it, and only
@@ -370,7 +398,7 @@ func play_strike(skill: CombatSkillData) -> void:
 	if limb != null:
 		tween.tween_property(limb, "rotation:x", -1.2 if kick else -1.45, 0.08).set_trans(Tween.TRANS_QUAD)
 	if _torso != null:
-		tween.parallel().tween_property(_torso, "rotation:y", 0.3, 0.08)
+		tween.parallel().tween_property(_torso, "rotation:y", 0.3 * _turn, 0.08)
 		tween.parallel().tween_property(_torso, "rotation:x", -0.12 if kick else 0.0, 0.08)
 	tween.parallel().tween_property(_body, "position:z", -0.2 if kick else -0.12, 0.08)
 	tween.tween_interval(0.08)
@@ -383,7 +411,7 @@ func play_strike(skill: CombatSkillData) -> void:
 func _play_kick_strike(skill: CombatSkillData) -> void:
 	var tween := _new_tween()
 	var out := skill.strike_time + skill.contact_time
-	var leg := _joint(_legs, 1)
+	var leg := _joint(_legs, _limb)
 	if leg != null:
 		leg.rotation.x = -0.8
 		tween.tween_property(leg, "rotation:x", -1.45, out).set_trans(Tween.TRANS_QUAD)
@@ -402,16 +430,16 @@ func _play_kick_strike(skill: CombatSkillData) -> void:
 func _play_hook_strike(skill: CombatSkillData) -> void:
 	var tween := _new_tween()
 	# `_new_tween` squares the body up; start from the loaded wind-up pose.
-	var arm := _joint(_arms, 1)
+	var arm := _joint(_arms, _limb)
 	if arm != null:
-		arm.rotation = Vector3(0.35, 0.0, 1.15)
+		arm.rotation = Vector3(0.35, 0.0, 1.15 * _turn)
 		tween.tween_property(arm, "rotation:x", -1.1, skill.strike_time + skill.contact_time).set_trans(Tween.TRANS_QUAD)
 	if _torso != null:
-		_torso.rotation.y = 0.55
-		tween.parallel().tween_property(_torso, "rotation:y", -0.6, skill.strike_time + skill.contact_time).set_trans(Tween.TRANS_QUAD)
+		_torso.rotation.y = 0.55 * _turn
+		tween.parallel().tween_property(_torso, "rotation:y", -0.6 * _turn, skill.strike_time + skill.contact_time).set_trans(Tween.TRANS_QUAD)
 	if _hips != null:
-		_hips.rotation.y = 0.25
-		tween.parallel().tween_property(_hips, "rotation:y", -0.3, skill.strike_time + skill.contact_time)
+		_hips.rotation.y = 0.25 * _turn
+		tween.parallel().tween_property(_hips, "rotation:y", -0.3 * _turn, skill.strike_time + skill.contact_time)
 	tween.tween_interval(skill.follow_through)
 	tween.tween_callback(_reset_pose)
 

@@ -16,6 +16,7 @@ func _run() -> void:
 		check(true, "skeletal art is off in this project: nothing to test")
 		finish()
 		return
+	_test_mirrored_clips()
 	# The park grandma (the old master's slot) brings her own model.
 	check(OLD_MASTER.display_name == "老奶奶" and OLD_MASTER.skeletal_model != null, "the old master is the park grandma, with her own model")
 	var grandma := _puppet(OLD_MASTER)
@@ -69,3 +70,26 @@ func _puppet(data: FighterData) -> FighterPuppet3D:
 	add_child(puppet)
 	puppet.apply(data)
 	return puppet
+
+
+## Owner, 2026-10-06 (「戰鬥動作太單一」): every attack can come off the
+## other side. The mirrored clip puts each hand and foot exactly where the
+## original puts its twin, reflected left for right.
+func _test_mirrored_clips() -> void:
+	var a := P04HumanVisual.new()
+	var b := P04HumanVisual.new()
+	add_child(a)
+	add_child(b)
+	for clip: String in P04HumanVisual.MIRRORED_CLIPS:
+		check(b.mirrored(clip) == "mirror/" + clip, "%s has a mirrored version" % clip)
+		var worst := 0.0
+		for t in [0.25, 0.5, 0.75]:
+			a.pose_clip(clip, t)
+			b.pose_clip(b.mirrored(clip), t)
+			for bones: Array in [["hand_l", "hand_r"], ["hand_r", "hand_l"], ["foot_l", "foot_r"], ["foot_r", "foot_l"]]:
+				var pa := a.skeleton.get_bone_global_pose(a.skeleton.find_bone(bones[0])).origin
+				var pb := b.skeleton.get_bone_global_pose(b.skeleton.find_bone(bones[1])).origin
+				worst = maxf(worst, (Vector3(-pa.x, pa.y, pa.z) - pb).length())
+		check(worst < 0.01, "and it is the same blow off the other side (worst %.3f m)" % worst)
+	a.queue_free()
+	b.queue_free()

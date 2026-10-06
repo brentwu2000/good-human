@@ -22,6 +22,12 @@ const STYLIZED_MODEL := "res://assets/characters/human/models/p04_owner/p04_owne
 const RELAXED_CLIPS := preload("res://assets/characters/human/animations/p04_relaxed_clips.glb")
 const RELAXED_LIBRARY: StringName = &"relaxed"
 static var _relaxed_library: AnimationLibrary
+## Owner, 2026-10-06 (「戰鬥動作太單一」): the attacks mirrored left for right
+## — the jab's rear-hand cross, the other hook, a kick off the other leg.
+const MIRROR_LIBRARY: StringName = &"mirror"
+const MIRRORED_CLIPS: Array[String] = ["Jab", "HeavyHook", "Kick"]
+## One mirrored library per model's own clips (the grandma has hers).
+static var _mirror_libraries: Dictionary = {}
 var skeleton: Skeleton3D
 var player: AnimationPlayer
 var model: Node3D
@@ -45,6 +51,7 @@ func _init(scene: PackedScene = null) -> void:
 	skeleton = _find_type(model, "Skeleton3D") as Skeleton3D
 	player = _find_type(model, "AnimationPlayer") as AnimationPlayer
 	_add_relaxed_clips()
+	_add_mirrored_clips()
 	SoftToon.register(self)
 	for joint_name: String in BONE_MAP:
 		var joint := Node3D.new()
@@ -117,6 +124,54 @@ func _add_relaxed_clips() -> void:
 		source.free()
 	if _relaxed_library != null:
 		player.add_animation_library(RELAXED_LIBRARY, _relaxed_library)
+
+
+## `clip` played off the other side ("mirror/Jab"), or `clip` itself when there
+## is no mirrored version.
+func mirrored(clip: String) -> String:
+	var name := "%s/%s" % [MIRROR_LIBRARY, clip]
+	return name if player != null and player.has_animation(name) else clip
+
+
+func _add_mirrored_clips() -> void:
+	if player == null or player.has_animation_library(MIRROR_LIBRARY) or not player.has_animation_library(&""):
+		return
+	var source := player.get_animation_library(&"")
+	if not _mirror_libraries.has(source):
+		var library := AnimationLibrary.new()
+		for clip in MIRRORED_CLIPS:
+			if source.has_animation(clip):
+				library.add_animation(clip, mirror_animation(source.get_animation(clip)))
+		_mirror_libraries[source] = library
+	player.add_animation_library(MIRROR_LIBRARY, _mirror_libraries[source])
+
+
+## The rig is symmetric across its X plane (each _l bone's rest is its _r
+## twin's mirrored), so a clip mirrors by swapping _l and _r tracks and
+## reflecting every key: rotation (x, y, z, w) -> (x, -y, -z, w), position
+## (x, y, z) -> (-x, y, z).
+static func mirror_animation(source: Animation) -> Animation:
+	var mirror := source.duplicate(true) as Animation
+	for i in mirror.get_track_count():
+		var path := String(mirror.track_get_path(i))
+		var colon := path.rfind(":")
+		if colon >= 0:
+			var bone := path.substr(colon + 1)
+			if bone.ends_with("_l"):
+				bone = bone.trim_suffix("_l") + "_r"
+			elif bone.ends_with("_r"):
+				bone = bone.trim_suffix("_r") + "_l"
+			mirror.track_set_path(i, NodePath(path.substr(0, colon + 1) + bone))
+		for k in mirror.track_get_key_count(i):
+			var value: Variant = mirror.track_get_key_value(i, k)
+			match mirror.track_get_type(i):
+				Animation.TYPE_ROTATION_3D:
+					var q := value as Quaternion
+					mirror.track_set_key_value(i, k, Quaternion(q.x, -q.y, -q.z, q.w))
+				Animation.TYPE_POSITION_3D:
+					var v := value as Vector3
+					mirror.track_set_key_value(i, k, Vector3(-v.x, v.y, v.z))
+	return mirror
 
 
 func play_clip(clip: String, loop := true) -> void:

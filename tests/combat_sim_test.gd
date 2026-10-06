@@ -25,6 +25,7 @@ func _ready() -> void:
 	_test_dodge_avoids_hit()
 	_test_kick_staggers_low_will()
 	_test_deterministic()
+	_test_combinations()
 	_test_fights_complete()
 	_test_force_result()
 	_test_dog_agency_hooks()
@@ -78,7 +79,17 @@ func _test_ai_choices() -> void:
 	me.cooldowns[HOOK.id] = 0.0
 	# Beyond the jab and hook, inside the kick (P-04 reach matched to Codex's model).
 	_place(sim, 80.0)
-	check(sim.choose_skill(me) == KICK, "beyond punch reach: only kick is valid")
+	var far := {}
+	for i in 300:
+		me.closing_until = -1.0
+		var pick := sim.choose_skill(me)
+		far[pick] = far.get(pick, 0) + 1
+	check(not far.has(PUNCH) and not far.has(HOOK) and far.has(KICK), "beyond punch reach: the kick is the only blow that can be thrown (%s)" % _names(far))
+	check(far.get(null, 0) > far.get(KICK, 0), "but usually they step in to use their hands instead (%d of 300 kicked)" % far.get(KICK, 0))
+	me.closing_until = -1.0
+	sim.choose_skill(me)
+	if me.closing_until > sim.time:
+		check(sim.choose_skill(me) == null, "and having decided to step in, they do not kick from out there after all")
 
 	_place(sim, 60.0)
 	me.ready_at = sim.time + 5.0
@@ -145,6 +156,24 @@ func _test_deterministic() -> void:
 	check_eq(a.result, b.result, "same seed, same result")
 	check_eq(a.time, b.time, "same seed, same duration")
 	check_eq(a.fighters[0].uses, b.fighters[0].uses, "same seed, same skill usage")
+
+
+## Owner, 2026-10-06 (「戰鬥動作太單一」): a jab that connects may run on into
+## a combination — straight on, with the hands, never a kick.
+func _test_combinations() -> void:
+	var combos := {"follow": 0, "kick_in_combo": 0}
+	for i in 30:
+		var sim := CombatSimulation.new(PLAYER, JOGGER, 700 + i, balance)
+		sim.combat_event.connect(func(kind: StringName, side: int, skill: CombatSkillData, _v: float) -> void:
+			if kind != &"skill_started" or skill == null or skill.effect != CombatSkillData.Effect.ATTACK:
+				return
+			if sim.fighters[side].in_combo:
+				combos["follow"] += 1
+				if skill.animation_key == &"kick":
+					combos["kick_in_combo"] += 1)
+		sim.run_to_end()
+	check(combos["follow"] > 20, "jabs run on into combinations (%d follow-ups in 30 fights)" % combos["follow"])
+	check_eq(combos["kick_in_combo"], 0, "a combination is thrown with the hands")
 
 
 func _test_fights_complete() -> void:

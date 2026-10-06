@@ -447,23 +447,27 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	# P04-04: a hook loads the whole upper body — shoulders and hips turn away
 	# and the arm comes up and out — so it reads from across a street.
 	var hook: CombatSkillData = preload("res://data/combat/skills/skill_heavy_hook.tres")
+	# Owner, 2026-10-06: hooks and kicks come off either side; the checks
+	# follow whichever one this is (`_turn` mirrors the turns).
 	puppet.play_windup(hook)
+	var hook_arm: Node3D = puppet._arms[puppet._limb]
+	var turn: float = puppet._turn
 	await _physics(int(hook.windup * 60.0) + 2)
-	check(torso.rotation.y > 0.4, "a hook wind-up turns the shoulders away (%.2f rad)" % torso.rotation.y)
-	check(hips.rotation.y > 0.15, "and the hips with them (%.2f rad)" % hips.rotation.y)
-	check(arm.rotation.z > 0.8, "and the arm comes up and out to the side (%.2f rad)" % arm.rotation.z)
-	check(torso.rotation.y > jab_turn + 0.2, "far more than a jab's wind-up")
+	check(torso.rotation.y * turn > 0.4, "a hook wind-up turns the shoulders away (%.2f rad)" % torso.rotation.y)
+	check(hips.rotation.y * turn > 0.15, "and the hips with them (%.2f rad)" % hips.rotation.y)
+	check(hook_arm.rotation.z * turn > 0.8, "and the arm comes up and out to the side (%.2f rad)" % hook_arm.rotation.z)
+	check(torso.rotation.y * turn > jab_turn + 0.2, "far more than a jab's wind-up")
 	puppet.play_strike(hook)
 	await _physics(int((hook.strike_time + hook.contact_time) * 60.0) + 1)
-	check(torso.rotation.y < -0.3, "the strike unwinds the body through and past square (%.2f rad)" % torso.rotation.y)
-	check(arm.rotation.x < -0.8, "and the arm sweeps across (%.2f rad)" % arm.rotation.x)
+	check(torso.rotation.y * turn < -0.3, "the strike unwinds the body through and past square (%.2f rad)" % torso.rotation.y)
+	check(hook_arm.rotation.x < -0.8, "and the arm sweeps across (%.2f rad)" % hook_arm.rotation.x)
 	await _physics(30)
 	puppet._reset_pose()
 
 	# P04-05: a kick chambers the leg up in front of them, then drives it out.
 	var kick: CombatSkillData = preload("res://data/combat/skills/skill_kick.tres")
-	var leg := Greybox.part(body, "LegR")
 	puppet.play_windup(kick)
+	var leg: Node3D = puppet._legs[puppet._limb]
 	await _physics(int(kick.windup * 60.0) + 2)
 	check(leg.rotation.x < -0.6, "a kick wind-up lifts the leg up in front (%.2f rad)" % leg.rotation.x)
 	check(torso.rotation.x > 0.15, "while the upper body leans back to balance it (%.2f rad)" % torso.rotation.x)
@@ -473,6 +477,24 @@ func _test_body_is_articulated(puppet: FighterPuppet3D) -> void:
 	await _physics(int(kick.follow_through * 60.0) - 2)
 	check(leg.rotation.x < -1.2, "and it stays out through the follow-through")
 	await _physics(30)
+	puppet._reset_pose()
+
+	# Both sides get used: kicks off either leg, and jabs thrown close
+	# together alternate hands (a one-two).
+	var sides := {}
+	for i in 40:
+		puppet.play_windup(kick)
+		sides[puppet._limb] = true
+	check(sides.size() == 2, "kicks come off either leg")
+	puppet._time += 5.0
+	var jab_skill: CombatSkillData = preload("res://data/combat/skills/skill_jab.tres")
+	puppet.play_windup(jab_skill)
+	var first: int = puppet._limb
+	puppet.play_windup(jab_skill)
+	check(puppet._limb != first, "a jab straight after a jab is the other hand")
+	puppet._time += 5.0
+	puppet.play_windup(jab_skill)
+	check_eq(puppet._limb, 1, "after a pause the lead hand again")
 	puppet._reset_pose()
 
 	# P04-06: the guard stays up through a blow, and comes down when it ends.

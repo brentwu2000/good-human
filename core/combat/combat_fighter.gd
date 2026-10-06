@@ -57,6 +57,13 @@ var step_speed: float = 0.0
 var connected: bool = false
 ## Skill usage count, for tests / debug.
 var uses: Dictionary[StringName, int] = {}
+## The last attack thrown, so the next choice can mix it up.
+var last_attack: StringName = &""
+## In a combination: the next attack follows straight on, with a hand.
+var in_combo: bool = false
+var combo_count: int = 0
+## Decided to step in to hand range: no kicking from out there until then.
+var closing_until: float = -1.0
 
 
 func _init(fighter_data: FighterData, fighter_side: int, balance: GameBalance) -> void:

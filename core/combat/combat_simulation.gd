@@ -250,24 +250,57 @@ func choose_skill(fighter: CombatFighter) -> CombatSkillData:
 	# heavy blow is a choice and not a reflex and the jab still gets thrown.
 	if best == null or best.effect != CombatSkillData.Effect.ATTACK:
 		return best
-	# An opening is not the moment for a jab: someone looking at the dog, or
-	# still recovering from a swing, gets the heaviest blow available.
-	if _is_open(_other(fighter)):
+	# An opening is not the moment for a jab. Someone looking at the dog gets
+	# the heaviest blow available, every time: that is what the bark is for
+	# and the player has to see it. Someone merely recovering from a swing
+	# most often does too, but not always, or every exchange ends in the
+	# same kick.
+	var target := _other(fighter)
+	if not fighter.in_combo and time < target.exposed_until:
 		return best
-	var total := 0
+	if not fighter.in_combo and _is_open(target) and _rng.randf() < _balance.opening_heavy_chance:
+		return best
+	var total := 0.0
 	var valid: Array[CombatSkillData] = []
+	var weights: Array[float] = []
 	for skill in fighter.data.skills:
 		if skill == null or skill.effect != CombatSkillData.Effect.ATTACK or fighter.cooldown_left(skill) > 0.0 or not _condition_met(fighter, skill):
 			continue
+		# A combination is thrown with the hands.
+		if fighter.in_combo and not _is_hand(skill):
+			continue
+		var weight := float(skill.priority)
+		if skill.id == fighter.last_attack:
+			weight *= _balance.repeat_weight
 		valid.append(skill)
-		total += skill.priority
-	var roll := _rng.randi_range(1, total)
-	for skill in valid:
-		roll -= skill.priority
-		if roll <= 0:
-			return skill
-	return best
+		weights.append(weight)
+		total += weight
+	if valid.is_empty():
+		return null if fighter.in_combo else best
+	# Only a kick reaches from here: usually they step in to use their hands.
+	if valid.all(func(s: CombatSkillData) -> bool: return not _is_hand(s)) and not _is_open(target):
+		if time < fighter.closing_until:
+			return null
+		if _rng.randf() < _balance.close_in_chance:
+			fighter.closing_until = time + _balance.close_in_seconds
+			return null
+	var roll := _rng.randf() * total
+	for i in valid.size():
+		roll -= weights[i]
+		if roll <= 0.0:
+			return valid[i]
+	return valid[-1]
 
+
+## Jab and hook: what a combination is made of.
+func _is_hand(skill: CombatSkillData) -> bool:
+	return skill.animation_key in [&"punch", &"hook"]
+
+
+
+func _end_combo(fighter: CombatFighter) -> void:
+	fighter.in_combo = false
+	fighter.combo_count = 0
 
 ## Open to a punishing blow: distracted (a bark's opening) or caught in the
 ## recovery after a swing.
@@ -303,11 +336,15 @@ func _decide(fighter: CombatFighter, delta: float) -> void:
 		fighter.step_left = 0.0
 		return
 	var skill := choose_skill(fighter)
+	if skill == null and fighter.in_combo and time >= fighter.ready_at:
+		# Nothing to follow up with (out of reach, or only a kick left): the
+		# combination is over.
+		_end_combo(fighter)
 	# A step is finished before an attack starts; a defence can still cut in.
 	if skill != null and fighter.is_stepping() and skill.effect == CombatSkillData.Effect.ATTACK:
 		skill = null
 	# Hesitation only delays attacks; it never makes the AI scripted.
-	if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and _rng.randf() < _balance.hesitation_chance:
+	if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and not fighter.in_combo and _rng.randf() < _balance.hesitation_chance:
 		fighter.ready_at = time + fighter.action_interval * 0.5
 		skill = null
 	if skill != null:
@@ -436,6 +473,11 @@ func _min_attack_range(fighter: CombatFighter) -> float:
 func _start(fighter: CombatFighter, skill: CombatSkillData) -> void:
 	fighter.action = skill
 	fighter.uses[skill.id] = fighter.uses.get(skill.id, 0) + 1
+	if skill.effect == CombatSkillData.Effect.ATTACK:
+		fighter.last_attack = skill.id
+	elif fighter.in_combo:
+		# Answering a blow breaks the combination off.
+		_end_combo(fighter)
 	fighter.cooldowns[skill.id] = skill.cooldown
 	combat_event.emit(&"skill_started", fighter.side, skill, 0.0)
 	if skill.effect == CombatSkillData.Effect.ATTACK:
@@ -504,6 +546,14 @@ func _phase_done(fighter: CombatFighter) -> void:
 			fighter.phase = CombatFighter.Phase.IDLE
 			fighter.action = null
 			if skill != null and skill.effect == CombatSkillData.Effect.ATTACK:
+				# A jab that connected may run on into the next blow, straight
+				# away and without stepping off.
+				if skill.animation_key == &"punch" and fighter.connected and fighter.combo_count < _balance.combo_max and _rng.randf() < _balance.combo_chance:
+					fighter.combo_count += 1
+					fighter.in_combo = true
+					fighter.ready_at = time + _balance.combo_gap
+					return
+				_end_combo(fighter)
 				fighter.ready_at = time + fighter.action_interval
 				# Spacing reset: sometimes they come off the exchange rather
 				# than staying on top of the other person.
