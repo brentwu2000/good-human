@@ -95,11 +95,13 @@ Installed 2026-09-28. Brief: `docs/06_art/SPRINT05_DESIGN_EXECUTION.md`. Design 
 ## Sprint 06 Identity / Bond Design (Update 009)
 Installed 2026-09-29. Brief: `docs/06_art/SPRINT06_DESIGN_WORKSTREAM.md`. Design starts immediately; engineering waits for Greed/Territory Gate 01. Reuse the established Dog POV / P-04 combat language; do not reopen the combat camera.
 
+> Owner (2026-10-06): Claude helps with art while Codex works on the dogs. The clinic window environment for D6-01/D6-03 is modelled (`docs/06_art/CLINIC_WINDOW_MODELS_CLAUDE.md`); the rest of those deliverables (composition, the pups, people, reactions) stays open.
+
 | ID | Deliverable | Owner | Status |
 |---|---|---|---|
-| D6-01 | Shelter Opening | Design/Codex ART | TODO |
+| D6-01 | Shelter Opening | Design/Codex ART; environment models Claude | IN_PROGRESS |
 | D6-02 | Dog Candidate Language | Design/Codex ART | TODO |
-| D6-03 | Dog POV Adoption | Design/Codex ART | TODO |
+| D6-03 | Dog POV Adoption | Design/Codex ART; environment models Claude | IN_PROGRESS |
 | D6-04 | Human Candidate System | Design/Codex ART | TODO |
 | D6-05 | Adoption Reactions | Design/Codex ART | TODO |
 | D6-06 | Pair Identity Home | Design/Codex ART | TODO |
