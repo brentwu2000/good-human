@@ -38,6 +38,10 @@ func _ready() -> void:
 	_add_button("主人重傷（25%）", func() -> void: _with_combat(func(c: Node) -> void:
 		if c.has_method(&"debug_set_owner_condition"):
 			c.debug_set_owner_condition(0.25)))
+	# P-05: a weapon lying beside the dog, without waiting on a search roll.
+	for id: StringName in [&"umbrella", &"broom", &"old_dumbbell"]:
+		var weapon := DataRegistry.get_weapon(id)
+		_add_button("地上放%s" % weapon.display_name, func() -> void: _debug_drop_weapon(weapon))
 	# S05-04: see the banyan call without waiting for the temptation roll.
 	_add_button("大榕樹在叫（誘惑）", _debug_banyan_call)
 	var camera_button := _add_button("", Callable())
@@ -152,6 +156,13 @@ func _update_combat_log_button() -> void:
 
 
 ## A button in the same grid and style as the combat log toggle.
+func _debug_drop_weapon(weapon: WeaponData) -> void:
+	var dog := run_manager.dog_actor as Node3D
+	if dog == null or not run_manager.is_running():
+		return
+	run_manager.weapon_found.emit(ItemStack.new(weapon.item, 1), dog.global_position + Vector3(0.6, 0, -1.4))
+
+
 func _add_button(text: String, action: Callable) -> Button:
 	var template := %CombatLogButton as Button
 	# No DUPLICATE_SIGNALS: the copy must not also toggle the combat log.
