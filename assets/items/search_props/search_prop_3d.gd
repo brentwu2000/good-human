@@ -10,7 +10,26 @@ const WOOD := Color("#956244")
 const LEAF := Color("#5a8956")
 
 
+## Modelled versions (Claude, at the owner's request; tools/art/build_search_props.py).
+const MODELS := {
+	"mailbox": preload("res://assets/items/search_props/models/mailbox.glb"),
+	"bush": preload("res://assets/items/search_props/models/bush.glb"),
+	"bench": preload("res://assets/items/search_props/models/bench.glb"),
+	"gym": preload("res://assets/items/search_props/models/gym_bag.glb"),
+	"trash": preload("res://assets/items/search_props/models/trash_bag.glb"),
+}
+
+
 static func build(search_id: StringName, accent: Color) -> Node3D:
+	var id := String(search_id)
+	for key: String in ["mailbox", "bush", "bench", "gym"]:
+		if key in id:
+			return (MODELS[key] as PackedScene).instantiate() as Node3D
+	return (MODELS["trash"] as PackedScene).instantiate() as Node3D
+
+
+## The greybox version (kept for reference and as a fallback).
+static func build_greybox(search_id: StringName, accent: Color) -> Node3D:
 	var id := String(search_id)
 	if "mailbox" in id:
 		return _mailbox(accent)
