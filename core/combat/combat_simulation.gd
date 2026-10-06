@@ -313,6 +313,8 @@ func _condition_met(fighter: CombatFighter, skill: CombatSkillData) -> bool:
 	match skill.condition:
 		CombatSkillData.Condition.TARGET_IN_RANGE:
 			return time >= fighter.ready_at and distance() <= skill.preferred_range
+		CombatSkillData.Condition.TARGET_OPEN:
+			return time >= fighter.ready_at and distance() <= skill.preferred_range and _is_open(target)
 		CombatSkillData.Condition.INCOMING_ATTACK:
 			# You react to a telegraph starting, not to it still being under
 			# way. Otherwise a longer wind-up is simply a longer free window for

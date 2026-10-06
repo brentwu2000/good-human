@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CombatSkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+id = &"skill_umbrella_guard"
+animation_key = &"umbrella_guard"
+display_name = "雨傘格擋"
+effect = 1
+condition = 1
+priority = 32
+cooldown = 2.8
+preferred_range = 0
+windup = 0.0
+active_time = 0.75
+recovery = 0.20
+strike_time = 0.0
+contact_time = 0.02
+follow_through = 0.0
+whiff_recovery = 0.0
+hit_stop = 0.05
+power = 0.0
+stagger = 0.0
+displacement = 0.0
+damage_reduction = 0.75

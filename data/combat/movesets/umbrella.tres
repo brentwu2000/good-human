@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponMoveSet" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://resources/weapon_move_set.gd" id="1_moves"]
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="6_skill"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_umbrella_poke.tres" id="2_poke"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_umbrella_swing.tres" id="3_swing"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_umbrella_counter.tres" id="4_counter"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_umbrella_guard.tres" id="5_guard"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_dodge.tres" id="7_dodge"]
+
+[resource]
+script = ExtResource("1_moves")
+id = &"umbrella"
+attacks = Array[ExtResource("6_skill")]([ExtResource("2_poke"), ExtResource("3_swing"), ExtResource("4_counter")])
+defenses = Array[ExtResource("6_skill")]([ExtResource("5_guard"), ExtResource("7_dodge")])
+ideal_min = 86.0
+ideal_max = 100.0

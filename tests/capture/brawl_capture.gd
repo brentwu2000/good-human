@@ -9,11 +9,11 @@ extends Node
 ##         res://tests/capture/brawl_capture.tscn -- <case>
 ##
 ## `tests/capture/record.sh` records every case. Cases: snap, orbit_cw,
-## orbit_ccw, behind_bark, leash_pull, critical, win, loss, p02_snap, banyan
+## umbrella (P05-04, holding one), orbit_ccw, behind_bark, leash_pull, critical, win, loss, p02_snap, banyan
 ## (the dog walking up to the Big Banyan, no fight).
 ## This is a recording tool, not a test: it asserts nothing.
 
-const CASES: Array[String] = ["snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap", "banyan", "inspect"]
+const CASES: Array[String] = ["umbrella", "snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap", "banyan", "inspect"]
 const MOVES: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 var _tree: SceneTree
@@ -66,6 +66,9 @@ func _run() -> void:
 		_tree.quit()
 		return
 
+	# P05-04: the owner holding the umbrella.
+	if case_name == "umbrella":
+		map.run_manager.equipped_weapon = DataRegistry.get_weapon(&"umbrella")
 	# Every case starts the same way: walking up to the pair from a few metres
 	# out and provoking them, so the Snap is always in the recording.
 	var start := pair.global_position + Vector3(0, 0.1, 5.0)
@@ -77,7 +80,7 @@ func _run() -> void:
 	await _press(&"interact")
 
 	match case_name:
-		"snap", "p02_snap":
+		"snap", "p02_snap", "umbrella":
 			await _seconds(10.0)
 		"orbit_cw":
 			await _seconds(2.5)

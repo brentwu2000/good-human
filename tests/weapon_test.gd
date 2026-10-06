@@ -9,6 +9,7 @@ const DELIVERY: FighterData = preload("res://data/combat/fighters/opp02_delivery
 func _ready() -> void:
 	_test_interface()
 	_test_unarmed_baseline()
+	_test_umbrella()
 	finish()
 
 
@@ -53,3 +54,61 @@ func _test_unarmed_baseline() -> void:
 			a.run_to_end()
 			b.run_to_end()
 			check(a.result == b.result and is_equal_approx(a.time, b.time) and a.fighters[0].uses == b.fighters[0].uses, "an unarmed fight plays out exactly as before (%s, seed %d)" % [opponent.id, seed_value])
+
+
+## P05-04: the umbrella is a different way of fighting, not a damage bonus —
+## longer reach, a fight held further out, a guard and a counter that only
+## exists as an answer.
+func _test_umbrella() -> void:
+	var umbrella := DataRegistry.get_weapon(&"umbrella")
+	check(umbrella != null and umbrella.archetype == WeaponData.Archetype.UMBRELLA, "P05-04: the umbrella is data")
+	check(umbrella.item == DataRegistry.get_item(&"umbrella") and DataRegistry.weapon_for_item(&"umbrella") == umbrella, "and it is the umbrella found in the street")
+	var ids := umbrella.moveset.skills().map(func(k: CombatSkillData) -> StringName: return k.id)
+	for id in [&"skill_umbrella_poke", &"skill_umbrella_swing", &"skill_umbrella_counter", &"skill_umbrella_guard"]:
+		check(ids.has(id), "it can %s" % id)
+	var jab: CombatSkillData = load("res://data/combat/skills/skill_jab.tres")
+	var poke: CombatSkillData = load("res://data/combat/skills/skill_umbrella_poke.tres")
+	check(poke.preferred_range > jab.preferred_range + 25.0, "the poke reaches well past a fist (%d vs %d)" % [poke.preferred_range, jab.preferred_range])
+	check(umbrella.moveset.ideal_min > DataRegistry.spacing.ideal_max, "and the umbrella wants the fight further out than fists do")
+	# The counter only exists as an answer.
+	var counter: CombatSkillData = load("res://data/combat/skills/skill_umbrella_counter.tres")
+	var held := PLAYER.armed(umbrella)
+	var sim := CombatSimulation.new(held, JOGGER, 5)
+	var me := sim.fighters[CombatSimulation.PLAYER]
+	var them := sim.fighters[CombatSimulation.OPPONENT]
+	sim.fighters[CombatSimulation.OPPONENT].position = me.position + 90.0
+	check(not sim._condition_met(me, counter), "no counter into someone who is ready")
+	them.phase = CombatFighter.Phase.RECOVERY
+	check(sim._condition_met(me, counter), "a counter into someone recovering from a swing")
+	# In real fights: held further out, and counters thrown.
+	var gaps := {"bare": 0.0, "umbrella": 0.0}
+	var counters := {"n": 0}
+	var wins := {"bare": 0, "umbrella": 0}
+	for i in 30:
+		for armed: bool in [false, true]:
+			var key := "umbrella" if armed else "bare"
+			var fight := CombatSimulation.new(held if armed else PLAYER, JOGGER, 400 + i)
+			var total := 0.0
+			var steps := 0
+			fight.combat_event.connect(func(kind: StringName, side: int, skill: CombatSkillData, _v: float) -> void:
+				if kind == &"skill_started" and side == 0 and skill == counter:
+					counters["n"] += 1)
+			while not fight.is_finished() and steps < 6000:
+				fight.step(1.0 / 60.0)
+				total += fight.distance()
+				steps += 1
+			gaps[key] += total / maxf(steps, 1)
+			if fight.result == CombatSimulation.Result.VICTORY:
+				wins[key] += 1
+	check(gaps["umbrella"] > gaps["bare"] + 8.0, "with the umbrella the fight is held further out (%.0f vs %.0f units)" % [gaps["umbrella"] / 30.0, gaps["bare"] / 30.0])
+	check(counters["n"] > 30, "counter pokes are thrown into openings (%d in 30 fights)" % counters["n"])
+	check(wins["umbrella"] >= wins["bare"], "against a quick, light fighter it helps (%d vs %d of 30)" % [wins["umbrella"], wins["bare"]])
+	# Seen, not only simulated: the puppet holds it in the lead hand.
+	var puppet := FighterPuppet3D.new()
+	add_child(puppet)
+	puppet.apply(PLAYER)
+	puppet.hold(umbrella)
+	check(puppet._prop != null and puppet._prop.is_inside_tree(), "the human is seen holding the umbrella")
+	puppet.hold(null)
+	check(puppet._prop == null, "and empty-handed again without it")
+	puppet.queue_free()

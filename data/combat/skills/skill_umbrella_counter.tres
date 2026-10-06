@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="CombatSkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+id = &"skill_umbrella_counter"
+animation_key = &"poke"
+display_name = "反擊戳刺"
+effect = 0
+condition = 2
+priority = 26
+cooldown = 1.2
+preferred_range = 112
+windup = 0.16
+active_time = 0.0
+recovery = 0.24
+strike_time = 0.06
+contact_time = 0.06
+follow_through = 0.10
+whiff_recovery = 0.20
+hit_stop = 0.06
+power = 1.6
+stagger = 3.0
+displacement = 8.0
+damage_reduction = 0.0

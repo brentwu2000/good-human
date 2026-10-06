@@ -8,6 +8,9 @@ enum Effect { ATTACK, BLOCK, DODGE }
 enum Condition {
 	TARGET_IN_RANGE,  ## Opponent within preferred_range.
 	INCOMING_ATTACK,  ## Opponent is winding up an attack that can reach us.
+	## P05-04: in range AND the opponent is open — recovering from a swing or
+	## looking at the dog. A counter: it only exists as an answer.
+	TARGET_OPEN,
 }
 
 @export var id: StringName
@@ -58,3 +61,9 @@ enum Condition {
 @export_range(0.0, 1.0) var damage_reduction: float = 0.0
 ## Dodge: distance moved away from the opponent during active_time.
 @export var reposition_distance: float = 0.0
+
+
+## A heavy blow: the dog senses it coming and it lands as a heavy hit. Was
+## "hook or kick" by name; now by weight, so weapons follow the same rule.
+func is_heavy() -> bool:
+	return effect == Effect.ATTACK and power >= 1.25

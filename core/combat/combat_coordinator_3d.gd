@@ -144,7 +144,9 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	_axis = gap.normalized() if gap.length() > 0.01 else Vector3.FORWARD
 	_side_axis = Vector3.UP.cross(_axis)
 	var lateral := 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
-	# P05-02: the owner fights with whatever they are holding.
+	# P05-02: the owner fights with whatever they are holding, and is seen
+	# holding it.
+	human.puppet.hold(run_manager.equipped_weapon)
 	var sim := CombatSimulation.new(human.fighter.armed(run_manager.equipped_weapon), opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
 	sim.set_lateral(lateral)
 	# S05-02: the owner starts the fight in whatever state the walk left them.
@@ -229,7 +231,7 @@ func _impact_weight(damage: float) -> float:
 
 ## Hooks and kicks move the body they land on; a jab does not.
 func _is_heavy(skill: CombatSkillData, weight: float) -> bool:
-	return weight >= 0.75 or (skill != null and skill.animation_key in [&"hook", &"kick"])
+	return weight >= 0.75 or (skill != null and skill.is_heavy())
 
 
 ## The blow's own hold, capped.

@@ -15,7 +15,11 @@ static var show_combat_text: bool = false
 signal bumped(from: Vector3)
 
 ## Codex's authored combat clips (P-04 + ART), by attack, reaction and footwork.
-const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick"}
+## P05-04: until Codex's D5W-02 umbrella motion, the umbrella's poke rides
+## the jab (the arm thrusts out) and its swing the hook (the arm sweeps across).
+const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Jab", &"swing": "HeavyHook"}
+## The hand a weapon is held in: the lead hand, the one the jab clip drives.
+const WEAPON_HAND := "hand_l"
 const REACTION_CLIPS := {
 	CombatMotion3D.State.HIT_LIGHT: "HitLight",
 	CombatMotion3D.State.HIT_HEAVY: "HitHeavy",
@@ -56,6 +60,9 @@ var _limb: int = 1
 var _turn: float = 1.0
 var _last_jab_at: float = -9.0
 var _side_rng := RandomNumberGenerator.new()
+## P-05: what they are holding, and the prop showing it.
+var held: WeaponData
+var _prop: Node3D
 var _hp_label: Label3D
 ## The fight wants the health bar shown; it only is with fight text on.
 var _hp_wanted: bool = false
@@ -109,6 +116,41 @@ func apply(fighter: FighterData) -> void:
 	_down = false
 	_condition = 1.0
 	_reset_pose()
+	var holding := held
+	held = null
+	_prop = null
+	hold(holding)
+
+
+## P-05: puts `weapon` in their lead hand (null: empty-handed). A skeletal
+## body carries it on the hand bone, so it follows every clip; the greybox
+## carries it at the end of the arm.
+func hold(weapon: WeaponData) -> void:
+	if weapon == held and (_prop != null) == (weapon != null and not weapon.is_unarmed()):
+		return
+	held = weapon
+	if _prop != null:
+		var mount := _prop.get_parent()
+		if mount is BoneAttachment3D:
+			mount.queue_free()
+		else:
+			_prop.queue_free()
+		_prop = null
+	_prop = WeaponProp3D.build(weapon)
+	if _prop == null or _body == null:
+		return
+	var skeletal := _body as P04HumanVisual
+	if skeletal != null and skeletal.skeleton != null and skeletal.skeleton.find_bone(WEAPON_HAND) >= 0:
+		var grip := BoneAttachment3D.new()
+		grip.bone_name = WEAPON_HAND
+		skeletal.skeleton.add_child(grip)
+		grip.add_child(_prop)
+		return
+	var arm := _joint(_arms, 1)
+	if arm != null:
+		_prop.position = Vector3(0, -0.55, 0)
+		_prop.rotation.x = -PI * 0.5
+		arm.add_child(_prop)
 
 
 func _process(delta: float) -> void:
@@ -339,14 +381,14 @@ func play_windup(skill: CombatSkillData) -> void:
 				tween.parallel().tween_property(_torso, "rotation:x", 0.22, skill.windup)
 			if _hips != null:
 				tween.parallel().tween_property(_hips, "rotation:x", 0.12, skill.windup)
-		&"block":
+		&"block", &"umbrella_guard":
 			for arm in _arms:
 				if arm != null:
 					tween.parallel().tween_property(arm, "rotation:x", -1.5, 0.12)
 		&"dodge":
 			if _torso != null:
 				tween.tween_property(_torso, "rotation:z", 0.4 * _turn, 0.1)
-		&"hook":
+		&"hook", &"swing":
 			# P04-04: the whole upper body loads up. Shoulders and hips turn
 			# away and the arm comes up and out to the side — it has to be
 			# readable from across a street, because it is the blow worth
@@ -376,9 +418,11 @@ func _choose_side(skill: CombatSkillData) -> void:
 			_mirrored_attack = not _mirrored_attack if _time - _last_jab_at < 1.5 else false
 			_last_jab_at = _time
 		&"hook", &"kick":
-			_mirrored_attack = _side_rng.randf() < 0.5
+			# Holding something, the hook is thrown with it, from its side.
+			_mirrored_attack = _side_rng.randf() < 0.5 and (held == null or held.is_unarmed() or skill.animation_key == &"kick")
 		_:
-			return
+			# Weapon moves come from the hand that holds it.
+			_mirrored_attack = false
 	_limb = 0 if _mirrored_attack else 1
 	_turn = -1.0 if _mirrored_attack else 1.0
 
@@ -386,7 +430,7 @@ func _choose_side(skill: CombatSkillData) -> void:
 ## The strike itself: the limb swings through, the body follows it, and only
 ## then does everything settle back.
 func play_strike(skill: CombatSkillData) -> void:
-	if skill.animation_key == &"hook":
+	if skill.animation_key in [&"hook", &"swing"]:
 		_play_hook_strike(skill)
 		return
 	if skill.animation_key == &"kick":

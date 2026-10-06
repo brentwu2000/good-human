@@ -35,7 +35,7 @@ func sense() -> Instinct:
 	if not coordinator.is_fighting():
 		return Instinct.WORRY if coordinator.is_owner_down() else Instinct.CALM
 	var them := coordinator.engagement.simulation.fighters[CombatSimulation.OPPONENT]
-	if them.is_winding_up_attack() and them.action.animation_key in [&"hook", &"kick"]:
+	if them.is_winding_up_attack() and them.action.is_heavy():
 		return Instinct.THREAT
 	var condition := coordinator.owner_condition()
 	if condition >= 0.0 and condition <= FighterPuppet3D.CRITICAL_AT:
