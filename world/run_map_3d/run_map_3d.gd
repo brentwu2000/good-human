@@ -16,6 +16,7 @@ var rig: CameraRig3D
 ## S05-03: the walk's tension, shown as the light turning towards evening and
 ## home calling more strongly.
 var tension: RunTensionDirector
+var atmosphere: CombatAtmosphere3D
 
 const DAY_SKY := Color(0.62, 0.75, 0.88)
 const EVENING_SKY := Color(0.9, 0.7, 0.56)
@@ -53,6 +54,15 @@ func _ready() -> void:
 	add_child(tension)
 	tension.tension_changed.connect(_apply_tension)
 	var agency := get_node_or_null("DogAgency")
+	# P03-E09: sound and the world's reaction around a fight.
+	atmosphere = CombatAtmosphere3D.new()
+	atmosphere.name = "CombatAtmosphere"
+	atmosphere.coordinator = coordinator
+	atmosphere.rig = rig
+	atmosphere.dog = dog
+	atmosphere.agency = agency
+	atmosphere.instinct = instinct
+	add_child(atmosphere)
 	var hud := get_node_or_null("RunHUD")
 	if agency != null and hud != null:
 		agency.outcome.connect(func(text: String, positive: bool) -> void:

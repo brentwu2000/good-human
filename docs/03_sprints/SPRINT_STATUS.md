@@ -294,9 +294,9 @@ Installed from Update 007 (2026-09-18). The update gates engineering behind Core
 | P4-008 | Resident rival | REVIEW |
 | P4-009 | Claim progression | REVIEW |
 | P4-010 | Extraction resolution | REVIEW |
-| P4-011 | Persistence | TODO |
-| P4-012 | Territory reward | TODO |
-| P4-013 | GOALS integration | TODO |
+| P4-011 | Persistence | REVIEW (done as S05-08) |
+| P4-012 | Territory reward | REVIEW (done as S05-11) |
+| P4-013 | GOALS integration | REVIEW (done as S05-10) |
 | P4-014 | TRAIN/DOG AGENCY compatibility | TODO |
 | P4-015 | Debug/telemetry | TODO |
 | P4-016 | Blind QA | TODO |
@@ -368,7 +368,7 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 | P03-E06 | Third-person → POV → third-person | REVIEW |
 | P03-E07 | Bark attention reaction visible in-world | REVIEW |
 | P03-E08 | Leash Pull visible result | REVIEW |
-| P03-E09 | Combat Atmosphere Director hooks | TODO |
+| P03-E09 | Combat Atmosphere Director hooks | REVIEW |
 | P03-E10 | Hide combat log, keep debug panel | REVIEW |
 | P03-E11 | Victory/defeat resolution beat | REVIEW |
 | P03-E12 | Capture build/video for QA | REVIEW |
@@ -403,6 +403,7 @@ P-03 is now the Sprint 04 experience blocker. Sprint 05 engineering stays gated;
 - The reaching hand is only possible because of the joint work: before it, the owner could not raise an arm at all.
 - Two test-timing notes, in the same family as the earlier ones: moving into the dog's eyes is a blend, so a check one frame after the win reads `pov` at 0.43 and fails for the right reason; and the hand and the dip happen within the same two seconds, so sampling them in sequence misses whichever went first — watch the whole beat at once.
 - The atmosphere director assumes audio (ducking ambience, impact, dog breathing, low-frequency pulse before the first strike). The project still has none, and this now blocks P03-E09.
+- **P03-E09 done (2026-10-06, owner: 「先繼續開發」).** Unblocked with placeholder sound made in code (`SfxSynth`: short 16-bit clips built from noise and tones and cached — thumps, rustles, a bark-shaped yelp; to be replaced by real audio). `CombatAtmosphere3D` (presentation only, built by the 3D walk) follows COMBAT_ATMOSPHERE_DIRECTOR: the street's ambience ducks with the camera's beat (EXPLORE −14 dB → TENSION −22 → ACTIVE −27 → CRISIS −30) and comes back after; a restrained low heartbeat rises under the stand-off (TENSION), all but disappears once blows land and returns when the owner is in trouble (CRISIS) — no battle music. Blows: air on every strike (louder for a heavy one), a light or heavy body thump on a hit, a dull thud on a block, a heavy thump on a fall. The dog: its bark, the leash when pulled, a growl the moment its instinct reads a threat to its human (at most every 4 s), its paws on the walk. World: people standing within 12 m of a fight turn to watch it while it lasts; the first heavy blow of a fight puts a few birds up out of the trees (once); heavy blows and falls kick up a little dust. New test `atmosphere_test` (29 checks, the real walk).
 - P03-E12: a capture tool records the fight under normal presentation (no debug, no fight text) at the 405×720 portrait size the ART capture requests use. `tests/capture/record.sh` plays scripted cases in the real 3D walk through Godot's Movie Maker into `build/captures/<case>.avi`: snap (approach and Combat Snap), orbit_cw, orbit_ccw, behind_bark, leash_pull, critical, win, loss, and p02_snap (the same approach under the P-02 third-person camera). One case per clip, so nothing is written on the picture. It needs a desktop session (Movie Maker renders); it asserts nothing and is not part of the test run.
 - The captures found what the headless tests had not: with the dog standing still beside a fight, the fighters circled straight onto it and the dog's eyes filled with clothing seen from below, a gate Critical Fail ("camera makes fight unreadable"). Fixed at the cause and without moving the dog, as the composition docs require: fighters keep 0.9 m clear of the dog (P-04: "adjust path round the dog"), through the same "where can I stand" question as walls. That question now answers with how badly placed a spot is, and no move may make it worse, so someone inside the margin can step out or round but not further in and nobody is pinned; a dog that keeps them from closing for 2 s stops counting until they are in range, so it cannot jam the fight. A person right at the lens, or standing between the lens and the dog outside first person, is faded, never hidden; that includes the opponent's dog. The dog's eyes look up no further than 20°, so a person right beside it no longer turns the view into sky and chins. What the owner learned ("主人記住了…") now waits until the fight is over instead of appearing over it.
 - Tried and dropped: easing the view out of the dog's head when a fighter came close. It moved the lens 2 m back behind the dog, into the space the fighters were circling through, and made the view snap (0.26 rad in a frame).
