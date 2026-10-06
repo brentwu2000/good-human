@@ -107,3 +107,19 @@ Installed 2026-09-29. Brief: `docs/06_art/SPRINT06_DESIGN_WORKSTREAM.md`. Design
 | D6-08 | Memory Presentation | Design/Codex ART | TODO |
 | D6-09 | Target Screenshot 05 — MY HUMAN | Design/Codex ART | TODO |
 | D6-10 | Identity Decision Pack | Design/Codex ART | TODO |
+
+## P-05 Street Loot & Improvised Weapons Design (Update 010)
+Installed 2026-10-06. Brief: `docs/06_art/P05_DESIGN_WORKSTREAM.md`. Runs in parallel with engineering; Umbrella is the signature priority. No production-scale catalog yet.
+
+| ID | Deliverable | Owner | Status |
+|---|---|---|---|
+| D5W-01 | Weapon Silhouette | Design/Codex ART | TODO |
+| D5W-02 | Umbrella Motion | Design/Codex ART | TODO |
+| D5W-03 | Long Object Motion | Design/Codex ART | TODO |
+| D5W-04 | Heavy Object Motion | Design/Codex ART | TODO |
+| D5W-05 | Search Discovery | Design/Codex ART | TODO |
+| D5W-06 | Equip/Swap | Design/Codex ART | TODO |
+| D5W-07 | Condition | Design/Codex ART | TODO |
+| D5W-08 | Dog Backpack Safe Loot | Design/Codex ART | TODO |
+| D5W-09 | Target Screenshot — FOUND SOMETHING | Design/Codex ART | TODO |
+| D5W-10 | Weapon Personality Matrix | Design/Codex ART | TODO |

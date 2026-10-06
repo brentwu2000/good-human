@@ -23,3 +23,8 @@ OWNED changes scent/local reactions/collection and unlocks one place-related rew
 ## Run Tension Director
 Inputs: duration, unbanked value, owner condition, extraction distance, active desire, territory/rival state, special opportunity.
 Outputs: ambient shift, fatigue, scent cue, rival presence, extraction cue, rare opportunity cue. Outputs are presentation, not arbitrary punishment.
+
+## Sprint 05 Greed Revision (Update 010, P-05)
+Greed opportunities include: weapon fitting current human/style, high-condition gear, Dog Gear, safe-container-worthy item, territory progress, rival/rematch, Dog Desire, valuable/collection item.
+Run Value must not flatten meaningful weapons into currency.
+Desired thought: “I can extract now, but there is a good umbrella near rival territory and my human fights much better with it.”

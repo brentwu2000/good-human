@@ -494,6 +494,33 @@ Installed 2026-09-28. Spec: `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESEN
 - **Owner (2026-10-06): 「打鬥手感」, 「戰鬥動作太單一也是問題」.** First, readability: captures of real fights (`record.sh snap behind_bark`, which had been recording the new shelter since the opening needs a pair; it now uses the classic pair) showed the dog-eye fight as trousers and shoes. Owner chose the low over-the-shoulder shot (ADR-L04): TENSION / ACTIVE / CRISIS / AFFECTION frame from behind the dog at 0.75–0.85 m pivot, 2.0–2.7 m back, aiming at chest height; the view turns past the dog at the fight, swung 55 % to side-on (`fight_side_on`) so the two fighters stand side by side. Dog-eye stays a debug option. Tests: `combat_feedback_test` (+5: default, low, both fighters head to foot, dog in frame); the dog-eye tests now turn that option on.
 - Then variety (「戰鬥動作太單一」). Measured over 200 fights per opponent: kicks were over half of all attacks (51–55 %), never a combination, and every exchange the same beat (one blow, circle, one blow). Causes: any opening (including the ordinary recovery after every swing) took the heaviest blow; and outside hand reach only the kick reaches, so every gap became a kick on the way in. Now (all `GameBalance`, data): a jab that connects runs on into a combination 65 % of the time — up to two more hand blows (jab or hook) 0.1 s apart, no kick, no stepping off (`combo_*`); a bark's opening still always gets the heaviest blow (the dog's effect must read), an ordinary recovery only 30 % of the time (`opening_heavy_chance`); the attack just thrown counts 0.4× next time (`repeat_weight`); out of hand reach they step in 60 % of the time instead of kicking (`close_in_*`); kick/hook/jab priority 16/13/10 (was 20/15/10, order kept). Presentation: Codex's Jab / HeavyHook / Kick are mirrored at load (`P04HumanVisual.mirror_animation`, exact to 0.000 m on this symmetric rig; one library per model), so jabs close together alternate hands (one-two), hooks and kicks come off either side, and the choreography layer follows the side. Result: kick 43 %, jab 42 %, hook 14 % (gym 43/29/28), about one attack in ten a combination follow-up. Balance (200 fights, untrained player): jogger 158, delivery 169, gym 143 (was 157/181/163); `dog_value_test` holds. Tests: `combat_sim_test` (+3: combinations happen, hands only; stepping in from kick range), `combat_motion_3d_test` (+3: either leg, one-two, lead hand after a pause), `skeletal_model_test` (+6: mirrored clips exist and are exact); the contact test now says a bark's opening always gets the heaviest blow.
 
+## P-05 STREET LOOT & IMPROVISED WEAPONS (Update 010)
+Installed 2026-10-06. Spec: `docs/01_prototypes/P_05_STREET_LOOT_IMPROVISED_WEAPONS.md`; systems `docs/04_systems/P05_WEAPON_LOOT_SYSTEMS.md`; data `docs/05_data/P05_LOOT_WEAPON_SCHEMA.md`; design `docs/06_art/P05_DESIGN_WORKSTREAM.md`; gate `docs/07_qa/P05_STREET_LOOT_WEAPON_GATE.md`; ADR-021 (loot must change play), ADR-022 (improvised before arsenal). Goal: SEARCH → EQUIP → FIGHT → RISK → EXTRACT. Core rule: useful loot changes play, not merely sale value.
+
+Roadmap revision: P-04 HUMAN BRAWL + PHYSICAL PRESENCE → **P-05 STREET LOOT + IMPROVISED WEAPONS** → Sprint 05 GREED / TERRITORY → Sprint 06 IDENTITY / BOND → CORE LOOP INTEGRATION GATE. Reason: search needs gameplay-changing loot before Greed/Territory can fully validate extraction decisions. **P-05 Gate PASS unlocks Sprint 05 Greed/Territory integration.**
+
+Apply after P-04/PATCH03 and before completing Sprint 05 engineering. Engineering order: loot ownership → archetype interface → preserve Unarmed baseline → Umbrella → Long → Heavy → weapon-aware spacing → pickup/equip/swap → condition → extraction/loss/Safe → no-HUD test. Codex ART D5W-01–10 in parallel (Umbrella first); Codex QA fresh, by the P-05 Gate. Out of scope: firearms, a huge catalog, rarity-colour treadmill, affix soup, crafting/repair tree, dog weapon combat, combat rewrite, a separate BattleScene.
+
+| ID | Task | Status |
+|---|---|---|
+| P05-01 | Loot ownership | TODO |
+| P05-02 | Weapon archetype interface | TODO |
+| P05-03 | Unarmed adapter | TODO |
+| P05-04 | Umbrella | TODO |
+| P05-05 | Long Object | TODO |
+| P05-06 | Heavy Blunt | TODO |
+| P05-07 | Weapon-aware spacing AI | TODO |
+| P05-08 | Contact integration | TODO |
+| P05-09 | Condition | TODO |
+| P05-10 | Pickup/equip/swap | TODO |
+| P05-11 | Extraction/loss | TODO |
+| P05-12 | Dog Safe eligibility | TODO |
+| P05-13 | No-HUD test | TODO |
+| P05-14 | Fresh Codex QA | TODO |
+
+## P-05 Engineering Notes (Claude)
+- To reconcile when engineering starts: the spec keeps "seamless Dog POV combat" authoritative, but the owner has since moved fights to the low over-the-shoulder shot (ADR-L04, 2026-10-06), so P-05's weapon readability is judged in that shot. Much of P05-01 / P05-11 / P05-12 already exists in part (Sprint 01 Inventory, dog safe slots, SAFE/UNBANKED run value from P4-001..P4-010); each task should first check what is there.
+
 ## Sprint 05 — GREED / TERRITORY EXECUTION (Update 008)
 Installed 2026-09-28. Spec: `docs/03_sprints/SPRINT_05_GREED_TERRITORY_EXECUTION.md`; systems `docs/04_systems/GREED_TERRITORY_SYSTEM.md`; data `docs/05_data/SPRINT05_DATA.md`; gate `docs/07_qa/SPRINT05_GREED_TERRITORY_GATE.md`; ADR-017 (extraction creates choice), ADR-018 (territory requires return). P-04 stays the combat baseline: Sprint 05 consumes it and does not redesign combat.
 

@@ -11,7 +11,7 @@ Codex owns the art pipeline and later performs independent QA. Do not replace fi
 - Platform: mobile-first 3D, dog-height camera (ADR-010 in `docs/99_notes/DECISIONS.md`). The Sprint 01–03 2D scenes are still in the repo.
 - Player identity: the dog
 - Current phase: MVP
-- Current sprint: `docs/03_sprints/SPRINT_04_DOG_AGENCY.md` (in the 3D walk); its active blocker is P-04, `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESENCE.md` (builds on P-03, `docs/03_sprints/SPRINT_04_P03_STREET_BRAWL.md`). `SPRINT_STATUS.md` is authoritative.
+- Current sprint: `docs/03_sprints/SPRINT_04_DOG_AGENCY.md` (in the 3D walk); its active blocker is P-04, `docs/01_prototypes/P_04_HUMAN_BRAWL_PHYSICAL_PRESENCE.md` (builds on P-03, `docs/03_sprints/SPRINT_04_P03_STREET_BRAWL.md`). Next is P-05 street loot & improvised weapons (`docs/01_prototypes/P_05_STREET_LOOT_IMPROVISED_WEAPONS.md`, Update 010), whose gate unlocks Sprint 05. `SPRINT_STATUS.md` is authoritative.
 
 ## Read Order
 Before coding:
