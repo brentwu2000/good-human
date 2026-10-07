@@ -102,12 +102,21 @@ func _run() -> void:
 	await _hold_until_free(human)
 	await _interact_at(dog, human, pair)
 	check(coordinator.is_fighting(), "provoked the park pair")
+	await _physics(2)
+	check(not hud.get_node("%DesireCard").visible and not hud.get_node("%HintArrow").visible, "the dog's thought and nose arrow step aside in a fight")
+	await _physics(30)
+	var spot_labels := _tree.get_nodes_in_group(SearchPoint.GROUP).filter(func(n: Node) -> bool: return n is SearchPoint3D).map(func(n: Node) -> float: return (n as SearchPoint3D)._name_label.transparency)
+	check(not spot_labels.is_empty() and spot_labels.all(func(t: float) -> bool: return t >= 0.99), "sniff-spot names fade out in a fight, not written across the fighters")
 	check_eq(_count(run, &"courage_provoke"), 1, "COURAGE: provoking in 3D")
 	coordinator.engagement.simulation.fighters[0].hp *= 0.3
 	dog.global_position = human.global_position + Vector3(0, 0, CombatCoordinator3D.DISENGAGE_DISTANCE + 2.0)
 	await _physics(3)
 	check(_count(run, &"run_escape") == 1 and _count(run, &"courage_escape") == 1, "RUN + COURAGE: escaping hurt")
 	check(Game.goal_progress.is_discovered(&"dogs", pair.encounter.id), "met pair discovered")
+	await _physics(2)
+	check(hud.get_node("%DesireCard").visible, "and the thought comes back when it is over")
+	await _physics(30)
+	check(_tree.get_nodes_in_group(SearchPoint.GROUP).all(func(n: Node) -> bool: return not n is SearchPoint3D or (n as SearchPoint3D)._name_label.transparency <= 0.01), "and the names come back")
 
 	# --- Alley scent reveals the rival -------------------------------------------------------
 	await _hold_until_free(human)

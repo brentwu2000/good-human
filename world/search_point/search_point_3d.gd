@@ -110,6 +110,11 @@ func _process(delta: float) -> void:
 		_popup.text = ""
 	if _scent.visible:
 		_scent.position.y = 1.6 + sin(_time * 2.0) * 0.08
+	# The name and scent are drawn over everything; in a fight beside them
+	# they were written across the fighters. They fade out until it is over.
+	var quiet := 1.0 if is_instance_valid(_run) and _run.owner_busy else 0.0
+	_name_label.transparency = move_toward(_name_label.transparency, quiet, delta * 4.0)
+	_scent.transparency = _name_label.transparency
 	if not _searching:
 		return
 	if not is_instance_valid(_run) or not _run.is_running():

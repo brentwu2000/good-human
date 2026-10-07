@@ -41,9 +41,26 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# A fight is read without words (P03-E12 / P04-11): the dog's thoughts and
+	# its nose arrow step aside — the arrow circles the middle of the screen,
+	# which is where the fighters' faces are — and come back when it is over.
+	# New thoughts wait their turn.
+	if _in_fight():
+		_card.hide()
+		_arrow.hide()
+		if _popup_left <= 0.0:
+			_popup.hide()
+		else:
+			_update_popup(delta)
+		return
 	_update_list()
 	_update_popup(delta)
 	_update_arrow()
+
+
+func _in_fight() -> bool:
+	var coordinator := director.coordinator if director != null else null
+	return coordinator != null and coordinator.has_method(&"is_fighting") and coordinator.is_fighting()
 
 
 static func line_for(desire: DesireData) -> String:
