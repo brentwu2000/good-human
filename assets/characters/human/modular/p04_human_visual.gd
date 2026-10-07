@@ -101,11 +101,22 @@ func _apply_blend(delta: float) -> void:
 
 func _process(_delta: float) -> void:
 	_apply_blend(_delta)
+	apply_layers()
+
+
+## The controls and this node's own tilt and offset over the clip's pose.
+## Safe to call more than once a frame (it knows what it wrote), which the
+## fight does to measure the pose people will actually see.
+func apply_layers() -> void:
 	# Gameplay also tilts this whole node (a blow's recoil, a stoop). Layered
 	# over a clip that already leans, only `layer_weight` of that tilt is kept:
 	# the model counter-rotates by the rest, root·model = root^w·yaw.
 	var yaw := Quaternion(Vector3.UP, PI)
 	model.quaternion = quaternion.inverse().slerp(Quaternion.IDENTITY, layer_weight) * yaw if layered else yaw
+	# The same for where it puts this node (a lunge into a strike, a guard
+	# pushed forward, knocked back): the fight clips step in and back
+	# themselves, and both at full strength put one person inside the other.
+	model.position = basis.inverse() * -position * (1.0 - layer_weight) if layered else Vector3.ZERO
 	if skeleton == null or not (legacy_driven or layered):
 		return
 	for joint_name: String in BONE_MAP:

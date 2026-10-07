@@ -266,15 +266,20 @@ def build(arm):
     lkick_hit = moved(S, d_foot_l=(-0.02, -0.28, 0.5), d_toe_l=(0.0, -0.6, 0.7), d_pelvis=(-0.02, 0.0, 0.0), d_tilt=-18.0, d_yaw=-6.0)
     bake(arm, "Fight_Kick_Lead", [(0, S, lin), (0.32, lkick_chamber, smooth), (0.5, lkick_hit, snap), (0.62, lkick_hit, lin), (0.82, lkick_chamber, smooth), (1, S, smooth)], 0.8)
 
-    # Defence.
-    block = moved(S, d_hand_l=(-0.06, 0.12, 0.14), d_hand_r=(0.04, 0.03, 0.08), d_pelvis=(0, 0.02, -0.03), d_head_pitch=10.0, d_chest_lean=6.0)
+    # Defence: a shell — forearms up in front of the face, chin tucked, and
+    # the weight sitting back, so the head goes away from the blow and not
+    # into the other person's lead hand.
+    block = moved(S, d_hand_l=(-0.06, 0.16, 0.14), d_hand_r=(0.04, 0.05, 0.08), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0)
     bake(arm, "Fight_Block", [(0, block, lin), (1, block, lin)], 0.3)
     slip = moved(S, d_pelvis=(0.1, 0.08, -0.06), d_tilt=-6.0, d_chest_lean=-8.0, d_chest_yaw=10.0, d_hand_l=(0.06, 0.12, -0.04), d_hand_r=(0.08, 0.1, -0.06), d_foot_r=(0.04, 0.1, 0.0))
     bake(arm, "Fight_Dodge", [(0, S, lin), (0.4, slip, snap), (0.7, slip, lin), (1, S, smooth)], 0.45)
     # Hit reactions: the whole body answers.
     hit_light = moved(S, d_head_pitch=-22.0, d_head_yaw=10.0, d_chest_lean=-10.0, d_pelvis=(0, 0.05, 0.0), d_hand_l=(0.03, 0.1, -0.06), d_hand_r=(-0.02, 0.05, -0.05))
     bake(arm, "Fight_HitLight", [(0, S, lin), (0.2, hit_light, snap), (0.45, hit_light, lin), (1, S, smooth)], 0.35)
-    hit_heavy = moved(S, d_head_pitch=24.0, d_chest_lean=22.0, d_tilt=14.0, d_pelvis=(0, 0.12, -0.06), d_foot_r=(0, 0.14, 0.0), d_hand_l=(-0.04, 0.16, -0.28), d_hand_r=(0.04, 0.1, -0.26), d_yaw=12.0)
+    # A heavy blow folds them over it and drives them back: the hips go back
+    # further than the chest comes forward, so the head is knocked away and
+    # never lunges into the person who hit them.
+    hit_heavy = moved(S, d_head_pitch=20.0, d_chest_lean=16.0, d_tilt=8.0, d_pelvis=(0, 0.22, -0.06), d_foot_r=(0, 0.2, 0.0), d_hand_l=(-0.04, 0.24, -0.28), d_hand_r=(0.04, 0.18, -0.26), d_yaw=12.0)
     bake(arm, "Fight_HitHeavy", [(0, S, lin), (0.18, hit_heavy, snap), (0.55, hit_heavy, lin), (1, S, smooth)], 0.55)
 
 

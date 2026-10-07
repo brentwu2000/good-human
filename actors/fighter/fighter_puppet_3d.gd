@@ -62,6 +62,13 @@ const CRITICAL_AT: float = 0.3
 ## Critical: every so often they falter for a moment (hesitation).
 const HESITATE_EVERY: float = 2.2
 const HESITATE_SECONDS: float = 0.35
+## A landed blow stops this far short of the body (m; the layers on top of
+## the clip take it the rest of the way to touching) (`_stop_at_body`).
+const TOUCH_GAP: float = 0.03
+## Attack clips: extension up to 0.5, held a little; past this they come back.
+const STRIKE_HELD_UNTIL: float = 0.64
+## Hit reactions: the blow's pose by 0.2, held to here, then recovering.
+const REACTION_HELD_UNTIL: float = 0.55
 
 var data: FighterData
 
@@ -79,6 +86,11 @@ var _mirrored_attack: bool = false
 var _limb: int = 1
 var _turn: float = 1.0
 var _last_jab_at: float = -9.0
+## The person being fought (set by the fight), so a blow stops on their body
+## instead of passing through it (`_stop_at_body`).
+var opponent: FighterPuppet3D
+## [clip, t, held until] posed this frame, for `stop_at_body`.
+var _posed: Array = []
 var _side_rng := RandomNumberGenerator.new()
 ## P-05: what they are holding, and the prop showing it.
 var held: WeaponData
@@ -277,28 +289,86 @@ func set_fighting() -> void:
 ## follow the same state the choreography reads. Called every frame by the
 ## coordinator during a fight.
 func drive_combat_clip(fighter: CombatFighter) -> void:
+	_posed = []
 	var skeletal := _body as P04HumanVisual
 	if skeletal == null or _down:
 		return
 	var reaction := motion.reaction_progress()
 	if reaction >= 0.0:
-		skeletal.pose_clip(_clip(skeletal, REACTION_CLIPS.get(motion.reacting_state(), "HitLight"), false), reaction)
+		var reacting := _clip(skeletal, REACTION_CLIPS.get(motion.reacting_state(), "HitLight"), false)
+		skeletal.pose_clip(reacting, reaction)
+		_posed = [reacting, reaction, REACTION_HELD_UNTIL]
 		return
 	var skill := fighter.action
 	if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and not fighter.is_idle():
 		var clip: String = ATTACK_CLIPS.get(skill.animation_key, "Jab")
-		skeletal.pose_clip(_clip(skeletal, clip, _mirrored_attack), _attack_progress(fighter, skill))
+		var played := _clip(skeletal, clip, _mirrored_attack)
+		var t := _attack_progress(fighter, skill)
+		skeletal.pose_clip(played, t)
+		_posed = [played, t, STRIKE_HELD_UNTIL]
 		return
 	if fighter.is_guarding():
-		skeletal.pose_clip(_clip(skeletal, "Block", false), 0.5)
+		var block := _clip(skeletal, "Block", false)
+		skeletal.pose_clip(block, 0.5)
+		_posed = [block, 0.5, 1.0]
 		return
 	if fighter.is_evading() and skill != null:
-		skeletal.pose_clip(_clip(skeletal, "Dodge", false), 1.0 - fighter.phase_time_left / maxf(skill.active_time, 0.01))
+		var dodge := _clip(skeletal, "Dodge", false)
+		var through := 1.0 - fighter.phase_time_left / maxf(skill.active_time, 0.01)
+		skeletal.pose_clip(dodge, through)
+		_posed = [dodge, through, 0.7]
 		return
 	var loop := _clip(skeletal, FOOTWORK_CLIPS.get(motion.state, "Idle"), false)
 	if skeletal.player.current_animation != loop or skeletal.player.speed_scale == 0.0:
 		skeletal.play_clip(loop)
 		skeletal.use_clip_layer(COMBAT_LAYER)
+
+
+## Fighting games stop a blow where it meets the body. The clips are authored
+## at full extension (the furthest a blow can land) but most land closer, so
+## if the pose at `t` would sink into the opponent, the clip is held at the
+## nearest moment it only touches: before `held_until` on the way out, after
+## it on the way back. The same keeps a body folding from a blow, or a guard,
+## out of the other person. Presentation only; the simulation's timing is
+## untouched.
+## Called by the fight once both people have been posed this frame, so each
+## is measured against where the other actually is now (twice round, as
+## one settling can move a body into the other's way).
+func stop_at_body() -> void:
+	var posed := _posed
+	var skeletal := _body as P04HumanVisual
+	if posed.is_empty() or skeletal == null or _down:
+		return
+	_stop_at_body(skeletal, posed[0], posed[1], posed[2])
+
+
+func _stop_at_body(skeletal: P04HumanVisual, clip: String, t: float, held_until: float) -> void:
+	var other := opponent._body as P04HumanVisual if opponent != null else null
+	if other == null or other.skeleton == null:
+		return
+	var theirs := BodyContact.capsules(other.skeleton)
+	# Measured as it will be seen: with the layers on top of the clip.
+	skeletal.apply_layers()
+	if _inside(skeletal, theirs) <= 0.0:
+		return
+	# Out: the latest time up to `t` that only touches; back: the earliest after.
+	var outward := t <= held_until
+	var clear := 0.0 if outward else 1.0
+	var deep := t
+	for i in 6:
+		var mid := (clear + deep) * 0.5
+		skeletal.pose_clip(clip, mid)
+		skeletal.apply_layers()
+		if _inside(skeletal, theirs) <= 0.0:
+			clear = mid
+		else:
+			deep = mid
+	skeletal.pose_clip(clip, clear)
+	skeletal.apply_layers()
+
+
+func _inside(skeletal: P04HumanVisual, theirs: Array) -> float:
+	return BodyContact.deepest(BodyContact.capsules(skeletal.skeleton), theirs, TOUCH_GAP)[0]
 
 
 ## The clip to play for P-04 clip `clip`: its fight version (the other side's

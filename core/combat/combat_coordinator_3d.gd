@@ -292,8 +292,13 @@ func _update_motion(delta: float) -> void:
 		var puppet: FighterPuppet3D = puppets[side]
 		var closing := fighter.footwork == CombatFighter.Footwork.APPROACH
 		puppet.motion.update(delta, fighter, closing, fighter.is_defeated())
+		puppet.opponent = puppets[1 - side]
 		puppet.drive_combat_clip(fighter)
 		puppet.play_motion(delta)
+	# Blows stop where they meet the other body, measured once both are posed.
+	for round in 2:
+		for puppet: FighterPuppet3D in puppets:
+			puppet.stop_at_body()
 
 
 ## P04-08: how badly placed a fighter would be at `ground` (simulation units
