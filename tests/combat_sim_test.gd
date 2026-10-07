@@ -16,6 +16,10 @@ const DODGE: CombatSkillData = preload("res://data/combat/skills/skill_dodge.tre
 var balance: GameBalance
 
 
+## Fighting distance for these checks: in reach of a jab, outside touching
+## distance (P-04 spacing, widened for the fighting-game stance).
+const NEAR: float = 70.0
+
 func _ready() -> void:
 	balance = DataRegistry.balance
 	_test_stats()
@@ -66,7 +70,7 @@ func _test_ai_choices() -> void:
 
 	# P-04: in range, an attack is a weighted choice among what is available —
 	# priority makes the heavier options likelier, never automatic.
-	_place(sim, 60.0)
+	_place(sim, NEAR)
 	var picks := _pick_counts(sim, me, 600)
 	check(picks.get(KICK, 0) > picks.get(HOOK, 0) and picks.get(HOOK, 0) > picks.get(PUNCH, 0), "in range: kick likeliest, then hook, then jab (%s)" % _names(picks))
 	check(picks.get(PUNCH, 0) > 0, "and the jab still gets thrown")
@@ -78,7 +82,7 @@ func _test_ai_choices() -> void:
 	me.cooldowns[KICK.id] = 0.0
 	me.cooldowns[HOOK.id] = 0.0
 	# Beyond the jab and hook, inside the kick (P-04 reach matched to Codex's model).
-	_place(sim, 80.0)
+	_place(sim, (PUNCH.preferred_range + KICK.preferred_range) * 0.5)
 	var far := {}
 	for i in 300:
 		me.closing_until = -1.0
@@ -91,7 +95,7 @@ func _test_ai_choices() -> void:
 	if me.closing_until > sim.time:
 		check(sim.choose_skill(me) == null, "and having decided to step in, they do not kick from out there after all")
 
-	_place(sim, 60.0)
+	_place(sim, NEAR)
 	me.ready_at = sim.time + 5.0
 	check(sim.choose_skill(me) == null, "attacks wait for action interval")
 	# A telegraph that began a moment ago: a reaction exists from the instant
@@ -107,7 +111,7 @@ func _test_ai_choices() -> void:
 
 
 func _test_block_reduces_damage() -> void:
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(them, PUNCH)
@@ -120,7 +124,7 @@ func _test_block_reduces_damage() -> void:
 
 
 func _test_dodge_avoids_hit() -> void:
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(them, KICK)
@@ -137,7 +141,7 @@ func _test_kick_staggers_low_will() -> void:
 	for pair: Array in [[GYM, true], [OLD_MASTER, false]]:
 		var opponent := pair[0] as FighterData
 		var sim := CombatSimulation.new(_attacks_only(PLAYER), _attacks_only(opponent), 3, balance)
-		_place(sim, 60.0)
+		_place(sim, NEAR)
 		var me := sim.fighters[CombatSimulation.PLAYER]
 		var them := sim.fighters[CombatSimulation.OPPONENT]
 		_start_attack(me, KICK)
@@ -219,7 +223,7 @@ func _test_force_result() -> void:
 
 func _test_dog_agency_hooks() -> void:
 	# Bark: an opponent still winding up drops the attack and decides nothing.
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(them, KICK)
 	var kinds := _collect(sim)
@@ -230,7 +234,7 @@ func _test_dog_agency_hooks() -> void:
 	check(them.uses.is_empty(), "distracted opponent starts nothing")
 
 	# ...but an attack they have already committed to still comes.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	them = sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(them, KICK)
 	them.phase_time_left = KICK.windup * CombatSimulation.COMMIT_SHARE * 0.5
@@ -238,14 +242,14 @@ func _test_dog_agency_hooks() -> void:
 	check(them.phase == CombatFighter.Phase.WINDUP, "a bark too late cannot call off a committed attack")
 
 	# A worn-out bark only turns their head.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	them = sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(them, KICK)
 	sim.distract(CombatSimulation.OPPONENT, CombatSimulation.DISTRACT_STRONG - 0.05)
 	check(them.phase == CombatFighter.Phase.WINDUP, "a weak bark does not cancel anything")
 
 	# The opening is worth extra damage, but the owner is never handed a turn.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	var opener := sim.fighters[CombatSimulation.PLAYER]
 	var exposed := sim.fighters[CombatSimulation.OPPONENT]
 	opener.data = _attacks_only(PLAYER)
@@ -272,7 +276,7 @@ func _test_dog_agency_hooks() -> void:
 	check(spam_wins <= paced_wins + 5, "extra barks add nothing; the first is the whole benefit (%d vs %d of 100)" % [spam_wins, paced_wins])
 
 	# Pull out of an incoming attack: it misses.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	them = sim.fighters[CombatSimulation.OPPONENT]
 	me.data = _attacks_only(PLAYER)
@@ -286,14 +290,14 @@ func _test_dog_agency_hooks() -> void:
 	check_eq(me.hp, me.max_hp, "pulled owner takes no damage")
 
 	# Pull with nothing incoming costs nothing and gains nothing.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	me = sim.fighters[CombatSimulation.PLAYER]
 	var standing := me.position
 	check(not sim.pull(CombatSimulation.PLAYER, 20.0), "pull without an attack is only a reposition")
 	check_eq(me.position, standing, "a mistimed pull does not cost the owner ground")
 
 	# A pull that saves them does cost tempo: they have to set their feet again.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	me = sim.fighters[CombatSimulation.PLAYER]
 	them = sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(them, KICK)
@@ -301,7 +305,7 @@ func _test_dog_agency_hooks() -> void:
 	check(me.ready_at >= sim.time + CombatSimulation.PULL_RECOVERY, "a save costs the owner their own tempo")
 
 	# Bad pull: stumble, no attacks for a while.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	me = sim.fighters[CombatSimulation.PLAYER]
 	_start_attack(me, PUNCH)
 	kinds = _collect(sim)

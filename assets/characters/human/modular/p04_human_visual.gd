@@ -21,6 +21,12 @@ const BONE_MAP := {"Hips": "pelvis", "Torso": "spine_03", "Head": "head", "ArmL"
 const STYLIZED_MODEL := "res://assets/characters/human/models/p04_owner/p04_owner_stylized.glb"
 const RELAXED_CLIPS := preload("res://assets/characters/human/animations/p04_relaxed_clips.glb")
 const RELAXED_LIBRARY: StringName = &"relaxed"
+## Fighting-game style combat clips (Claude, owner request 2026-10-07;
+## tools/art/make_fight_clips.py): a bladed, bouncing stance, footwork,
+## strikes with weight transfer, defence and whole-body hit reactions.
+const FIGHT_CLIPS := preload("res://assets/characters/human/animations/p04_fight_clips.glb")
+const FIGHT_LIBRARY: StringName = &"fight"
+static var _fight_library: AnimationLibrary
 static var _relaxed_library: AnimationLibrary
 ## Owner, 2026-10-06 (「戰鬥動作太單一」): the attacks mirrored left for right
 ## — the jab's rear-hand cross, the other hook, a kick off the other leg.
@@ -39,6 +45,12 @@ var layer_weight := 0.0
 var _written: Dictionary = {}
 var _clip_base: Dictionary = {}
 var controls: Dictionary = {}
+## Owner, 2026-10-07: changes between clips blend instead of snapping. The
+## pose when the clip changed, and how long is left of the blend from it.
+const BLEND_SECONDS: float = 0.12
+var _blend_from: Array[Quaternion] = []
+var _blend_hips := Vector3.ZERO
+var _blend_left: float = 0.0
 
 ## `scene`: another model on the same OwnerSkeleton (FighterData.skeletal_model);
 ## null = the shared P-04 human.
@@ -51,6 +63,7 @@ func _init(scene: PackedScene = null) -> void:
 	skeleton = _find_type(model, "Skeleton3D") as Skeleton3D
 	player = _find_type(model, "AnimationPlayer") as AnimationPlayer
 	_add_relaxed_clips()
+	_add_fight_clips()
 	_add_mirrored_clips()
 	SoftToon.register(self)
 	for joint_name: String in BONE_MAP:
@@ -61,7 +74,33 @@ func _init(scene: PackedScene = null) -> void:
 	# After the AnimationPlayer: the clip writes its pose, then the controls.
 	process_priority = 50
 
+## Remembers the pose right now, to blend from into the next clip.
+func _start_blend() -> void:
+	if skeleton == null or skeleton.get_bone_count() == 0:
+		return
+	_blend_from.resize(skeleton.get_bone_count())
+	for i in skeleton.get_bone_count():
+		_blend_from[i] = skeleton.get_bone_pose_rotation(i)
+	var hips := skeleton.find_bone("pelvis")
+	_blend_hips = skeleton.get_bone_pose_position(hips) if hips >= 0 else Vector3.ZERO
+	_blend_left = BLEND_SECONDS
+
+
+func _apply_blend(delta: float) -> void:
+	if _blend_left <= 0.0 or skeleton == null or _blend_from.size() != skeleton.get_bone_count():
+		return
+	_blend_left = maxf(_blend_left - delta, 0.0)
+	var w := 1.0 - _blend_left / BLEND_SECONDS
+	w = w * w * (3.0 - 2.0 * w)
+	for i in skeleton.get_bone_count():
+		skeleton.set_bone_pose_rotation(i, _blend_from[i].slerp(skeleton.get_bone_pose_rotation(i), w))
+	var hips := skeleton.find_bone("pelvis")
+	if hips >= 0:
+		skeleton.set_bone_pose_position(hips, _blend_hips.lerp(skeleton.get_bone_pose_position(hips), w))
+
+
 func _process(_delta: float) -> void:
+	_apply_blend(_delta)
 	# Gameplay also tilts this whole node (a blow's recoil, a stoop). Layered
 	# over a clip that already leans, only `layer_weight` of that tilt is kept:
 	# the model counter-rotates by the rest, root·model = root^w·yaw.
@@ -126,6 +165,25 @@ func _add_relaxed_clips() -> void:
 		player.add_animation_library(RELAXED_LIBRARY, _relaxed_library)
 
 
+## "fight/<clip>" when the fight library has it, else "".
+func fight_clip(clip: String) -> String:
+	var name := "%s/%s" % [FIGHT_LIBRARY, clip]
+	return name if player != null and player.has_animation(name) else ""
+
+
+func _add_fight_clips() -> void:
+	if player == null or player.has_animation_library(FIGHT_LIBRARY):
+		return
+	if _fight_library == null:
+		var source := FIGHT_CLIPS.instantiate()
+		var source_player := _find_type(source, "AnimationPlayer") as AnimationPlayer
+		if source_player != null:
+			_fight_library = source_player.get_animation_library(&"")
+		source.free()
+	if _fight_library != null:
+		player.add_animation_library(FIGHT_LIBRARY, _fight_library)
+
+
 ## `clip` played off the other side ("mirror/Jab"), or `clip` itself when there
 ## is no mirrored version.
 func mirrored(clip: String) -> String:
@@ -180,6 +238,8 @@ func play_clip(clip: String, loop := true) -> void:
 		return
 	var animation := player.get_animation(clip)
 	animation.loop_mode = Animation.LOOP_LINEAR if loop else Animation.LOOP_NONE
+	if player.current_animation != clip:
+		_start_blend()
 	player.speed_scale = 1.0
 	player.play(clip, 0.12)
 	# A one-shot clip stops rewriting the pose when it ends; layering over it
@@ -195,6 +255,7 @@ func pose_clip(clip: String, t: float) -> void:
 		return
 	var animation := player.get_animation(clip)
 	if player.current_animation != clip:
+		_start_blend()
 		animation.loop_mode = Animation.LOOP_NONE
 		# No cross-fade: at speed 0 a blend never advances, and the new clip
 		# would never take over (it did not, until this was found measuring

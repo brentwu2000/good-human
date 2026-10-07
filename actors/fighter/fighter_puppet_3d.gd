@@ -17,7 +17,7 @@ signal bumped(from: Vector3)
 ## Codex's authored combat clips (P-04 + ART), by attack, reaction and footwork.
 ## P05-04: until Codex's D5W-02 umbrella motion, the umbrella's poke rides
 ## the jab (the arm thrusts out) and its swing the hook (the arm sweeps across).
-const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Jab", &"swing": "HeavyHook", &"smash": "Jab"}
+const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Thrust", &"swing": "HeavyHook", &"smash": "Jab"}
 ## The hand a weapon is held in: the lead hand, the one the jab clip drives.
 const WEAPON_HAND := "hand_l"
 const REACTION_CLIPS := {
@@ -32,8 +32,28 @@ const FOOTWORK_CLIPS := {
 	CombatMotion3D.State.SIDESTEP: "Circle",
 	CombatMotion3D.State.BACKSTEP: "Backstep",
 }
-## How strongly the P-04 choreography's joint accents layer over the clips.
-const COMBAT_LAYER: float = 0.5
+## Owner, 2026-10-07 (「打鬥的方式太生硬」): fighting-game style clips —
+## a bladed, bouncing stance, footwork that keeps it, blows with weight
+## transfer, whole-body reactions. Each P-04 clip name maps to its fight clip
+## and the other side's (the cross for a jab thrown off the rear hand, and so
+## on); used when the model has the fight library, else the first-pass clips.
+const FIGHT_CLIPS := {
+	"Jab": ["Fight_Jab", "Fight_Cross"],
+	"Thrust": ["Fight_Thrust", "Fight_Thrust"],
+	"HeavyHook": ["Fight_Hook", "Fight_Hook_Rear"],
+	"Kick": ["Fight_Kick", "Fight_Kick_Lead"],
+	"HitLight": ["Fight_HitLight", "Fight_HitLight"],
+	"HitHeavy": ["Fight_HitHeavy", "Fight_HitHeavy"],
+	"Block": ["Fight_Block", "Fight_Block"],
+	"Dodge": ["Fight_Dodge", "Fight_Dodge"],
+	"Idle": ["Fight_Stance", "Fight_Stance"],
+	"Approach": ["Fight_Step_Fwd", "Fight_Step_Fwd"],
+	"Circle": ["Fight_Circle", "Fight_Circle"],
+	"Backstep": ["Fight_Step_Back", "Fight_Step_Back"],
+}
+## How strongly the P-04 choreography's joint accents layer over the clips:
+## light now, the fight clips carry the body themselves.
+const COMBAT_LAYER: float = 0.2
 
 ## P02-008: how the fight is going for them, as their body shows it.
 enum Condition { HEALTHY, HURT, CRITICAL, DOWN }
@@ -262,23 +282,37 @@ func drive_combat_clip(fighter: CombatFighter) -> void:
 		return
 	var reaction := motion.reaction_progress()
 	if reaction >= 0.0:
-		skeletal.pose_clip(REACTION_CLIPS.get(motion.reacting_state(), "HitLight"), reaction)
+		skeletal.pose_clip(_clip(skeletal, REACTION_CLIPS.get(motion.reacting_state(), "HitLight"), false), reaction)
 		return
 	var skill := fighter.action
 	if skill != null and skill.effect == CombatSkillData.Effect.ATTACK and not fighter.is_idle():
 		var clip: String = ATTACK_CLIPS.get(skill.animation_key, "Jab")
-		skeletal.pose_clip(skeletal.mirrored(clip) if _mirrored_attack else clip, _attack_progress(fighter, skill))
+		skeletal.pose_clip(_clip(skeletal, clip, _mirrored_attack), _attack_progress(fighter, skill))
 		return
 	if fighter.is_guarding():
-		skeletal.pose_clip("Block", 0.5)
+		skeletal.pose_clip(_clip(skeletal, "Block", false), 0.5)
 		return
 	if fighter.is_evading() and skill != null:
-		skeletal.pose_clip("Dodge", 1.0 - fighter.phase_time_left / maxf(skill.active_time, 0.01))
+		skeletal.pose_clip(_clip(skeletal, "Dodge", false), 1.0 - fighter.phase_time_left / maxf(skill.active_time, 0.01))
 		return
-	var loop: String = FOOTWORK_CLIPS.get(motion.state, "Idle")
+	var loop := _clip(skeletal, FOOTWORK_CLIPS.get(motion.state, "Idle"), false)
 	if skeletal.player.current_animation != loop or skeletal.player.speed_scale == 0.0:
 		skeletal.play_clip(loop)
 		skeletal.use_clip_layer(COMBAT_LAYER)
+
+
+## The clip to play for P-04 clip `clip`: its fight version (the other side's
+## when `other_side`), else the first-pass clip, mirrored if asked.
+func _clip(skeletal: P04HumanVisual, clip: String, other_side: bool) -> String:
+	var pair: Array = FIGHT_CLIPS.get(clip, [])
+	if not pair.is_empty():
+		var fight := skeletal.fight_clip(pair[1] if other_side else pair[0])
+		if not fight.is_empty():
+			return fight
+	# A move only the fight clips have falls back to the jab.
+	if skeletal.player == null or not skeletal.player.has_animation(clip):
+		clip = "Jab"
+	return skeletal.mirrored(clip) if other_side else clip
 
 
 ## 0..1 through an attack's clip: 0.5 is the moment its contact window opens.

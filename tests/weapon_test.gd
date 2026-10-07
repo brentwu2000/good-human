@@ -270,15 +270,18 @@ func _test_contact() -> void:
 			puppet.apply(PLAYER)
 			puppet.hold(weapon)
 			await get_tree().process_frame
-			var clip: String = FighterPuppet3D.ATTACK_CLIPS.get(skill.animation_key, "Jab")
+			# The clip the game actually plays for it (the fight clip, once loaded).
+			var base: String = FighterPuppet3D.ATTACK_CLIPS.get(skill.animation_key, "Jab")
+			var clip: String = puppet._clip(puppet._body as P04HumanVisual, base, false)
 			var drawn := 0.0
 			for t in [0.45, 0.5, 0.55]:
 				(puppet._body as P04HumanVisual).pose_clip(clip, t)
-				await get_tree().process_frame
+				# Past the blend into the clip.
+				await get_tree().create_timer(P04HumanVisual.BLEND_SECONDS + 0.05).timeout
 				var tip: Vector3 = puppet._prop.global_transform * Vector3(0, WeaponProp3D.TIP[weapon.archetype], 0)
 				drawn = maxf(drawn, (tip - puppet.global_position).dot(-puppet.global_basis.z))
 			var reach := skill.preferred_range / 100.0 - body_front
-			if clip == "Jab":
+			if base in ["Jab", "Thrust"]:
 				check(absf(drawn - reach) < 0.15, "%s: the drawn tip reaches %.2f m, its reach %.2f m" % [skill.id, drawn, reach])
 			else:
 				check(reach - drawn <= hook_allowance, "%s: a swing reaching %.2f m is drawn to %.2f m (hook allowance)" % [skill.id, reach, drawn])

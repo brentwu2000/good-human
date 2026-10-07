@@ -34,6 +34,9 @@ var cooldowns: Dictionary[StringName, float] = {}
 var distracted_until: float = -1.0
 ## Hits against this fighter before this time exploit an opening (bark).
 var exposed_until: float = -1.0
+## Until when a full-strength bark has them really looking away (the heaviest
+## blow goes in); a worn-out bark only marks `exposed_until`.
+var strongly_exposed_until: float = -1.0
 ## Last simulation time this fighter was moving out of the way in a dodge.
 var last_evaded_at: float = -99.0
 ## Being yanked by the leash until this time (P04-10): the owner is moving,

@@ -31,7 +31,7 @@ func _ready() -> void:
 ## Circling moves someone round the other person: the gap between them stays
 ## the same and only the line turns.
 func _test_circling_keeps_distance() -> void:
-	var sim := CombatSimulation.new(PLAYER, OPPONENTS[0], 7, null, 62.0)
+	var sim := CombatSimulation.new(PLAYER, OPPONENTS[0], 7, null, DataRegistry.spacing.ideal_min)
 	for fighter in sim.fighters:
 		fighter.ready_at = 99.0  # nobody attacks
 	var before := sim.distance()

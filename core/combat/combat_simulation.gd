@@ -189,6 +189,8 @@ func distract(side: int, seconds: float) -> void:
 	# not perma-cancelled. An attack they have already committed to still lands.
 	# The other human is never handed a free turn: their ordinary next attack is
 	# simply worth more while the opening lasts.
+	if seconds >= DISTRACT_STRONG:
+		fighter.strongly_exposed_until = maxf(fighter.strongly_exposed_until, time + seconds + _balance.opening_grace)
 	if seconds >= DISTRACT_STRONG and _can_be_called_off(fighter):
 		_enter(fighter, CombatFighter.Phase.RECOVERY, seconds)
 	combat_event.emit(&"distracted", side, null, seconds)
@@ -275,7 +277,7 @@ func choose_skill(fighter: CombatFighter) -> CombatSkillData:
 	# most often does too, but not always, or every exchange ends in the
 	# same kick.
 	var target := _other(fighter)
-	if not fighter.in_combo and time < target.exposed_until:
+	if not fighter.in_combo and time < target.strongly_exposed_until:
 		return best
 	if not fighter.in_combo and _is_open(target) and _rng.randf() < _balance.opening_heavy_chance:
 		return best

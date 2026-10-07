@@ -4,9 +4,9 @@
 
 [resource]
 script = ExtResource("1_spacing")
-ideal_min = 62.0
-ideal_max = 69.0
-hard_min_separation = 60.0
+ideal_min = 70.0
+ideal_max = 77.0
+hard_min_separation = 68.0
 approach_speed = 1.0
 circle_speed = 30.0
 backstep_distance = 30.0

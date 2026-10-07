@@ -122,11 +122,13 @@ func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, _amou
 		&"hit":
 			var heavy := skill != null and skill.is_heavy()
 			play(&"impact_heavy" if heavy else &"impact_light", target + Vector3(0, 1.1, 0), 0.0)
+			_spark(attacker, target, skill, Color(1.0, 0.92, 0.7), 1.4 if heavy else 1.0)
 			if heavy:
 				_dust(target)
 				_put_up_birds()
 		&"blocked":
 			play(&"block", target + Vector3(0, 1.2, 0), -3.0)
+			_spark(attacker, target, skill, Color(0.75, 0.88, 1.0), 0.7)
 		&"defeated":
 			play(&"impact_heavy", _fighter_position(side) + Vector3(0, 0.5, 0), 2.0)
 			_dust(_fighter_position(side))
@@ -202,6 +204,50 @@ func _put_up_birds() -> void:
 		tween.tween_property(bird, "global_position", bird.global_position + away, randf_range(1.2, 1.8)).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 		tween.parallel().tween_property(bird, "scale", Vector3(1.0, 1.0, 1.0) * 0.4, 1.6)
 		tween.tween_callback(bird.queue_free)
+
+
+## Owner, 2026-10-07 (fighting-game feel): a hit spark where the blow
+## lands — a bright flash and a few streaks flying out, gone in a tenth of a
+## second; bigger for a heavy blow, cool and small for a block. At the front
+## of the body being hit, at the height the blow goes in (a kick lower).
+func _spark(attacker: Vector3, target: Vector3, skill: CombatSkillData, colour: Color, size: float) -> void:
+	var towards := (attacker - target)
+	towards.y = 0.0
+	towards = towards.normalized() if towards.length() > 0.01 else Vector3.FORWARD
+	var height := 0.85 if skill != null and skill.animation_key == &"kick" else 1.35
+	var at := target + towards * 0.2 + Vector3(0, height, 0)
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glow.albedo_color = colour
+	glow.no_depth_test = true
+	var flash := MeshInstance3D.new()
+	var ball := SphereMesh.new()
+	ball.radius = 0.07 * size
+	ball.height = 0.14 * size
+	flash.mesh = ball
+	flash.material_override = glow
+	flash.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	get_parent().add_child(flash)
+	flash.global_position = at
+	var tween := flash.create_tween()
+	tween.tween_property(flash, "scale", Vector3.ONE * 1.8, 0.1).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(glow, "albedo_color:a", 0.0, 0.12)
+	tween.tween_callback(flash.queue_free)
+	for i in 6:
+		var streak := MeshInstance3D.new()
+		var line := BoxMesh.new()
+		line.size = Vector3(0.012, 0.012, 0.16 * size)
+		streak.mesh = line
+		streak.material_override = glow
+		streak.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		get_parent().add_child(streak)
+		streak.global_position = at
+		var out := (towards + Vector3(randf_range(-0.9, 0.9), randf_range(-0.6, 0.8), randf_range(-0.9, 0.9))).normalized()
+		streak.look_at(at + out, Vector3.UP if absf(out.y) < 0.95 else Vector3.RIGHT)
+		var fly := streak.create_tween()
+		fly.tween_property(streak, "global_position", at + out * 0.28 * size, 0.1).set_ease(Tween.EASE_OUT)
+		fly.tween_callback(streak.queue_free)
 
 
 ## A little dust at someone's feet: low, thin, gone in half a second.

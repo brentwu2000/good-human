@@ -14,6 +14,10 @@ const DODGE: CombatSkillData = preload("res://data/combat/skills/skill_dodge.tre
 const STEP: float = 1.0 / 60.0
 
 
+## Fighting distance for these checks: in reach of a jab, outside touching
+## distance (P-04 spacing, widened for the fighting-game stance).
+const NEAR: float = 70.0
+
 func _ready() -> void:
 	_test_jab_data()
 	_test_phases_and_contact_timing()
@@ -42,7 +46,7 @@ func _test_jab_data() -> void:
 
 
 func _test_phases_and_contact_timing() -> void:
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	var log := _log(sim)
@@ -73,7 +77,7 @@ func _test_phases_and_contact_timing() -> void:
 func _test_lands_only_once() -> void:
 	var long_window := JAB.duplicate() as CombatSkillData
 	long_window.contact_time = 0.5
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var log := _log(sim)
 	_start_attack(sim.fighters[CombatSimulation.PLAYER], long_window)
 	_run_until_idle(sim, CombatSimulation.PLAYER)
@@ -81,7 +85,7 @@ func _test_lands_only_once() -> void:
 
 
 func _test_whiff() -> void:
-	var sim := _duel(JAB.preferred_range + 60.0)
+	var sim := _duel(JAB.preferred_range + NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	them.ready_at = 99.0
@@ -113,7 +117,7 @@ func _test_contact_waits_for_reach() -> void:
 	for i in 120:
 		sim.step(STEP)
 		if me.phase == CombatFighter.Phase.CONTACT:
-			them.position = me.position + 60.0
+			them.position = me.position + NEAR
 		if me.is_idle():
 			break
 	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "stepping into an open window gets you hit")
@@ -121,7 +125,7 @@ func _test_contact_waits_for_reach() -> void:
 
 
 func _test_block_in_window() -> void:
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	var log := _log(sim)
@@ -139,7 +143,7 @@ func _test_block_in_window() -> void:
 ## of reach and it is reported as dodged; too late, it lands anyway.
 func _test_pull_covers_contact() -> void:
 	var leash := DogAgency.PULL_DISTANCE * CombatCoordinator3D.UNITS_PER_METER
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	var log := _log(sim)
@@ -245,21 +249,21 @@ func _test_hook() -> void:
 		var data: FighterData = load("res://data/combat/fighters/%s.tres" % path)
 		check(not data.skills.has(HOOK), "%s does not" % path)
 
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	_start_attack(sim.fighters[CombatSimulation.PLAYER], HOOK)
 	var log := _log(sim)
 	_run_until_idle(sim, CombatSimulation.PLAYER)
 	check(log.any(func(e: Array) -> bool: return e[0] == &"hit"), "a hook in reach lands")
-	check(sim.distance() >= 60.0 + HOOK.displacement - 0.01, "and moves them back (%.1f from 60)" % sim.distance())
+	check(sim.distance() >= NEAR + HOOK.displacement - 0.01, "and moves them back (%.1f from %.0f)" % [sim.distance(), NEAR])
 
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	_start_attack(sim.fighters[CombatSimulation.PLAYER], HOOK)
 	them.action = BLOCK
 	them.phase = CombatFighter.Phase.ACTIVE
 	them.phase_time_left = 5.0
 	_run_until_idle(sim, CombatSimulation.PLAYER)
-	var moved := sim.distance() - 60.0
+	var moved := sim.distance() - NEAR
 	check(moved > 0.0 and moved < HOOK.displacement, "blocked, it still moves them, less (%.1f)" % moved)
 
 
@@ -276,16 +280,23 @@ func _test_opening_gets_the_heavy_blow() -> void:
 		var skill := sim.choose_skill(me)
 		picks[skill] = picks.get(skill, 0) + 1
 	check(picks.size() > 1, "normally the choice varies (%d different)" % picks.size())
+	# A full-strength bark (a worn-out one only marks `exposed_until`).
 	them.exposed_until = sim.time + 1.0
+	them.strongly_exposed_until = sim.time + 1.0
 	picks.clear()
 	for i in 100:
 		var skill := sim.choose_skill(me)
 		picks[skill] = picks.get(skill, 0) + 1
 	check(picks.size() == 1 and picks.has(KICK), "into a bark's opening: always the heaviest (kick)")
 	them.exposed_until = -1.0
+	them.strongly_exposed_until = -1.0
 	them.action = JAB
 	them.phase = CombatFighter.Phase.RECOVERY
-	check(sim.choose_skill(me) == KICK, "into someone recovering from a swing: the heaviest too")
+	picks.clear()
+	for i in 200:
+		var skill := sim.choose_skill(me)
+		picks[skill] = picks.get(skill, 0) + 1
+	check(picks.get(KICK, 0) > 100, "into someone recovering from a swing: most often the heaviest (%d of 200)" % picks.get(KICK, 0))
 
 
 ## P04-05: the kick is the long, committed option — furthest reach, longest
@@ -313,7 +324,7 @@ func _test_kick() -> void:
 ## in reach, you are hit however hard you are trying to get away.
 func _test_dodge_is_spatial() -> void:
 	# In time: moving back clears the kick's reach before its window opens.
-	var sim := _duel(60.0)
+	var sim := _duel(NEAR)
 	var me := sim.fighters[CombatSimulation.PLAYER]
 	var them := sim.fighters[CombatSimulation.OPPONENT]
 	var log := _log(sim)
@@ -333,7 +344,7 @@ func _test_dodge_is_spatial() -> void:
 	check(at_contact > KICK.preferred_range + CombatSimulation.REACH_TOLERANCE, "because they were out of reach when the window opened (%.0f)" % at_contact)
 
 	# Too late: still dodging, still in reach when the window opens — hit.
-	sim = _duel(60.0)
+	sim = _duel(NEAR)
 	me = sim.fighters[CombatSimulation.PLAYER]
 	them = sim.fighters[CombatSimulation.OPPONENT]
 	log = _log(sim)
