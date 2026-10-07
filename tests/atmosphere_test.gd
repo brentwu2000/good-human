@@ -71,9 +71,9 @@ func _run() -> void:
 	sim.combat_event.emit(&"hit", CombatSimulation.OPPONENT, kick, 20.0)
 	check(atmosphere._birds_flown, "the first heavy blow puts the birds up")
 	check(map.get_child_count() > nodes_before + 5, "birds and dust are seen")
-	var flown := map.get_child_count()
+	var flown := _tree.get_nodes_in_group(&"combat_birds").size()
 	sim.combat_event.emit(&"hit", CombatSimulation.OPPONENT, kick, 20.0)
-	check(map.get_child_count() < flown + 6, "only once a fight")
+	check(flown > 0 and _tree.get_nodes_in_group(&"combat_birds").size() == flown, "only once a fight")
 	var at := atmosphere._next_voice
 	sim.combat_event.emit(&"blocked", CombatSimulation.OPPONENT, jab, 2.0)
 	check(atmosphere._voices[at].stream == SfxSynth.get_sound(&"block"), "a block is a dull thud")

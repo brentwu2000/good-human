@@ -198,6 +198,7 @@ func _put_up_birds() -> void:
 	for i in 6:
 		var bird := Greybox.box(Vector3(0.12, 0.03, 0.06), Color(0.15, 0.15, 0.17), from + Vector3(randf_range(-0.8, 0.8), randf_range(-0.3, 0.3), randf_range(-0.8, 0.8)))
 		bird.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		bird.add_to_group(&"combat_birds")
 		get_parent().add_child(bird)
 		var away := Vector3(randf_range(-6.0, 6.0), randf_range(5.0, 9.0), randf_range(-6.0, 6.0))
 		var tween := bird.create_tween()
