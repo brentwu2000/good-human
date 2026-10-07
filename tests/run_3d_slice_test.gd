@@ -147,11 +147,14 @@ func _run() -> void:
 	rig.snap_behind_dog()
 	await _physics(2)
 	check(rig.collided and rig.is_dog_visible(), "wall pulls camera in, dog still visible")
-	check(rig.global_position.y - dog.global_position.y < 2.6, "camera does not climb near walls")
+	# No higher than the walking shot hangs in the open.
+	var walk: Dictionary = CameraRig3D.FRAMING
+	var open_height: float = walk["pivot"] + sin(deg_to_rad(-walk["pitch"])) * walk["distance"] + 0.1
+	check(rig.global_position.y - dog.global_position.y < open_height, "camera does not climb near walls (%.2f m)" % (rig.global_position.y - dog.global_position.y))
 	dog.global_position = Vector3(-12, 0.1, 4.8)
 	rig.snap()
 	await _physics(2)
-	check(not rig.collided and rig._faded.size() > 0 and rig.global_position.y - dog.global_position.y < 2.6, "too close to a wall, the wall fades")
+	check(not rig.collided and rig._faded.size() > 0 and rig.global_position.y - dog.global_position.y < open_height, "too close to a wall, the wall fades")
 
 	# --- Search ------------------------------------------------------------------
 	var trash := map.get_node("SearchPoints/trash_street_east") as SearchPoint3D

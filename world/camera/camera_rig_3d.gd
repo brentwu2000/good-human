@@ -35,7 +35,13 @@ enum Context { EXPLORE, TENSION, ACTIVE, CRISIS, AFFECTION, RELEASE }
 ## road it is heading for fills the screen. The pivot above the dog is what
 ## places the camera; `dog_low` (degrees) then aims that far above the dog, so
 ## it holds the same spot on screen however far a wall pulls the camera in.
-const FRAMING: Dictionary = {"pivot": 1.2, "pitch": -15.0, "distance": 4.2, "fov": 70.0, "focus": 0.0, "pov": 0.0, "dog_low": 14.0}
+## Owner, 2026-10-08 (「普通走路牽繩這段，變成稍微第三人稱視角，也看的到主人」):
+## the walk is the two of them. The camera hangs further back and higher,
+## behind the owner, and `side` (m, to the view's right) moves it over the
+## opposite shoulder from the side the owner walks on, so the owner is seen
+## whole beside the frame's middle, the dog ahead of them and the lead between.
+## `owner_share` turns the aim that far from the dog towards the owner.
+const FRAMING: Dictionary = {"pivot": 1.75, "pitch": -15.0, "distance": 5.2, "fov": 66.0, "focus": 0.0, "pov": 0.0, "dog_low": 9.0, "side": -0.6, "owner_share": 0.5}
 ## A fight must read as a push-IN against the walking shot, so every combat
 ## context is closer and narrower than EXPLORE, not further away. (The first
 ## pass measured itself against the old 7.5 m pull-back instead of against
@@ -47,6 +53,11 @@ const FRAMING: Dictionary = {"pivot": 1.2, "pitch": -15.0, "distance": 4.2, "fov
 ## lower foreground and both people are seen whole: every blow, block and
 ## stumble reads, and the dog's height still makes them big. (Dog-eye first
 ## person, `pov`, stays as a debug option: `combat_pov`.)
+## Further than this (m) from the dog, the owner is not framed into the walk.
+const OWNER_IN_SHOT_DISTANCE: float = 4.0
+## The owner's outline (m) for deciding whether they cover the dog.
+const OWNER_HEIGHT: float = 1.75
+const OWNER_HALF_WIDTH: float = 0.3
 const CONTEXT_FRAMING: Dictionary = {
 	Context.EXPLORE: FRAMING,
 	Context.TENSION: {"pivot": 0.85, "pitch": -8.0, "distance": 2.70, "fov": 60.0, "focus": 0.60, "pov": 0.0, "subject": 1.1},
@@ -277,7 +288,7 @@ func _update(delta: float, instant: bool) -> void:
 	var t := 1.0 if instant or current.is_empty() else 1.0 - exp(-smoothing * delta)
 	if current.is_empty():
 		current = target.duplicate()
-	for key: String in ["pivot", "pitch", "distance", "fov", "focus", "dog_low", "subject"]:
+	for key: String in ["pivot", "pitch", "distance", "fov", "focus", "dog_low", "subject", "side", "owner_share"]:
 		var goal: float = target.get(key, 0.0)
 		current[key] = lerpf(current.get(key, goal), goal, framing_t)
 
@@ -300,6 +311,7 @@ func _update(delta: float, instant: bool) -> void:
 
 	var pitch := deg_to_rad(current["pitch"])
 	var boom: Vector3 = Vector3(0, -sin(pitch), cos(pitch)).rotated(Vector3.UP, yaw) * _boom_distance()
+	boom += Vector3.RIGHT.rotated(Vector3.UP, yaw) * float(current.get("side", 0.0))
 	var chase := _place_camera(_focus, _focus + boom)
 	global_position = chase.lerp(dog.eye_position(), pov) if pov > 0.001 else chase
 
@@ -404,7 +416,7 @@ func _walking_look(anchor: Vector3) -> Vector3:
 	var full: float = FRAMING["dog_low"]
 	if low <= 0.01:
 		return anchor
-	var to_dog := (dog.global_position + Vector3(0, 0.25, 0)) - global_position
+	var to_dog := (_walk_subject() + Vector3(0, 0.25, 0)) - global_position
 	var flat := Vector2(to_dog.x, to_dog.z)
 	if flat.length() < 0.01:
 		return anchor
@@ -412,6 +424,20 @@ func _walking_look(anchor: Vector3) -> Vector3:
 	var heading := Vector3(flat.x, 0.0, flat.y).normalized()
 	var aim := (heading * cos(elevation) + Vector3.UP * sin(elevation)) * maxf(to_dog.length(), 1.0)
 	return anchor.lerp(global_position + aim, low / full)
+
+
+## What the walking shot is built round: the dog, turned `owner_share` of the
+## way towards the owner while they are on the lead beside it (not when the
+## owner is far off catching up, or fighting).
+func _walk_subject() -> Vector3:
+	var share: float = current.get("owner_share", 0.0)
+	if share <= 0.0 or owner_actor == null:
+		return dog.global_position
+	var to_owner := owner_actor.global_position - dog.global_position
+	to_owner.y = 0.0
+	if to_owner.length() > OWNER_IN_SHOT_DISTANCE:
+		return dog.global_position
+	return dog.global_position + to_owner * share
 
 
 ## FocusAnchor (D4/P02-001) with a soft dead-zone (D4/P02-002). Out of combat
@@ -459,6 +485,25 @@ func _keep_dog_in_frame(look_target: Vector3) -> Vector3:
 	if axis.length() < 0.0001:
 		return look_target
 	return global_position + to_dog.normalized().rotated(axis.normalized(), limit) * to_look.length()
+
+
+## Whether the dog, as seen, is behind the owner's body: nearer the lens than
+## the dog and the dog's back inside their outline on screen.
+func _owner_covers_dog() -> bool:
+	var feet := owner_actor.global_position
+	var head := feet + Vector3(0, OWNER_HEIGHT, 0)
+	var forward := -camera.global_basis.z
+	var lens := camera.global_position
+	var dog_at := dog.global_position + Vector3(0, 0.3, 0)
+	var owner_depth := (feet + Vector3(0, 0.9, 0) - lens).dot(forward)
+	if owner_depth <= 0.1 or owner_depth >= (dog_at - lens).dot(forward) - 0.1:
+		return false
+	var dog_screen := camera.unproject_position(dog_at)
+	var middle := camera.unproject_position(feet + Vector3(0, 0.9, 0))
+	var half := absf(camera.unproject_position(feet + Vector3(0, 0.9, 0) + camera.global_basis.x * OWNER_HALF_WIDTH).x - middle.x)
+	var top := camera.unproject_position(head).y
+	var bottom := camera.unproject_position(feet).y
+	return absf(dog_screen.x - middle.x) < half and dog_screen.y > top and dog_screen.y < bottom
 
 
 ## Shakes the camera node after it has been placed and aimed, so collision and
@@ -594,20 +639,18 @@ func _place_camera(from: Vector3, to: Vector3) -> Vector3:
 	return result
 
 
-## The leashed owner walks behind the dog, which from the chase camera means
-## between the player and the dog. Anywhere in that space it is in the way: on
-## the camera line it covers the dog, and off to the side it fills the edge of
-## the frame as a body part with no body attached. So the test is depth, not
-## occlusion — nearer the camera than the dog is, and it leaves the shot. The
-## leash is what says where it went.
+## The leashed owner walks behind the dog, between the player and the dog.
+## Since 2026-10-08 the walking shot is framed to show them (see FRAMING), so
+## they fade only when actually in the way: right at the lens, or across the
+## line of sight to the dog. (The close chase camera this replaced faded them
+## whenever they were nearer than the dog, which was all the time.)
 func _update_owner_fade() -> void:
 	if owner_actor == null:
 		return
-	var forward := -global_basis.z
+	var lens := camera.global_position
 	var body := owner_actor.global_position + Vector3(0, 0.9, 0)
-	var owner_depth := (body - camera.global_position).dot(forward)
-	var dog_depth := (dog.global_position - camera.global_position).dot(forward)
-	owner_actor.set_faded(owner_depth < dog_depth - 0.1)
+	var flat := Vector2(body.x - lens.x, body.z - lens.z).length()
+	owner_actor.set_faded(flat < near_fade_distance * 1.5 or _owner_covers_dog())
 	_fade_fighters_at_the_lens()
 
 
