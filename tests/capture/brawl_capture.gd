@@ -13,7 +13,7 @@ extends Node
 ## (the dog walking up to the Big Banyan, no fight).
 ## This is a recording tool, not a test: it asserts nothing.
 
-const CASES: Array[String] = ["umbrella", "broom", "old_dumbbell", "snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap", "banyan", "inspect"]
+const CASES: Array[String] = ["umbrella", "broom", "snap", "orbit_cw", "orbit_ccw", "behind_bark", "leash_pull", "critical", "win", "loss", "p02_snap", "banyan", "inspect"]
 const MOVES: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 var _tree: SceneTree
@@ -67,7 +67,7 @@ func _run() -> void:
 		return
 
 	# P05-04: the owner holding the umbrella.
-	if case_name in ["umbrella", "broom", "old_dumbbell"]:
+	if case_name in ["umbrella", "broom"]:
 		map.run_manager.equipped_weapon = DataRegistry.get_weapon(StringName(case_name))
 	# Every case starts the same way: walking up to the pair from a few metres
 	# out and provoking them, so the Snap is always in the recording.
@@ -80,7 +80,7 @@ func _run() -> void:
 	await _press(&"interact")
 
 	match case_name:
-		"snap", "p02_snap", "umbrella", "broom", "old_dumbbell":
+		"snap", "p02_snap", "umbrella", "broom":
 			await _seconds(10.0)
 		"orbit_cw":
 			await _seconds(2.5)

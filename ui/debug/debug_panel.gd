@@ -39,7 +39,7 @@ func _ready() -> void:
 		if c.has_method(&"debug_set_owner_condition"):
 			c.debug_set_owner_condition(0.25)))
 	# P-05: a weapon lying beside the dog, without waiting on a search roll.
-	for id: StringName in [&"umbrella", &"broom", &"old_dumbbell"]:
+	for id: StringName in [&"umbrella", &"broom"]:
 		var weapon := DataRegistry.get_weapon(id)
 		_add_button("地上放%s" % weapon.display_name, func() -> void: _debug_drop_weapon(weapon))
 	# S05-04: see the banyan call without waiting for the temptation roll.

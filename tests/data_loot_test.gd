@@ -5,7 +5,7 @@ const SPRINT_ITEMS: Array[StringName] = [
 	&"tennis_ball", &"dog_treat", &"sports_drink", &"bandage", &"old_running_shoes", &"umbrella",
 	&"jump_rope", &"hand_grip", &"dog_toy", &"old_sports_watch", &"boxing_gloves", &"mysterious_item",
 	&"half_tennis_ball", &"banyan_frisbee",
-	# P-05: the broom (long object) and the old dumbbell (heavy blunt).
+	# P-05: the broom (long object); the old dumbbell is training kit (owner, 2026-10-09).
 	&"broom", &"old_dumbbell",
 ]
 const TABLE_PATHS: Array[String] = [

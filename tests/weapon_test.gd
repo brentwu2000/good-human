@@ -11,7 +11,7 @@ func _ready() -> void:
 	_test_unarmed_baseline()
 	_test_umbrella()
 	_test_long_object()
-	_test_heavy_blunt()
+	_test_dumbbell_is_training()
 	_test_styles()
 	await _test_contact()
 	_test_condition()
@@ -157,33 +157,14 @@ func _test_long_object() -> void:
 	check(gaps["broom"] > gaps["umbrella"] + 5.0, "a broom fight is held further out than an umbrella fight (%.0f vs %.0f)" % [gaps["broom"] / 20.0, gaps["umbrella"] / 20.0])
 
 
-## P05-06: heavy blunt is commitment — slow to start, slow to recover, heavy
-## on the feet, and it goes through a guard.
-func _test_heavy_blunt() -> void:
-	var dumbbell := DataRegistry.get_weapon(&"old_dumbbell")
-	check(dumbbell != null and dumbbell.archetype == WeaponData.Archetype.HEAVY_BLUNT, "P05-06: the old dumbbell is heavy blunt")
-	check(not dumbbell.item.is_safe_eligible(), "and not something for the dog's backpack")
-	var kick: CombatSkillData = load("res://data/combat/skills/skill_kick.tres")
-	for skill in dumbbell.moveset.attacks:
-		check(skill.is_heavy(), "%s is a heavy blow" % skill.id)
-		check(skill.windup >= 0.6 and skill.recovery > kick.recovery, "%s commits: long wind-up, longer recovery than a kick" % skill.id)
-		check(skill.guard_break >= 0.7, "%s goes through a guard" % skill.id)
-	var held := PLAYER.armed(dumbbell)
-	var bare := CombatSimulation.new(PLAYER, JOGGER, 2)
-	var heavy := CombatSimulation.new(held, JOGGER, 2)
-	check(heavy.fighters[0].move_speed < bare.fighters[0].move_speed * 0.8, "it slows their feet")
-	# Through a block: the same blow, blocked by a fist guard, still hurts.
-	var block: CombatSkillData = load("res://data/combat/skills/skill_block.tres")
-	var smash: CombatSkillData = load("res://data/combat/skills/skill_heavy_smash.tres")
-	var through := 1.0 - block.damage_reduction * (1.0 - smash.guard_break)
-	check(through > 0.8, "a blocked smash still lands %.0f %% of itself" % (through * 100.0))
-	var wins := {"bare": 0, "dumbbell": 0}
-	for i in 30:
-		for key: String in ["bare", "dumbbell"]:
-			var fight := CombatSimulation.new(held if key == "dumbbell" else PLAYER, DELIVERY, 800 + i)
-			if fight.run_to_end() == CombatSimulation.Result.VICTORY:
-				wins[key] += 1
-	check(wins["dumbbell"] >= wins["bare"], "against the tough Delivery Worker it helps (%d vs %d of 30)" % [wins["dumbbell"], wins["bare"]])
+## Owner, 2026-10-09: 「啞鈴應該是訓練材料，不該是武器」. The old dumbbell is
+## training kit like the hand grip and the jump rope: found and carried home,
+## never held in a fight.
+func _test_dumbbell_is_training() -> void:
+	check(DataRegistry.get_weapon(&"old_dumbbell") == null, "the old dumbbell is not a weapon")
+	var item := DataRegistry.get_item(&"old_dumbbell")
+	check(item != null and item.type == ItemData.ItemType.TRAINING and item.loot_class == ItemData.LootClass.SUPPLY, "it is training kit")
+	check(DataRegistry.weapon_for_item(&"old_dumbbell") == null, "nothing turns it into one")
 
 
 ## P05-07: the same umbrella in different hands. Untrained misjudges its
@@ -248,7 +229,7 @@ func _test_styles() -> void:
 ## across, so it is held to the same allowance P-04 gives the hook.
 func _test_contact() -> void:
 	var outside := {"n": 0, "hits": 0}
-	for id in [&"umbrella", &"broom", &"old_dumbbell"]:
+	for id in [&"umbrella", &"broom"]:
 		for i in 6:
 			var sim := CombatSimulation.new(PLAYER.armed(DataRegistry.get_weapon(id)), JOGGER, 1500 + i)
 			sim.combat_event.connect(func(kind: StringName, side: int, _skill: CombatSkillData, _v: float) -> void:
@@ -260,7 +241,7 @@ func _test_contact() -> void:
 	check(outside["hits"] > 50 and outside["n"] == 0, "P05-08: every weapon blow lands inside its contact window (%d of %d outside)" % [outside["n"], outside["hits"]])
 	var body_front := 0.17
 	var hook_allowance := 0.30
-	for id in [&"umbrella", &"broom", &"old_dumbbell"]:
+	for id in [&"umbrella", &"broom"]:
 		var weapon := DataRegistry.get_weapon(id)
 		for skill in weapon.moveset.attacks:
 			if skill.preferred_range < weapon.moveset.ideal_min - 1.0 and weapon.moveset.ideal_min > 0.0:
@@ -382,7 +363,7 @@ func _test_lost_on_defeat() -> void:
 func _test_no_hud() -> void:
 	check(not FighterPuppet3D.show_combat_text, "P05-13: in normal play no fight text is shown")
 	var traits := {}
-	for id: StringName in [&"unarmed", &"umbrella", &"broom", &"old_dumbbell"]:
+	for id: StringName in [&"unarmed", &"umbrella", &"broom"]:
 		var weapon := DataRegistry.get_weapon(id)
 		var me := PLAYER.armed(weapon)
 		var c := {"gap": 0.0, "steps": 0, "windup": 0.0, "recovery": 0.0, "attacks": 0, "guards": 0}
@@ -405,20 +386,18 @@ func _test_no_hud() -> void:
 	var bare: Dictionary = traits[&"unarmed"]
 	var umbrella: Dictionary = traits[&"umbrella"]
 	var broom: Dictionary = traits[&"broom"]
-	var dumbbell: Dictionary = traits[&"old_dumbbell"]
 	var summary := ", ".join(traits.keys().map(func(k: StringName) -> String: return "%s gap %.0f windup %.2f open %.2f" % [k, traits[k]["gap"], traits[k]["windup"], traits[k]["open"]]))
-	check(broom["gap"] > umbrella["gap"] + 3.0 and umbrella["gap"] > bare["gap"] - 3.0 and bare["gap"] > dumbbell["gap"] - 6.0, "spacing reads: the broom furthest out, then the umbrella, fists and the dumbbell close (%s)" % summary)
-	check(dumbbell["windup"] > bare["windup"] + 0.15 and dumbbell["open"] > bare["open"] + 0.2, "weight reads: the dumbbell's blows come slowest and leave them open longest")
+	check(broom["gap"] > umbrella["gap"] + 3.0 and umbrella["gap"] > bare["gap"] - 3.0, "spacing reads: the broom furthest out, then the umbrella, then fists (%s)" % summary)
 	check(umbrella["windup"] < bare["windup"], "and the umbrella's poke comes quicker than a fist")
-	var rhythms := [bare["windup"], umbrella["windup"], broom["windup"], dumbbell["windup"]]
+	var rhythms := [bare["windup"], umbrella["windup"], broom["windup"]]
 	var distinct := 0
 	for i in rhythms.size():
 		for j in range(i + 1, rhythms.size()):
 			if absf(rhythms[i] - rhythms[j]) > 0.03:
 				distinct += 1
-	check(distinct >= 5, "no two ways of fighting share a rhythm (%d of 6 pairs differ)" % distinct)
+	check(distinct >= 2, "no two ways of fighting share a rhythm (%d of 3 pairs differ)" % distinct)
 	# The weapon is in the hand, and nothing is written over anyone.
-	for id: StringName in [&"umbrella", &"broom", &"old_dumbbell"]:
+	for id: StringName in [&"umbrella", &"broom"]:
 		var puppet := FighterPuppet3D.new()
 		add_child(puppet)
 		puppet.apply(PLAYER)

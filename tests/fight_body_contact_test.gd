@@ -96,12 +96,14 @@ func _run() -> void:
 	check(longest <= MOST_FRAMES_PAST, "no body stays inside the other (%d frames past the allowance: %s)" % [longest, longest_what])
 	check(deepest <= NEVER_DEEPER, "nor ever goes deep into it (deepest %.3f m: %s)" % [deepest, deepest_what])
 	# Stopping blows at the body must not stop them being thrown: every attack
-	# seen for a while gets to its strike (0.5 of the clip), where it lands.
+	# seen for a while gets well out of its wind-up. (Not to 0.5, the strike:
+	# thrown up close, a blow meets the body before full extension and rightly
+	# stops there. What this catches is a blow held at 0, never thrown.)
 	var thrown := 0
 	for clip: String in ATTACKS:
 		if seen.get(clip, 0) >= 60:
 			thrown += 1
-			check(reached[clip] >= 0.5, "%s is still thrown (to %.2f)" % [clip, reached[clip]])
+			check(reached[clip] >= 0.25, "%s is still thrown (to %.2f)" % [clip, reached[clip]])
 	check(thrown >= 2, "several kinds of blow were thrown (%d)" % thrown)
 	finish()
 

@@ -6,11 +6,11 @@
 script = ExtResource("1_item")
 id = &"old_dumbbell"
 display_name = "舊啞鈴"
-description = "公園健身角留下來的啞鈴。很重。"
-type = 4
+description = "公園健身角留下來的啞鈴。很重，是練身體的東西，不是拿來打架的。"
+type = 3
 rarity = 1
 stackable = false
 max_stack = 1
 value = 20
-loot_class = 1
+loot_class = 4
 size_class = 1
