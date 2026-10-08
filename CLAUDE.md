@@ -51,6 +51,7 @@ Before coding:
 - Tests: `tests/run_all.sh` (headless; each `tests/*_test.tscn` is one scene). Never use `--script` for tests.
 - Windows debug build: `"$GODOT" --headless --path "$(pwd -W)" --export-debug "Windows Desktop" "$(pwd -W)/build/windows/GoodHuman.exe"` (`build/` is gitignored). Rebuild after each playable change so the owner can check progress.
 - External Claude skills: `.claude/skills/`, sources/licenses in `docs/99_notes/EXTERNAL_SKILLS.md`.
+- Blender: 5.2 LTS only (`/c/Program Files/Blender Foundation/Blender 5.2/blender.exe`, owner 2026-10-08: no 4.5). Use the installed add-ons (MPFB, Rigify, Retarget, LoopTools, Bool Tool, PolyQuilt, Magic UV, Ucupaint, Archimesh, Extra Mesh Objects, Sapling, A.N.T. Landscape) instead of reinventing them; batch work stays in plain `bpy`/`bmesh`. List, roles and licences: `docs/99_notes/BLENDER_TOOLCHAIN.md`. Do not install others without approval. Codex owns art; check for an open Blender (Codex) before changing preferences.
 
 ## Do Not
 - Redesign core game rules.

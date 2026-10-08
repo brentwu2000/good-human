@@ -83,6 +83,33 @@ joint names reachable, or the combat animation stops
 working. Record any imported asset in `ASSET_LICENSES.md` as usual, and keep
 `.glb` output under the normal `assets/` folders.
 
+## Blender toolchain (add-ons)
+Owner decision 2026-10-08: **Blender 5.2 LTS is the one environment** — do not
+install 4.5 or another version alongside it. These add-ons are installed and
+enabled in it; use them rather than hand-rolling the same thing, and do not
+install others (or switch these off) without the owner's approval. Versions,
+licences, hashes and what was left out on purpose:
+`docs/99_notes/BLENDER_TOOLCHAIN.md` (research behind it:
+`.claude/Blender_Toolchain_Research_GOOD_HUMAN.md`).
+
+| Need | Use |
+|---|---|
+| Human base bodies | MPFB (bundled assets CC0) |
+| Rigs for people and dogs | Rigify (bake to deform bones before GLB export) |
+| Rig conversion, retargeting | Retarget |
+| Mesh clean-up | LoopTools; Bool Tool for boolean props |
+| Manual retopology | PolyQuilt — viewport only, it does not load in `--background` |
+| UVs | Magic UV |
+| Layered texture painting | Ucupaint — bake to plain textures before export |
+| Building / prop blockouts | Archimesh, Extra Mesh Objects |
+| Trees, terrain | Sapling Tree Gen, A.N.T. Landscape — reduce before Godot |
+
+Batch and repeatable work stays in plain `bpy`/`bmesh` scripts (`tools/art/`);
+add-on operators depend on mode and selection. Every GLB still goes through the
+usual Godot checks (`tests/breed_models_test` for dogs). If an add-on shows as
+disabled in Preferences, re-enable it rather than reinstalling; a Blender
+window saving old preferences on exit can switch them off.
+
 ## The 3D character pipeline
 Reference images → AI mesh → Blender → rig → GLB → Godot lives in a separate
 directory, `../good-human-3d-pipeline`, kept out of this repository so model
