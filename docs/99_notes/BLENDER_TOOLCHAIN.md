@@ -5,7 +5,7 @@ Installed 2026-10-08 by Claude on the owner's request (「請看 Blender_Toolcha
 ## Environment
 
 - Blender **5.2.0 LTS** (build 2026-07-14), `C:\Program Files\Blender Foundation\Blender 5.2\` — the one already used by the art pipeline and `tools/art/*.py`.
-- The report recommends a fixed 4.5 LTS production environment with 5.x kept for experiments (Retarget 2.x). That was **not** set up: everything here is installed into the existing 5.2, which every listed add-on supports (all declare 4.2–5.0 minimums). Setting up a separate 4.5 LTS is a separate decision.
+- The report recommends a fixed 4.5 LTS production environment with 5.x kept for experiments (Retarget 2.x). **Owner decision (2026-10-08): 「5.2能用就不用裝4.5吧」** — 5.2 LTS is the single production environment; no 4.5 install. Every listed add-on supports it (all declare 4.2–5.0 minimums).
 - Source: extensions.blender.org (repository `blender_org`), installed with `blender -c extension install -s`. Hashes are the platform's published archive hashes.
 - Install folder: `%APPDATA%\Blender Foundation\Blender\5.2\extensions\blender_org\`.
 
