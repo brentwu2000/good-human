@@ -14,6 +14,7 @@ func _ready() -> void:
 	_test_dumbbell_is_training()
 	_test_styles()
 	await _test_contact()
+	await _test_grip()
 	_test_condition()
 	_test_lost_on_defeat()
 	_test_no_hud()
@@ -267,6 +268,44 @@ func _test_contact() -> void:
 			else:
 				check(reach - drawn <= hook_allowance, "%s: a swing reaching %.2f m is drawn to %.2f m (hook allowance)" % [skill.id, reach, drawn])
 			puppet.queue_free()
+
+
+## Owner, 2026-10-09 (「拿武器的樣子不符合現實拿物品的樣子」): held like
+## the real thing — through a closed fist, not along open fingers; the
+## umbrella in one hand like a walking stick, the broom in both; carried on
+## the walk in a closed hand too.
+func _test_grip() -> void:
+	var puppet := FighterPuppet3D.new()
+	add_child(puppet)
+	puppet.apply(PLAYER)
+	var body := puppet._body as P04HumanVisual
+	var skeleton := body.skeleton
+	# The grip sits inside the curled fingers of this very skeleton.
+	var hand := skeleton.find_bone("hand_l")
+	var to_hand := skeleton.get_bone_global_rest(hand).affine_inverse()
+	var knuckle := to_hand * skeleton.get_bone_global_rest(skeleton.find_bone("middle_01_l")).origin
+	var grip := WeaponProp3D.grip("l")
+	check(grip.origin.distance_to(knuckle) < 0.06, "the grip is in the fist, by the middle knuckle (%.3f m)" % grip.origin.distance_to(knuckle))
+	var fingers := Vector3(0, 1, 0)
+	check(absf(grip.basis.y.normalized().dot(fingers)) < 0.5, "the shaft runs across the hand, not along the fingers")
+	# Each way of holding has its own clips.
+	var expected := {&"umbrella": "Fight_Stance_Armed", &"broom": "Fight_Stance_Long"}
+	for id: StringName in expected:
+		puppet.hold(DataRegistry.get_weapon(id))
+		check(puppet._clip(body, "Idle", false).ends_with(expected[id]), "%s: its own guard (%s)" % [id, puppet._clip(body, "Idle", false)])
+		puppet.set_ambient(true)
+		check(String(body.player.current_animation).contains("Carry_Walk"), "%s: carried on the walk in a closed hand (%s)" % [id, body.player.current_animation])
+	# The broom is in both hands: the rear hand's grip is on the shaft.
+	puppet.hold(DataRegistry.get_weapon(&"broom"))
+	body.pose_clip(puppet._clip(body, "Idle", false), 0.5)
+	await get_tree().create_timer(P04HumanVisual.BLEND_SECONDS + 0.05).timeout
+	var shaft := puppet._prop.global_transform
+	var rear := skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone("hand_r")) * WeaponProp3D.grip("r")
+	var along := (rear.origin - shaft.origin).dot(shaft.basis.y.normalized())
+	var off := (rear.origin - shaft.origin - shaft.basis.y.normalized() * along).length()
+	check(off < 0.07 and along < -0.25, "broom: the rear hand holds the shaft behind the lead hand (%.2f m off it, %.2f m back)" % [off, -along])
+	puppet.hold(null)
+	puppet.queue_free()
 
 
 ## P05-09: GOOD / WORN / CRITICAL / BROKEN. It travels with the very thing

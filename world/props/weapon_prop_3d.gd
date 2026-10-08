@@ -1,9 +1,34 @@
 class_name WeaponProp3D
 extends RefCounted
 ## P-05: what a held weapon looks like until Codex's D5W-01 silhouettes
-## arrive. Built along +Y from the grip (the fist) outwards, so attached to a
-## hand bone it points the way the forearm does: forward on a poke, up in a
-## guard.
+## arrive. Built along +Y from the grip outwards; held, it sits on `grip()`,
+## the shaft running through the closed fist the way the fight clips close it.
+
+## Where a hand holds a shaft, in its hand bone's frame: written by
+## tools/art/make_fight_clips.py from the fingers curled round one.
+const GRIP_JSON := "res://assets/characters/human/animations/p04_fight_grip.json"
+static var _grips: Dictionary = {}
+
+
+## The transform (hand bone frame) that puts a prop's +Y along the shaft
+## through hand `side`'s fist ("l" or "r"), its origin in the middle of it.
+static func grip(side: String) -> Transform3D:
+	if _grips.is_empty():
+		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(GRIP_JSON))
+		if data is Dictionary:
+			_grips = data
+	var hand: Dictionary = _grips.get(side, {})
+	if hand.is_empty():
+		return Transform3D.IDENTITY
+	var y := _vector(hand["axis"]).normalized()
+	var z := _vector(hand["normal"])
+	z = (z - y * z.dot(y)).normalized()
+	return Transform3D(Basis(y.cross(z), y, z), _vector(hand["centre"]))
+
+
+static func _vector(values: Array) -> Vector3:
+	return Vector3(values[0], values[1], values[2])
+
 
 ## How far along +Y from the grip the drawn weapon ends (its striking tip).
 const TIP := {

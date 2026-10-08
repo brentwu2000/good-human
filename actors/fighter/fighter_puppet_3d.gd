@@ -15,9 +15,9 @@ static var show_combat_text: bool = false
 signal bumped(from: Vector3)
 
 ## Codex's authored combat clips (P-04 + ART), by attack, reaction and footwork.
-## P05-04: until Codex's D5W-02 umbrella motion, the umbrella's poke rides
-## the jab (the arm thrusts out) and its swing the hook (the arm sweeps across).
-const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Thrust", &"swing": "HeavyHook", &"smash": "Jab"}
+## Each attack's P-04 clip name; holding something, ARMED_CLIPS turns it into
+## that weapon's own move (a poke the thrust, a swing the cut or chop).
+const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Thrust", &"swing": "HeavyHook"}
 ## The hand a weapon is held in: the lead hand, the one the jab clip drives.
 const WEAPON_HAND := "hand_l"
 const REACTION_CLIPS := {
@@ -51,6 +51,28 @@ const FIGHT_CLIPS := {
 	"Circle": ["Fight_Circle", "Fight_Circle"],
 	"Backstep": ["Fight_Step_Back", "Fight_Step_Back"],
 }
+## Owner, 2026-10-09 (「拿武器的樣子不符合現實拿物品的樣子」): holding
+## something, a fighter uses the set of clips made for how that thing is
+## held — the umbrella in one hand like a walking stick, the broom in both
+## like a short bayonet — with the fingers closed round it. Each P-04 clip
+## name maps to the set's clip; anything not listed falls back to the
+## empty-handed one.
+const ARMED_CLIPS := {
+	WeaponData.Archetype.UMBRELLA: {
+		"Idle": "Fight_Stance_Armed", "Approach": "Fight_Step_Fwd_Armed", "Circle": "Fight_Circle_Armed",
+		"Backstep": "Fight_Step_Back_Armed", "Block": "Fight_Block_Armed", "Dodge": "Fight_Dodge_Armed",
+		"HitLight": "Fight_HitLight_Armed", "HitHeavy": "Fight_HitHeavy_Armed",
+		"Thrust": "Fight_Thrust", "HeavyHook": "Fight_Swing",
+	},
+	WeaponData.Archetype.LONG_OBJECT: {
+		"Idle": "Fight_Stance_Long", "Approach": "Fight_Step_Fwd_Long", "Circle": "Fight_Circle_Long",
+		"Backstep": "Fight_Step_Back_Long", "Block": "Fight_Block_Long", "Dodge": "Fight_Dodge_Long",
+		"HitLight": "Fight_HitLight_Long", "HitHeavy": "Fight_HitHeavy_Long",
+		"Thrust": "Fight_Thrust_Long", "HeavyHook": "Fight_Swing_Long", "Jab": "Fight_Shove_Long",
+	},
+}
+## Outside a fight: the relaxed walk and idle, carrying it (`set_ambient`).
+const CARRY_SUFFIX := {WeaponData.Archetype.UMBRELLA: "_Armed", WeaponData.Archetype.LONG_OBJECT: "_Long"}
 ## How strongly the P-04 choreography's joint accents layer over the clips:
 ## light now, the fight clips carry the body themselves.
 const COMBAT_LAYER: float = 0.2
@@ -162,8 +184,11 @@ func hold(weapon: WeaponData, condition: WeaponCondition.State = WeaponCondition
 		show_condition(condition)
 		return
 	held = weapon
+	_ambient_clip = ""
 	if _prop != null:
 		var mount := _prop.get_parent()
+		if mount != null and mount.get_parent() is BoneAttachment3D:
+			mount = mount.get_parent()
 		if mount is BoneAttachment3D:
 			mount.queue_free()
 		else:
@@ -175,9 +200,14 @@ func hold(weapon: WeaponData, condition: WeaponCondition.State = WeaponCondition
 	show_condition(condition)
 	var skeletal := _body as P04HumanVisual
 	if skeletal != null and skeletal.skeleton != null and skeletal.skeleton.find_bone(WEAPON_HAND) >= 0:
-		var grip := BoneAttachment3D.new()
-		grip.bone_name = WEAPON_HAND
-		skeletal.skeleton.add_child(grip)
+		var mount := BoneAttachment3D.new()
+		mount.bone_name = WEAPON_HAND
+		skeletal.skeleton.add_child(mount)
+		# Through the closed fist, not out along the fingers.
+		var grip := Node3D.new()
+		grip.name = "Grip"
+		grip.transform = WeaponProp3D.grip("l")
+		mount.add_child(grip)
 		grip.add_child(_prop)
 		return
 	var arm := _joint(_arms, 1)
@@ -264,6 +294,12 @@ func set_ambient(moving: bool) -> void:
 	if _pose_tween != null and _pose_tween.is_running():
 		return
 	var clip := skeletal.ambient_clip(moving)
+	# Carrying something on the walk, the hand is closed round it.
+	if held != null and not held.is_unarmed():
+		var suffix: String = CARRY_SUFFIX.get(held.archetype, "")
+		var carry := skeletal.fight_clip(("Carry_Walk" if moving else "Carry_Idle") + suffix) if not suffix.is_empty() else ""
+		if not carry.is_empty():
+			clip = carry
 	if _ambient_clip == clip:
 		return
 	_ambient_clip = clip
@@ -374,6 +410,12 @@ func _inside(skeletal: P04HumanVisual, theirs: Array) -> float:
 ## The clip to play for P-04 clip `clip`: its fight version (the other side's
 ## when `other_side`), else the first-pass clip, mirrored if asked.
 func _clip(skeletal: P04HumanVisual, clip: String, other_side: bool) -> String:
+	if held != null and not held.is_unarmed():
+		var armed: String = (ARMED_CLIPS.get(held.archetype, {}) as Dictionary).get(clip, "")
+		if not armed.is_empty():
+			var found := skeletal.fight_clip(armed)
+			if not found.is_empty():
+				return found
 	var pair: Array = FIGHT_CLIPS.get(clip, [])
 	if not pair.is_empty():
 		var fight := skeletal.fight_clip(pair[1] if other_side else pair[0])

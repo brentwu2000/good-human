@@ -69,6 +69,8 @@ func _run() -> void:
 	# P05-04: the owner holding the umbrella.
 	if case_name in ["umbrella", "broom"]:
 		map.run_manager.equipped_weapon = DataRegistry.get_weapon(StringName(case_name))
+		# In hand on the walk up to the pair, as in play.
+		human.puppet.hold(map.run_manager.equipped_weapon)
 	# Every case starts the same way: walking up to the pair from a few metres
 	# out and provoking them, so the Snap is always in the recording.
 	var start := pair.global_position + Vector3(0, 0.1, 5.0)
