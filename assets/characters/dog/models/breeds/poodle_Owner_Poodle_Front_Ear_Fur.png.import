@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1yxyhxvcjgk"
-path="res://.godot/imported/golden_golden_basecolor_codex.jpg-044e667cc1b6b32ddbde376aa02d4cfb.ctex"
+uid="uid://c35s8vnfq3sut"
+path="res://.godot/imported/poodle_Owner_Poodle_Front_Ear_Fur.png-0b2d2adba085d2c1bcc1fde8cd2c433d.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "5ef6682d72278c3780e98ed669fadf1b"
+"md5": "fa9bbc05da21b58889051cc2460f14d8"
 }
 
 [deps]
 
-source_file="res://assets/characters/dog/models/breeds/golden_golden_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/golden_golden_basecolor_codex.jpg-044e667cc1b6b32ddbde376aa02d4cfb.ctex"]
+source_file="res://assets/characters/dog/models/breeds/poodle_Owner_Poodle_Front_Ear_Fur.png"
+dest_files=["res://.godot/imported/poodle_Owner_Poodle_Front_Ear_Fur.png-0b2d2adba085d2c1bcc1fde8cd2c433d.ctex"]
 
 [params]
 

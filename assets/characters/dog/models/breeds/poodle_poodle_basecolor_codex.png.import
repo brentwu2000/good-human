@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cluacr0pgu8de"
-path="res://.godot/imported/corgi_corgi_basecolor_codex.jpg-c6d87b629290976a17e1a978aa0d0953.ctex"
+uid="uid://ccr8qbpeqiijq"
+path="res://.godot/imported/poodle_poodle_basecolor_codex.png-fba70f929298deb061bda0182905f2c3.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "fd4189a7962c4bbad01bf2e51c13e3a8"
+"md5": "dea370cd21d20826f49397109a717137"
 }
 
 [deps]
 
-source_file="res://assets/characters/dog/models/breeds/corgi_corgi_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/corgi_corgi_basecolor_codex.jpg-c6d87b629290976a17e1a978aa0d0953.ctex"]
+source_file="res://assets/characters/dog/models/breeds/poodle_poodle_basecolor_codex.png"
+dest_files=["res://.godot/imported/poodle_poodle_basecolor_codex.png-fba70f929298deb061bda0182905f2c3.ctex"]
 
 [params]
 

@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bj2584osphgkt"
-path="res://.godot/imported/poodle_poodle_basecolor_codex.jpg-12af19d4cebeed95a0ddd3f1c848c321.ctex"
+uid="uid://cra6k2qp23lyq"
+path="res://.godot/imported/frenchie_frenchie_basecolor_codex.png-79972c418b9489e68ae792453e434475.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "fc81dbb18ba4a6b560425cb3db361248"
+"md5": "671dcc816a1da80d79d65fe9aac82f03"
 }
 
 [deps]
 
-source_file="res://assets/characters/dog/models/breeds/poodle_poodle_basecolor_codex.jpg"
-dest_files=["res://.godot/imported/poodle_poodle_basecolor_codex.jpg-12af19d4cebeed95a0ddd3f1c848c321.ctex"]
+source_file="res://assets/characters/dog/models/breeds/frenchie_frenchie_basecolor_codex.png"
+dest_files=["res://.godot/imported/frenchie_frenchie_basecolor_codex.png-79972c418b9489e68ae792453e434475.ctex"]
 
 [params]
 
