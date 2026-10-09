@@ -158,6 +158,7 @@ func eye_position() -> Vector3:
 
 ## Bark body language (DogAgency decides what it does).
 func play_bark() -> void:
+	_motion.play_bark()
 	_bark_label.text = "汪！"
 	_bark_left = 0.7
 	var tween := create_tween()
@@ -175,6 +176,7 @@ func set_instinct(instinct: int) -> void:
 		_instinct_tween.kill()
 	_instinct_tween = create_tween()
 	var tilt := 0.0
+	_motion.set_alert(instinct == DogInstinct.Instinct.THREAT)
 	match instinct:
 		DogInstinct.Instinct.THREAT:
 			tilt = -0.12

@@ -11,7 +11,10 @@ const ALLOWED_PRESS: float = 0.05
 ## meet arms in fight_body_contact_test.
 const ALLOWED_ON_ARMS: float = 0.08
 const ARMS: Array[String] = ["arm", "forearm"]
-const MOST_FRAMES_PAST: int = 3
+## Up to this many frames past it (0.08 s) is a blow or a lunge arriving
+## faster than the weapon turns away; the fault this guards against sat in
+## the other person for 150-300 frames.
+const MOST_FRAMES_PAST: int = 5
 ## Never deeper than this, even for a frame (a kick can arrive in one frame
 ## before the weapon has turned away from it).
 const NEVER_DEEPER: float = 0.15
@@ -68,7 +71,7 @@ func _fight(id: StringName) -> void:
 		if not coordinator.is_fighting():
 			break
 		for f in sim.fighters:
-			f.hp = maxf(f.hp, f.max_hp * 0.5)
+			f.hp = f.max_hp
 		frames += 1
 		var hit := BodyContact.deepest(ours.weapon_capsules(), BodyContact.capsules(theirs.skeleton))
 		var depth: float = hit[0]

@@ -89,7 +89,10 @@ const HESITATE_SECONDS: float = 0.35
 const AVOID_MAX: float = 1.2
 const AVOID_STEPS: int = 8
 const AVOID_RATE: float = 4.0
-var _avoid_angle: float = 0.0
+var _avoid := Vector2.ZERO
+## A one-shot whole-body gesture (`play_gesture`) holds the ambient clip off
+## for this long, unless they start to move.
+var _gesture_left: float = 0.0
 const TRAIL_FROM: float = 0.38
 const TRAIL_UNTIL: float = 0.6
 ## A landed blow stops this far short of the body (m; the layers on top of
@@ -247,6 +250,7 @@ func show_condition(condition: WeaponCondition.State) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	_gesture_left = maxf(_gesture_left - delta, 0.0)
 	if _hp_label != null:
 		_hp_label.visible = _hp_wanted and show_combat_text
 	_look_away_left = maxf(_look_away_left - delta, 0.0)
@@ -315,7 +319,16 @@ func set_ambient(moving: bool) -> void:
 		return
 	if _pose_tween != null and _pose_tween.is_running():
 		return
+	if moving:
+		_gesture_left = 0.0
+	elif _gesture_left > 0.0:
+		return
 	var clip := skeletal.ambient_clip(moving)
+	# Hurt, standing still, they stand hurt (Mesh2Motion "Idle Hurt").
+	if not moving and condition_state() != Condition.HEALTHY:
+		var hurt := skeletal.m2m_clip("M2M_Idle_Hurt")
+		if not hurt.is_empty():
+			clip = hurt
 	# Carrying something on the walk, the hand is closed round it.
 	if held != null and not held.is_unarmed():
 		var suffix: String = CARRY_SUFFIX.get(held.archetype, "")
@@ -419,47 +432,48 @@ func _keep_weapon_clear(skeletal: P04HumanVisual) -> void:
 		return
 	var theirs := BodyContact.capsules((opponent._body as P04HumanVisual).skeleton)
 	var base := WeaponProp3D.grip("l")
-	var target := 0.0
-	if _clear_depth(skeletal, base, 0.0, theirs) > 0.0:
-		# The smallest turn either way that clears them; failing that,
-		# whichever leaves the least of it in them.
-		target = _avoid_angle
-		var least := _clear_depth(skeletal, base, _avoid_angle, theirs)
+	var target := Vector2.ZERO
+	if _clear_depth(skeletal, base, Vector2.ZERO, theirs) > 0.0:
+		# The smallest turn that clears them — tipped over the hand, then
+		# swung aside — failing that, whichever leaves least in them.
+		target = _avoid
+		var least := _clear_depth(skeletal, base, _avoid, theirs)
+		var found := false
 		for step in range(1, AVOID_STEPS + 1):
-			var found := false
-			for sign: float in [1.0, -1.0]:
-				var angle := sign * AVOID_MAX * step / AVOID_STEPS
-				var depth := _clear_depth(skeletal, base, angle, theirs)
+			var angle := AVOID_MAX * step / AVOID_STEPS
+			for turn: Vector2 in [Vector2(angle, 0), Vector2(-angle, 0), Vector2(0, angle), Vector2(0, -angle)]:
+				var depth := _clear_depth(skeletal, base, turn, theirs)
 				if depth <= 0.0:
-					target = angle
+					target = turn
 					found = true
 					break
 				if depth < least:
 					least = depth
-					target = angle
+					target = turn
 			if found:
 				break
 	# Out at once, back gently.
 	var rate := AVOID_RATE * get_process_delta_time()
-	_avoid_angle = target if absf(target) > absf(_avoid_angle) else move_toward(_avoid_angle, target, rate)
-	grip.transform = _turned_grip(base, _avoid_angle)
+	_avoid = target if target.length() > _avoid.length() else _avoid.move_toward(target, rate)
+	grip.transform = _turned_grip(base, _avoid)
 
 
-## How deep the weapon would be in `theirs` with the grip turned by `angle`.
-func _clear_depth(skeletal: P04HumanVisual, base: Transform3D, angle: float, theirs: Array) -> float:
+## How deep the weapon would be in `theirs` with the grip turned by `turn`.
+func _clear_depth(skeletal: P04HumanVisual, base: Transform3D, turn: Vector2, theirs: Array) -> float:
 	var skeleton := skeletal.skeleton
 	var hand := skeleton.find_bone(WEAPON_HAND)
-	var at := skeleton.global_transform * skeleton.get_bone_global_pose(hand) * _turned_grip(base, angle) * _prop.transform
+	var at := skeleton.global_transform * skeleton.get_bone_global_pose(hand) * _turned_grip(base, turn) * _prop.transform
 	return BodyContact.deepest(BodyContact.prop_capsules(_prop, at), theirs, TOUCH_GAP)[0]
 
 
-## The grip turned `angle` about the hand's across-the-palm axis, tipping
-## the weapon's point back over the hand (towards the holder).
-func _turned_grip(base: Transform3D, angle: float) -> Transform3D:
-	if absf(angle) < 0.0001:
+## The grip turned by `turn`: x about the hand's across-the-palm axis
+## (tipping the point over the hand), y about the palm's normal (swinging it
+## aside).
+func _turned_grip(base: Transform3D, turn: Vector2) -> Transform3D:
+	if turn.length() < 0.0001:
 		return base
-	var across := base.basis.x.normalized()
-	return Transform3D(Basis(across, angle) * base.basis, base.origin)
+	var rotation := Basis(base.basis.x.normalized(), turn.x) * Basis(base.basis.z.normalized(), turn.y)
+	return Transform3D(rotation * base.basis, base.origin)
 
 
 func _stop_at_body(skeletal: P04HumanVisual, clip: String, t: float, held_until: float) -> void:
@@ -968,6 +982,9 @@ func play_down() -> void:
 
 
 func play_victory() -> void:
+	# A fist-pump (Mesh2Motion "Victory Fist Pump"), else a hop.
+	if play_gesture("M2M_Victory"):
+		return
 	var tween := _new_tween()
 	tween.tween_property(_body, "position:y", 0.3, 0.15)
 	tween.tween_property(_body, "position:y", 0.0, 0.15)
@@ -983,6 +1000,9 @@ func play_pick_up(at: Vector3) -> void:
 	var to := at - global_position
 	if Vector2(to.x, to.z).length() > 0.01:
 		rotation.y = atan2(-to.x, -to.z)
+	# Bending down for it and up again (Mesh2Motion "PickUp_Table").
+	if play_gesture("M2M_PickUp", 1.3):
+		return
 	var tween := _new_tween()
 	if _hips != null:
 		tween.tween_property(_hips, "position:y", Greybox.HIP_HEIGHT - 0.35, 0.22).set_trans(Tween.TRANS_SINE)
@@ -1062,6 +1082,25 @@ func _play_down_clip() -> bool:
 		_pose_tween.kill()
 	_ambient_clip = "Down"
 	skeletal.play_clip("Down", false)
+	return true
+
+
+## Plays Mesh2Motion clip `clip` once over the whole body, at `rate`, then the
+## ambient clip resumes (sooner if they start moving). False when this body
+## has no such clip.
+func play_gesture(clip: String, rate: float = 1.0) -> bool:
+	var skeletal := _body as P04HumanVisual
+	if skeletal == null or _down:
+		return false
+	var name := skeletal.m2m_clip(clip)
+	if name.is_empty():
+		return false
+	if _pose_tween != null:
+		_pose_tween.kill()
+	_ambient_clip = name
+	skeletal.play_clip(name, false)
+	skeletal.player.speed_scale = rate
+	_gesture_left = skeletal.player.get_animation(name).length / rate
 	return true
 
 

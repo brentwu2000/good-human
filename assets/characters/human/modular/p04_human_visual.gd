@@ -27,6 +27,13 @@ const RELAXED_LIBRARY: StringName = &"relaxed"
 const FIGHT_CLIPS := preload("res://assets/characters/human/animations/p04_fight_clips.glb")
 const FIGHT_LIBRARY: StringName = &"fight"
 static var _fight_library: AnimationLibrary
+## Owner, 2026-10-09: Mesh2Motion's people clips (CC0), baked onto this rig by
+## tools/art/retarget_mesh2motion.py — gestures and states the fight clips
+## and Codex's relaxed clips do not cover (a fist-pump, picking something up,
+## standing hurt, a wave).
+const M2M_CLIPS := preload("res://assets/characters/human/animations/p04_m2m_clips.glb")
+const M2M_LIBRARY: StringName = &"m2m"
+static var _m2m_library: AnimationLibrary
 static var _relaxed_library: AnimationLibrary
 ## Owner, 2026-10-06 (「戰鬥動作太單一」): the attacks mirrored left for right
 ## — the jab's rear-hand cross, the other hook, a kick off the other leg.
@@ -64,6 +71,7 @@ func _init(scene: PackedScene = null) -> void:
 	player = _find_type(model, "AnimationPlayer") as AnimationPlayer
 	_add_relaxed_clips()
 	_add_fight_clips()
+	_add_m2m_clips()
 	_add_mirrored_clips()
 	SoftToon.register(self)
 	for joint_name: String in BONE_MAP:
@@ -195,6 +203,25 @@ func _add_fight_clips() -> void:
 		player.add_animation_library(FIGHT_LIBRARY, _fight_library)
 
 
+func _add_m2m_clips() -> void:
+	if player == null or player.has_animation_library(M2M_LIBRARY):
+		return
+	if _m2m_library == null:
+		var source := M2M_CLIPS.instantiate()
+		var source_player := _find_type(source, "AnimationPlayer") as AnimationPlayer
+		if source_player != null:
+			_m2m_library = source_player.get_animation_library(&"")
+		source.free()
+	if _m2m_library != null:
+		player.add_animation_library(M2M_LIBRARY, _m2m_library)
+
+
+## "m2m/<clip>" when the Mesh2Motion library has it, else "".
+func m2m_clip(clip: String) -> String:
+	var name := "%s/%s" % [M2M_LIBRARY, clip]
+	return name if player != null and player.has_animation(name) else ""
+
+
 ## `clip` played off the other side ("mirror/Jab"), or `clip` itself when there
 ## is no mirrored version.
 func mirrored(clip: String) -> String:
@@ -273,7 +300,9 @@ func pose_clip(clip: String, t: float) -> void:
 		# reach). Gameplay moves the time smoothly anyway.
 		player.play(clip, 0.0)
 	player.speed_scale = 0.0
-	player.seek(clampf(t, 0.0, 1.0) * animation.length, true)
+	# Seeking a one-shot to its very end makes the player stop and drop the
+	# clip (current_animation ""), so the next frame restarts it with a blend.
+	player.seek(clampf(t, 0.0, 0.999) * animation.length, true)
 
 ## Controls on top of the playing clip, at `weight` (0..1).
 func use_clip_layer(weight: float) -> void:

@@ -93,6 +93,7 @@ func _ready() -> void:
 func _greet(_seed: int) -> void:
 	if not Game.has_pair():
 		human.say("好，出去散步吧！")
+		human.puppet.play_gesture("M2M_Greeting", 1.4)
 		return
 	# S06-10: the very first walk remembers how they met.
 	var first := Memories.recall_for(Game.pair_state, &"shelter")
@@ -103,6 +104,9 @@ func _greet(_seed: int) -> void:
 	if Bond.pets_before_walk(Game.pair_state):
 		human.puppet.play_acknowledge(dog.global_position)
 		dog.play_petted()
+	else:
+		# Off we go: a wave to the dog (Mesh2Motion "Greeting").
+		human.puppet.play_gesture("M2M_Greeting", 1.4)
 
 
 ## S05-05: what the dog makes of a place is said in the walk, in its own voice,

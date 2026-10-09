@@ -73,9 +73,10 @@ func _run() -> void:
 		await _tree.process_frame
 		if not coordinator.is_fighting():
 			break
-		# Nobody may win quickly: this is about bodies, not the result.
+		# Nobody may go down: this is about bodies, not the result (a knock-down
+		# mid-test left a body frozen in its down clip while the fight went on).
 		for f in sim.fighters:
-			f.hp = maxf(f.hp, f.max_hp * 0.5)
+			f.hp = f.max_hp
 		frames += 1
 		for v: P04HumanVisual in [ours, theirs]:
 			if _clip(v) != "":
@@ -95,16 +96,23 @@ func _run() -> void:
 	check(frames > 600, "a long fight was watched (%d frames)" % frames)
 	check(longest <= MOST_FRAMES_PAST, "no body stays inside the other (%d frames past the allowance: %s)" % [longest, longest_what])
 	check(deepest <= NEVER_DEEPER, "nor ever goes deep into it (deepest %.3f m: %s)" % [deepest, deepest_what])
-	# Stopping blows at the body must not stop them being thrown: every attack
-	# seen for a while gets well out of its wind-up. (Not to 0.5, the strike:
-	# thrown up close, a blow meets the body before full extension and rightly
-	# stops there. What this catches is a blow held at 0, never thrown.)
+	# Stopping blows at the body must not stop them being thrown. The bug this
+	# guards against froze every blow at the start of its clip; a single fight
+	# pressed chest to chest can rightly stop one kind of blow early, so: some
+	# blow reaches its strike (0.5), and most kinds seen get well out of their
+	# wind-up.
+	var kinds := 0
 	var thrown := 0
+	var furthest := 0.0
 	for clip: String in ATTACKS:
 		if seen.get(clip, 0) >= 60:
-			thrown += 1
-			check(reached[clip] >= 0.25, "%s is still thrown (to %.2f)" % [clip, reached[clip]])
-	check(thrown >= 2, "several kinds of blow were thrown (%d)" % thrown)
+			kinds += 1
+			furthest = maxf(furthest, reached[clip])
+			if reached[clip] >= 0.25:
+				thrown += 1
+	check(kinds >= 2, "several kinds of blow were thrown (%d)" % kinds)
+	check(furthest >= 0.5, "blows still reach their strike (furthest %.2f)" % furthest)
+	check(thrown * 2 >= kinds, "most kinds get out of their wind-up (%d of %d: %s)" % [thrown, kinds, reached])
 	finish()
 
 

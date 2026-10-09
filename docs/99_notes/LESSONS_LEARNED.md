@@ -70,6 +70,8 @@ Owner, 2026-10-09: 「把開發遇到的問題要寫回，讓下次開發不會�
 
 ## 6. Blender
 
+**6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
+
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
 
 **6.2 Codex may have Blender open.** Changing add-ons or preferences while another Blender runs can be overwritten when it quits. Check for a running Blender first (`Get-Process blender`); never close Codex's.
