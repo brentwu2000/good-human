@@ -24,7 +24,7 @@ Owner, 2026-10-09: 「拿武器的樣子不符合現實拿物品的樣子，請�
 - **Through the fist**: the shaft runs through the curled fingers. Its axis and centre are measured from the curled middle finger and written to `assets/characters/human/animations/p04_fight_grip.json`; Godot (`WeaponProp3D.grip`) mounts the prop there, and the clips turn the hand so that axis points where the weapon should.
 - **Umbrella** (one hand, walking-stick style): front guard with the arm forward and down, the point lifted at the other person's face; thrusts off a straighter arm; cuts from high, driven by the hips; a hanging high guard to block.
 - **Broom** (two hands, short-bayonet style): lead hand in front of the belly, rear hand on the shaft at the right hip, head forward; thrust with both hands as the main blow, a chop from overhead, a shove with the shaft up close; the shaft raised across the face to block.
-- **On the walk**: Codex's relaxed Idle/Walk with the lead hand closed round it — the umbrella point-down like a walking stick, the broom round the middle, head down.
+- **On the walk**: Codex's relaxed Idle/Walk with the lead hand closed round it — the umbrella point-down like a walking stick, the broom shouldered, its head resting back over the shoulder.
 
 Previews: `blender -b --factory-startup --python tools/art/preview_fight_hands.py -- <out dir>`. Checks: `tests/weapon_test.gd` (`_test_grip`, and the drawn reach of every thrust).
 
