@@ -41,6 +41,7 @@ Dog/human assets require S-level final quality. A-level bases may be transformed
 4. `docs/06_art/ART_STATUS.md`
 5. `docs/06_art/ASSET_LICENSES.md`
 6. `docs/99_notes/LESSONS_LEARNED.md` — problems already hit (posing hands and held objects, Blender previews, publishing models, exports); when you fix one that was not obvious, add it there.
+7. Open handoffs from Claude — `docs/06_art/CLAUDE_HANDOFF_TO_CODEX_*.md` (newest first). Each lists what was added on the owner's requests, how it is rebuilt, what must not change, and the adjustments the owner wants (CX-xx); record them in `ART_STATUS.md` as you take them.
 
 ## Blender (MCP)
 A Blender bridge is wired into Codex as the `blender` MCP server, so the ART
