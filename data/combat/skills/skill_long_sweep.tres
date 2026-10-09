@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_skill")
 id = &"skill_long_sweep"
-animation_key = &"swing"
+animation_key = &"sweep"
 display_name = "橫掃"
 effect = 0
 condition = 0

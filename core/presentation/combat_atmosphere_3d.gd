@@ -215,7 +215,11 @@ func _spark(attacker: Vector3, target: Vector3, skill: CombatSkillData, colour: 
 	var towards := (attacker - target)
 	towards.y = 0.0
 	towards = towards.normalized() if towards.length() > 0.01 else Vector3.FORWARD
-	var height := 0.85 if skill != null and skill.animation_key == &"kick" else 1.35
+	var height := 1.35
+	if skill != null and skill.animation_key == &"kick":
+		height = 0.85
+	elif skill != null and skill.animation_key == &"sweep":
+		height = 0.45
 	var at := target + towards * 0.2 + Vector3(0, height, 0)
 	var glow := StandardMaterial3D.new()
 	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

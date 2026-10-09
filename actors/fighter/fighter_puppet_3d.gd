@@ -17,7 +17,7 @@ signal bumped(from: Vector3)
 ## Codex's authored combat clips (P-04 + ART), by attack, reaction and footwork.
 ## Each attack's P-04 clip name; holding something, ARMED_CLIPS turns it into
 ## that weapon's own move (a poke the thrust, a swing the cut or chop).
-const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Thrust", &"swing": "HeavyHook"}
+const ATTACK_CLIPS := {&"punch": "Jab", &"hook": "HeavyHook", &"kick": "Kick", &"poke": "Thrust", &"swing": "HeavyHook", &"sweep": "Sweep"}
 ## The hand a weapon is held in: the lead hand, the one the jab clip drives.
 const WEAPON_HAND := "hand_l"
 const REACTION_CLIPS := {
@@ -68,7 +68,7 @@ const ARMED_CLIPS := {
 		"Idle": "Fight_Stance_Long", "Approach": "Fight_Step_Fwd_Long", "Circle": "Fight_Circle_Long",
 		"Backstep": "Fight_Step_Back_Long", "Block": "Fight_Block_Long", "Dodge": "Fight_Dodge_Long",
 		"HitLight": "Fight_HitLight_Long", "HitHeavy": "Fight_HitHeavy_Long",
-		"Thrust": "Fight_Thrust_Long", "HeavyHook": "Fight_Swing_Long", "Jab": "Fight_Shove_Long",
+		"Thrust": "Fight_Thrust_Long", "HeavyHook": "Fight_Swing_Long", "Jab": "Fight_Shove_Long", "Sweep": "Fight_Sweep_Long",
 	},
 }
 ## Outside a fight: the relaxed walk and idle, carrying it (`set_ambient`).
@@ -84,6 +84,8 @@ const CRITICAL_AT: float = 0.3
 ## Critical: every so often they falter for a moment (hesitation).
 const HESITATE_EVERY: float = 2.2
 const HESITATE_SECONDS: float = 0.35
+const TRAIL_FROM: float = 0.38
+const TRAIL_UNTIL: float = 0.6
 ## A landed blow stops this far short of the body (m; the layers on top of
 ## the clip take it the rest of the way to touching) (`_stop_at_body`).
 const TOUCH_GAP: float = 0.03
@@ -117,6 +119,9 @@ var _side_rng := RandomNumberGenerator.new()
 ## P-05: what they are holding, and the prop showing it.
 var held: WeaponData
 var _prop: Node3D
+## The smear behind it while a blow is fast (between the wind-up's end and
+## the follow-through, `TRAIL_FROM`..`TRAIL_UNTIL` of the attack clip).
+var trail: WeaponTrail3D
 var _hp_label: Label3D
 ## The fight wants the health bar shown; it only is with fight text on.
 var _hp_wanted: bool = false
@@ -209,12 +214,22 @@ func hold(weapon: WeaponData, condition: WeaponCondition.State = WeaponCondition
 		grip.transform = WeaponProp3D.grip("l")
 		mount.add_child(grip)
 		grip.add_child(_prop)
+		_add_trail(weapon)
 		return
 	var arm := _joint(_arms, 1)
 	if arm != null:
 		_prop.position = Vector3(0, -0.55, 0)
 		_prop.rotation.x = -PI * 0.5
 		arm.add_child(_prop)
+
+
+func _add_trail(weapon: WeaponData) -> void:
+	if trail == null:
+		trail = WeaponTrail3D.new()
+		trail.name = "WeaponTrail"
+		add_child(trail)
+	trail.follow(_prop, WeaponProp3D.TIP.get(weapon.archetype, 0.6))
+	trail.active = false
 
 
 ## P05-09 (D5W-07): how worn it is reads on the object itself.
@@ -326,6 +341,8 @@ func set_fighting() -> void:
 ## coordinator during a fight.
 func drive_combat_clip(fighter: CombatFighter) -> void:
 	_posed = []
+	if trail != null:
+		trail.active = false
 	var skeletal := _body as P04HumanVisual
 	if skeletal == null or _down:
 		return
@@ -341,6 +358,8 @@ func drive_combat_clip(fighter: CombatFighter) -> void:
 		var played := _clip(skeletal, clip, _mirrored_attack)
 		var t := _attack_progress(fighter, skill)
 		skeletal.pose_clip(played, t)
+		if trail != null:
+			trail.active = t >= TRAIL_FROM and t <= TRAIL_UNTIL
 		_posed = [played, t, STRIKE_HELD_UNTIL]
 		return
 	if fighter.is_guarding():
@@ -550,7 +569,7 @@ func play_windup(skill: CombatSkillData) -> void:
 				tween.tween_property(arm, "rotation:x", -2.6, skill.windup).set_trans(Tween.TRANS_SINE)
 			if _torso != null:
 				tween.parallel().tween_property(_torso, "rotation:x", -0.25, skill.windup)
-		&"hook", &"swing":
+		&"hook", &"swing", &"sweep":
 			# P04-04: the whole upper body loads up. Shoulders and hips turn
 			# away and the arm comes up and out to the side — it has to be
 			# readable from across a street, because it is the blow worth
@@ -593,7 +612,7 @@ func _choose_side(skill: CombatSkillData) -> void:
 ## The strike itself: the limb swings through, the body follows it, and only
 ## then does everything settle back.
 func play_strike(skill: CombatSkillData) -> void:
-	if skill.animation_key in [&"hook", &"swing"]:
+	if skill.animation_key in [&"hook", &"swing", &"sweep"]:
 		_play_hook_strike(skill)
 		return
 	if skill.animation_key == &"smash":

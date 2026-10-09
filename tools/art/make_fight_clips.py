@@ -395,6 +395,24 @@ def with_aim(pose, aim):
     return pose
 
 
+def strike(arm, name, guard, load, hit, follow, seconds, arc=(0.0, 0.0, 0.0), lag=0.35):
+    """A weapon blow the way game animators build one (docs/99_notes/
+    WEAPON_GRIP_REFERENCE.md, "Other games"): a wind-up, then the hand
+    travels a curve, not a straight line (`arc` bows the path out at its
+    middle), the weapon lagging behind the hand (`lag`: how far its direction
+    has turned when the hand is most of the way) and snapping through at the
+    strike, then carrying on past the target (`follow`) before the recovery.
+    The game opens the contact window at 0.5 and holds to 0.64."""
+    accel = lambda t: t * t
+    lin = lambda t: t
+    mid = lerp_pose(load, hit, 0.7)
+    mid["hand_l"] = tuple(a + b for a, b in zip(mid["hand_l"], arc))
+    la, ha = Vector(load["aim_l"]), Vector(hit["aim_l"])
+    if la.length > 0.05 and ha.length > 0.05:
+        mid["aim_l"] = tuple(la.normalized().slerp(ha.normalized(), lag))
+    bake(arm, name, [(0, guard, lin), (0.32, load, smooth), (0.44, mid, accel), (0.5, hit, snap), (0.6, follow, smooth), (0.66, follow, lin), (1, guard, smooth)], seconds)
+
+
 def armed_sets(arm):
     """Everything a fighter does while holding something, one set per way of
     holding it: "_Armed" for the umbrella (one hand), "_Long" for the broom
@@ -424,13 +442,19 @@ def armed_sets(arm):
     # Umbrella, after the walking stick (Barton-Wright): thrusts at the face
     # off a straight arm, and cuts that come from the hips, not the elbow.
     U = umbrella
-    # Chambered back clearly, then driven out off a long lunge.
+    # Chambered back clearly, then driven out off a long lunge; a thrust
+    # runs straight, so no arc, and it settles a little past the point.
     thrust_load = with_aim(moved(U, d_pelvis=(0, 0.06, -0.01), d_hand_l=(0.0, 0.14, 0.02), d_yaw=6.0, d_chest_yaw=4.0), (-0.1, -1.0, 0.45))
     thrust_hit = with_aim(moved(U, d_pelvis=(-0.01, -0.12, -0.03), d_foot_l=(0, -0.15, 0), d_hand_l=(-0.02, -0.07, 0.0), d_yaw=-12.0, d_chest_yaw=-8.0, d_tilt=5.0), (-0.06, -1.0, 0.22))
-    bake(arm, "Fight_Thrust", [(0, U, lin), (0.3, thrust_load, smooth), (0.5, thrust_hit, snap), (0.64, thrust_hit, lin), (1, U, smooth)], 0.65)
+    thrust_follow = with_aim(moved(thrust_hit, d_hand_l=(0.0, -0.03, -0.02), d_tilt=2.0), (-0.06, -1.0, 0.16))
+    strike(arm, "Fight_Thrust", U, thrust_load, thrust_hit, thrust_follow, 0.65, lag=0.8)
+    # The cut: raised high beside the head, brought down across on a curve
+    # with the hips, the wrist snapping it through, carried on down past the
+    # target to the far hip.
     cut_load = with_aim(moved(U, d_hand_l=(0.05, 0.10, 0.48), d_yaw=-14.0, d_chest_yaw=-10.0, d_pelvis=(0.02, 0.02, -0.01), d_tilt=-4.0), (0.25, 0.55, 0.8))
     cut_hit = with_aim(moved(U, d_hand_l=(-0.12, -0.12, 0.10), d_yaw=22.0, d_chest_yaw=16.0, d_head_yaw=-12.0, d_pelvis=(-0.03, -0.05, -0.03), d_tilt=6.0, d_foot_l=(0, -0.06, 0), d_toe_l=(-0.4, 0.2, 0.0)), (-0.55, -0.8, -0.15))
-    bake(arm, "Fight_Swing", [(0, U, lin), (0.32, cut_load, smooth), (0.5, cut_hit, snap), (0.6, cut_hit, lin), (1, U, smooth)], 0.75)
+    cut_follow = with_aim(moved(cut_hit, d_hand_l=(-0.16, 0.06, -0.24), d_yaw=10.0, d_chest_yaw=8.0, d_tilt=4.0), (-0.6, -0.3, -0.75))
+    strike(arm, "Fight_Swing", U, cut_load, cut_hit, cut_follow, 0.75, arc=(0.04, -0.10, 0.10))
     # The hanging guard: the hand up above the head, the umbrella slanting
     # down across the front of the body, the weight back.
     hang = with_aim(moved(U, d_hand_l=(-0.04, 0.12, 0.62), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0), (-0.65, -0.35, -0.68))
@@ -441,10 +465,22 @@ def armed_sets(arm):
     L = broom
     lthrust_load = moved(L, d_pelvis=(0, 0.06, -0.01), d_hand_l=(0.0, 0.14, 0.0), d_yaw=6.0)
     lthrust_hit = with_aim(moved(L, d_pelvis=(-0.01, -0.13, -0.03), d_foot_l=(0, -0.16, 0), d_hand_l=(-0.02, -0.12, 0.04), d_yaw=-8.0, d_tilt=6.0), (0.12, -0.97, 0.26))
-    bake(arm, "Fight_Thrust_Long", [(0, L, lin), (0.3, lthrust_load, smooth), (0.5, lthrust_hit, snap), (0.64, lthrust_hit, lin), (1, L, smooth)], 0.7)
+    lthrust_follow = with_aim(moved(lthrust_hit, d_hand_l=(0.0, -0.03, -0.02), d_tilt=2.0), (0.12, -0.97, 0.2))
+    strike(arm, "Fight_Thrust_Long", L, lthrust_load, lthrust_hit, lthrust_follow, 0.7, lag=0.8)
+    # Chop: the whole trunk behind it — lifted high, brought down over the
+    # top on a curve, the head carrying on down towards the ground.
     chop_load = with_aim(moved(L, d_hand_l=(0.08, 0.14, 0.55), d_pelvis=(0, 0.04, 0.0), d_tilt=-8.0, d_chest_lean=-6.0), (0.1, -0.35, 0.93))
     chop_hit = with_aim(moved(L, d_hand_l=(0.02, -0.14, 0.10), d_pelvis=(0, -0.06, -0.04), d_tilt=12.0, d_chest_lean=10.0, d_foot_l=(0, -0.08, 0)), (0.12, -0.95, -0.28))
-    bake(arm, "Fight_Swing_Long", [(0, L, lin), (0.36, chop_load, smooth), (0.5, chop_hit, snap), (0.62, chop_hit, lin), (1, L, smooth)], 0.8)
+    chop_follow = with_aim(moved(chop_hit, d_hand_l=(0.0, 0.02, -0.16), d_tilt=5.0, d_chest_lean=6.0, d_pelvis=(0, -0.02, -0.03)), (0.1, -0.7, -0.7))
+    strike(arm, "Fight_Swing_Long", L, chop_load, chop_hit, chop_follow, 0.8, arc=(0.0, -0.12, 0.12))
+    # Sweep (P-05's long sweep; a staff's sweeping blow at the legs, as Sifu's
+    # broom and staff do): wound back to the lead side with the trunk turned
+    # away, then swept low across in front with a full trunk turn, carried on
+    # round past the target.
+    sweep_load = with_aim(moved(L, d_hand_l=(0.20, 0.10, -0.06), d_yaw=-26.0, d_chest_yaw=-14.0, d_pelvis=(0.03, 0.03, -0.05), d_tilt=6.0), (0.8, 0.45, -0.25))
+    sweep_hit = with_aim(moved(L, d_hand_l=(-0.10, -0.08, -0.16), d_yaw=20.0, d_chest_yaw=12.0, d_head_yaw=-10.0, d_pelvis=(-0.02, -0.06, -0.08), d_tilt=10.0, d_foot_l=(0, -0.06, 0)), (-0.25, -0.92, -0.38))
+    sweep_follow = with_aim(moved(sweep_hit, d_hand_l=(-0.16, 0.08, 0.0), d_yaw=14.0, d_chest_yaw=8.0), (-0.85, -0.35, -0.3))
+    strike(arm, "Fight_Sweep_Long", L, sweep_load, sweep_hit, sweep_follow, 0.8, arc=(0.0, -0.14, 0.0))
     shove = with_aim(moved(L, d_hand_l=(0.10, -0.12, 0.30), d_pelvis=(0, -0.06, -0.01), d_foot_l=(0, -0.07, 0)), (0.97, -0.1, 0.2))
     shove_load = with_aim(moved(L, d_hand_l=(0.12, 0.04, 0.28)), (0.97, -0.1, 0.2))
     bake(arm, "Fight_Shove_Long", [(0, L, lin), (0.3, shove_load, smooth), (0.5, shove, snap), (0.62, shove, lin), (1, L, smooth)], 0.6)
@@ -458,12 +494,12 @@ def carry_clips(arm):
     """Walking and standing about holding something, outside a fight: Codex's
     relaxed Idle/Walk unchanged except the lead hand, which closes round the
     thing carried — the umbrella point-down like a walking stick, the broom
-    held round the middle, head down in front."""
+    on the shoulder, its head resting back over it."""
     before_objects = set(bpy.data.objects)
     before_actions = set(bpy.data.actions)
     bpy.ops.import_scene.gltf(filepath=RELAXED)
     sources = {a.name: a for a in set(bpy.data.actions) - before_actions}
-    carried = {"_Armed": Vector((0.0, -0.25, -1.0)), "_Long": Vector((0.05, -0.45, -1.0))}
+    carried = {"_Armed": Vector((0.0, -0.25, -1.0)), "_Long": Vector((-0.15, 0.85, 0.5))}
     scene = bpy.context.scene
     pbs = arm.pose.bones
     for source_name, out in (("Idle_Relaxed", "Carry_Idle"), ("Walk_Relaxed", "Carry_Walk")):
@@ -484,6 +520,18 @@ def carry_clips(arm):
                     pb.matrix_basis = pose[pb.name]
                 bpy.context.view_layer.update()
                 hand = pbs["hand_l"]
+                if suffix == "_Long":
+                    # Shouldered, the way long things are carried in games
+                    # and in life: the hand in front of the shoulder, the
+                    # head of the broom resting back over it.
+                    up, low = pbs["upperarm_l"], pbs["lowerarm_l"]
+                    shoulder = up.matrix.translation.copy()
+                    target = shoulder + Vector((0.04, -0.16, -0.12))
+                    elbow = two_bone(shoulder, target, up.bone.length, low.bone.length, Vector((0.6, 0.2, -1.0)))
+                    aim(up, elbow - shoulder)
+                    bpy.context.view_layer.update()
+                    aim(low, target - low.matrix.translation)
+                    bpy.context.view_layer.update()
                 forearm = (hand.matrix.translation - pbs["lowerarm_l"].matrix.translation).normalized()
                 hold_along(hand, "l", along, forearm)
                 bpy.context.view_layer.update()

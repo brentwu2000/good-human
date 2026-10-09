@@ -30,6 +30,10 @@ Owner, 2026-10-09: 「把開發遇到的問題要寫回，讓下次開發不會�
 
 **2.6 Fit reach with the lunge, not by shrinking the move.** *Symptom:* after the grip moved the prop forward, thrusts were pulled in to keep the reach, and then barely moved — guard and strike were a few centimetres apart (owner: 「有進步，但需要再優化」). *Rule:* an attack reads by contrast: guard a little chambered, a clear pull-back on the wind-up, then a long drive with a step and the hips. Keep the strike's hand where the reach needs it and get the travel from the guard and the lunge. *Check:* the showcase capture (`weapon_showcase.tscn`), not only `weapon_test`.
 
+**2.7 Two skills sharing an animation key share a look.** The broom's sweep and heavy blow were both `swing`, so the sweep played the overhead chop. Each move that should look different needs its own key and clip; check the moveset's skills against `ATTACK_CLIPS`/`ARMED_CLIPS` when adding one.
+
+**2.8 Compare with how other games animate it, not only with real life.** Real grips fixed the hands; arcs, wrist lag, follow-through and trails (the craft of game melee animation) are what made the blows read. See `WEAPON_GRIP_REFERENCE.md` "Compared with other games".
+
 **2.5 Reactions must not move the head into the attacker.** HitHeavy folding forward and Block leaning in caused overlaps a clamp cannot fix (a constant pose cannot be "held earlier"). Author reactions that move away from the blow.
 
 ## 3. Tests that lie

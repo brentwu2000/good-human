@@ -27,3 +27,18 @@ Owner, 2026-10-09: 「拿武器的樣子不符合現實拿物品的樣子，請�
 - **On the walk**: Codex's relaxed Idle/Walk with the lead hand closed round it — the umbrella point-down like a walking stick, the broom round the middle, head down.
 
 Previews: `blender -b --factory-startup --python tools/art/preview_fight_hands.py -- <out dir>`. Checks: `tests/weapon_test.gd` (`_test_grip`, and the drawn reach of every thrust).
+
+## Compared with other games (owner, 2026-10-09: 「請再研究一下其他遊戲手拿武器的方式，對照你做的動作」)
+
+| Principle (source) | How games do it | Before | Now |
+|---|---|---|---|
+| Arc ([MoCap Online, sword/melee guide](https://mocaponline.com/blogs/mocap-news/sword-melee-animation-guide)) | Swings travel a curved path; fastest at ~60–70 % of the arc | hand went straight from wind-up to strike | a mid key bows the path; ease accelerates into the strike |
+| Wrist snap (same) | The weapon lags the hand, then snaps through at the peak | weapon turned with the hand | at the mid key the weapon has turned only ~35 % of the way, then snaps |
+| Follow-through (same) | Momentum carries 30–60° past the target; heavy weapons further | stopped dead at the strike | `follow` pose past the target before recovery (cut to the far hip, chop towards the ground, sweep on round) |
+| Weapon trail (same) | On at swing start, off when the follow-through slows | none | `WeaponTrail3D` ribbon from the tip, 0.38–0.6 of the clip, fades in 0.14 s |
+| Hit stop (same) | 1–4 frames frozen on a hit | already (`_punch_landed`) | — |
+| Two-handed weight (same) | Full trunk rotation drives the swing; off-hand stays on the weapon ([weapon systems guide](https://mocaponline.com/blogs/mocap-news/weapon-animation-systems-guide)) | rear hand on the shaft, little trunk turn | sweep and chop turn and fold the trunk |
+| Idle with a weapon (same) | Weapon-specific: rested on a shoulder, leaned on, grip adjusted | broom hanging from one hand | broom shouldered on the walk; umbrella point-down like a cane |
+| Long weapons' moves ([Sifu weapons guides](https://earlyguides.com/sifu/weapons)) | Brooms/staffs: reach, sweeping blows that catch several people, stagger | the "sweep" skill played the overhead chop | its own low sweep at the legs (`Fight_Sweep_Long`, animation key `sweep`) |
+
+Built by `strike()` in `tools/art/make_fight_clips.py`; seen in `tests/capture/weapon_showcase.tscn`.

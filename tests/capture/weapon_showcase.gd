@@ -24,13 +24,14 @@ const STEPS := {
 		["重受擊", "Fight_HitHeavy_Armed", 0.0, "attack"],
 	],
 	&"broom": [
-		["拿著走路（握中段，刷頭朝下）", "Carry_Walk_Long", 2.6, "walk"],
+		["拿著走路（扛在肩上）", "Carry_Walk_Long", 2.6, "walk"],
 		["拿著站著", "Carry_Idle_Long", 1.6, "loop"],
 		["備戰：雙手刺刀式，刷頭朝前", "Fight_Stance_Long", 2.0, "loop"],
 		["前進", "Fight_Step_Fwd_Long", 1.2, "loop"],
 		["後退", "Fight_Step_Back_Long", 1.2, "loop"],
 		["雙手刺擊", "Fight_Thrust_Long", 0.0, "attack"],
 		["舉高下劈", "Fight_Swing_Long", 0.0, "attack"],
+		["橫掃下盤", "Fight_Sweep_Long", 0.0, "attack"],
 		["近身推擊", "Fight_Shove_Long", 0.0, "attack"],
 		["格擋：桿子橫舉在臉前", "Fight_Block_Long", 1.6, "hold"],
 		["閃避", "Fight_Dodge_Long", 0.0, "attack"],
@@ -45,6 +46,7 @@ var _tree: SceneTree
 var _caption: Label
 var _owner: FighterPuppet3D
 var _other: FighterPuppet3D
+var _attacking := false
 
 
 func _ready() -> void:
@@ -114,11 +116,13 @@ func _run() -> void:
 				_caption.text = "%s｜%s" % [title, step[0]]
 				await _play(visual, clip, length, step[2], 1.0 if step[3] == "loop" else 0.0, Vector3.ZERO, null)
 			"attack":
+				_attacking = not step[1].contains("Hit") and not step[1].contains("Dodge")
 				_caption.text = "%s｜%s" % [title, step[0]]
 				await _play(visual, clip, length, length, 1.0, Vector3.ZERO, null)
 				await _play(visual, "fight/" + ("Fight_Stance_Armed" if id == &"umbrella" else "Fight_Stance_Long"), 1.0, 0.4, 1.0, Vector3.ZERO, null)
 				_caption.text = "%s｜%s（慢動作）" % [title, step[0]]
 				await _play(visual, clip, length, length / SLOW, SLOW, Vector3.ZERO, null)
+				_attacking = false
 		await _play(visual, "fight/" + ("Fight_Stance_Armed" if id == &"umbrella" else "Fight_Stance_Long"), 1.0, 0.5, 1.0, Vector3.ZERO, null)
 	_tree.quit()
 
@@ -131,6 +135,8 @@ func _play(visual: P04HumanVisual, clip: String, length: float, seconds: float, 
 	for i in frames:
 		var t := 0.5 if speed == 0.0 else fmod(elapsed * speed, length) / length
 		visual.pose_clip(clip, t)
+		if _owner.trail != null:
+			_owner.trail.active = _attacking and t >= FighterPuppet3D.TRAIL_FROM and t <= FighterPuppet3D.TRAIL_UNTIL
 		if mover != null:
 			mover.global_position += velocity / 30.0
 		await _tree.process_frame

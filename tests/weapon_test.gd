@@ -304,6 +304,18 @@ func _test_grip() -> void:
 	var along := (rear.origin - shaft.origin).dot(shaft.basis.y.normalized())
 	var off := (rear.origin - shaft.origin - shaft.basis.y.normalized() * along).length()
 	check(off < 0.07 and along < -0.25, "broom: the rear hand holds the shaft behind the lead hand (%.2f m off it, %.2f m back)" % [off, -along])
+	# Each blow its own move: the broom's sweep is a low sweep, not the chop.
+	check(puppet._clip(body, FighterPuppet3D.ATTACK_CLIPS[&"sweep"], false).ends_with("Fight_Sweep_Long"), "broom: the sweep sweeps")
+	check(puppet._clip(body, "HeavyHook", false).ends_with("Fight_Swing_Long"), "broom: the heavy blow chops")
+	# A smear behind the weapon while the blow is fast, gone after.
+	check(puppet.trail != null, "a held weapon has a swing trail")
+	puppet.trail.active = true
+	for i in 6:
+		await get_tree().process_frame
+	check(puppet.trail.sample_count() >= 3, "it draws while the blow is fast (%d points)" % puppet.trail.sample_count())
+	puppet.trail.active = false
+	await get_tree().create_timer(WeaponTrail3D.LIFE + 0.05).timeout
+	check(puppet.trail.sample_count() == 0, "and is gone soon after")
 	puppet.hold(null)
 	puppet.queue_free()
 
