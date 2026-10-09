@@ -54,3 +54,56 @@ static func deepest(a: Array, b: Array, pad: float = 0.0) -> Array:
 			if depth > best[0]:
 				best = [depth, x[3], y[3]]
 	return best
+
+
+## A held prop as capsules along its +Y (the shaft through the fist), from
+## its own meshes: cut into SLICES along the shaft, each as thick as the
+## mesh there, so a broom's head is fat and its handle thin. Worked out once
+## per prop (in its own frame) and placed where it is now.
+const SLICES: int = 6
+
+
+static func prop_capsules(prop: Node3D, at: Variant = null) -> Array:
+	if prop == null:
+		return []
+	if not prop.has_meta("contact_slices"):
+		prop.set_meta("contact_slices", _slice_prop(prop))
+	var out: Array = []
+	if at == null:
+		at = prop.global_transform
+	var place: Transform3D = at
+	for slice: Array in prop.get_meta("contact_slices"):
+		out.append([place * slice[0], place * slice[1], slice[2], "weapon%d" % out.size()])
+	return out
+
+
+static func _slice_prop(prop: Node3D) -> Array:
+	var to_prop := prop.global_transform.affine_inverse()
+	var points: Array[Vector3] = []
+	for node in prop.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		var into := to_prop * mesh_instance.global_transform
+		for surface in mesh_instance.mesh.get_surface_count():
+			var vertices: PackedVector3Array = mesh_instance.mesh.surface_get_arrays(surface)[Mesh.ARRAY_VERTEX]
+			for v in vertices:
+				points.append(into * v)
+	if points.is_empty():
+		return []
+	var low := INF
+	var high := -INF
+	for p in points:
+		low = minf(low, p.y)
+		high = maxf(high, p.y)
+	var step := (high - low) / SLICES
+	var radii: Array[float] = []
+	radii.resize(SLICES)
+	radii.fill(0.0)
+	for p in points:
+		var i := clampi(int((p.y - low) / maxf(step, 0.0001)), 0, SLICES - 1)
+		radii[i] = maxf(radii[i], Vector2(p.x, p.z).length())
+	var slices: Array = []
+	for i in SLICES:
+		slices.append([Vector3(0, low + step * i, 0), Vector3(0, low + step * (i + 1), 0), maxf(radii[i], 0.01)])
+	return slices

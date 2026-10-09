@@ -26,6 +26,16 @@ static func grip(side: String) -> Transform3D:
 	return Transform3D(Basis(y.cross(z), y, z), _vector(hand["centre"]))
 
 
+## How far along the shaft from the fist a prop sits in the hand: a long
+## thing (the broom) is held near the end of its handle, so it sits forward.
+static func shift(archetype: WeaponData.Archetype) -> float:
+	if archetype != WeaponData.Archetype.LONG_OBJECT:
+		return 0.0
+	if _grips.is_empty():
+		grip("l")
+	return float(_grips.get("long_shift", 0.0))
+
+
 static func _vector(values: Array) -> Vector3:
 	return Vector3(values[0], values[1], values[2])
 

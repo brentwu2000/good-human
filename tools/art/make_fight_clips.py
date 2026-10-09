@@ -81,8 +81,18 @@ THUMB_FIST = (30.0, 40.0, 35.0)
 THUMB_GRIP = (24.0, 34.0, 26.0)
 THUMB_ACROSS = 35.0                      # thumb swung across the palm first (degrees)
 FINGERS = ("index", "middle", "ring", "pinky")
-# Where the rear hand holds a two-handed shaft: this far back from the lead grip.
-TWO_HAND_SPREAD = 0.40
+# A two-handed shaft (the broom) is held near the END of its handle, the
+# "rear-ended grip" of the reference: the rear hand at the very end, the lead
+# hand a short way up, most of the shaft and the head out in front. Held in
+# its middle (as first built) 0.7 m of handle stuck back past the lead hand
+# and ran into the hip, belly and head (owner, 2026-10-09: 「穿模了」).
+# The broom model's handle ends 0.695 m behind where the prop is mounted, so
+# the prop is shifted forward in the lead hand by LONG_GRIP_SHIFT (Godot reads
+# it from GRIP_JSON); clips keep the head where they put it by pulling the
+# lead hand back by the same amount.
+BROOM_HANDLE_BACK = 0.695
+LONG_GRIP_SHIFT = 0.395
+TWO_HAND_SPREAD = 0.25
 HANDS = {}
 
 
@@ -131,7 +141,9 @@ def measure_hands(arm):
         pb.matrix_basis = Matrix.Identity(4)
     bpy.context.view_layer.update()
     with open(GRIP_JSON, "w", encoding="utf-8") as out:
-        json.dump({side: {"axis": list(h["axis"]), "centre": list(h["centre"]), "normal": list(h["normal"])} for side, h in HANDS.items()}, out, indent=1)
+        data = {side: {"axis": list(h["axis"]), "centre": list(h["centre"]), "normal": list(h["normal"])} for side, h in HANDS.items()}
+        data["long_shift"] = LONG_GRIP_SHIFT
+        json.dump(data, out, indent=1)
 
 
 def hold_rotation(side, along, forearm):
@@ -195,13 +207,21 @@ def armed_guards():
     the waist, rear hand further back on it, the head forward and a little up."""
     # Hand at chest height a little in front, standing taller than the
     # empty-handed crouch (a stick-fighter's guard), the point at the face.
-    umbrella = moved(STANCE, d_hand_l=(0.03, 0.0, -0.16), d_tilt=-3.0, d_pelvis=(0, 0, 0.03))
-    umbrella["aim_l"] = (-0.1, -1.0, 0.42)
+    # Held up steeply, the point towards the face but short of it: even when
+    # an empty-handed opponent closes in to fist range nothing held reaches
+    # the other body (owner, 2026-10-09: 「穿模了」 — level and
+    # far out, the guard sat inside the other person).
+    umbrella = moved(STANCE, d_hand_l=(0.03, 0.12, -0.16), d_tilt=-3.0, d_pelvis=(0, 0, 0.03))
+    umbrella["aim_l"] = (-0.06, -0.28, 0.96)
     umbrella["grip_l"] = 1.0
     # The shaft runs from the rear hand at the right hip, across the body, out
     # past the lead hand in front of the belly.
-    broom = moved(STANCE, d_hand_l=(-0.07, 0.04, -0.20))
-    broom["aim_l"] = (0.17, -0.95, 0.42)
+    # A staff's high guard: both hands in front of the chest, the broom
+    # standing up at about 66 degrees towards the other person's head. Held
+    # at the handle's end it is 1.2 m long in front of the lead hand; level,
+    # it reached 1.5 m, well inside anyone at broom distance.
+    broom = moved(STANCE, d_hand_l=(-0.003, 0.022, 0.079))
+    broom["aim_l"] = (0.12, -0.40, 0.91)
     broom["grip_l"] = 1.0
     broom["grip_r"] = 1.0
     broom["two_hand"] = 1.0
@@ -312,11 +332,83 @@ def apply_pose(arm, p):
     # along `aim_l`; two-handed, the rear hand takes the same shaft further back.
     held = Vector(p["aim_l"])
     armed = held.length > 0.05
+    two_handed = armed and p["two_hand"] > 0.5
+    # Two-handed, the shaft is kept in front of the body (owner, 2026-10-09:
+    # 「穿模了」 — with the rear hand 0.4 m back along it, a shaft angled down
+    # or across ran through the belly): if it passes too close to the trunk,
+    # both hands go further out in front until it clears.
+    push = Vector((0, 0, 0))
+    for clearing in range(8 if two_handed else 1):
+        solve_arms(arm, p, held, armed, push)
+        if not two_handed:
+            break
+        deficit, away = shaft_deficit(arm, held)
+        if deficit <= 0.0:
+            break
+        push += away * (deficit + 0.01)
+    # Legs: ankles to their targets, knees forward and a little out.
+    for side, sx in (("l", 1), ("r", -1)):
+        th, ca, ft = pbs[f"thigh_{side}"], pbs[f"calf_{side}"], pbs[f"foot_{side}"]
+        hip = th.matrix.translation.copy()
+        ankle = Vector(p[f"foot_{side}"])
+        knee = two_bone(hip, ankle, th.bone.length, ca.bone.length, Vector((sx * 0.25, -1.0, 0.0)))
+        aim(th, knee - hip)
+        bpy.context.view_layer.update()
+        aim(ca, ankle - ca.matrix.translation)
+        bpy.context.view_layer.update()
+        aim(ft, Vector(p[f"toe_{side}"]))
+        bpy.context.view_layer.update()
+
+
+# A two-handed shaft's handle runs this far back from the lead grip (the
+# broom model's handle end), and must stay this far from each body part's
+# line (its radius plus a margin): trunk, head, thighs.
+SHAFT_BACK = BROOM_HANDLE_BACK - LONG_GRIP_SHIFT
+SHAFT_FORWARD = 0.79 + LONG_GRIP_SHIFT
+SHAFT_CLEARANCE = {"trunk": 0.17, "head": 0.15, "thigh": 0.11}
+
+
+def shaft_deficit(arm, held):
+    """How much closer than allowed (m) the held broom — the whole of it, from
+    its handle end to its head — comes to the body; 0 when clear."""
+    pbs = arm.pose.bones
+    lead = pbs["hand_l"].matrix @ HANDS["l"]["centre"]
+    butt = lead - held.normalized() * SHAFT_BACK
+    tip = lead + held.normalized() * SHAFT_FORWARD
+    parts = [("trunk", pbs["pelvis"].matrix.translation, pbs["neck_01"].matrix.translation),
+             ("head", pbs["head"].matrix.translation + Vector((0, 0, 0.09)), pbs["head"].matrix.translation + Vector((0, 0, 0.09))),
+             ("thigh", pbs["thigh_l"].matrix.translation, pbs["calf_l"].matrix.translation),
+             ("thigh", pbs["thigh_r"].matrix.translation, pbs["calf_r"].matrix.translation)]
+    worst = 0.0
+    away = Vector((0, -1, 0))
+    for kind, a, b in parts:
+        line = b - a
+        for i in range(25):
+            point = butt.lerp(tip, i / 24.0)
+            t = 0.0 if line.length_squared < 1e-8 else max(0.0, min(1.0, (point - a).dot(line) / line.length_squared))
+            off = point - (a + line * t)
+            short = SHAFT_CLEARANCE[kind] - off.length
+            if short > worst:
+                worst = short
+                # Out the way the shaft already is from that part, level
+                # (never up or down through the body), and never backwards.
+                flat = Vector((off.x, min(off.y, 0.0), 0.0))
+                forward = Vector((0, -1, 0))
+                away = (flat.normalized() + forward).normalized() if flat.length > 1e-4 else forward
+    return worst, away
+
+
+def solve_arms(arm, p, held, armed, push):
+    pbs = arm.pose.bones
     grip_point = None
     for side, sx in (("l", 1), ("r", -1)):
         up, low, hand = pbs[f"upperarm_{side}"], pbs[f"lowerarm_{side}"], pbs[f"hand_{side}"]
         shoulder = up.matrix.translation.copy()
-        target = Vector(p[f"hand_{side}"])
+        target = Vector(p[f"hand_{side}"]) + (push if side == "l" else Vector((0, 0, 0)))
+        if side == "l" and armed and p["two_hand"] > 0.5:
+            # Held near the end of the handle: the hand sits further back
+            # along the shaft, the head stays where the pose puts it.
+            target -= held.normalized() * LONG_GRIP_SHIFT
         on_shaft = armed and (side == "l" or p["two_hand"] > 0.5)
         want = None
         if on_shaft and side == "r" and grip_point is not None:
@@ -342,18 +434,6 @@ def apply_pose(arm, p):
         curl_fingers(arm, side, p[f"grip_{side}"])
         if side == "l" and armed:
             grip_point = hand.matrix @ HANDS["l"]["centre"]
-    # Legs: ankles to their targets, knees forward and a little out.
-    for side, sx in (("l", 1), ("r", -1)):
-        th, ca, ft = pbs[f"thigh_{side}"], pbs[f"calf_{side}"], pbs[f"foot_{side}"]
-        hip = th.matrix.translation.copy()
-        ankle = Vector(p[f"foot_{side}"])
-        knee = two_bone(hip, ankle, th.bone.length, ca.bone.length, Vector((sx * 0.25, -1.0, 0.0)))
-        aim(th, knee - hip)
-        bpy.context.view_layer.update()
-        aim(ca, ankle - ca.matrix.translation)
-        bpy.context.view_layer.update()
-        aim(ft, Vector(p[f"toe_{side}"]))
-        bpy.context.view_layer.update()
 
 
 def bake(arm, name, keys, seconds, loop=False, bounce=0.0, bounces=2):
@@ -395,7 +475,7 @@ def with_aim(pose, aim):
     return pose
 
 
-def strike(arm, name, guard, load, hit, follow, seconds, arc=(0.0, 0.0, 0.0), lag=0.35):
+def strike(arm, name, guard, load, hit, follow, seconds, arc=(0.0, 0.0, 0.0), lag=0.35, back_out=(0.06, -0.10, 0.0)):
     """A weapon blow the way game animators build one (docs/99_notes/
     WEAPON_GRIP_REFERENCE.md, "Other games"): a wind-up, then the hand
     travels a curve, not a straight line (`arc` bows the path out at its
@@ -410,7 +490,15 @@ def strike(arm, name, guard, load, hit, follow, seconds, arc=(0.0, 0.0, 0.0), la
     la, ha = Vector(load["aim_l"]), Vector(hit["aim_l"])
     if la.length > 0.05 and ha.length > 0.05:
         mid["aim_l"] = tuple(la.normalized().slerp(ha.normalized(), lag))
-    bake(arm, name, [(0, guard, lin), (0.32, load, smooth), (0.44, mid, accel), (0.5, hit, snap), (0.6, follow, smooth), (0.66, follow, lin), (1, guard, smooth)], seconds)
+    # Coming back, the hands stay out in front (`back_out`) while the weapon
+    # turns back to the guard, so a long shaft's butt end passes beside the
+    # body rather than through it.
+    back = lerp_pose(follow, guard, 0.5)
+    back["hand_l"] = tuple(a + b for a, b in zip(back["hand_l"], back_out))
+    fa, ga = Vector(follow["aim_l"]), Vector(guard["aim_l"])
+    if fa.length > 0.05 and ga.length > 0.05:
+        back["aim_l"] = tuple(fa.normalized().slerp(ga.normalized(), 0.5))
+    bake(arm, name, [(0, guard, lin), (0.32, load, smooth), (0.44, mid, accel), (0.5, hit, snap), (0.6, follow, smooth), (0.66, follow, lin), (0.82, back, smooth), (1, guard, smooth)], seconds)
 
 
 def armed_sets(arm):
@@ -431,7 +519,7 @@ def armed_sets(arm):
         side_follow = moved(G, d_foot_r=(0.09, 0.0, 0.03), d_pelvis=(0.02, 0.0, -0.01))
         bake(arm, "Fight_Circle" + suffix, [(0, G, lin), (0.3, side, smooth), (0.6, side_follow, smooth), (1, G, smooth)], 0.5, bounce=0.015, bounces=1)
         # Hit and slipping: the whole body answers, the hands keep hold.
-        hit_light = moved(G, d_head_pitch=-22.0, d_head_yaw=10.0, d_chest_lean=-10.0, d_pelvis=(0, 0.05, 0.0), d_hand_l=(0.02, 0.08, -0.04))
+        hit_light = moved(G, d_head_pitch=-22.0, d_head_yaw=10.0, d_chest_lean=-10.0, d_pelvis=(0, 0.05, 0.0), d_hand_l=(0.02, 0.08, -0.04) if suffix == "_Armed" else (0.03, 0.02, 0.02))
         bake(arm, "Fight_HitLight" + suffix, [(0, G, lin), (0.2, hit_light, snap), (0.45, hit_light, lin), (1, G, smooth)], 0.35)
         hit_heavy = moved(G, d_head_pitch=20.0, d_chest_lean=16.0, d_tilt=8.0, d_pelvis=(0, 0.22, -0.06), d_foot_r=(0, 0.2, 0.0), d_hand_l=(-0.04, 0.2, -0.12), d_yaw=12.0)
         hit_heavy["aim_l"] = tuple(a + b for a, b in zip(G["aim_l"], (0.0, 0.0, -0.35)))
@@ -444,49 +532,54 @@ def armed_sets(arm):
     U = umbrella
     # Chambered back clearly, then driven out off a long lunge; a thrust
     # runs straight, so no arc, and it settles a little past the point.
-    thrust_load = with_aim(moved(U, d_pelvis=(0, 0.06, -0.01), d_hand_l=(0.0, 0.14, 0.02), d_yaw=6.0, d_chest_yaw=4.0), (-0.1, -1.0, 0.45))
-    thrust_hit = with_aim(moved(U, d_pelvis=(-0.01, -0.12, -0.03), d_foot_l=(0, -0.15, 0), d_hand_l=(-0.02, -0.07, 0.0), d_yaw=-12.0, d_chest_yaw=-8.0, d_tilt=5.0), (-0.06, -1.0, 0.22))
+    thrust_load = with_aim(moved(U, d_pelvis=(0, 0.06, -0.01), d_hand_l=(0.0, 0.06, 0.02), d_yaw=6.0, d_chest_yaw=4.0), (-0.1, -1.0, 0.45))
+    thrust_hit = with_aim(moved(U, d_pelvis=(-0.01, -0.12, -0.03), d_foot_l=(0, -0.15, 0), d_hand_l=(-0.02, -0.19, 0.0), d_yaw=-12.0, d_chest_yaw=-8.0, d_tilt=5.0), (-0.06, -1.0, 0.22))
     thrust_follow = with_aim(moved(thrust_hit, d_hand_l=(0.0, -0.03, -0.02), d_tilt=2.0), (-0.06, -1.0, 0.16))
     strike(arm, "Fight_Thrust", U, thrust_load, thrust_hit, thrust_follow, 0.65, lag=0.8)
     # The cut: raised high beside the head, brought down across on a curve
     # with the hips, the wrist snapping it through, carried on down past the
     # target to the far hip.
-    cut_load = with_aim(moved(U, d_hand_l=(0.05, 0.10, 0.48), d_yaw=-14.0, d_chest_yaw=-10.0, d_pelvis=(0.02, 0.02, -0.01), d_tilt=-4.0), (0.25, 0.55, 0.8))
-    cut_hit = with_aim(moved(U, d_hand_l=(-0.12, -0.12, 0.10), d_yaw=22.0, d_chest_yaw=16.0, d_head_yaw=-12.0, d_pelvis=(-0.03, -0.05, -0.03), d_tilt=6.0, d_foot_l=(0, -0.06, 0), d_toe_l=(-0.4, 0.2, 0.0)), (-0.55, -0.8, -0.15))
+    cut_load = with_aim(moved(U, d_hand_l=(0.05, -0.02, 0.48), d_yaw=-14.0, d_chest_yaw=-10.0, d_pelvis=(0.02, 0.02, -0.01), d_tilt=-4.0), (0.25, 0.55, 0.8))
+    cut_hit = with_aim(moved(U, d_hand_l=(-0.12, -0.24, 0.10), d_yaw=22.0, d_chest_yaw=16.0, d_head_yaw=-12.0, d_pelvis=(-0.03, -0.05, -0.03), d_tilt=6.0, d_foot_l=(0, -0.06, 0), d_toe_l=(-0.4, 0.2, 0.0)), (-0.55, -0.8, -0.15))
     cut_follow = with_aim(moved(cut_hit, d_hand_l=(-0.16, 0.06, -0.24), d_yaw=10.0, d_chest_yaw=8.0, d_tilt=4.0), (-0.6, -0.3, -0.75))
     strike(arm, "Fight_Swing", U, cut_load, cut_hit, cut_follow, 0.75, arc=(0.04, -0.10, 0.10))
     # The hanging guard: the hand up above the head, the umbrella slanting
     # down across the front of the body, the weight back.
-    hang = with_aim(moved(U, d_hand_l=(-0.04, 0.12, 0.62), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0), (-0.65, -0.35, -0.68))
+    hang = with_aim(moved(U, d_hand_l=(-0.04, 0.0, 0.62), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0), (-0.8, -0.12, -0.58))
     bake(arm, "Fight_Block_Armed", [(0, hang, lin), (1, hang, lin)], 0.3)
 
     # Broom, like a short bayonet: the thrust is the main blow, both hands
     # driving it; a chop from overhead; a shove with the shaft up close.
     L = broom
-    lthrust_load = moved(L, d_pelvis=(0, 0.06, -0.01), d_hand_l=(0.0, 0.14, 0.0), d_yaw=6.0)
-    lthrust_hit = with_aim(moved(L, d_pelvis=(-0.01, -0.13, -0.03), d_foot_l=(0, -0.16, 0), d_hand_l=(-0.02, -0.12, 0.04), d_yaw=-8.0, d_tilt=6.0), (0.12, -0.97, 0.26))
-    lthrust_follow = with_aim(moved(lthrust_hit, d_hand_l=(0.0, -0.03, -0.02), d_tilt=2.0), (0.12, -0.97, 0.2))
+    lthrust_load = with_aim(moved(L, d_pelvis=(0, 0.06, -0.01), d_hand_l=(-0.067, 0.158, -0.279), d_yaw=6.0), (0.25, -0.9, 0.35))
+    lthrust_hit = with_aim(moved(L, d_pelvis=(-0.01, -0.13, -0.03), d_foot_l=(0, -0.16, 0), d_hand_l=(-0.187, 0.118, -0.219), d_yaw=-8.0, d_tilt=6.0), (0.34, -0.92, 0.2))
+    lthrust_follow = with_aim(moved(lthrust_hit, d_hand_l=(0.0, -0.03, -0.02), d_tilt=2.0), (0.34, -0.92, 0.15))
     strike(arm, "Fight_Thrust_Long", L, lthrust_load, lthrust_hit, lthrust_follow, 0.7, lag=0.8)
     # Chop: the whole trunk behind it — lifted high, brought down over the
     # top on a curve, the head carrying on down towards the ground.
-    chop_load = with_aim(moved(L, d_hand_l=(0.08, 0.14, 0.55), d_pelvis=(0, 0.04, 0.0), d_tilt=-8.0, d_chest_lean=-6.0), (0.1, -0.35, 0.93))
-    chop_hit = with_aim(moved(L, d_hand_l=(0.02, -0.14, 0.10), d_pelvis=(0, -0.06, -0.04), d_tilt=12.0, d_chest_lean=10.0, d_foot_l=(0, -0.08, 0)), (0.12, -0.95, -0.28))
-    chop_follow = with_aim(moved(chop_hit, d_hand_l=(0.0, 0.02, -0.16), d_tilt=5.0, d_chest_lean=6.0, d_pelvis=(0, -0.02, -0.03)), (0.1, -0.7, -0.7))
+    # Lifted right over the head (the hand target is raised to allow for the
+    # rear-ended grip pulling it back down the upright shaft).
+    chop_load = with_aim(moved(L, d_hand_l=(0.013, 0.118, 0.601), d_pelvis=(0, 0.04, 0.0), d_tilt=-8.0, d_chest_lean=-6.0), (0.1, -0.35, 0.93))
+    chop_hit = with_aim(moved(L, d_hand_l=(-0.047, -0.122, -0.179), d_pelvis=(0, -0.06, -0.04), d_tilt=12.0, d_chest_lean=10.0, d_foot_l=(0, -0.08, 0)), (0.12, -0.95, -0.28))
+    # The butt end goes past the lead hip, not into the belly.
+    chop_follow = with_aim(moved(chop_hit, d_hand_l=(0.08, -0.06, -0.12), d_tilt=5.0, d_chest_lean=6.0, d_pelvis=(0, -0.02, -0.03)), (0.3, -0.82, -0.5))
     strike(arm, "Fight_Swing_Long", L, chop_load, chop_hit, chop_follow, 0.8, arc=(0.0, -0.12, 0.12))
     # Sweep (P-05's long sweep; a staff's sweeping blow at the legs, as Sifu's
     # broom and staff do): wound back to the lead side with the trunk turned
     # away, then swept low across in front with a full trunk turn, carried on
     # round past the target.
-    sweep_load = with_aim(moved(L, d_hand_l=(0.20, 0.10, -0.06), d_yaw=-26.0, d_chest_yaw=-14.0, d_pelvis=(0.03, 0.03, -0.05), d_tilt=6.0), (0.8, 0.45, -0.25))
-    sweep_hit = with_aim(moved(L, d_hand_l=(-0.10, -0.08, -0.16), d_yaw=20.0, d_chest_yaw=12.0, d_head_yaw=-10.0, d_pelvis=(-0.02, -0.06, -0.08), d_tilt=10.0, d_foot_l=(0, -0.06, 0)), (-0.25, -0.92, -0.38))
-    sweep_follow = with_aim(moved(sweep_hit, d_hand_l=(-0.16, 0.08, 0.0), d_yaw=14.0, d_chest_yaw=8.0), (-0.85, -0.35, -0.3))
-    strike(arm, "Fight_Sweep_Long", L, sweep_load, sweep_hit, sweep_follow, 0.8, arc=(0.0, -0.14, 0.0))
-    shove = with_aim(moved(L, d_hand_l=(0.10, -0.12, 0.30), d_pelvis=(0, -0.06, -0.01), d_foot_l=(0, -0.07, 0)), (0.97, -0.1, 0.2))
-    shove_load = with_aim(moved(L, d_hand_l=(0.12, 0.04, 0.28)), (0.97, -0.1, 0.2))
+    sweep_load = with_aim(moved(L, d_hand_l=(0.133, 0.118, -0.339), d_yaw=-26.0, d_chest_yaw=-14.0, d_pelvis=(0.03, 0.03, -0.05), d_tilt=6.0), (0.8, 0.45, -0.25))
+    sweep_hit = with_aim(moved(L, d_hand_l=(-0.167, -0.062, -0.439), d_yaw=20.0, d_chest_yaw=12.0, d_head_yaw=-10.0, d_pelvis=(-0.02, -0.06, -0.08), d_tilt=10.0, d_foot_l=(0, -0.06, 0)), (-0.25, -0.92, -0.38))
+    sweep_follow = with_aim(moved(sweep_hit, d_hand_l=(-0.12, -0.20, 0.0), d_yaw=14.0, d_chest_yaw=8.0), (-0.7, -0.62, -0.3))
+    # Coming back up to the high guard the hands rise first, so the handle's
+    # end clears the thigh.
+    strike(arm, "Fight_Sweep_Long", L, sweep_load, sweep_hit, sweep_follow, 0.8, arc=(0.0, -0.14, 0.0), back_out=(0.0, -0.16, 0.28))
+    shove = with_aim(moved(L, d_hand_l=(0.033, -0.102, 0.021), d_pelvis=(0, -0.06, -0.01), d_foot_l=(0, -0.07, 0)), (0.97, -0.1, 0.2))
+    shove_load = with_aim(moved(L, d_hand_l=(0.053, 0.058, 0.001)), (0.97, -0.1, 0.2))
     bake(arm, "Fight_Shove_Long", [(0, L, lin), (0.3, shove_load, smooth), (0.5, shove, snap), (0.62, shove, lin), (1, L, smooth)], 0.6)
     # Blocking with a staff: the shaft raised across in front of the face.
     # Elbows bent, the shaft across in front of the forehead.
-    staff_block = with_aim(moved(L, d_hand_l=(0.27, 0.02, 0.35), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0), (0.97, -0.05, 0.1))
+    staff_block = with_aim(moved(L, d_hand_l=(0.203, 0.038, 0.071), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0), (0.97, -0.05, 0.1))
     bake(arm, "Fight_Block_Long", [(0, staff_block, lin), (1, staff_block, lin)], 0.3)
 
 

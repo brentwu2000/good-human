@@ -84,6 +84,12 @@ const CRITICAL_AT: float = 0.3
 ## Critical: every so often they falter for a moment (hesitation).
 const HESITATE_EVERY: float = 2.2
 const HESITATE_SECONDS: float = 0.35
+## Turning a weapon away from the other body (`_keep_weapon_clear`):
+## at most this far (rad), tried in this many steps, eased back at this rate.
+const AVOID_MAX: float = 1.2
+const AVOID_STEPS: int = 8
+const AVOID_RATE: float = 4.0
+var _avoid_angle: float = 0.0
 const TRAIL_FROM: float = 0.38
 const TRAIL_UNTIL: float = 0.6
 ## A landed blow stops this far short of the body (m; the layers on top of
@@ -214,6 +220,7 @@ func hold(weapon: WeaponData, condition: WeaponCondition.State = WeaponCondition
 		grip.transform = WeaponProp3D.grip("l")
 		mount.add_child(grip)
 		grip.add_child(_prop)
+		_prop.position = Vector3(0, WeaponProp3D.shift(weapon.archetype), 0)
 		_add_trail(weapon)
 		return
 	var arm := _joint(_arms, 1)
@@ -392,16 +399,74 @@ func drive_combat_clip(fighter: CombatFighter) -> void:
 func stop_at_body() -> void:
 	var posed := _posed
 	var skeletal := _body as P04HumanVisual
-	if posed.is_empty() or skeletal == null or _down:
+	if skeletal == null or _down:
 		return
-	_stop_at_body(skeletal, posed[0], posed[1], posed[2])
+	if not posed.is_empty():
+		_stop_at_body(skeletal, posed[0], posed[1], posed[2])
+	_keep_weapon_clear(skeletal)
+
+
+## Owner, 2026-10-09 (「穿模了」): between blows — on guard, stepping,
+## blocking, being hit — a held weapon is turned away at the wrist, up and
+## back, when the other person comes inside it, instead of passing through
+## them (guards and footwork loop, so they cannot be held earlier the way a
+## blow is). After `_stop_at_body` on a blow too, for when they are so close
+## that even the wind-up would be in them. Eased back, so it moves rather
+## than pops.
+func _keep_weapon_clear(skeletal: P04HumanVisual) -> void:
+	var grip := _prop.get_parent() as Node3D if _prop != null else null
+	if grip == null or opponent == null or not (opponent._body is P04HumanVisual):
+		return
+	var theirs := BodyContact.capsules((opponent._body as P04HumanVisual).skeleton)
+	var base := WeaponProp3D.grip("l")
+	var target := 0.0
+	if _clear_depth(skeletal, base, 0.0, theirs) > 0.0:
+		# The smallest turn either way that clears them; failing that,
+		# whichever leaves the least of it in them.
+		target = _avoid_angle
+		var least := _clear_depth(skeletal, base, _avoid_angle, theirs)
+		for step in range(1, AVOID_STEPS + 1):
+			var found := false
+			for sign: float in [1.0, -1.0]:
+				var angle := sign * AVOID_MAX * step / AVOID_STEPS
+				var depth := _clear_depth(skeletal, base, angle, theirs)
+				if depth <= 0.0:
+					target = angle
+					found = true
+					break
+				if depth < least:
+					least = depth
+					target = angle
+			if found:
+				break
+	# Out at once, back gently.
+	var rate := AVOID_RATE * get_process_delta_time()
+	_avoid_angle = target if absf(target) > absf(_avoid_angle) else move_toward(_avoid_angle, target, rate)
+	grip.transform = _turned_grip(base, _avoid_angle)
+
+
+## How deep the weapon would be in `theirs` with the grip turned by `angle`.
+func _clear_depth(skeletal: P04HumanVisual, base: Transform3D, angle: float, theirs: Array) -> float:
+	var skeleton := skeletal.skeleton
+	var hand := skeleton.find_bone(WEAPON_HAND)
+	var at := skeleton.global_transform * skeleton.get_bone_global_pose(hand) * _turned_grip(base, angle) * _prop.transform
+	return BodyContact.deepest(BodyContact.prop_capsules(_prop, at), theirs, TOUCH_GAP)[0]
+
+
+## The grip turned `angle` about the hand's across-the-palm axis, tipping
+## the weapon's point back over the hand (towards the holder).
+func _turned_grip(base: Transform3D, angle: float) -> Transform3D:
+	if absf(angle) < 0.0001:
+		return base
+	var across := base.basis.x.normalized()
+	return Transform3D(Basis(across, angle) * base.basis, base.origin)
 
 
 func _stop_at_body(skeletal: P04HumanVisual, clip: String, t: float, held_until: float) -> void:
 	var other := opponent._body as P04HumanVisual if opponent != null else null
 	if other == null or other.skeleton == null:
 		return
-	var theirs := BodyContact.capsules(other.skeleton)
+	var theirs := BodyContact.capsules(other.skeleton) + opponent.weapon_capsules()
 	# Measured as it will be seen: with the layers on top of the clip.
 	skeletal.apply_layers()
 	if _inside(skeletal, theirs) <= 0.0:
@@ -423,7 +488,24 @@ func _stop_at_body(skeletal: P04HumanVisual, clip: String, t: float, held_until:
 
 
 func _inside(skeletal: P04HumanVisual, theirs: Array) -> float:
-	return BodyContact.deepest(BodyContact.capsules(skeletal.skeleton), theirs, TOUCH_GAP)[0]
+	# Owner, 2026-10-09 (「穿模了」): what they hold counts too — a weapon
+	# stops where it meets the other person like a fist does.
+	return BodyContact.deepest(BodyContact.capsules(skeletal.skeleton) + weapon_capsules(), theirs, TOUCH_GAP)[0]
+
+
+## The held weapon as capsules where the hand holds it right now, worked out
+## from the hand bone (an attachment can lag a re-posed skeleton).
+func weapon_capsules() -> Array:
+	var skeletal := _body as P04HumanVisual
+	if _prop == null or skeletal == null or skeletal.skeleton == null:
+		return []
+	var skeleton := skeletal.skeleton
+	var hand := skeleton.find_bone(WEAPON_HAND)
+	if hand < 0:
+		return []
+	var grip := _prop.get_parent() as Node3D
+	var at := skeleton.global_transform * skeleton.get_bone_global_pose(hand) * (grip.transform if grip != null else WeaponProp3D.grip("l")) * _prop.transform
+	return BodyContact.prop_capsules(_prop, at)
 
 
 ## The clip to play for P-04 clip `clip`: its fight version (the other side's

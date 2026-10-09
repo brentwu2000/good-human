@@ -34,6 +34,12 @@ Owner, 2026-10-09: 「把開發遇到的問題要寫回，讓下次開發不會�
 
 **2.8 Compare with how other games animate it, not only with real life.** Real grips fixed the hands; arcs, wrist lag, follow-through and trails (the craft of game melee animation) are what made the blows read. See `WEAPON_GRIP_REFERENCE.md` "Compared with other games".
 
+**2.9 A held weapon is part of the body for collisions.** *Symptom (owner: 「穿模了」):* the umbrella and broom went through the other person, and the broom's handle through its own holder's belly, hips and head. *Cause:* contact and "stop at the body" counted bodies only; no test looked at the weapon. *Rule:* measure weapons from their model (`BodyContact.prop_capsules`); a blow stops when its weapon meets the other body; between blows the weapon turns away at the wrist (`_keep_weapon_clear`). *Check:* `weapon_clip_test` (against its own body, every clip), `weapon_fight_contact_test` (against the other person, real fights).
+
+**2.10 A guard must fit the fighting distance.** A guard that points the weapon level at the other person reaches past their body at the move set's `ideal_min` — and an empty-handed opponent closes in further still. Hold long things up at an angle in guard (umbrella ~70°, broom ~66°) and bring them level only to strike. Measure guard reach against `ideal_min` − 0.17 m (their body front).
+
+**2.11 Where a two-handed thing is held decides what sticks out.** Held in the middle, 0.7 m of broom handle stuck back past the hands into the hip and belly whatever the pose; held near the end of the handle (the reference's "rear-ended grip", `LONG_GRIP_SHIFT`), nothing does. Moving the off hand does not move the weapon — it hangs from the lead hand — so fix the grip, not the off hand. When a fix "changes nothing", check both sides compute the same geometry before tuning further.
+
 **2.5 Reactions must not move the head into the attacker.** HitHeavy folding forward and Block leaning in caused overlaps a clamp cannot fix (a constant pose cannot be "held earlier"). Author reactions that move away from the blow.
 
 ## 3. Tests that lie
