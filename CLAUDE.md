@@ -21,6 +21,7 @@ Before coding:
 4. `docs/03_sprints/SPRINT_STATUS.md`
 5. Current sprint document
 6. Relevant system spec, if present
+7. `docs/99_notes/LESSONS_LEARNED.md` — problems already hit and the rules that came out of them
 
 ## Engineering Rules
 - Use typed GDScript where practical.
@@ -42,7 +43,7 @@ Before coding:
 3. Mark task IN_PROGRESS in `SPRINT_STATUS.md`.
 4. Implement only that task and required dependencies.
 5. Validate it.
-6. Report changed files and validation.
+6. Report changed files and validation. If the work hit a problem that was not obvious (cost real time, or a test passed while the game was wrong), add it to `docs/99_notes/LESSONS_LEARNED.md` as symptom → cause → rule → check.
 7. Mark REVIEW when implementation is ready.
 8. Within the current sprint, continue to the next task without waiting (mark status, commit and push each). Stop at sprint boundaries, design conflicts or real blockers.
 
