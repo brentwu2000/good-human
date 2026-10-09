@@ -38,6 +38,8 @@ Owner, 2026-10-09: 「把開發遇到的問題要寫回，讓下次開發不會�
 
 **3.3 Headless numbers can be wrong about the screen.** The headless viewport ignores `root.size`; framing judged from headless numbers was misleading. Judge framing from Movie Maker captures (`tests/capture/record.sh`, portrait 405×720), side views from the `inspect` case.
 
+**3.4 Movie Maker ignores `--resolution` here.** The project's window override (405×720) wins, so captures are always portrait 405×720 — and 405 is odd, which libx264 refuses: scale to an even size (e.g. 540×960) when encoding MP4. Show a set of moves with `tests/capture/weapon_showcase.tscn -- <umbrella|broom>`.
+
 ## 4. Camera and what is drawn over the game
 
 **4.1 A fade rule can hide what the player should see.** The walking camera faded the owner whenever they were nearer than the dog — i.e. always. Fade only at the lens or when actually covering the subject on screen (`_owner_covers_dog`). *Check:* `walk_framing_test`.
