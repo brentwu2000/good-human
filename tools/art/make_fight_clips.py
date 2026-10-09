@@ -193,13 +193,15 @@ def armed_guards():
     person's face; the rear fist up by the chin.
     Broom (two hands): held like a short bayonet — lead hand on the handle at
     the waist, rear hand further back on it, the head forward and a little up."""
-    umbrella = moved(STANCE, d_hand_l=(0.05, -0.12, -0.30))
-    umbrella["aim_l"] = (-0.12, -1.0, 0.62)
+    # Hand at chest height a little in front, standing taller than the
+    # empty-handed crouch (a stick-fighter's guard), the point at the face.
+    umbrella = moved(STANCE, d_hand_l=(0.03, 0.0, -0.16), d_tilt=-3.0, d_pelvis=(0, 0, 0.03))
+    umbrella["aim_l"] = (-0.1, -1.0, 0.42)
     umbrella["grip_l"] = 1.0
     # The shaft runs from the rear hand at the right hip, across the body, out
     # past the lead hand in front of the belly.
-    broom = moved(STANCE, d_hand_l=(-0.07, -0.06, -0.24))
-    broom["aim_l"] = (0.17, -0.96, 0.32)
+    broom = moved(STANCE, d_hand_l=(-0.07, 0.04, -0.20))
+    broom["aim_l"] = (0.17, -0.95, 0.42)
     broom["grip_l"] = 1.0
     broom["grip_r"] = 1.0
     broom["two_hand"] = 1.0
@@ -422,8 +424,9 @@ def armed_sets(arm):
     # Umbrella, after the walking stick (Barton-Wright): thrusts at the face
     # off a straight arm, and cuts that come from the hips, not the elbow.
     U = umbrella
-    thrust_load = with_aim(moved(U, d_pelvis=(0, 0.04, -0.01), d_hand_l=(0.0, 0.07, 0.02), d_yaw=4.0), (-0.1, -1.0, 0.5))
-    thrust_hit = with_aim(moved(U, d_pelvis=(-0.01, -0.06, -0.02), d_foot_l=(0, -0.08, 0), d_hand_l=(-0.04, 0.05, 0.14), d_yaw=-10.0, d_chest_yaw=-6.0, d_tilt=3.0), (-0.06, -1.0, 0.22))
+    # Chambered back clearly, then driven out off a long lunge.
+    thrust_load = with_aim(moved(U, d_pelvis=(0, 0.06, -0.01), d_hand_l=(0.0, 0.14, 0.02), d_yaw=6.0, d_chest_yaw=4.0), (-0.1, -1.0, 0.45))
+    thrust_hit = with_aim(moved(U, d_pelvis=(-0.01, -0.12, -0.03), d_foot_l=(0, -0.15, 0), d_hand_l=(-0.02, -0.07, 0.0), d_yaw=-12.0, d_chest_yaw=-8.0, d_tilt=5.0), (-0.06, -1.0, 0.22))
     bake(arm, "Fight_Thrust", [(0, U, lin), (0.3, thrust_load, smooth), (0.5, thrust_hit, snap), (0.64, thrust_hit, lin), (1, U, smooth)], 0.65)
     cut_load = with_aim(moved(U, d_hand_l=(0.05, 0.10, 0.48), d_yaw=-14.0, d_chest_yaw=-10.0, d_pelvis=(0.02, 0.02, -0.01), d_tilt=-4.0), (0.25, 0.55, 0.8))
     cut_hit = with_aim(moved(U, d_hand_l=(-0.12, -0.12, 0.10), d_yaw=22.0, d_chest_yaw=16.0, d_head_yaw=-12.0, d_pelvis=(-0.03, -0.05, -0.03), d_tilt=6.0, d_foot_l=(0, -0.06, 0), d_toe_l=(-0.4, 0.2, 0.0)), (-0.55, -0.8, -0.15))
@@ -436,8 +439,8 @@ def armed_sets(arm):
     # Broom, like a short bayonet: the thrust is the main blow, both hands
     # driving it; a chop from overhead; a shove with the shaft up close.
     L = broom
-    lthrust_load = moved(L, d_pelvis=(0, 0.04, -0.01), d_hand_l=(0.0, 0.08, 0.0), d_yaw=4.0)
-    lthrust_hit = with_aim(moved(L, d_pelvis=(-0.01, -0.08, -0.02), d_foot_l=(0, -0.1, 0), d_hand_l=(-0.02, -0.02, 0.08), d_yaw=-8.0, d_tilt=4.0), (0.12, -0.97, 0.26))
+    lthrust_load = moved(L, d_pelvis=(0, 0.06, -0.01), d_hand_l=(0.0, 0.14, 0.0), d_yaw=6.0)
+    lthrust_hit = with_aim(moved(L, d_pelvis=(-0.01, -0.13, -0.03), d_foot_l=(0, -0.16, 0), d_hand_l=(-0.02, -0.12, 0.04), d_yaw=-8.0, d_tilt=6.0), (0.12, -0.97, 0.26))
     bake(arm, "Fight_Thrust_Long", [(0, L, lin), (0.3, lthrust_load, smooth), (0.5, lthrust_hit, snap), (0.64, lthrust_hit, lin), (1, L, smooth)], 0.7)
     chop_load = with_aim(moved(L, d_hand_l=(0.08, 0.14, 0.55), d_pelvis=(0, 0.04, 0.0), d_tilt=-8.0, d_chest_lean=-6.0), (0.1, -0.35, 0.93))
     chop_hit = with_aim(moved(L, d_hand_l=(0.02, -0.14, 0.10), d_pelvis=(0, -0.06, -0.04), d_tilt=12.0, d_chest_lean=10.0, d_foot_l=(0, -0.08, 0)), (0.12, -0.95, -0.28))
@@ -446,7 +449,8 @@ def armed_sets(arm):
     shove_load = with_aim(moved(L, d_hand_l=(0.12, 0.04, 0.28)), (0.97, -0.1, 0.2))
     bake(arm, "Fight_Shove_Long", [(0, L, lin), (0.3, shove_load, smooth), (0.5, shove, snap), (0.62, shove, lin), (1, L, smooth)], 0.6)
     # Blocking with a staff: the shaft raised across in front of the face.
-    staff_block = with_aim(moved(L, d_hand_l=(0.22, -0.20, 0.42), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0), (0.95, -0.12, 0.2))
+    # Elbows bent, the shaft across in front of the forehead.
+    staff_block = with_aim(moved(L, d_hand_l=(0.27, 0.02, 0.35), d_pelvis=(0, 0.06, -0.03), d_head_pitch=10.0, d_chest_lean=-4.0, d_tilt=-4.0), (0.97, -0.05, 0.1))
     bake(arm, "Fight_Block_Long", [(0, staff_block, lin), (1, staff_block, lin)], 0.3)
 
 

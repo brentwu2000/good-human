@@ -28,6 +28,8 @@ Owner, 2026-10-09: 「把開發遇到的問題要寫回，讓下次開發不會�
 
 **2.4 Reach is a contract.** Changing a grip, prop length or clip extension changes where a weapon's tip lands. `weapon_test` measures the drawn tip of every thrust against its reach — re-run it after any pose or prop change, and recalibrate the clip, not the rule.
 
+**2.6 Fit reach with the lunge, not by shrinking the move.** *Symptom:* after the grip moved the prop forward, thrusts were pulled in to keep the reach, and then barely moved — guard and strike were a few centimetres apart (owner: 「有進步，但需要再優化」). *Rule:* an attack reads by contrast: guard a little chambered, a clear pull-back on the wind-up, then a long drive with a step and the hips. Keep the strike's hand where the reach needs it and get the travel from the guard and the lunge. *Check:* the showcase capture (`weapon_showcase.tscn`), not only `weapon_test`.
+
 **2.5 Reactions must not move the head into the attacker.** HitHeavy folding forward and Block leaning in caused overlaps a clamp cannot fix (a constant pose cannot be "held earlier"). Author reactions that move away from the blow.
 
 ## 3. Tests that lie
