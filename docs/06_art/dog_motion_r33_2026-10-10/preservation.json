@@ -1,0 +1,168 @@
+{
+  "models": {
+    "chihuahua": {
+      "before_sha256": "711afcd31f868de3f593bd6e30af8b541e8f47a5146ea28ae4601f35940bfdeb",
+      "after_sha256": "c3a8094c6db93092c486fb4850cc4106a8c928de8f5becf0e8da894da531c734",
+      "rest_geometry_uvs_textures_rig_original_clips_preserved": true,
+      "influences_per_vertex": 8
+    },
+    "corgi": {
+      "before_sha256": "6b14a2658677873a7f31d80e3123bd8eac36cdaf81dc61983a7145ea73ab6a43",
+      "after_sha256": "c87e5af2da0a1335d28511d7f17354a5efec13a2d65df5491165ee2fad913721",
+      "rest_geometry_uvs_textures_rig_original_clips_preserved": true,
+      "influences_per_vertex": 8
+    },
+    "frenchie": {
+      "before_sha256": "68ed47878aa6f348dcbb46c225ad64e3d1608443ed52991029dcb1ffdd6b65d0",
+      "after_sha256": "08141d86444278ccddce937b88b1de74251b800b985be16ce9810d39b288df49",
+      "rest_geometry_uvs_textures_rig_original_clips_preserved": true,
+      "influences_per_vertex": 8
+    },
+    "golden": {
+      "before_sha256": "39b9ab8e59fe5e6d5d32f62f2a44965956b6d2dc41a7aabb8bd87766e9b713e1",
+      "after_sha256": "f51358d0a4061ffb662176314bdf35caf24521c33508740954dfc450ab607965",
+      "rest_geometry_uvs_textures_rig_original_clips_preserved": true,
+      "influences_per_vertex": 8
+    },
+    "pomeranian": {
+      "before_sha256": "f3380b10d780b8d31c6d87fad7576f408f88fb4b15fd14942ba29f75ded2db5d",
+      "after_sha256": "55048c8b4314ab2b26a1fdcaa20a1defbf6f01906ce143ef68563d930b728caa",
+      "rest_geometry_uvs_textures_rig_original_clips_preserved": true,
+      "influences_per_vertex": 8
+    },
+    "poodle": {
+      "before_sha256": "5f2acb9bdfad2f8998dbdc3bbec8835bd2dbd51e243957ebe10487426192e560",
+      "after_sha256": "dde998aa796f129a1f3616a52e2bccbb20b1431a39e2ddc6b3589a65486ec12d",
+      "rest_geometry_uvs_textures_rig_original_clips_preserved": true,
+      "influences_per_vertex": 8
+    },
+    "shiba": {
+      "before_sha256": "6700eebcd23e38ac91cfca177e5575cb68f03e056be422444233d7a6db1b30d7",
+      "after_sha256": "ab90cbb3ddb790049aebd6704437583009900098dd43146f015a18c0e1b05817",
+      "rest_geometry_uvs_textures_rig_original_clips_preserved": true,
+      "influences_per_vertex": 8
+    }
+  },
+  "animations": {
+    "shiba_01": {
+      "before_sha256": "98e65bd2a01fb0a2dc750023ca22262d8fceb436c7d2b18ee5cb39aeedb6a4f4",
+      "after_sha256": "e3a05e7bf3b20c95f3d868dab2d305d4edcaaac90939cf0ec025847e55e6105c",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    },
+    "chihuahua": {
+      "before_sha256": "6e884505fa253fb4dc61b46519e96501ab3b98da4d7c0254307d852b85313a94",
+      "after_sha256": "ab0880101446f6e29903b0488d0bd490a07160fc8d6db366cea72301e1f7df1f",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    },
+    "corgi": {
+      "before_sha256": "dd2115b5bfe087533734aa2a1de80b32dc394bb0273bb952935e0674943933a8",
+      "after_sha256": "b62e07834531d19a3689f650fd51fe780f899081816bca736ac24f1bac8267f0",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    },
+    "frenchie": {
+      "before_sha256": "09a99e3e9041f91c9da2058a7376df0acee2c9677e6b9f5e1c839bfa35f45ee0",
+      "after_sha256": "b2eefae008432c7185f05ab582e0419f8452c2d83883609f190b9a3bf270d91e",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    },
+    "golden": {
+      "before_sha256": "8acc2c32c51d2d78ead758c8dc681b145d24583df05f10ef9d401962e480e537",
+      "after_sha256": "9625dc515e7cb910db104e6b69305a6c5b4b15c4146e40712b9f5d7607d03280",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    },
+    "pomeranian": {
+      "before_sha256": "52c6c4a2dc4c6f2f417d5ccac6addbdb820a045b9dbfd0e40ee32a27a5bb4abb",
+      "after_sha256": "340e6e98794d840812b6419c16fe3f606f14d7da64487827e666e48ded327b9b",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    },
+    "poodle": {
+      "before_sha256": "a7aa3b311bfe15099656dfe1448642235268b67c83fc8e7693bce043a611428f",
+      "after_sha256": "d5e171f6ab31096e4602146fe11ebdc74f5d644ad3ec29377c57ea329a3fac57",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    },
+    "shiba": {
+      "before_sha256": "6bc0f9981de1d74158af3776561473280d3f4f332a7e50d7711ea0b9015fa203",
+      "after_sha256": "dc02e92397aff1c3be23995012d6eba2d30cc0a3b84180bfd12b22025be95300",
+      "clips": [
+        "M2M_Alert",
+        "M2M_Bark",
+        "M2M_Fetch",
+        "M2M_Howl",
+        "M2M_Idle",
+        "M2M_Jump",
+        "M2M_Run",
+        "M2M_Sit",
+        "M2M_Sneak"
+      ]
+    }
+  }
+}

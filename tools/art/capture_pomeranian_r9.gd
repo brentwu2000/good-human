@@ -25,6 +25,8 @@ func _run() -> void:
 		await process_frame
 	for dog in room.dogs:
 		dog.visible = false
+	for sign in room.find_children("*", "Label3D", true, false):
+		sign.visible = false
 	for p in room.players:
 		p.stop()
 	var folder: String = options.get("--output", "res://build/dogs_face_r9/godot")
@@ -59,8 +61,8 @@ func _run() -> void:
 	original.visible = false
 	dog.visible = true
 	SoftToon.set_enabled(self, false)
-	room.camera.size = 0.58
-	target = dog.position + Vector3(0, 0.20, 0)
+	room.camera.size = height * 1.65
+	target = dog.position + Vector3(0, height * 0.60, 0)
 	room.camera.position = target + Vector3(1.5, 0.25, 1.5)
 	room.camera.look_at(target)
 	for clip in ["Idle", "Walk", "Sit"]:

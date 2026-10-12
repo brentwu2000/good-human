@@ -2,6 +2,24 @@
 
 Allowed states: `TODO`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`
 
+## ART runtime publication — 2026-10-12 (CX-01 umbrella)
+
+Published higher-contrast ochre umbrella and compact J-hook. Same grip origin,
++Y and 0.60 m tip; rear end now -0.08 m instead of -0.10 m. No grip, animation,
+reach or gameplay code change required; seven suites pass (346 assertions).
+405×720 showcase and actual umbrella-fight capture reviewed. REVIEW / B.
+[Record](../06_art/UMBRELLA_CX01_2026-10-12.md).
+
+## ART runtime publication — 2026-10-12 (r34)
+
+Codex completed the unfinished dog contact-polish pass: eight M2M libraries
+published at 120 Hz plus Chihuahua r30 cheek texture on the preserved r33 skin.
+Keep dog library `animation/fps=120`, all bone translation tracks and both
+skin influence sets when rebuilding. Seven required suites pass (346 assertions);
+published Chihuahua captures match candidate pixels at all five sampled phases.
+Grade B / REVIEW; jaw rigs and other handoff requests remain separate.
+Details: [r34 record](../06_art/DOG_MOTION_R34_2026-10-12.md).
+
 ## Sprint 01 — WALK
 
 | ID | Task | Status |
@@ -640,3 +658,11 @@ Installed 2026-09-29. Spec: `docs/03_sprints/SPRINT_06_IDENTITY_BOND.md`; system
 - **Owner direction (2026-10-06): 「開場選狗的部分，我不喜歡這種很像賣寵物的場景，應該是像選主人畫面一樣，只是從外面往內看」, 「狗狗一樣會在場景中移動，左右切換也可以」.** The cages and cage cards are gone. Choosing the dog now happens on the pavement outside the clinic, looking in through the same front window at the same pen the pup later looks out from (new `ClinicWindow` builds the clinic inside, the shop front, the street and the light for both scenes). The five pups run about the pen, sniff and rest; resting near the glass, they look out at you. ◀ ▶ go from pup to pup left to right as seen from the street (`select_step`), or tap a pup; the watched one has a soft ring and meets your look by what can be seen of it only (`forwardness` of its visible traits: comes to the glass / keeps back and peeks / sniffs and glances up), and the view drifts along the pavement to keep it in sight. The card is the see-through panel used inside: breed, sex, age, the visible traits and 「還有一點看不出來……」; 「🐾 就是牠了」. The glass now has a low sill (pups at it are seen from outside and see out), a hand-written paper 「等一個家／歡迎進來看看」 and nose prints. The adoption opens with 「（現在，你就是圍欄裡的那隻小狗。外面的人來來去去。）」. Rules unchanged. Test: `identity_world_test` (+7).
 - Overlap to reconcile when engineering starts: owner habits already exist in part. Sprint 03 TRAIN's OwnerBehavior and GrowthResolver turn repeated dog behaviour into visible owner reactions (leash stumbles, recovery pauses, hesitation, social readiness); S06-09 Habit should build on them rather than add a parallel system. Likewise S06-12 extends the existing Collection progress, and the current walk always uses one fixed owner (`player_human.tres`), which S06-04..07 replace with a generated, persistent one.
 
+
+
+- **ART / CX-04, 2026-10-10:** r33 dog deformation repair published: seven breed
+  GLBs now carry smoothed eight-influence weights; all eight Mesh2Motion dog
+  libraries rebuilt by `retarget_mesh2motion.py`. Corrective bone translations
+  must be retained (front-pivot fitting); names and runtime API unchanged.
+  Required seven regression suites PASS, 346 checks. Grade B, contact/mesh/
+  material polish remains. Details: `docs/06_art/DOG_MOTION_R33_2026-10-10.md`.

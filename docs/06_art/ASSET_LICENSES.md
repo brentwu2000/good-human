@@ -1,5 +1,129 @@
 # Third-Party Asset License Register
 
+## CX-01 umbrella — 2026-10-12
+
+Original procedural geometry: Claude-directed GOOD HUMAN! authoring (2026-10-06).
+Warm-ochre/honey PBR materials and compact J-hook: Codex-directed project authoring.
+Source: `tools/art/build_p05_weapons.py`; published `assets/props/weapons/umbrella.glb`.
+No third-party download, bitmap texture or new add-on. Project-authored / commercial
+use and modification permitted; REVIEW / grade B. Baseline and editable source
+preserved. [Record](UMBRELLA_CX01_2026-10-12.md).
+
+## Dog contact polish r34 — 2026-10-12
+
+Project-authored contact correction and retarget refinements over the existing
+Mesh2Motion CC0 source; no new third-party asset. Eight dog motion libraries
+published. Chihuahua uses the existing r30 Ucupaint cheek texture with r33 skin;
+original model and reference restrictions remain unchanged. Grade B / REVIEW.
+See [r34 record](DOG_MOTION_R34_2026-10-12.md).
+
+2026-10-10 (CX-06): Mesh2Motion by Scott Petrovic — source
+https://github.com/scottpetrovic/mesh2motion-app (`static/animations/`), pinned
+commit 653a969; retrieved 2026-10-09. Models/rigs/animations CC0 1.0, code MIT;
+commercial use and modification permitted. Untouched sources, hashes and exact
+licence texts: `assets/_source/mesh2motion/PROVENANCE.md`. Used for the owner's
+21-clip library and eight nine-clip dog libraries. r33 adds project-authored dog
+weight/pivot/rotation/ground adaptations; no new third-party input and no plugin
+code distributed. Underlying dog-model restrictions remain. Grade B repair.
+[Record](DOG_MOTION_R33_2026-10-10.md).
+
+2026-10-09: Chihuahua r31 adds project-authored HeadLook and Sniff gesture
+curves via the installed Rigify authoring tool. No downloaded motion assets;
+no plugin code included in GLB. Existing model/source restrictions unchanged.
+Author: GOOD HUMAN! ART via Codex. REVIEW / B, candidate only.
+[Record](CHIHUAHUA_RIGIFY_R31_2026-10-09.md).
+
+2026-10-09: Chihuahua r30 uses the owner's existing Chihuahua side reference
+and r29 baseline in a project-authored Ucupaint layer/mask repair. No new
+third-party asset. Ucupaint is an authoring tool, not code distributed in GLB.
+Inherited factory/rig restrictions remain. REVIEW / B, candidate only.
+[Record](CHIHUAHUA_UCUPAINT_R30_2026-10-09.md).
+
+2026-10-08: Chihuahua r29 reuses the original r6 model and owner's existing
+Chihuahua front reference for local nose/bridge projection. No new third-party
+source; inherited factory/Hunyuan/rig restrictions remain. REVIEW / B, preview
+only. [Record](CHIHUAHUA_NOSE_R29_2026-10-08.md).
+
+2026-10-08: Poodle r28 reuses the owner's existing Poodle front reference for a
+shared ear material projection over r27. No new third-party source; inherited
+factory/Hunyuan/rig restrictions remain. REVIEW / B, preview only.
+[Record](POODLE_EAR_MATERIAL_R28_2026-10-08.md).
+
+2026-10-08: Poodle r27 adds project-authored skinned ear infills over r26 using
+the owner's existing factory Poodle front reference for fur. No new third-party
+source; inherited factory/Hunyuan/rig restrictions unchanged. REVIEW / B, preview
+only. [Record](POODLE_EARS_R27_2026-10-08.md).
+
+2026-10-07: Poodle r26 reuses original r6 model and owner's existing Poodle
+front reference. No new third-party input; inherited factory/rig restrictions
+unchanged. REVIEW / B. [Record](POODLE_NOSE_R26_2026-10-07.md).
+
+2026-10-07: Golden r25 reuses original geometry and the owner's existing Golden
+front image for local nasal-bridge projection. No new third-party input;
+inherited restrictions unchanged. REVIEW / B.
+[Record](GOLDEN_BRIDGE_R25_2026-10-07.md).
+
+2026-10-06: Golden r24 uses original r6 geometry and the owner's existing Golden
+front reference for localized chin material projection. No new third-party
+source; inherited breed-factory/rig restrictions retained. REVIEW / B.
+[Record](GOLDEN_CHIN_R24_2026-10-06.md).
+
+2026-10-06: Shiba r23 uses the existing r6 breed model and owner's factory Shiba
+front reference for local chin material projection. No new third-party source;
+inherited breed-factory/rig restrictions remain. REVIEW / B, preview only.
+[Record](SHIBA_CHIN_R23_2026-10-06.md).
+
+2026-10-06: Corgi r22 is project-authored localized tongue-root geometry repair
+over r21, with existing textures retained. No new third-party material;
+inherited source/rig restrictions unchanged. REJECTED experiment.
+[Record](CORGI_WEB_R22_2026-10-06.md).
+
+2026-10-06: Corgi r21 adds project-authored Blender inner-mouth color to the
+existing r20 material recipe. No new external source; original geometry and
+inherited rig licence unchanged. REVIEW / B.
+[Record](CORGI_MOUTH_R21_2026-10-06.md).
+
+2026-10-06: Corgi r20 uses immutable r6 geometry plus local nasal/chin material
+projection from the owner's existing Corgi front reference. No new third-party
+source; inherited breed-factory/rig restrictions retained. REVIEW / B.
+[Record](CORGI_LOCAL_R20_2026-10-06.md).
+
+2026-10-06: Corgi r19 reconstructs the front face over the existing r6 model
+using the owner's existing factory Corgi front reference. No new third-party
+source. Original breed-factory and inherited rig restrictions remain.
+IN_PROGRESS / B, not runtime-approved. [Record](CORGI_FACE_R19_2026-10-06.md).
+
+2026-10-06: Frenchie r18 is project-authored local ear-root depth smoothing
+over r17, with existing texture bytes retained. No new third-party input;
+original breed-factory restrictions remain. REVIEW / B candidate.
+[Record](FRENCHIE_EAR_ROOT_R18_2026-10-06.md).
+
+2026-10-06: Frenchie r17 uses r15 geometry/materials and the existing factory
+Frenchie side reference for a continuous temple projection. No new third-party
+input; original breed-factory restrictions remain. REVIEW / B candidate.
+[Record](FRENCHIE_TEMPLE_R17_2026-10-06.md).
+
+2026-10-05: Frenchie r16 reuses existing r15 geometry and the same factory side
+reference. No new third-party input or licensing change. REJECTED material
+experiment; retained for comparison only, not production use.
+[Record](FRENCHIE_MATERIAL_R16_2026-10-05.md).
+
+2026-10-05: Frenchie r15 is project-authored seam/brow geometry relaxation and
+rebaking of existing r13/front and r14/side sources. No new third-party input;
+existing breed-factory restrictions and REVIEW / B grade remain.
+[Record](FRENCHIE_SEAM_R15_2026-10-05.md).
+
+2026-10-05: Frenchie r14 uses the existing owner/factory reference
+`../good_human_stylized_factory/references/dogs/frenchie_side.png` for side-fur
+projection and Blender-authored UV/material baking. No new third-party source;
+same breed-factory restrictions. REVIEW / B, not runtime-approved.
+[Record](FRENCHIE_SIDE_MATERIAL_R14_2026-10-05.md).
+
+2026-10-05: Frenchie r12 extends the project-authored face/chin reconstruction
+over the unchanged r6 source and owner's existing Frenchie front reference.
+No new third-party asset; existing breed-factory/rig restrictions remain.
+REVIEW / B candidate only; see [repair record](FRENCHIE_FACE_R12_2026-10-05.md).
+
 Every third-party asset considered for GOOD HUMAN! must be recorded here before production use.
 
 | Asset | Author | Source | License | Free | Commercial | Modification | Grade | Retrieved | Notes |

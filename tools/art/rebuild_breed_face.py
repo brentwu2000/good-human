@@ -36,6 +36,19 @@ def main(config):
     ids=np.flatnonzero(cut);roots=np.array([find(t[0]) for t in logical[cut]])
     values,counts=np.unique(roots,return_counts=True)
     cut[ids[roots!=values[np.argmax(counts)]]]=False
+    # Optional: remove small retained islands inside the facial cut. They are
+    # residual mouth folds, not additional boundary loops to bridge blindly.
+    if config.get('absorb_cut_islands', False):
+        parent=np.arange(len(first))
+        for a,b,c in logical[~cut]:
+            ra=find(a);parent[find(b)]=ra;parent[find(c)]=ra
+        kept_ids=np.flatnonzero(~cut)
+        kept_roots=np.array([find(t[0]) for t in logical[~cut]])
+        cut_vertices=np.unique(logical[cut])
+        for root,count in zip(*np.unique(kept_roots,return_counts=True)):
+            component=kept_ids[kept_roots==root]
+            if count<300 and np.isin(logical[component],cut_vertices).any():
+                cut[component]=True
     for iteration in range(12):
         et=logical[cut]
         edges=np.sort(np.concatenate([et[:,[0,1]],et[:,[1,2]],et[:,[2,0]]]),axis=1)
@@ -182,6 +195,8 @@ def main(config):
     edge=np.stack([np.interp(angle,np.r_[theta,theta[0]+2*np.pi],np.r_[rim_color[:,i],rim_color[0,i]]) for i in range(3)],-1)
     radius=np.sqrt(((x-CX)/RX)**2+((z-CZ)/RZ)**2)
     blend=smooth(config.get('blend_start',.72),.945,radius)
+    if 'texture_blend' in config:
+        blend=config['texture_blend'](x,z,blend)
     col=col*(1-blend[...,None])+edge*blend[...,None]
     face_image=Image.fromarray(np.uint8(np.clip(col,0,1)*255));face_image.save(OUT/'face_atlas.png')
     buf=io.BytesIO();face_image.save(buf,format='JPEG',quality=95)

@@ -1,0 +1,44 @@
+﻿[
+    {
+        "suite":  "breed_models",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\nPASS breed_models_test.gd: 81 checks\r\n"
+    },
+    {
+        "suite":  "dog_motion",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\nPASS dog_motion_test.gd: 80 checks\r\n"
+    },
+    {
+        "suite":  "owner_gesture",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\nPASS owner_gesture_test.gd: 14 checks\r\n"
+    },
+    {
+        "suite":  "weapon",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\nPASS weapon_test.gd: 103 checks\r\nERROR: 7 RID allocations of type \u0027PN13RendererDummy14TextureStorage12DummyTextureE\u0027 were leaked at exit.\r\nERROR: 34 RID allocations of type \u0027N13RendererDummy9DummyMeshE\u0027 were leaked at exit.\r\nERROR: 9 RID allocations of type \u0027N13RendererDummy15MaterialStorage13DummyMaterialE\u0027 were leaked at exit.\r\nERROR: 1 RID allocations of type \u0027N13RendererDummy15MaterialStorage11DummyShaderE\u0027 were leaked at exit.\r\nERROR: Parameter \"material\" is null.\r\n   at: material_get_instance_shader_parameters (servers/rendering/dummy/storage/material_storage.cpp:265)\r\nERROR: Parameter \"material\" is null.\r\n   at: material_get_instance_shader_parameters (servers/rendering/dummy/storage/material_storage.cpp:265)\r\n   GDScript backtrace (most recent call first):\r\n       [0] _test_condition (res://tests/weapon_test.gd:377)\r\n       [1] _ready (res://tests/weapon_test.gd:18)\r\n       [2] _test_grip (res://tests/weapon_test.gd:320)\r\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\r\n   at: cleanup (core/object/object.cpp:2663)\r\nERROR: 89 resources still in use at exit (run with --verbose for details).\r\n   at: clear (core/io/resource.cpp:810)\r\nERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools12BucketMediumE\r\n   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)\r\n"
+    },
+    {
+        "suite":  "weapon_clip",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\n  umbrella Fight_HitHeavy_Armed: 0.011 m (weapon3, head at t 0.20)\r\n  umbrella Fight_Thrust: 0.013 m (weapon0, torso at t 0.35)\r\n  broom Fight_Swing_Long: 0.009 m (weapon0, torso at t 0.45)\r\n  broom Fight_Sweep_Long: 0.024 m (weapon0, torso at t 0.55)\r\nworst 0.024 m\r\nPASS weapon_clip_test.gd: 52 checks\r\n"
+    },
+    {
+        "suite":  "weapon_fight_contact",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\n  umbrella: deepest 0.000 m, longest 0 frames past 0.05 m ()\r\n  broom: deepest 0.000 m, longest 0 frames past 0.05 m ()\r\nPASS weapon_fight_contact_test.gd: 8 checks\r\nWARNING: ObjectDB instances leaked at exit (run with --verbose for details).\r\n   at: cleanup (core/object/object.cpp:2663)\r\n"
+    },
+    {
+        "suite":  "fight_body_contact",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\nPASS fight_body_contact_test.gd: 8 checks\r\n"
+    }
+]

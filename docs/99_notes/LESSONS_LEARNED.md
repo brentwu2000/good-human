@@ -70,6 +70,16 @@ Owner, 2026-10-09: 「把開發遇到的問題要寫回，讓下次開發不會�
 
 ## 6. Blender
 
+**6.6 Do not factory-reset inside a live MCP build call.** `read_factory_settings`
+invalidated `bpy.context.active_object` during umbrella export and disconnected
+the bridge. Save the scene, clear its objects instead, and leave preferences and
+the bridge intact. The revised `build_p05_weapons.reset` works in batch and MCP.
+
+**6.7 A wider handle changes the weapon capsule, even with the same tip.** The
+first J-hook extended 74 mm from the shaft and raised Thrust self-contact to
+61 mm. The compact 42 mm hook passes at 13 mm. Keep the collision tolerance;
+adjust the art and rerun `weapon_clip_test`, rather than checking tip reach only.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
@@ -92,6 +102,33 @@ Owner, 2026-10-09: 「把開發遇到的問題要寫回，讓下次開發不會�
 
 ## 8. Tooling
 
+**8.3 Use the project's pinned Godot for art validation.** The shell `godot`
+alias points at 4.7.1 here, while `tests/run_all.sh` specifies 4.6.3. The alias
+reports a native `VirtualJoystick` class conflict. Use the test runner's binary;
+do not modify gameplay classes to accommodate an accidental engine switch.
+
+**8.4 Dense GLB keys require matching import sampling.** A 120 Hz dog contact
+bake imported at 30 Hz loses the between-key correction. Keep dog library
+`animation/fps=120`, then reimport and inspect. Ground checks must evaluate
+actual skin between keys; r34 samples Run at 209 times and checks it still moves.
+
 **8.1 Long Python edits through a shell heredoc break on quotes.** Write the patch script to a file (scratchpad) and run it.
 
 **8.2 `str.replace` with an empty "old" text inserts everywhere.** When slicing a file by markers, assert the slice is non-empty before replacing.
+
+
+### Dog skin / retarget correction, 2026-10-10 (CX-04)
+
+- A texture-looking tear can be skin deformation or the body going below ground.
+  Bone-marker tests missed both. Check the deformed mesh in Godot and measure
+  skinned vertices through the clip; r33 adds `audit_dog_motion_skin.py`.
+- Matching bone names does not mean matching anatomical pivots. The inherited
+  breed front chains sat behind the visible forelegs. r33 keeps bind names and
+  bakes virtual-pivot compensation into translation tracks; do not strip those.
+- Imported Blender armatures can bring an unskinned Icosphere control object.
+  Including all meshes gave a false -1 m ground level. Filter actual meshes by
+  their Armature modifier's target before measuring the body's bounds.
+- Abrupt four-weight transitions amplified fox motion into large skin stretch.
+  r33 smooths the weights and retains both glTF influence sets (eight total).
+  Preserve both on subsequent processing; review performance and deformation
+  before reducing to four. Corrections and limits live in reproducible tools.

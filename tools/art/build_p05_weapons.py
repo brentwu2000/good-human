@@ -21,7 +21,10 @@ os.makedirs(SOURCE, exist_ok=True)
 
 
 def reset():
-    bpy.ops.wm.read_factory_settings(use_empty=True)
+    # Keep the live MCP context and enabled add-ons. Factory reset invalidates
+    # the UI context halfway through a bridge call and disconnects the bridge.
+    for obj in list(bpy.data.objects):
+        bpy.data.objects.remove(obj, do_unlink=True)
 
 
 def mat(name, color, roughness=0.7, metallic=0.0):
@@ -67,13 +70,49 @@ def export(name):
 # --- Umbrella: a closed folding umbrella -------------------------------------------
 def build_umbrella():
     reset()
-    rubber = mat("Umbrella_Grip_Rubber", (0.05, 0.05, 0.055), 0.85)
+    rubber = mat("Umbrella_Grip_HoneyWood", (0.66, 0.40, 0.18), 0.48)
     metal = mat("Umbrella_Shaft_Metal", (0.62, 0.63, 0.65), 0.35, 0.85)
-    fabric = mat("Umbrella_Canopy_Navy", (0.07, 0.1, 0.2), 0.8)
+    fabric = mat("Umbrella_Canopy_Ochre", (0.62, 0.45, 0.20), 0.85)
     strap = mat("Umbrella_Strap", (0.05, 0.07, 0.15), 0.75)
     # The grip, a little fatter in the middle, in the fist.
-    grip = cylinder("Umbrella_Grip", -0.1, 0.03, 0.016, rubber, 20, 0.014)
+    # CX-01: preserve the fist's straight grip and calibrated tip, but replace
+    # its lower end with a readable J. The hook stays above the old -0.10 m end.
+    grip = cylinder("Umbrella_Grip", -0.055, 0.03, 0.016, rubber, 20, 0.014)
     smooth_bevel(grip)
+    hook_vertices, hook_faces = [], []
+    centers = []
+    radius = 0.017
+    tube_radius = 0.008
+    for i in range(25):
+        angle = math.pi + math.pi * i / 24
+        centers.append((radius + radius * math.cos(angle), -0.055 + radius * math.sin(angle), angle))
+    # Continue the free end upward. The hollow centre must read at mobile size.
+    for i in range(1, 6):
+        centers.append((radius * 2, -0.055 + i * 0.005, math.tau))
+    for x, z, angle in centers:
+        for j in range(12):
+            a = math.tau * j / 12
+            hook_vertices.append((x + tube_radius * math.cos(a) * math.cos(angle),
+                                  tube_radius * math.sin(a),
+                                  z + tube_radius * math.cos(a) * math.sin(angle)))
+    for i in range(len(centers) - 1):
+        for j in range(12):
+            hook_faces.append((i*12+j, i*12+(j+1)%12, (i+1)*12+(j+1)%12, (i+1)*12+j))
+    hook_faces.append(tuple(reversed(range(12))))
+    hook_faces.append(tuple((len(centers)-1)*12+j for j in range(12)))
+    hook_mesh = bpy.data.meshes.new("Umbrella_JHook")
+    hook_mesh.from_pydata(hook_vertices, [], hook_faces)
+    hook_mesh.update()
+    bm_hook = bmesh.new()
+    bm_hook.from_mesh(hook_mesh)
+    bmesh.ops.recalc_face_normals(bm_hook, faces=list(bm_hook.faces))
+    bm_hook.to_mesh(hook_mesh)
+    bm_hook.free()
+    hook = bpy.data.objects.new("Umbrella_JHook", hook_mesh)
+    bpy.context.collection.objects.link(hook)
+    hook.data.materials.append(rubber)
+    for poly in hook_mesh.polygons:
+        poly.use_smooth = True
     cylinder("Umbrella_Collar", 0.03, 0.045, 0.011, metal, 16)
     cylinder("Umbrella_Shaft", 0.045, 0.56, 0.0055, metal, 10)
     # The furled canopy: pleated (alternate radii), widest by the runner,
@@ -214,7 +253,18 @@ def build_dumbbell():
     export("old_dumbbell")
 
 
-build_umbrella()
-build_broom()
-build_dumbbell()
-print("P05_WEAPONS_DONE")
+if __name__ == "__main__":
+    import argparse, sys
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--umbrella-only', action='store_true')
+    parser.add_argument('--out', default=OUT)
+    parser.add_argument('--source', default=SOURCE)
+    args = parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+    OUT, SOURCE = args.out, args.source
+    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(SOURCE, exist_ok=True)
+    build_umbrella()
+    if not args.umbrella_only:
+        build_broom()
+        build_dumbbell()
+    print("P05_WEAPONS_DONE")

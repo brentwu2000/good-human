@@ -1,0 +1,47 @@
+[
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\shiba_01.glb",
+    "before_sha256": "e3a05e7bf3b20c95f3d868dab2d305d4edcaaac90939cf0ec025847e55e6105c",
+    "after_sha256": "8b200104d631f4ed182aa0cf3d90e465b3e78e471bb4012e19ab3480235e348e"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\chihuahua.glb",
+    "before_sha256": "ab0880101446f6e29903b0488d0bd490a07160fc8d6db366cea72301e1f7df1f",
+    "after_sha256": "e559606340513976f3bfc9172533993b2a407ff22021ac6252eb575ca772cd07"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\corgi.glb",
+    "before_sha256": "b62e07834531d19a3689f650fd51fe780f899081816bca736ac24f1bac8267f0",
+    "after_sha256": "4a3e4255c5fb0ef8a34432b900d452f1fd76b06fc6fdcbea90d857f3e9c018d5"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\frenchie.glb",
+    "before_sha256": "b2eefae008432c7185f05ab582e0419f8452c2d83883609f190b9a3bf270d91e",
+    "after_sha256": "3dcbd7f43616cdb69ce600c9545be41b6194c5375ce2a18d041804c0ed8d8ea2"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\golden.glb",
+    "before_sha256": "9625dc515e7cb910db104e6b69305a6c5b4b15c4146e40712b9f5d7607d03280",
+    "after_sha256": "5600581045e01ccabbffb1f319196d1515facf66252ae27a6dc9943e02fca88e"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\pomeranian.glb",
+    "before_sha256": "340e6e98794d840812b6419c16fe3f606f14d7da64487827e666e48ded327b9b",
+    "after_sha256": "fc3aa2607949d52140c42243bb93d53eb97f51f18c76cedf8d5530b2b98670e6"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\poodle.glb",
+    "before_sha256": "d5e171f6ab31096e4602146fe11ebdc74f5d644ad3ec29377c57ea329a3fac57",
+    "after_sha256": "0cfc29b0c276ff3111ac770dc7323076fcdd2f457e4e36f90b94fdc4870e786f"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\animations\\m2m\\shiba.glb",
+    "before_sha256": "dc02e92397aff1c3be23995012d6eba2d30cc0a3b84180bfd12b22025be95300",
+    "after_sha256": "00f76a1eb2365e9cbaf5fdabc25346216fe26cf3424fb319bc53db077f5e0328"
+  },
+  {
+    "runtime": "assets\\characters\\dog\\models\\breeds\\chihuahua.glb",
+    "before_sha256": "c3a8094c6db93092c486fb4850cc4106a8c928de8f5becf0e8da894da531c734",
+    "after_sha256": "07c6afeeed7a2f48f03d4f2426f4f758ad6ff153ea688eddba88176f79bda132"
+  }
+]

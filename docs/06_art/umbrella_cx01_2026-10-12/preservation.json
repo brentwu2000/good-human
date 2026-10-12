@@ -1,0 +1,49 @@
+{
+  "before": {
+    "sha256": "48c90cee5332e5bfcecde262e094bcfd8286ea6c2f256c9bd522c1a7b68b3dbc",
+    "triangles": 1028,
+    "minimum": [
+      -0.052000001072883606,
+      -0.09999999776482582,
+      -0.052000001072883606
+    ],
+    "maximum": [
+      0.052000001072883606,
+      0.5999999977648258,
+      0.052000001072883606
+    ],
+    "nodes": [
+      "Umbrella_Canopy",
+      "Umbrella_Collar",
+      "Umbrella_Grip",
+      "Umbrella_Shaft",
+      "Umbrella_Snap",
+      "Umbrella_Strap",
+      "Umbrella_Tip"
+    ]
+  },
+  "after": {
+    "sha256": "b121a9f2c066e24134115af764bcee0c8c01d887726c165913d3636b391372ef",
+    "triangles": 1744,
+    "minimum": [
+      -0.052000001072883606,
+      -0.07999999821186066,
+      -0.052000001072883606
+    ],
+    "maximum": [
+      0.052000001072883606,
+      0.5999999977648258,
+      0.052000001072883606
+    ],
+    "nodes": [
+      "Umbrella_Canopy",
+      "Umbrella_Collar",
+      "Umbrella_Grip",
+      "Umbrella_JHook",
+      "Umbrella_Shaft",
+      "Umbrella_Snap",
+      "Umbrella_Strap",
+      "Umbrella_Tip"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "published_hashes_match_audit": true,
+  "run_209_samples_ground_tolerance_m": 1e-05,
+  "runtime_candidate_pixels_identical": {
+    "chihuahua_M2M_Run_0.png": true,
+    "chihuahua_M2M_Run_25.png": true,
+    "chihuahua_M2M_Run_50.png": true,
+    "chihuahua_M2M_Run_75.png": true,
+    "chihuahua_M2M_Run_99.png": true
+  }
+}

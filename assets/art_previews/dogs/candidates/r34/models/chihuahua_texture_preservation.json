@@ -1,0 +1,11 @@
+{
+  "source_sha256": "c3a8094c6db93092c486fb4850cc4106a8c928de8f5becf0e8da894da531c734",
+  "candidate_sha256": "07c6afeeed7a2f48f03d4f2426f4f758ad6ff153ea688eddba88176f79bda132",
+  "original_binary_prefix_retained": true,
+  "all_geometry_UVs_normals_weights_rig_animation_descriptors_retained": true,
+  "clips": [
+    "Idle",
+    "Sit",
+    "Walk"
+  ]
+}
