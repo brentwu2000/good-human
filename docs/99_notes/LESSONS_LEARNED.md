@@ -91,6 +91,18 @@ P-04 skin has `ArtTone`, but its Color Attribute node is unlinked, so tinting it
 (stubble) changed no pixel in Godot. Compare pixels before/after in a capture,
 not the Blender data.
 
+**6.10 A sheet view and a generated view are not the same head.** The office
+worker's geometry came from a Qwen 3/4 view; projecting the sheet's front view onto
+it put the glasses a few cm off (doubled rims, hair on the face) while the body
+projected fine. Paint the head from the mesh's own geometry (rims from a depth
+high-pass, hair from normal bumpiness): `paint_head_stylized.py`. Check: a face
+close-up render, not the full-body one.
+
+**6.11 Generators live in `C:/Users/b/tools/modly`, not in project folders.** The
+Modly install inside a Documents experiment folder vanished with it, and the factory
+batch still pointed at an earlier deleted folder. All launchers read
+`C:/Users/b/tools/modly/env.sh`. Check: `curl :8765/health` before a batch.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

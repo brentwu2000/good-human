@@ -1,4 +1,12 @@
 # Art Status
+## Office worker r1 (Claude) — 2026-10-13
+
+AI 3D factory route: Qwen-Image-Edit-2509 (Apache-2.0) 3/4 view, TripoSG (MIT,
+Marching Cubes), Instant Meshes, bake, projection + new `paint_head_stylized.py`,
+rig_lods on OwnerSkeleton (19 clips). Game LOD2 6k tris, 1.2 MB. REVIEW / B:
+faceted face close-up, shirt smudges; sheet rights UNKNOWN (owner to confirm).
+[Record](OFFICE_WORKER_R1_2026-10-13.md).
+
 
 ## Owner head refinement r1 (Claude) — 2026-10-12
 

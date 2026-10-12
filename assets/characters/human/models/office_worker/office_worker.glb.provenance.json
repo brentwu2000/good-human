@@ -1,0 +1,25 @@
+{
+  "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\office_worker\\office_worker_game.glb",
+  "created": "2026-10-13T01:13:41",
+  "tool": "blender rig_lods.py",
+  "model": "blender",
+  "model_licence": "GPL tool; output belongs to the user",
+  "model_class": "COMMERCIAL_OK",
+  "inputs": [
+    {
+      "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\blender_work\\humans\\office_worker\\lod0_toon.glb",
+      "class": "UNKNOWN"
+    }
+  ],
+  "params": {
+    "lod": "lod2",
+    "game": {
+      "base": 1024,
+      "normal": 512,
+      "tote": 256,
+      "orm": "multiplied into base"
+    }
+  },
+  "note": "",
+  "class": "UNKNOWN"
+}

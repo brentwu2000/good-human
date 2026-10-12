@@ -49,6 +49,9 @@ func to_fighter_data(display_name: String) -> FighterData:
 	fighter.hair_style = hair_style
 	fighter.top_style = top_style
 	fighter.accessory_style = accessory_style
+	var bg := background()
+	if bg != null and bg.skeletal_model != null:
+		fighter.skeletal_model = bg.skeletal_model
 	return fighter
 
 

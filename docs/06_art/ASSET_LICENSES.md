@@ -172,3 +172,12 @@ inherited rig/weight restrictions and grade B remain; see
 - Preserve untouched originals under `assets/_source/`.
 - Record the license text or source evidence when practical.
 - Do not redistribute third-party source packs outside what their license permits.
+
+## Office worker (Claude, 2026-10-13)
+`assets/characters/human/models/office_worker/office_worker.glb` (+ extracted textures).
+Chain: owner sheet (rights UNDOCUMENTED) → Qwen-Image-Edit-2509 Q3_K_S + Lightning LoRA
+(Apache-2.0) → TripoSG weights/code (MIT; DINOv2 Apache-2.0), Marching Cubes
+(scikit-image BSD-3; diso CC BY-NC not installed) → rembg u2net (MIT) for reference
+cut-outs → Instant Meshes (BSD-3) → Blender 5.2 scripts → P-04 OwnerSkeleton + clips
+(project-internal). Per-file provenance: `office_worker.glb.provenance.json` and
+`good_human_stylized_factory/**/*.provenance.json`. Release gate: owner confirms the sheet.

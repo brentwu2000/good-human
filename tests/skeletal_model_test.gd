@@ -62,7 +62,29 @@ func _run() -> void:
 	var hair := plain_visual.model.find_children("Hair*", "MeshInstance3D", true, false)
 	var unskinned := hair.filter(func(m: MeshInstance3D) -> bool: return m.skin == null or m.get_node_or_null(m.skeleton) != sk)
 	check(hair.size() > 0 and unskinned.is_empty(), "the hair is skinned to the skeleton (%d pieces, %d loose)" % [hair.size(), unskinned.size()])
+	await _test_background_model()
 	finish()
+
+
+## Owner, 2026-10-13: the office worker (社畜上班族) has his own model; anyone of
+## that background who becomes the dog's human wears it.
+func _test_background_model() -> void:
+	var human := HumanCandidate.new()
+	human.background_id = &"office_worker"
+	var bg := human.background()
+	check(bg != null and bg.skeletal_model != null, "the office worker background brings its own model")
+	var fighter := human.to_fighter_data("阿哲")
+	check(fighter.skeletal_model == bg.skeletal_model, "and the person's fighter wears it")
+	var puppet := _puppet(fighter)
+	var visual := puppet._body as P04HumanVisual
+	check(visual != null and visual.model.scene_file_path.ends_with("office_worker/office_worker.glb"), "in the walk and the fight (%s)" % (visual.model.scene_file_path if visual else "none"))
+	check(visual.player.has_animation("Idle_Relaxed") and visual.player.has_animation("Jab") and visual.player.has_animation("Walk"), "with his own relaxed clips and the combat clips")
+	puppet.set_ambient(false)
+	await get_tree().process_frame
+	check(visual.player.current_animation.ends_with("Idle_Relaxed"), "standing relaxed (%s)" % visual.player.current_animation)
+	var other := HumanCandidate.new()
+	other.background_id = &"student"
+	check(other.to_fighter_data("").skeletal_model == null, "other backgrounds keep the shared human")
 
 
 func _puppet(data: FighterData) -> FighterPuppet3D:

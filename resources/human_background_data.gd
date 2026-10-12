@@ -28,6 +28,9 @@ enum Reaction { INTERESTED, AMUSED, CAUTIOUS, STARTLED, AFFECTIONATE, INDIFFEREN
 @export var hair_styles: Array[int] = []
 @export var top_styles: Array[int] = []
 @export var accessory_styles: Array[int] = []
+## Their own model on the OwnerSkeleton (e.g. the office worker's), worn by
+## everyone of this background; null = the shared P-04 human in their colours.
+@export var skeletal_model: PackedScene
 
 @export_group("Reactions")
 ## Reaction -> what they say (short, in their own voice).

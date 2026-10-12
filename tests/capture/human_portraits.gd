@@ -13,6 +13,8 @@ const FIGHTERS := {
 	"gym": "res://data/combat/fighters/opp03_gym.tres",
 	"student": "res://data/combat/fighters/opp04_student.tres",
 	"grandma": "res://data/combat/fighters/oppx01_old_master.tres",
+	# Adopter backgrounds with their own model: the background id.
+	"office_worker": "office_worker",
 }
 ## [name, puppet yaw (the puppet faces -Z at PI), camera position, look-at point, fov]
 const VIEWS := [
@@ -23,6 +25,18 @@ const VIEWS := [
 	["face", PI, Vector3(0, 1.62, 1.1), Vector3(0, 1.58, 0), 26.0],
 	["face_three_quarter", PI * 0.75, Vector3(0, 1.62, 1.1), Vector3(0, 1.58, 0), 26.0],
 ]
+
+
+## A fighter file, or a person of that background in its first clothes colours.
+func _fighter(source: String) -> FighterData:
+	if source.begins_with("res://"):
+		return load(source)
+	var human := HumanCandidate.new()
+	human.background_id = StringName(source)
+	var bg := human.background()
+	human.shirt_color = bg.shirt_colors[0]
+	human.pants_color = bg.pants_colors[0]
+	return human.to_fighter_data("")
 
 
 func _ready() -> void:
@@ -60,14 +74,22 @@ func _run() -> void:
 	for key: String in wanted:
 		var puppet := FighterPuppet3D.new()
 		world.add_child(puppet)
-		puppet.apply(load(FIGHTERS[key]))
+		puppet.apply(_fighter(FIGHTERS[key]))
 		var body := puppet._body as P04HumanVisual
 		if body != null:
 			body.play_clip(body.ambient_clip(false), true)
+		for i in 3:
+			await get_tree().process_frame
+		# Face views follow the head (models differ in height and head size).
+		var lift := 0.0
+		if body != null and body.skeleton != null and body.skeleton.find_bone("head") >= 0:
+			var head := body.skeleton.global_transform * body.skeleton.get_bone_global_pose(body.skeleton.find_bone("head"))
+			lift = head.origin.y - 1.592
 		for view: Array in VIEWS:
 			puppet.rotation.y = view[1]
-			camera.position = view[2]
-			camera.look_at(view[3], Vector3.UP)
+			var dy := Vector3(0, lift, 0) if String(view[0]).begins_with("face") else Vector3.ZERO
+			camera.position = view[2] + dy
+			camera.look_at(view[3] + dy, Vector3.UP)
 			camera.fov = view[4]
 			for i in 6:
 				await get_tree().process_frame

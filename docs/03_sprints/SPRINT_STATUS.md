@@ -1,5 +1,16 @@
 # Sprint Status
 
+## ART character refinement — 2026-10-13 (Claude): office worker r1
+
+Owner sheet 「社畜上班族」, route A (AI 3D factory): Qwen-Image-Edit-2509 view →
+TripoSG → retopo → bake → body projection + stylized head paint → OwnerSkeleton
+with all 19 clips → 6k-tri game LOD. Worn by the `office_worker` adopter
+background (`HumanBackgroundData.skeletal_model`). 47 test scenes pass. REVIEW / B;
+the sheet's rights need the owner's confirmation. Generators reinstalled at
+`C:/Users/b/tools/modly` (the old folder was gone).
+[Record](../06_art/OFFICE_WORKER_R1_2026-10-13.md).
+
+
 ## ART character refinement — 2026-10-12 (Claude, owner request)
 
 Owner: 「請你負責精修人物」 — Claude refines the humans this round (owner,
