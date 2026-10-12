@@ -1,0 +1,10 @@
+{
+  "sha256": "cdef00ca9d67907cf2af5e01c3470d05016718ba60b51b679869e92592f85e21",
+  "candidate_runtime_png_bytes_equal": {
+    "chihuahua_M2M_Run_0.png": true,
+    "chihuahua_M2M_Run_25.png": true,
+    "chihuahua_M2M_Run_50.png": true,
+    "chihuahua_M2M_Run_75.png": true,
+    "chihuahua_M2M_Run_99.png": true
+  }
+}

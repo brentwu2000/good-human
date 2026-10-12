@@ -1,0 +1,10 @@
+{
+  "source_sha256": "cdef00ca9d67907cf2af5e01c3470d05016718ba60b51b679869e92592f85e21",
+  "candidate_sha256": "a145a5f136668c45506fe9699a0f31a7dd57a5286dbcd2c52c0266f62da15270",
+  "moved_vertices": 425,
+  "max_displacement_m": 0.001112642075199839,
+  "inverted_faces": 0,
+  "unchanged_binary_except_position_normal": true,
+  "triangle_count": 47787,
+  "core_eye_nose_mouth_displacement_m": 0.0
+}

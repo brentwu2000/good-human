@@ -1,0 +1,14 @@
+﻿[
+    {
+        "suite":  "breed_models",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\nPASS breed_models_test.gd: 81 checks\r\n"
+    },
+    {
+        "suite":  "dog_motion",
+        "passed":  true,
+        "exit_code":  0,
+        "output":  "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\r\n\r\nPASS dog_motion_test.gd: 80 checks\r\n"
+    }
+]

@@ -11,6 +11,27 @@ the sheet's rights need the owner's confirmation. Generators reinstalled at
 [Record](../06_art/OFFICE_WORKER_R1_2026-10-13.md).
 
 
+## ART dog detail r37 — 2026-10-13
+
+Published Chihuahua ear-tip/throat refinement; stable rig, eight skin influences
+and motions. 161 model/motion checks PASS; Godot comparisons and published-path
+verification complete. REVIEW / B.
+[Record](../06_art/CHIHUAHUA_DETAIL_R37_2026-10-13.md).
+
+## ART dog detail r36 — 2026-10-12
+
+Published Chihuahua local ear/chin geometry refinement, retaining r35 texture and
+all rig/motion contracts. Model/motion suites PASS (161 checks); actual Godot
+comparison and runtime verification complete. REVIEW / B.
+[Record](../06_art/CHIHUAHUA_DETAIL_R36_2026-10-12.md).
+
+## ART dog refinement — 2026-10-12 (r35)
+
+Chihuahua facial surface/cheek material refined and published; existing skeleton,
+eight skin influences and clips retained. Model/motion tests PASS (161 checks).
+REVIEW / B; remaining anatomy/material/budget work listed in the
+[record](../06_art/CHIHUAHUA_POLISH_R35_2026-10-12.md).
+
 ## ART character refinement — 2026-10-12 (Claude, owner request)
 
 Owner: 「請你負責精修人物」 — Claude refines the humans this round (owner,

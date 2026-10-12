@@ -155,3 +155,13 @@ actual skin between keys; r34 samples Run at 209 times and checks it still moves
   r33 smooths the weights and retains both glTF influence sets (eight total).
   Preserve both on subsequent processing; review performance and deformation
   before reducing to four. Corrections and limits live in reproducible tools.
+
+
+## 2026-10-12: bounded smoothing can reveal ear-tip spikes
+
+Chihuahua r36 first trial smoothed the whole ear. Tiny irregular tip pieces did
+not shrink with the surrounding bowl (including inversion-protected vertices),
+so previously subtle spikes became conspicuous. Zero flipped faces is not a
+visual acceptance criterion. Fade the smoothing mask out before fragile tips,
+compare both profiles in Godot, and retain unresolved tips as explicit work.
+Final r36 preserves z >= 0.337 m; max local movement 2.5 mm.

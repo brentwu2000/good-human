@@ -1,5 +1,28 @@
 # Third-Party Asset License Register
 
+## Chihuahua detail r37 — 2026-10-13
+
+GOOD HUMAN! ART via Codex: project-authored local ear geometry and throat paint
+over r36; donor is existing good_human_stylized_factory/references/dogs/chihuahua_side.png.
+No new third-party retrieval; underlying model/reference terms unchanged.
+Originals retained, editable source archived. REVIEW / B.
+[Record](CHIHUAHUA_DETAIL_R37_2026-10-13.md).
+
+## Chihuahua detail r36 — 2026-10-12
+
+GOOD HUMAN! ART via Codex: project-authored local ear/chin geometry edits over r35.
+No new third-party retrieval or texture; source model/reference terms unchanged.
+Original r35 retained, final Blender source archived. REVIEW / B.
+[Record](CHIHUAHUA_DETAIL_R36_2026-10-12.md).
+
+## Chihuahua face polish r35 — 2026-10-12
+
+GOOD HUMAN! ART via Codex: local surface and Ucupaint fur edits over the existing
+r34 Chihuahua, using the existing good_human_stylized_factory/references/dogs/chihuahua_side.png.
+No new third-party retrieval; underlying model/reference terms remain unchanged.
+Project-authored modifications, REVIEW / B; preserved originals and editable source.
+[Record](CHIHUAHUA_POLISH_R35_2026-10-12.md).
+
 ## CX-01 umbrella — 2026-10-12
 
 Original procedural geometry: Claude-directed GOOD HUMAN! authoring (2026-10-06).

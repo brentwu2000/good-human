@@ -8,6 +8,22 @@ faceted face close-up, shirt smudges; sheet rights UNKNOWN (owner to confirm).
 [Record](OFFICE_WORKER_R1_2026-10-13.md).
 
 
+## Chihuahua detail r37 published — 2026-10-13
+
+Ear-tip micro-relaxation and Ucupaint throat transition published. 425 vertices
+move by at most 1.113 mm; core face unmoved. Existing UV/skin/rig/clips retained.
+119 review captures, 10 runtime frames; model/motion suites PASS (161 checks).
+REVIEW / B: fine tip defects, flat donor fur, torso and anatomy work remain.
+[Record](CHIHUAHUA_DETAIL_R37_2026-10-13.md).
+
+## Chihuahua detail r36 published — 2026-10-12
+
+Ear bowl/root and under-chin transitions locally smoothed; pointed tips preserved
+after rejecting an ear-wide trial. Maximum 2.5 mm displacement; rig, textures,
+eight skin influences and clips retained. Godot 119 review captures plus 10
+runtime samples; 161 test checks PASS. REVIEW / B, residual ear/neck seams and
+body/anatomy/budget work remain. [Record](CHIHUAHUA_DETAIL_R36_2026-10-12.md).
+
 ## Owner head refinement r1 (Claude) — 2026-10-12
 
 Owner asked Claude to refine the human characters this round. Owner model:
@@ -15,12 +31,13 @@ curly hair built from the skull (bald crown/forehead fixed), round glasses,
 brows; jacket collar points, zip and seams laid onto the body. Body, rig and
 clips unchanged; 47 test scenes pass. REVIEW / B.
 [Record](OWNER_HEAD_R1_2026-10-12.md).
-## Dog visual polish r35 taken — 2026-10-12
+## Dog visual polish r35 published — 2026-10-12
 
-IN_PROGRESS, owner priority: dogs before other handoff work. Start with Chihuahua
-cheek/eye-socket/muzzle surface transitions, preserving identity and the current
-r34 skin, rig and motion contracts. Inspect clay and textured views before deciding
-whether a candidate is suitable for publication.
+Chihuahua cheek/eye-socket surface smoothing and Ucupaint fur transition published.
+Rig, eight skin influences and animations preserved. 119 candidate/static/M2M
+captures reviewed, 10 runtime samples verified; two suites PASS (161 checks).
+REVIEW / B: ear/jaw/torso finish, original Sit, jaw animation and budget remain.
+[Record and comparisons](CHIHUAHUA_POLISH_R35_2026-10-12.md).
 
 ## CX-01 umbrella readability completed — 2026-10-12
 

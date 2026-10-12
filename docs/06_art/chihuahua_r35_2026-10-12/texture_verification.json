@@ -1,0 +1,6 @@
+{
+  "source_sha256": "9d01671afa8a67f6148068f2b4ff708d49c0c83d16ad7687f8395b1b76744097",
+  "candidate_sha256": "92514df9a47d421d4bb5dcbe532167daf50b809859a8add13da4b1f4e210b80e",
+  "surface_binary_prefix_retained": true,
+  "geometry_uv_skin_rig_animations_unchanged_by_texture_packaging": true
+}
