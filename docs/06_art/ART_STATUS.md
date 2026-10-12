@@ -1,4 +1,12 @@
 # Art Status
+
+## Owner head refinement r1 (Claude) — 2026-10-12
+
+Owner asked Claude to refine the human characters this round. Owner model:
+curly hair built from the skull (bald crown/forehead fixed), round glasses,
+brows; jacket collar points, zip and seams laid onto the body. Body, rig and
+clips unchanged; 47 test scenes pass. REVIEW / B.
+[Record](OWNER_HEAD_R1_2026-10-12.md).
 ## Dog visual polish r35 taken — 2026-10-12
 
 IN_PROGRESS, owner priority: dogs before other handoff work. Start with Chihuahua

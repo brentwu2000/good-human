@@ -1,5 +1,12 @@
 # Sprint Status
 
+## ART character refinement — 2026-10-12 (Claude, owner request)
+
+Owner: 「請你負責精修人物」 — Claude refines the humans this round (owner,
+opponents, grandma); Codex keeps the art pipeline otherwise. r1: owner head
+(curls, glasses, brows, jacket details) in `p04_owner_refined.glb`. REVIEW.
+[Record](../06_art/OWNER_HEAD_R1_2026-10-12.md).
+
 Allowed states: `TODO`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`
 
 ## ART runtime publication — 2026-10-12 (CX-01 umbrella)

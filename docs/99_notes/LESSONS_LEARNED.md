@@ -80,6 +80,17 @@ first J-hook extended 74 mm from the shaft and raised Thrust self-contact to
 61 mm. The compact 42 mm hook passes at 13 mm. Keep the collision tolerance;
 adjust the art and rerun `weapon_clip_test`, rather than checking tip reach only.
 
+**6.8 `primitive_*_add(location=…)` keeps the vertices local.** The owner's
+hair shell was cut by a hairline written in world space and came out empty (0
+verts, then 392 tris of hair) with no error. Apply the location
+(`transform_apply`) before any world-space vertex test, or transform the bmesh.
+Check: print vertex counts after every cut.
+
+**6.9 A colour attribute is not a colour unless the material uses it.** The
+P-04 skin has `ArtTone`, but its Color Attribute node is unlinked, so tinting it
+(stubble) changed no pixel in Godot. Compare pixels before/after in a capture,
+not the Blender data.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
