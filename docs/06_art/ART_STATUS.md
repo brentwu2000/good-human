@@ -1,4 +1,10 @@
 # Art Status
+## Retired fisher r1 (Claude) — 2026-10-13
+
+The `retiree` background now wears its own model (退休釣魚阿伯), through the AI 3D factory
+(yaw-corrected TripoSG, welded-seam projection, zones paint, head share 0.24). Game LOD2
+6k tris, 1.1 MB. REVIEW / B; sheet rights UNKNOWN. [Record](RETIRED_FISHER_R1_2026-10-13.md).
+
 ## Market auntie r1 (Claude) — 2026-10-13
 
 New adopter background `market_vendor` with her own model, through the AI 3D factory

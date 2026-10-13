@@ -1,0 +1,25 @@
+{
+  "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\retired_fisher\\retired_fisher_game.glb",
+  "created": "2026-10-13T22:08:32",
+  "tool": "blender rig_lods.py",
+  "model": "blender",
+  "model_licence": "GPL tool; output belongs to the user",
+  "model_class": "COMMERCIAL_OK",
+  "inputs": [
+    {
+      "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\blender_work\\humans\\retired_fisher\\lod0_toon_prop.glb",
+      "class": "UNKNOWN"
+    }
+  ],
+  "params": {
+    "lod": "lod2",
+    "game": {
+      "base": 1024,
+      "normal": 0,
+      "tote": 256,
+      "orm": "multiplied into base"
+    }
+  },
+  "note": "",
+  "class": "UNKNOWN"
+}

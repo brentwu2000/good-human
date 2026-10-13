@@ -86,6 +86,10 @@ func _test_background_model() -> void:
 	auntie.background_id = &"market_vendor"
 	var av := _puppet(auntie.to_fighter_data("阿珠"))._body as P04HumanVisual
 	check(av != null and av.model.scene_file_path.ends_with("market_auntie/market_auntie.glb") and av.player.has_animation("Jab"), "the market vendor wears the market auntie, with the combat clips")
+	var fisher := HumanCandidate.new()
+	fisher.background_id = &"retiree"
+	var fv := _puppet(fisher.to_fighter_data("阿伯"))._body as P04HumanVisual
+	check(fv != null and fv.model.scene_file_path.ends_with("retired_fisher/retired_fisher.glb") and fv.player.has_animation("Jab"), "the retiree wears the retired fisher, with the combat clips")
 	var other := HumanCandidate.new()
 	other.background_id = &"student"
 	check(other.to_fighter_data("").skeletal_model == null, "other backgrounds keep the shared human")

@@ -16,6 +16,7 @@ const FIGHTERS := {
 	# Adopter backgrounds with their own model: the background id.
 	"office_worker": "office_worker",
 	"market_auntie": "market_vendor",
+	"retired_fisher": "retiree",
 }
 ## [name, puppet yaw (the puppet faces -Z at PI), camera position, look-at point, fov]
 const VIEWS := [

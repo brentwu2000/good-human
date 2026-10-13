@@ -1,5 +1,10 @@
 # Sprint Status
 
+## ART characters — 2026-10-13 (Claude): retired fisher r1
+
+Owner sheet 「退休釣魚阿伯」 on the existing `retiree` background (ADR-L05). 47 test scenes pass.
+REVIEW / B. [Record](../06_art/RETIRED_FISHER_R1_2026-10-13.md).
+
 ## ART characters — 2026-10-13 (Claude): market auntie r1
 
 Owner sheet 「市場阿姨」: new adopter background `market_vendor` wearing her own model (ADR-L05),

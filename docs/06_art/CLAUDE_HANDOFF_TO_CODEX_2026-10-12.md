@@ -30,6 +30,10 @@ the dogs and props stay with you.
   projection, fixes inside-out normals first), `paint_stylized.py` `"mode": "zones"`,
   `project_textures.py --no-region-gate`. Record: `MARKET_AUNTIE_R1_2026-10-13.md`.
 
+- **Retired fisher r1 (2026-10-13)** — `assets/characters/human/models/retired_fisher/retired_fisher.glb`,
+  background `retiree`. `project_simple.py` now welds UV seams before fixing normals;
+  `paint_stylized.py` zones accept `x_min` and `r_min`/`y_centre`. Record: `RETIRED_FISHER_R1_2026-10-13.md`.
+
 ## Do not change without telling Claude
 - OwnerSkeleton bone names; the clips are shared by every human.
 - Mesh names starting `Hair` (`skeletal_model_test` checks they are skinned).

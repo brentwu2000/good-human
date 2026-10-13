@@ -1,11 +1,12 @@
-[gd_resource type="Resource" script_class="HumanBackgroundData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="HumanBackgroundData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/human_background_data.gd" id="1_bg"]
+[ext_resource type="PackedScene" path="res://assets/characters/human/models/retired_fisher/retired_fisher.glb" id="2_model"]
 
 [resource]
 script = ExtResource("1_bg")
 id = &"retiree"
-reveal_text = "原來是剛退休、每天在公園散步的阿伯。"
+reveal_text = "原來是剛退休、每天在河堤釣魚的阿伯。"
 personality_tags = Array[StringName]([&"patient", &"gentle"])
 preference_weights = Dictionary[int, float]({6: 0.60, 1: 0.50, 7: 0.20, 4: -0.20, 3: -0.40})
 likes_dog_tags = Dictionary[StringName, float]({&"gentle": 0.50, &"calm": 0.40, &"energetic": -0.30})
@@ -17,3 +18,4 @@ hair_styles = Array[int]([0, 3])
 top_styles = Array[int]([4, 0])
 accessory_styles = Array[int]([1, 0])
 reaction_lines = Dictionary[int, String]({0: "嗯，你很穩喔。", 1: "呵呵，傻狗。", 2: "慢慢來，慢慢來。", 3: "唉唷！", 4: "乖，乖。", 5: "……"})
+skeletal_model = ExtResource("2_model")
