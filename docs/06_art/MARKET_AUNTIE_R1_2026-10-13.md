@@ -24,6 +24,12 @@ who becomes the dog's human wears this model.
 - Automatic yaw fitting for the side / 3/4 views picked wrong angles (a face on the back of
   the head); fixed yaws (side −90, mirrored side +90) are used.
 
+## r2 — 2026-10-14
+Reprojected with `project_simple.py`'s welded-seam normals (found on the retired fisher):
+coverage 18 % → 22 %, front of the face and the side view coloured. The square dark specks on
+her cheeks and the line by her mouth are gone. Same palette, proportions and rig.
+`r2_before_after.png` (top r1, bottom r2).
+
 ## Check
 47 test scenes pass; `skeletal_model_test` +1 (market vendor wears her). `weapon_fight_contact_test`
 failed once in one full run and passed on 4 reruns (with and without her): flaky, not caused by her.
