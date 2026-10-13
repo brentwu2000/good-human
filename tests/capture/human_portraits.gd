@@ -80,16 +80,24 @@ func _run() -> void:
 			body.play_clip(body.ambient_clip(false), true)
 		for i in 3:
 			await get_tree().process_frame
-		# Face views follow the head (models differ in height and head size).
+		# Face views follow the head: from the neck to the top of the model, so
+		# big-headed characters are framed as well as the owner (neck 1.49, top 1.76).
 		var lift := 0.0
-		if body != null and body.skeleton != null and body.skeleton.find_bone("head") >= 0:
-			var head := body.skeleton.global_transform * body.skeleton.get_bone_global_pose(body.skeleton.find_bone("head"))
-			lift = head.origin.y - 1.592
+		var zoom := 1.0
+		if body != null and body.skeleton != null and body.skeleton.find_bone("neck_01") >= 0:
+			var neck := (body.skeleton.global_transform * body.skeleton.get_bone_global_pose(body.skeleton.find_bone("neck_01"))).origin.y
+			var top := neck
+			for mesh: MeshInstance3D in body.model.find_children("*", "MeshInstance3D", true, false):
+				top = maxf(top, (mesh.global_transform * mesh.get_aabb()).end.y)
+			lift = (neck + top) / 2.0 - 1.625
+			zoom = clampf((top - neck) / 0.27, 0.6, 2.5)
 		for view: Array in VIEWS:
 			puppet.rotation.y = view[1]
-			var dy := Vector3(0, lift, 0) if String(view[0]).begins_with("face") else Vector3.ZERO
-			camera.position = view[2] + dy
-			camera.look_at(view[3] + dy, Vector3.UP)
+			var is_face := String(view[0]).begins_with("face")
+			var dy := Vector3(0, lift, 0) if is_face else Vector3.ZERO
+			var target: Vector3 = view[3] + dy
+			camera.position = target + ((view[2] as Vector3) - (view[3] as Vector3)) * (zoom if is_face else 1.0)
+			camera.look_at(target, Vector3.UP)
 			camera.fov = view[4]
 			for i in 6:
 				await get_tree().process_frame

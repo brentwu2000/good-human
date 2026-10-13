@@ -2,19 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xq1v5bi686ww"
-path="res://.godot/imported/office_worker_office_worker_game_normal.jpg-2d87f44f45ec351ce39eeb93b0322d7a.ctex"
+uid="uid://cnh1hqoe6ou6"
+path="res://.godot/imported/in_game_portraits.png-acada51ea1d3dab56f6858fea1d69f57.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "99566e3f25d8bbbfbafc9ced9a842717"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/office_worker/office_worker_office_worker_game_normal.jpg"
-dest_files=["res://.godot/imported/office_worker_office_worker_game_normal.jpg-2d87f44f45ec351ce39eeb93b0322d7a.ctex"]
+source_file="res://docs/06_art/office_worker_r1_2026-10-13/in_game_portraits.png"
+dest_files=["res://.godot/imported/in_game_portraits.png-acada51ea1d3dab56f6858fea1d69f57.ctex"]
 
 [params]
 
@@ -26,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

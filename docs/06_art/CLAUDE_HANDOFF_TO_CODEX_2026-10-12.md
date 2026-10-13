@@ -19,7 +19,8 @@ the dogs and props stay with you.
   Worn by the `office_worker` adopter background (`HumanBackgroundData.skeletal_model`).
   Record: `OFFICE_WORKER_R1_2026-10-13.md`.
 - **Factory changes** (in `good_human_stylized_factory/scripts`, defaults unchanged for the grandma):
-  `project_textures.py --hair dark`, `rig_lods.py --name`, new `paint_head_stylized.py`;
+  `project_textures.py --hair dark`, `rig_lods.py --name / --measure-neck / --no-game-normal`,
+  `rig_character.measure_neck`, new `paint_stylized.py` (+ per-character `paint_profile.json`);
   `batch_dogs.sh` now launches generators from `C:/Users/b/tools/modly` (Modly 1476fd0 +
   TripoSG, reinstalled 2026-10-13; the old `Documents/ai_3d_pipeline_poc` is gone).
 

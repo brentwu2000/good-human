@@ -1,6 +1,6 @@
 {
   "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\office_worker\\office_worker_game.glb",
-  "created": "2026-10-13T01:13:41",
+  "created": "2026-10-13T07:53:13",
   "tool": "blender rig_lods.py",
   "model": "blender",
   "model_licence": "GPL tool; output belongs to the user",
@@ -15,7 +15,7 @@
     "lod": "lod2",
     "game": {
       "base": 1024,
-      "normal": 512,
+      "normal": 0,
       "tote": 256,
       "orm": "multiplied into base"
     }

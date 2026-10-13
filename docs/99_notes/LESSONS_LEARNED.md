@@ -103,6 +103,16 @@ Modly install inside a Documents experiment folder vanished with it, and the fac
 batch still pointed at an earlier deleted folder. All launchers read
 `C:/Users/b/tools/modly/env.sh`. Check: `curl :8765/health` before a batch.
 
+**6.12 A rig scaled from the owner misplaces a big-headed character's neck.**
+The office worker's fitted `neck_01` sat at his eye height: a nod would fold his
+face. Fit neck/shoulders from the mesh's width profile (`rig_lods --measure-neck`).
+Check: print the neck/head bone heights against the mesh's chin and shoulders.
+
+**6.13 LOD0's normal map on a decimated LOD shines.** Hair showed white cracked
+facets in Godot; the texture was fine. For flat stylized colour, export the game
+LOD matte without the normal map (`--no-game-normal`), and dilate UV islands so a
+downscaled texture does not pull the background into seams.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
