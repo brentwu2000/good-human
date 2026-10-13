@@ -19,6 +19,7 @@ the shared P-04 human in their colours.
 | UV + Normal/AO bake | `bake_maps.py` 2048 | |
 | Body colour | `project_textures.py --hair dark` (new option) | shirt, tie, backpack, trousers |
 | Stylized texture | **new** `paint_stylized.py` + `paint_profile.json` | head and shoes from geometry, body snapped to the sheet palette (below) |
+| Proportions | **new** `match_proportions.py --head-share 0.24 --height 1.60` | head ratio matched to the grandma |
 | Rig + clips + LODs | `rig_lods.py --name office_worker --measure-neck --no-game-normal` (new options), owner_plus_relaxed source | 19 clips incl. Idle/Walk_Relaxed; LOD0 95k / LOD1 12k / LOD2 6k / LOD3 2.5k |
 | Game | LOD2, 1024 base, matte, no normal map | `assets/characters/human/models/office_worker/office_worker.glb` (1.1 MB) |
 
@@ -46,6 +47,13 @@ uppers and grey soles; trouser-coloured hem band.
 - Tried and dropped: decimating with the head protected (Decimate vertex group) —
   the head already takes ~47 % of 6k, and chained LODs broke the face.
 - The watch is not painted separately; a dark band at the left wrist reads as one.
+
+### r3 proportions (owner: 「大小比例不對 頭身比 比例跟阿罵不同」)
+Head share (chin to top / height), measured: grandma 0.24 (~4.1 heads), office worker
+0.29 (~3.5), owner 0.17 (~6). New factory step `match_proportions.py` (before rig_lods):
+head scaled ×0.789 about the neck with a 9 cm blend, then the whole figure to 1.60 m
+(grandma 1.59 with her bun) → head share 0.24. Re-rigged with `--measure-neck`
+(neck 1.14, skull base 1.23, shoulder 1.08 m). `proportions_r3_vs_grandma.png`.
 
 ## Game
 - `HumanBackgroundData.skeletal_model` (new); `HumanCandidate.to_fighter_data` passes it on.
