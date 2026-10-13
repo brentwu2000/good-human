@@ -1,4 +1,12 @@
 # Art Status
+## Chihuahua delivery refinement — 2026-10-13
+
+IN_PROGRESS under owner instruction to continue until deliverable. Whole-body
+review found seated-base anatomy, merged hindquarters and shoulder facets that
+cannot be solved by local paint. Testing adapted CC0 Mesh2Motion body topology
+with retained Chihuahua identity; structural candidate remains in build/dog_delivery.
+Runtime remains r37 until full appearance, skin, motion and budget gates pass.
+
 ## Office worker r1 (Claude) — 2026-10-13
 
 AI 3D factory route: Qwen-Image-Edit-2509 (Apache-2.0) 3/4 view, TripoSG (MIT,

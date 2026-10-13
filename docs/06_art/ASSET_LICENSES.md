@@ -1,5 +1,13 @@
 # Third-Party Asset License Register
 
+## Chihuahua structural study — 2026-10-13
+
+Existing Mesh2Motion fox topology (Scott Petrovic, CC0 1.0; retrieved 2026-10-09,
+commit 653a969) adapted for Chihuahua body/rig study. Commercial use and
+modification permitted; original retained. No new download. Project adaptation
+by GOOD HUMAN! ART via Codex; WIP / B, not runtime-published.
+[Checkpoint](CHIHUAHUA_DELIVERY_WIP_2026-10-13.md).
+
 ## Chihuahua detail r37 — 2026-10-13
 
 GOOD HUMAN! ART via Codex: project-authored local ear geometry and throat paint
