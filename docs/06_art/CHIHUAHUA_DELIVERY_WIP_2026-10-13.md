@@ -34,3 +34,32 @@ actual mouth/jaw structure, normalize/inspect skin, adapt all required Mesh2Moti
 clips, inspect actual-skin motion/contact, export candidate, compare in Godot,
 run relevant tests, archive editable source and only then consider publication.
 Current structural rig has not been motion-validated and is not deliverable.
+
+## Detail checkpoint
+
+Added baked 2048px body albedo/normal maps, restrained directional fur,
+cream paws with individual toes, red collar and a brass identity tag.
+Retargeted 10 Mesh2Motion actions at 60 Hz. Reviewed Run, Sit and Howl stills;
+this is not full animation/contact validation. Fixed a tail-shaping selection
+that incorrectly included lower hind-leg vertices (now requires z > 0.80 in
+source coordinates), and tapered 840 lower rear-skull vertices into the neck.
+The coordinate repair preserved the detailed mesh's UVs, weights and actions
+through a bijective face-corner index mapping. Rebuilding from the corrected
+body script avoids needing that one-time repair.
+
+[Side](chihuahua_delivery_2026-10-13/neck_refined_side.png),
+[three-quarter](chihuahua_delivery_2026-10-13/neck_refined_threequarter.png),
+[run](chihuahua_delivery_2026-10-13/refined_pose_Run.png),
+[sit](chihuahua_delivery_2026-10-13/sit_toe_refined.png),
+[howl](chihuahua_delivery_2026-10-13/refined_pose_Howl.png).
+
+Latest editable checkpoint: build/dog_delivery/chihuahua_details_checkpoint.blend.
+Incremental tools: material -> detail -> animate -> fur -> bake -> accessories ->
+refine neck. animate currently requires MotionSource imported separately at 60 Hz
+and the exact action names documented in its source. These scripts are authoring
+checkpoints, not an unattended build.
+
+Remaining visible issues: rear foot/hock folding in seated poses, rigid mouth
+expression, some angular rear-skull contour and head/body material mismatch.
+Need full evaluated-skin contact checks, export/Godot validation and source archive.
+Runtime remains r37; candidate remains B and has not passed the delivery gate.

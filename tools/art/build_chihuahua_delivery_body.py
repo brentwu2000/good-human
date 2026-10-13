@@ -24,7 +24,7 @@ bm.to_mesh(body.data);bm.free()
 def shape(p):
  x,y,z=p
  # Narrow the fox tail and turn its rest centerline up into a Chihuahua sickle.
- if y>.84:
+ if y>.84 and z>.80:
   t=min(1,(y-.84)/1.32);angle=t*1.8
   x*=.42;z=1.08+(z-1.08)*.42+.68*(1-math.cos(angle));y=.84+.68*math.sin(angle)
  return Vector((x*.18,y*.14+.025,z*.13))
