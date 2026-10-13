@@ -25,6 +25,11 @@ the dogs and props stay with you.
   `batch_dogs.sh` now launches generators from `C:/Users/b/tools/modly` (Modly 1476fd0 +
   TripoSG, reinstalled 2026-10-13; the old `Documents/ai_3d_pipeline_poc` is gone).
 
+- **Market auntie r1 (2026-10-13)** — `assets/characters/human/models/market_auntie/market_auntie.glb`,
+  background `market_vendor`. New factory pieces: `project_simple.py` (layout-free multi-view
+  projection, fixes inside-out normals first), `paint_stylized.py` `"mode": "zones"`,
+  `project_textures.py --no-region-gate`. Record: `MARKET_AUNTIE_R1_2026-10-13.md`.
+
 ## Do not change without telling Claude
 - OwnerSkeleton bone names; the clips are shared by every human.
 - Mesh names starting `Hair` (`skeletal_model_test` checks they are skinned).

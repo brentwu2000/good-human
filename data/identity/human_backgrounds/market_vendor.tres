@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="HumanBackgroundData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/human_background_data.gd" id="1_bg"]
+[ext_resource type="PackedScene" path="res://assets/characters/human/models/market_auntie/market_auntie.glb" id="2_model"]
+
+[resource]
+script = ExtResource("1_bg")
+id = &"market_vendor"
+reveal_text = "原來是傳統市場賣菜的阿姨。"
+personality_tags = Array[StringName]([&"friendly", &"caring"])
+preference_weights = Dictionary[int, float]({2: 0.50, 0: 0.40, 5: 0.40, 4: 0.30, 3: 0.10, 7: -0.20, 8: -0.60})
+likes_dog_tags = Dictionary[StringName, float]({&"food": 0.50, &"affectionate": 0.40, &"energetic": 0.20, &"shy": -0.20})
+tendencies = Array[StringName]([&"sociable", &"early_riser"])
+name_suggestions = Array[String](["阿珠", "秀蘭", "美玉"])
+shirt_colors = Array[Color]([Color(0.420, 0.420, 0.600, 1), Color(0.560, 0.380, 0.480, 1)])
+pants_colors = Array[Color]([Color(0.250, 0.240, 0.250, 1)])
+hair_styles = Array[int]([4])
+top_styles = Array[int]([4, 3])
+accessory_styles = Array[int]([1, 2])
+reaction_lines = Dictionary[int, String]({0: "哎唷，你看什麼看～", 1: "哈哈哈，好可愛喔！", 2: "欸欸欸，小心一點。", 3: "哎呀！嚇死人。", 4: "來來來，阿姨摸一下。", 5: "嗯，好啦。"})
+skeletal_model = ExtResource("2_model")

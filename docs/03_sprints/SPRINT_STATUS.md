@@ -1,5 +1,11 @@
 # Sprint Status
 
+## ART characters — 2026-10-13 (Claude): market auntie r1
+
+Owner sheet 「市場阿姨」: new adopter background `market_vendor` wearing her own model (ADR-L05),
+made through the AI 3D factory. 47 test scenes pass. REVIEW / B.
+[Record](../06_art/MARKET_AUNTIE_R1_2026-10-13.md).
+
 ## ART character refinement — 2026-10-13 (Claude): office worker r1
 
 Owner sheet 「社畜上班族」, route A (AI 3D factory): Qwen-Image-Edit-2509 view →

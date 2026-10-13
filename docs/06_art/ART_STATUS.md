@@ -1,4 +1,11 @@
 # Art Status
+## Market auntie r1 (Claude) — 2026-10-13
+
+New adopter background `market_vendor` with her own model, through the AI 3D factory
+(Qwen-Image-Edit-2509 view, TripoSG, retopo, new `project_simple.py`, `paint_stylized.py`
+zones mode, head share 0.24, rig_lods). Game LOD2 6k tris, 1.2 MB. REVIEW / B; sheet rights
+UNKNOWN. [Record](MARKET_AUNTIE_R1_2026-10-13.md).
+
 ## Chihuahua delivery refinement — 2026-10-13
 
 IN_PROGRESS under owner instruction to continue until deliverable. Whole-body

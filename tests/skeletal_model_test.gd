@@ -82,6 +82,10 @@ func _test_background_model() -> void:
 	puppet.set_ambient(false)
 	await get_tree().process_frame
 	check(visual.player.current_animation.ends_with("Idle_Relaxed"), "standing relaxed (%s)" % visual.player.current_animation)
+	var auntie := HumanCandidate.new()
+	auntie.background_id = &"market_vendor"
+	var av := _puppet(auntie.to_fighter_data("阿珠"))._body as P04HumanVisual
+	check(av != null and av.model.scene_file_path.ends_with("market_auntie/market_auntie.glb") and av.player.has_animation("Jab"), "the market vendor wears the market auntie, with the combat clips")
 	var other := HumanCandidate.new()
 	other.background_id = &"student"
 	check(other.to_fighter_data("").skeletal_model == null, "other backgrounds keep the shared human")
