@@ -1,0 +1,24 @@
+{
+ "asset": "grandma",
+ "stages_done": [
+  "A",
+  "B",
+  "C"
+ ],
+ "status": "NEEDS_REVIEW",
+ "needs_review_faces": 193,
+ "needs_review_share": 0.0315,
+ "regions": {
+  "skin": 652,
+  "hair": 761,
+  "eyes": 0,
+  "top": 1388,
+  "top_inner": 200,
+  "bottom": 1782,
+  "shoes": 995,
+  "accessories": 28,
+  "glasses": 0
+ },
+ "glasses": 132,
+ "source_sha256_unchanged": "0fe837aa6e350d75fc0247c8fb917d1fdb5bc86eab7fe62127e6fe0a04b537ed"
+}

@@ -1,0 +1,109 @@
+{
+ "stage": "C_materials",
+ "materials": {
+  "M_skin": {
+   "colour": [
+    0.86,
+    0.64,
+    0.52
+   ],
+   "roughness": 0.65,
+   "role": "skin"
+  },
+  "M_hair": {
+   "colour": [
+    0.7,
+    0.7,
+    0.73
+   ],
+   "roughness": 0.7,
+   "role": "hair"
+  },
+  "M_eyes": {
+   "colour": [
+    0.24,
+    0.17,
+    0.16
+   ],
+   "roughness": 0.5,
+   "role": "eyes"
+  },
+  "M_top": {
+   "colour": [
+    0.53,
+    0.46,
+    0.59
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_top_inner": {
+   "colour": [
+    0.92,
+    0.89,
+    0.85
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_bottom": {
+   "colour": [
+    0.27,
+    0.25,
+    0.25
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_shoes": {
+   "colour": [
+    0.92,
+    0.9,
+    0.88
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_accessories": {
+   "colour": [
+    0.52,
+    0.24,
+    0.29
+   ],
+   "roughness": 0.6,
+   "role": "accessory"
+  },
+  "M_glasses": {
+   "colour": [
+    0.36,
+    0.22,
+    0.17
+   ],
+   "roughness": 0.6,
+   "role": "accessory"
+  }
+ },
+ "objects": {
+  "Character": {
+   "M_NEEDS_REVIEW": 193,
+   "M_skin": 652,
+   "M_hair": 761,
+   "M_top": 1388,
+   "M_top_inner": 200,
+   "M_bottom": 1782,
+   "M_shoes": 995,
+   "M_accessories": 28
+  },
+  "Glasses": {
+   "M_glasses": 132
+  }
+ },
+ "renders": {
+  "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\solid_front.png",
+  "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\solid_back.png",
+  "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\solid_left.png",
+  "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\solid_right.png",
+  "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\solid_three_quarter.png"
+ },
+ "checkpoint": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\work\\grandma_C_materials.blend"
+}

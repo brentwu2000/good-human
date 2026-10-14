@@ -1,0 +1,184 @@
+{
+  "stage": "A_inspect",
+  "input": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\source\\grandma.glb",
+  "blender": "5.2.0 LTS",
+  "python": "3.13.13",
+  "command_line": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe -b --factory-startup --python art_pipeline/scripts/inspect_asset.py -- --input art_pipeline/assets/source/grandma.glb --output art_pipeline/reports/grandma/inspection.json",
+  "devices": {
+    "cpu": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+    "gpu": [
+      "OPTIX: NVIDIA GeForce RTX 3070 Ti",
+      "CUDA: NVIDIA GeForce RTX 3070 Ti"
+    ]
+  },
+  "objects": [
+    {
+      "name": "OwnerSkeleton",
+      "type": "ARMATURE",
+      "parent": null
+    },
+    {
+      "name": "Character",
+      "type": "MESH",
+      "parent": "OwnerSkeleton"
+    },
+    {
+      "name": "Glasses",
+      "type": "MESH",
+      "parent": "OwnerSkeleton"
+    },
+    {
+      "name": "Icosphere",
+      "type": "MESH",
+      "parent": null
+    }
+  ],
+  "images": [
+    {
+      "name": "grandma_surface_v4_base",
+      "size": [
+        2048,
+        2048
+      ],
+      "packed": true,
+      "filepath": "",
+      "colorspace": "sRGB"
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Character",
+      "mesh": "out",
+      "vertices": 7127,
+      "faces": 5999,
+      "triangles": 5999,
+      "material_slots": [
+        "GrandmaToon"
+      ],
+      "faces_per_material": {
+        "GrandmaToon": 5999
+      },
+      "vertex_groups": 53,
+      "vertex_group_names_sample": [
+        "Root",
+        "pelvis",
+        "spine_01",
+        "spine_02",
+        "spine_03",
+        "clavicle_l",
+        "upperarm_l",
+        "lowerarm_l",
+        "hand_l",
+        "index_01_l",
+        "index_02_l",
+        "index_03_l"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "color_attributes": [],
+      "face_attributes": [
+        "material_index",
+        "sharp_face"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "negative_scale": false,
+      "seam_split_vertices_welded_for_checks": 4123,
+      "non_manifold_edges": 21,
+      "boundary_edges": 14,
+      "inconsistent_normal_edges": 0,
+      "duplicate_faces": 0,
+      "degenerate_faces": 0,
+      "uv": {
+        "missing": false,
+        "zero_area_faces": 0,
+        "islands": 1052,
+        "uv_space_used": 0.339,
+        "overlap_share_of_used": 0.001,
+        "texel_density_p10_p50_p90": [
+          0.398,
+          0.442,
+          0.471
+        ],
+        "texel_density_spread_p90_over_p10": 1.18,
+        "note": "coverage rasterised at 512^2 from the triangles; deliberate mirrored UVs would count as overlap"
+      }
+    },
+    {
+      "name": "Glasses",
+      "mesh": "Glasses",
+      "vertices": 168,
+      "faces": 132,
+      "triangles": 132,
+      "material_slots": [
+        "GlassesRim"
+      ],
+      "faces_per_material": {
+        "GlassesRim": 132
+      },
+      "vertex_groups": 53,
+      "vertex_group_names_sample": [
+        "Root",
+        "pelvis",
+        "spine_01",
+        "spine_02",
+        "spine_03",
+        "clavicle_l",
+        "upperarm_l",
+        "lowerarm_l",
+        "hand_l",
+        "index_01_l",
+        "index_02_l",
+        "index_03_l"
+      ],
+      "uv_layers": [],
+      "color_attributes": [],
+      "face_attributes": [
+        "material_index",
+        "sharp_face"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "negative_scale": false,
+      "seam_split_vertices_welded_for_checks": 48,
+      "non_manifold_edges": 96,
+      "boundary_edges": 96,
+      "inconsistent_normal_edges": 0,
+      "duplicate_faces": 0,
+      "degenerate_faces": 0,
+      "uv": {
+        "missing": true
+      }
+    }
+  ],
+  "ignored_helpers": [
+    "Icosphere"
+  ],
+  "armatures": [
+    {
+      "name": "OwnerSkeleton",
+      "bones": 53
+    }
+  ],
+  "actions": 19,
+  "renders": {
+    "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\view_front.png",
+    "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\view_back.png",
+    "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\view_left.png",
+    "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\view_right.png",
+    "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\grandma\\view_three_quarter.png"
+  },
+  "suggested_repair_path": [
+    "Character: one material over the whole body: regions must come from stage B (vertex groups, connectivity, texture colour as candidates); expect NEEDS_REVIEW where they disagree",
+    "Character: 21 non-manifold edges (glTF splits vertices at UV seams; most are boundary edges of that split)",
+    "Glasses: no UVs: stage E smart-unwrap candidate",
+    "Glasses: 96 non-manifold edges (glTF splits vertices at UV seams; most are boundary edges of that split)"
+  ]
+}

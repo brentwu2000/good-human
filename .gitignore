@@ -5,3 +5,8 @@
 
 # Python bytecode
 __pycache__/
+
+# Texturing v5 pipeline working files (rebuilt from source by the scripts)
+/art_pipeline/assets/source/
+/art_pipeline/assets/work/
+/art_pipeline/assets/export/

@@ -1,0 +1,295 @@
+{
+  "asset": "grandma",
+  "source": "art_pipeline/assets/source/grandma.glb",
+  "note": "Park grandma (old master). Region colours sampled from her surface-v4 base colour (k-means). Socks are folded into 'shoes' (same white, same bones); the cardigan's flowers into 'top'. Glasses are their own mesh: 'accessories'. Bone priors: the neckline shows skin on the torso bones; the cardigan hem hangs over the thigh bones. Thigh and calf are separate classes: shoes only from the calf down (the white blouse hem over the thighs is not a shoe).",
+  "regions": [
+    {
+      "id": 1,
+      "name": "skin",
+      "role": "skin",
+      "colour": [
+        0.86,
+        0.64,
+        0.52
+      ],
+      "match": [
+        [
+          0.839,
+          0.62,
+          0.499
+        ]
+      ]
+    },
+    {
+      "id": 2,
+      "name": "hair",
+      "role": "hair",
+      "colour": [
+        0.7,
+        0.7,
+        0.73
+      ],
+      "match": [
+        [
+          0.67,
+          0.671,
+          0.703
+        ],
+        [
+          0.512,
+          0.53,
+          0.568
+        ],
+        [
+          0.591,
+          0.599,
+          0.634
+        ]
+      ]
+    },
+    {
+      "id": 3,
+      "name": "eyes",
+      "role": "eyes",
+      "colour": [
+        0.24,
+        0.17,
+        0.16
+      ],
+      "match": [
+        [
+          0.239,
+          0.169,
+          0.161
+        ]
+      ]
+    },
+    {
+      "id": 4,
+      "name": "top",
+      "role": "cloth",
+      "colour": [
+        0.53,
+        0.46,
+        0.59
+      ],
+      "match": [
+        [
+          0.529,
+          0.459,
+          0.588
+        ],
+        [
+          0.389,
+          0.336,
+          0.417
+        ],
+        [
+          0.66,
+          0.493,
+          0.56
+        ],
+        [
+          0.589,
+          0.509,
+          0.576
+        ]
+      ]
+    },
+    {
+      "id": 5,
+      "name": "top_inner",
+      "role": "cloth",
+      "colour": [
+        0.92,
+        0.89,
+        0.85
+      ],
+      "match": [
+        [
+          0.913,
+          0.886,
+          0.858
+        ]
+      ]
+    },
+    {
+      "id": 6,
+      "name": "bottom",
+      "role": "cloth",
+      "colour": [
+        0.27,
+        0.25,
+        0.25
+      ],
+      "match": [
+        [
+          0.263,
+          0.239,
+          0.235
+        ]
+      ]
+    },
+    {
+      "id": 7,
+      "name": "shoes",
+      "role": "cloth",
+      "colour": [
+        0.92,
+        0.9,
+        0.88
+      ],
+      "match": [
+        [
+          0.913,
+          0.886,
+          0.858
+        ],
+        [
+          0.66,
+          0.493,
+          0.56
+        ]
+      ]
+    },
+    {
+      "id": 8,
+      "name": "accessories",
+      "role": "accessory",
+      "colour": [
+        0.52,
+        0.24,
+        0.29
+      ],
+      "match": [
+        [
+          0.522,
+          0.239,
+          0.294
+        ]
+      ]
+    },
+    {
+      "id": 9,
+      "name": "glasses",
+      "role": "accessory",
+      "colour": [
+        0.36,
+        0.22,
+        0.17
+      ],
+      "match": [
+        [
+          0.36,
+          0.22,
+          0.17
+        ]
+      ]
+    }
+  ],
+  "separate_meshes": {
+    "Glasses": "glasses"
+  },
+  "bone_classes": {
+    "head": [
+      "head"
+    ],
+    "neck": [
+      "neck_01"
+    ],
+    "torso": [
+      "pelvis",
+      "spine_01",
+      "spine_02",
+      "spine_03",
+      "clavicle_l",
+      "clavicle_r",
+      "Root"
+    ],
+    "arm": [
+      "upperarm_l",
+      "lowerarm_l",
+      "upperarm_r",
+      "lowerarm_r"
+    ],
+    "hand": [
+      "hand_l",
+      "hand_r",
+      "thumb_*",
+      "index_*",
+      "middle_*",
+      "ring_*",
+      "pinky_*"
+    ],
+    "foot": [
+      "foot_l",
+      "ball_l",
+      "foot_r",
+      "ball_r"
+    ],
+    "thigh": [
+      "thigh_l",
+      "thigh_r"
+    ],
+    "calf": [
+      "calf_l",
+      "calf_r"
+    ]
+  },
+  "bone_priors": {
+    "head": [
+      "skin",
+      "hair",
+      "eyes",
+      "accessories"
+    ],
+    "neck": [
+      "skin",
+      "hair",
+      "top",
+      "top_inner"
+    ],
+    "torso": [
+      "top",
+      "top_inner",
+      "bottom",
+      "skin"
+    ],
+    "arm": [
+      "top",
+      "skin"
+    ],
+    "hand": [
+      "skin",
+      "top"
+    ],
+    "foot": [
+      "shoes",
+      "bottom"
+    ],
+    "thigh": [
+      "bottom",
+      "top",
+      "top_inner",
+      "skin"
+    ],
+    "calf": [
+      "bottom",
+      "shoes",
+      "skin"
+    ]
+  },
+  "review": {
+    "min_confidence": 0.5,
+    "min_island_faces": 3,
+    "max_review_share": 0.01
+  },
+  "roughness": {
+    "skin": 0.65,
+    "cloth": 0.85,
+    "hair": 0.7,
+    "eyes": 0.5,
+    "accessory": 0.6,
+    "fur": 0.9
+  }
+}
