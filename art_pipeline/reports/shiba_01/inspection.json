@@ -1,0 +1,319 @@
+{
+  "stage": "A_inspect",
+  "input": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\source\\shiba_01.glb",
+  "blender": "5.2.0 LTS",
+  "python": "3.13.13",
+  "command_line": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe -b --factory-startup --python art_pipeline/scripts/inspect_asset.py -- --input art_pipeline/assets/source/shiba_01.glb --output art_pipeline/reports/shiba_01/inspection.json",
+  "devices": {
+    "cpu": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+    "gpu": [
+      "OPTIX: NVIDIA GeForce RTX 3070 Ti",
+      "CUDA: NVIDIA GeForce RTX 3070 Ti"
+    ]
+  },
+  "objects": [
+    {
+      "name": "Shiba_Rig",
+      "type": "ARMATURE",
+      "parent": null
+    },
+    {
+      "name": "Eye_L",
+      "type": "MESH",
+      "parent": "Shiba_Rig"
+    },
+    {
+      "name": "Eye_R",
+      "type": "MESH",
+      "parent": "Shiba_Rig"
+    },
+    {
+      "name": "Nose",
+      "type": "MESH",
+      "parent": "Shiba_Rig"
+    },
+    {
+      "name": "Shiba_Body",
+      "type": "MESH",
+      "parent": "Shiba_Rig"
+    },
+    {
+      "name": "Icosphere",
+      "type": "MESH",
+      "parent": null
+    }
+  ],
+  "images": [],
+  "meshes": [
+    {
+      "name": "Eye_L",
+      "mesh": "Sphere.006",
+      "vertices": 271,
+      "faces": 440,
+      "triangles": 440,
+      "material_slots": [
+        "Eye_L_Mat.001"
+      ],
+      "faces_per_material": {
+        "Eye_L_Mat.001": 440
+      },
+      "vertex_groups": 23,
+      "vertex_group_names_sample": [
+        "ROOT",
+        "pelvis",
+        "rear_leg_L",
+        "rear_shin_L",
+        "rear_paw_L",
+        "rear_leg_R",
+        "rear_shin_R",
+        "rear_paw_R",
+        "spine_01",
+        "spine_02",
+        "front_leg_L",
+        "front_shin_L"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "color_attributes": [],
+      "face_attributes": [
+        "material_index",
+        "sharp_face"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "negative_scale": false,
+      "seam_split_vertices_welded_for_checks": 49,
+      "non_manifold_edges": 0,
+      "boundary_edges": 0,
+      "inconsistent_normal_edges": 0,
+      "duplicate_faces": 0,
+      "degenerate_faces": 0,
+      "uv": {
+        "missing": false,
+        "zero_area_faces": 0,
+        "islands": 1,
+        "uv_space_used": 0.917,
+        "overlap_share_of_used": 0.0,
+        "texel_density_p10_p50_p90": [
+          43.215,
+          47.169,
+          68.184
+        ],
+        "texel_density_spread_p90_over_p10": 1.58,
+        "note": "coverage rasterised at 512^2 from the triangles; deliberate mirrored UVs would count as overlap"
+      }
+    },
+    {
+      "name": "Eye_R",
+      "mesh": "Sphere.007",
+      "vertices": 271,
+      "faces": 440,
+      "triangles": 440,
+      "material_slots": [
+        "Eye_R_Mat.001"
+      ],
+      "faces_per_material": {
+        "Eye_R_Mat.001": 440
+      },
+      "vertex_groups": 23,
+      "vertex_group_names_sample": [
+        "ROOT",
+        "pelvis",
+        "rear_leg_L",
+        "rear_shin_L",
+        "rear_paw_L",
+        "rear_leg_R",
+        "rear_shin_R",
+        "rear_paw_R",
+        "spine_01",
+        "spine_02",
+        "front_leg_L",
+        "front_shin_L"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "color_attributes": [],
+      "face_attributes": [
+        "material_index",
+        "sharp_face"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "negative_scale": false,
+      "seam_split_vertices_welded_for_checks": 49,
+      "non_manifold_edges": 0,
+      "boundary_edges": 0,
+      "inconsistent_normal_edges": 0,
+      "duplicate_faces": 0,
+      "degenerate_faces": 0,
+      "uv": {
+        "missing": false,
+        "zero_area_faces": 0,
+        "islands": 1,
+        "uv_space_used": 0.917,
+        "overlap_share_of_used": 0.0,
+        "texel_density_p10_p50_p90": [
+          43.215,
+          47.169,
+          68.183
+        ],
+        "texel_density_spread_p90_over_p10": 1.58,
+        "note": "coverage rasterised at 512^2 from the triangles; deliberate mirrored UVs would count as overlap"
+      }
+    },
+    {
+      "name": "Nose",
+      "mesh": "Sphere.008",
+      "vertices": 271,
+      "faces": 440,
+      "triangles": 440,
+      "material_slots": [
+        "Nose_Mat.001"
+      ],
+      "faces_per_material": {
+        "Nose_Mat.001": 440
+      },
+      "vertex_groups": 23,
+      "vertex_group_names_sample": [
+        "ROOT",
+        "pelvis",
+        "rear_leg_L",
+        "rear_shin_L",
+        "rear_paw_L",
+        "rear_leg_R",
+        "rear_shin_R",
+        "rear_paw_R",
+        "spine_01",
+        "spine_02",
+        "front_leg_L",
+        "front_shin_L"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "color_attributes": [],
+      "face_attributes": [
+        "material_index",
+        "sharp_face"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "negative_scale": false,
+      "seam_split_vertices_welded_for_checks": 49,
+      "non_manifold_edges": 0,
+      "boundary_edges": 0,
+      "inconsistent_normal_edges": 0,
+      "duplicate_faces": 0,
+      "degenerate_faces": 0,
+      "uv": {
+        "missing": false,
+        "zero_area_faces": 0,
+        "islands": 1,
+        "uv_space_used": 0.917,
+        "overlap_share_of_used": 0.0,
+        "texel_density_p10_p50_p90": [
+          19.655,
+          23.32,
+          33.04
+        ],
+        "texel_density_spread_p90_over_p10": 1.68,
+        "note": "coverage rasterised at 512^2 from the triangles; deliberate mirrored UVs would count as overlap"
+      }
+    },
+    {
+      "name": "Shiba_Body",
+      "mesh": "geometry_0.001",
+      "vertices": 7169,
+      "faces": 10778,
+      "triangles": 10778,
+      "material_slots": [
+        "Shiba_Coat"
+      ],
+      "faces_per_material": {
+        "Shiba_Coat": 10778
+      },
+      "vertex_groups": 23,
+      "vertex_group_names_sample": [
+        "ROOT",
+        "pelvis",
+        "rear_leg_L",
+        "rear_shin_L",
+        "rear_paw_L",
+        "rear_leg_R",
+        "rear_shin_R",
+        "rear_paw_R",
+        "spine_01",
+        "spine_02",
+        "front_leg_L",
+        "front_shin_L"
+      ],
+      "uv_layers": [
+        "UVMap"
+      ],
+      "color_attributes": [
+        "Color"
+      ],
+      "face_attributes": [
+        "material_index",
+        "sharp_face"
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "negative_scale": false,
+      "seam_split_vertices_welded_for_checks": 1778,
+      "non_manifold_edges": 0,
+      "boundary_edges": 0,
+      "inconsistent_normal_edges": 0,
+      "duplicate_faces": 0,
+      "degenerate_faces": 0,
+      "uv": {
+        "missing": false,
+        "zero_area_faces": 0,
+        "islands": 91,
+        "uv_space_used": 0.374,
+        "overlap_share_of_used": 0.002,
+        "texel_density_p10_p50_p90": [
+          0.745,
+          0.816,
+          0.891
+        ],
+        "texel_density_spread_p90_over_p10": 1.2,
+        "note": "coverage rasterised at 512^2 from the triangles; deliberate mirrored UVs would count as overlap"
+      }
+    }
+  ],
+  "ignored_helpers": [
+    "Icosphere"
+  ],
+  "armatures": [
+    {
+      "name": "Shiba_Rig",
+      "bones": 23
+    }
+  ],
+  "actions": 3,
+  "renders": {
+    "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\shiba_01\\view_front.png",
+    "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\shiba_01\\view_back.png",
+    "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\shiba_01\\view_left.png",
+    "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\shiba_01\\view_right.png",
+    "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\shiba_01\\view_three_quarter.png"
+  },
+  "suggested_repair_path": [
+    "Shiba_Body: one material over the whole body: regions must come from stage B (vertex groups, connectivity, texture colour as candidates); expect NEEDS_REVIEW where they disagree"
+  ]
+}

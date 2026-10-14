@@ -124,12 +124,20 @@ def main():
             conf[:] = 1.0
             source = ["separate_mesh"] * nf
         else:
-            img = base_image(o)
-            if img is None:
-                sys.exit(f"SEGMENT_FAIL: {o.name} has no base colour image to take candidates from")
-            w, h = img.size
-            px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, img.channels)[..., :3]
-            uv = me.uv_layers.active.data
+            ca_name = cfg.get("color_attribute")
+            corner_rgb = None
+            if ca_name:
+                # Candidates from a colour attribute (the shiba's coat is vertex-coloured).
+                ca = me.color_attributes[ca_name]
+                vals = np.array([d.color_srgb[:3] for d in ca.data], dtype=np.float32)
+                corner_rgb = vals if ca.domain == "CORNER" else vals[[l.vertex_index for l in me.loops]]
+            else:
+                img = base_image(o)
+                if img is None:
+                    sys.exit(f"SEGMENT_FAIL: {o.name} has no base colour image to take candidates from")
+                w, h = img.size
+                px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, img.channels)[..., :3]
+                uv = me.uv_layers.active.data
             groups = {g.index: g.name for g in o.vertex_groups}
             vclass = []
             for v in me.vertices:
@@ -147,16 +155,18 @@ def main():
                         acc[c] = acc.get(c, 0) + wgt
                 cls = max(acc, key=acc.get) if acc else None
                 allowed = cfg["bone_priors"].get(cls, names)
-                # Colour candidates: centre and the three corner-to-centre midpoints.
-                uvs = np.array([uv[li].uv[:] for li in f.loop_indices])
-                cen = uvs.mean(0)
-                # Close to the centre: small UV triangles sit next to unpainted padding.
-                pts = [cen] + [cen + (u - cen) * 0.3 for u in uvs[:3]]
+                # Colour candidates: per-corner colours (colour attribute), or the face
+                # centre and three points near it (texture: small UV triangles sit next
+                # to unpainted padding).
+                if corner_rgb is not None:
+                    samples = [corner_rgb[li] for li in f.loop_indices] + [corner_rgb[list(f.loop_indices)].mean(0)]
+                else:
+                    uvs = np.array([uv[li].uv[:] for li in f.loop_indices])
+                    cen = uvs.mean(0)
+                    pts = [cen] + [cen + (u - cen) * 0.3 for u in uvs[:3]]
+                    samples = [px[min(max(int(pnt[1] * h), 0), h - 1), min(max(int(pnt[0] * w), 0), w - 1)] for pnt in pts]
                 votes = []
-                for pnt in pts:
-                    x = min(max(int(pnt[0] * w), 0), w - 1)
-                    y = min(max(int(pnt[1] * h), 0), h - 1)
-                    c = px[y, x]
+                for c in samples:
                     if c.sum() < 0.02:  # padding (never painted): no vote
                         continue
                     d = ((match_cols - c) ** 2).sum(1)
