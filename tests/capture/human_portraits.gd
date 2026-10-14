@@ -33,6 +33,11 @@ const VIEWS := [
 
 ## A fighter file, or a person of that background in its first clothes colours.
 func _fighter(source: String) -> FighterData:
+	# "glb:<path>": the old master's data wearing another model (pipeline outputs).
+	if source.begins_with("glb:"):
+		var f := (load(FIGHTERS["grandma"]) as FighterData).duplicate() as FighterData
+		f.skeletal_model = load(source.substr(4))
+		return f
 	if source.begins_with("res://"):
 		return load(source)
 	var human := HumanCandidate.new()

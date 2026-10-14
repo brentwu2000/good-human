@@ -291,5 +291,15 @@
     "eyes": 0.5,
     "accessory": 0.6,
     "fur": 0.9
+  },
+  "reference_texture": "assets/characters/human/models/ai_grandma/grandma_grandma_surface_v4_base.png",
+  "detail_k": {
+    "skin": 3,
+    "hair": 3,
+    "top": 4,
+    "top_inner": 2,
+    "bottom": 1,
+    "shoes": 3,
+    "accessories": 1
   }
 }
