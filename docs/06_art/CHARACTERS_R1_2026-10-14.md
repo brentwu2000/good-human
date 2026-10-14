@@ -52,3 +52,13 @@ Steps 1→3: `surface_step1_rebake.png`, `surface_step3_flat_zones.png` (grandma
 Cost: game files 1.1–1.3 MB → 4.5–5.8 MB (2048 PNG). 1024 PNG would be ~1.5 MB — size is for
 the owner to decide later. Open: faces are still the projected painting (softer than the
 grandma's drawn features); the market auntie and the office worker keep some blotches.
+
+## Faces r3 — drawn like the grandma's (owner chose plan A)
+Flattening the projected faces failed twice (blotches; features vanished): the projected
+features are partial. Now each face is **drawn**: `draw_face_map.py` draws simple features
+(closed-eye arcs or round eyes with a highlight, brows, mouth, blush; the fisher's white
+goatee) as shapes over the front reference, positions read off it on a 20 px grid, stored in
+each `paint_profile.json` → `face_drawing`. `paint_stylized.py` `drawn_face` zones fill the
+face with flat skin (dark projected texels stay hair) and project the drawing from the front
+with project_simple's registration. Gym coach: offset [-12, 10] px (his reference head is tilted).
+`surface_step4_drawn_faces.png` (grandma left), `xiaomi_drawn_face.png`. 47 test scenes pass.
