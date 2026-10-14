@@ -1,0 +1,51 @@
+{
+ "stage": "D_E_paint_bake",
+ "regions": {
+  "orange_fur": {
+   "texels": 279640,
+   "palette": [
+    [
+     0.7099999785423279,
+     0.4300000071525574,
+     0.20999999344348907
+    ]
+   ]
+  },
+  "cream_fur": {
+   "texels": 72675,
+   "palette": [
+    [
+     0.8999999761581421,
+     0.8500000238418579,
+     0.7599999904632568
+    ]
+   ]
+  },
+  "paws": {
+   "texels": 43911,
+   "palette": [
+    [
+     0.9200000166893005,
+     0.8799999952316284,
+     0.800000011920929
+    ]
+   ]
+  }
+ },
+ "boundary_texels_moved": 8992,
+ "textures": {
+  "base_color": [
+   1024,
+   1024,
+   "sRGB"
+  ],
+  "roughness": [
+   512,
+   512,
+   "Non-Color"
+  ],
+  "padding_px": 16
+ },
+ "export": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\export\\shiba_01.glb",
+ "checkpoint": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\work\\shiba_01_E_baked.blend"
+}

@@ -101,7 +101,7 @@ def main():
 
     # ---- F1/F2 on the baked checkpoint: blank texels, ID check by region id.
     bpy.ops.wm.open_mainfile(filepath=os.path.abspath(a.baked))
-    body = bpy.data.objects["Character"]
+    body = bpy.data.objects[cfg.get("body", "Character")]
     me = body.data
     rid = np.zeros(len(me.polygons), dtype=np.int32)
     me.attributes["region_id"].data.foreach_get("value", rid)

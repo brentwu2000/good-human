@@ -37,3 +37,11 @@ the existing base colour as a candidate only (four samples per face, shaded copi
 World height is never used. Faces whose candidate is not allowed or not confident, and
 islands under 3 faces, are `NEEDS_REVIEW` (region 0, magenta) — never guessed.
 Config colours are sRGB; stage C converts them to linear for Base Color.
+
+Shiba pilot (2026-10-14, copy only): coat colour from the vertex colour attribute (scripts read
+`color_attribute` from the config and interpolate it into UV space as the reference); owner approved
+the 311 gradient faces' candidates. Retry 2: two colours per coat region drew a tan halo along the old
+gradient → one colour per region. QA PASS; Godot matches (`reports/shiba_01/godot_before_after.png`):
+orange/cream outline crisp and the same from all four sides. **Not installed**: the dogs are Codex's
+(active work on them); `assets/export/shiba_01.glb` is ready for Codex to adopt.
+Godot check tool: `tests/capture/model_turnaround.tscn -- <res://model.glb> <out dir> [prefix]`.

@@ -107,19 +107,48 @@ def main():
     regions = {r["id"]: r for r in cfg["regions"]}
     rough = cfg.get("roughness", {})
     rep = {"stage": "D_E_paint_bake", "regions": {}}
-    body = bpy.data.objects["Character"]
+    body = bpy.data.objects[cfg.get("body", "Character")]
     me = body.data
     rid = np.zeros(len(me.polygons), dtype=np.int32)
     me.attributes["region_id"].data.foreach_get("value", rid)
     # The source base colour (stage A found it packed in the original material).
-    # The existing base colour, as a local reference only (config "reference_texture").
-    src = bpy.data.images.load(os.path.abspath(cfg["reference_texture"]))
-    W, H = src.size
-    T = a.size or W
-    srcpx = np.array(src.pixels[:], dtype=np.float32).reshape(H, W, src.channels)[..., :3]
-    if T != W:
-        idx = (np.arange(T) * W / T).astype(int)
-        srcpx = srcpx[idx][:, idx]
+    # The existing colour, as a local reference only: a texture (config
+    # "reference_texture") or a colour attribute interpolated into UV space.
+    if cfg.get("color_attribute"):
+        T = a.size or cfg.get("texture_size", 1024)
+        ca = me.color_attributes[cfg["color_attribute"]]
+        vals = np.array([d.color_srgb[:3] for d in ca.data], dtype=np.float32)
+        corner = vals if ca.domain == "CORNER" else vals[[l.vertex_index for l in me.loops]]
+        srcpx = np.zeros((T, T, 3), dtype=np.float32)
+        uvl = np.array([d.uv[:] for d in me.uv_layers.active.data]) * T
+        me.calc_loop_triangles()
+        for t in me.loop_triangles:
+            lp = list(t.loops)
+            tri = uvl[lp]
+            x0, y0 = np.floor(tri.min(0)).astype(int)
+            x1, y1 = np.ceil(tri.max(0)).astype(int)
+            x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, T - 1), min(y1, T - 1)
+            if x1 < x0 or y1 < y0:
+                continue
+            xs, ys = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+            (ax, ay), (bx, by), (cx, cy) = tri
+            det = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy)
+            if abs(det) < 1e-12:
+                continue
+            l1 = ((by - cy) * (xs - cx) + (cx - bx) * (ys - cy)) / det
+            l2 = ((cy - ay) * (xs - cx) + (ax - cx) * (ys - cy)) / det
+            l3 = 1 - l1 - l2
+            ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+            col = l1[..., None] * corner[lp[0]] + l2[..., None] * corner[lp[1]] + l3[..., None] * corner[lp[2]]
+            srcpx[y0:y1 + 1, x0:x1 + 1][ins] = col[ins]
+    else:
+        src = bpy.data.images.load(os.path.abspath(cfg["reference_texture"]))
+        W, H = src.size
+        T = a.size or W
+        srcpx = np.array(src.pixels[:], dtype=np.float32).reshape(H, W, src.channels)[..., :3]
+        if T != W:
+            idx = (np.arange(T) * W / T).astype(int)
+            srcpx = srcpx[idx][:, idx]
     uv = np.array([d.uv[:] for d in me.uv_layers.active.data]) * T
     me.calc_loop_triangles()
     # Boundary faces may resolve the line between their own region and an edge
