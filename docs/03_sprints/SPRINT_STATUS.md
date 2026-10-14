@@ -1,5 +1,10 @@
 # Sprint Status
 
+## ART characters — 2026-10-14 (Claude): rider, gym coach, Xiaomi r1
+
+Delivery rider and the new gym coach background wear their own models (ADR-L05); Xiaomi
+modelled only. 47 test scenes pass. REVIEW / B. [Record](../06_art/CHARACTERS_R1_2026-10-14.md).
+
 ## ART characters — 2026-10-13 (Claude): retired fisher r1
 
 Owner sheet 「退休釣魚阿伯」 on the existing `retiree` background (ADR-L05). 47 test scenes pass.

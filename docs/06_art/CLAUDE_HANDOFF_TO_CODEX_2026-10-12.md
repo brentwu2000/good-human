@@ -34,6 +34,10 @@ the dogs and props stay with you.
   background `retiree`. `project_simple.py` now welds UV seams before fixing normals;
   `paint_stylized.py` zones accept `x_min` and `r_min`/`y_centre`. Record: `RETIRED_FISHER_R1_2026-10-13.md`.
 
+- **Rider, gym coach, Xiaomi r1 (2026-10-14)** — `assets/characters/human/models/{delivery_rider,gym_coach,xiaomi}/`.
+  Xiaomi is not wired to any background (owner). New options: `project_simple.py --neck-search`,
+  `match_proportions.py --neck-range`, zones `y_min`. Record: `CHARACTERS_R1_2026-10-14.md`.
+
 ## Do not change without telling Claude
 - OwnerSkeleton bone names; the clips are shared by every human.
 - Mesh names starting `Hair` (`skeletal_model_test` checks they are skinned).

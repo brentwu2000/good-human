@@ -1,0 +1,25 @@
+{
+  "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\gym_coach\\gym_coach_game.glb",
+  "created": "2026-10-14T11:58:05",
+  "tool": "blender rig_lods.py",
+  "model": "blender",
+  "model_licence": "GPL tool; output belongs to the user",
+  "model_class": "COMMERCIAL_OK",
+  "inputs": [
+    {
+      "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\blender_work\\humans\\gym_coach\\lod0_toon_prop.glb",
+      "class": "UNKNOWN"
+    }
+  ],
+  "params": {
+    "lod": "lod2",
+    "game": {
+      "base": 1024,
+      "normal": 0,
+      "tote": 256,
+      "orm": "multiplied into base"
+    }
+  },
+  "note": "",
+  "class": "UNKNOWN"
+}

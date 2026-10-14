@@ -90,6 +90,11 @@ func _test_background_model() -> void:
 	fisher.background_id = &"retiree"
 	var fv := _puppet(fisher.to_fighter_data("阿伯"))._body as P04HumanVisual
 	check(fv != null and fv.model.scene_file_path.ends_with("retired_fisher/retired_fisher.glb") and fv.player.has_animation("Jab"), "the retiree wears the retired fisher, with the combat clips")
+	for pair: Array in [[&"delivery_rider", "delivery_rider/delivery_rider.glb"], [&"gym_coach", "gym_coach/gym_coach.glb"]]:
+		var person := HumanCandidate.new()
+		person.background_id = pair[0]
+		var pv := _puppet(person.to_fighter_data(""))._body as P04HumanVisual
+		check(pv != null and pv.model.scene_file_path.ends_with(pair[1]) and pv.player.has_animation("Jab"), "%s wears its own model, with the combat clips" % pair[0])
 	var other := HumanCandidate.new()
 	other.background_id = &"student"
 	check(other.to_fighter_data("").skeletal_model == null, "other backgrounds keep the shared human")

@@ -1,4 +1,10 @@
 # Art Status
+## Delivery rider, gym coach, Xiaomi r1 (Claude) — 2026-10-14
+
+Three more owner sheets through the AI 3D factory. Rider on `delivery_rider`, coach on the new
+`gym_coach` background; Xiaomi is a model only (owner). Game LODs 6k tris. REVIEW / B; sheet
+rights UNKNOWN. [Record](CHARACTERS_R1_2026-10-14.md).
+
 ## Retired fisher r1 (Claude) — 2026-10-13
 
 The `retiree` background now wears its own model (退休釣魚阿伯), through the AI 3D factory

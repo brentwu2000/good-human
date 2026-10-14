@@ -17,6 +17,8 @@ const FIGHTERS := {
 	"office_worker": "office_worker",
 	"market_auntie": "market_vendor",
 	"retired_fisher": "retiree",
+	"delivery_rider": "delivery_rider",
+	"gym_coach": "gym_coach",
 }
 ## [name, puppet yaw (the puppet faces -Z at PI), camera position, look-at point, fov]
 const VIEWS := [
