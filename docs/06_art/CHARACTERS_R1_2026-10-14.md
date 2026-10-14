@@ -62,3 +62,15 @@ each `paint_profile.json` → `face_drawing`. `paint_stylized.py` `drawn_face` z
 face with flat skin (dark projected texels stay hair) and project the drawing from the front
 with project_simple's registration. Gym coach: offset [-12, 10] px (his reference head is tilted).
 `surface_step4_drawn_faces.png` (grandma left), `xiaomi_drawn_face.png`. 47 test scenes pass.
+
+## Colour r4 — by position (owner: 「你來調整人物的上色」)
+Region smoothing alone left blotches, so more areas are now decided by position, as the grandma's:
+- hair: everything on the head outside the drawn face is hair; small ear zones and a neck zone
+  (front, just under the face) are skin (rider, auntie, Xiaomi);
+- the market auntie's apron is one red, her blouse lavender (the floral print was blotches at this size);
+- the gym coach's shorts are black with a continuous red stripe on the side-facing surfaces
+  (new zone option `normal_x_min`);
+- the office worker's shirt front no longer admits the backpack's black (specks gone);
+- `paint_stylized.py` zones also accept `smooth` (extra majority rounds inside the zone).
+`surface_step5_colour_by_position.png`. 47 test scenes pass.
+Open: a dark stroke on the auntie's nose bridge; some skin patches remain in her side curls.
