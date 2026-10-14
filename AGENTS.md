@@ -43,6 +43,20 @@ Dog/human assets require S-level final quality. A-level bases may be transformed
 6. `docs/99_notes/LESSONS_LEARNED.md` — problems already hit (posing hands and held objects, Blender previews, publishing models, exports); when you fix one that was not obvious, add it there.
 7. Open handoffs from Claude — `docs/06_art/CLAUDE_HANDOFF_TO_CODEX_*.md` (newest first). Each lists what was added on the owner's requests, how it is rebuilt, what must not change, and the adjustments the owner wants (CX-xx); record them in `ART_STATUS.md` as you take them.
 
+## Running Blender and Godot (no approval prompts)
+Owner, 2026-10-14: Blender and Godot are allowed without asking, by executable,
+in `~/.codex/rules/default.rules`. The rules match the **first word** of the
+command, so call the executable directly:
+
+```powershell
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' -b --factory-startup --python tools\art\<script>.py
+& 'C:\Users\b\Downloads\Godot_v4.6.3-stable_win64.exe\Godot_v4.6.3-stable_win64_console.exe' --headless --path . res://tests/<name>_test.tscn
+```
+
+Do **not** wrap them in `powershell -Command "& '...blender.exe' ..."`: the whole
+wrapped string is then one word, no rule matches, and the owner is asked again.
+Downloads and cloud generation (PolyHaven, Sketchfab, Hunyuan, Hyper3D) still ask on purpose.
+
 ## Blender (MCP)
 A Blender bridge is wired into Codex as the `blender` MCP server, so the ART
 role can model, inspect and export without leaving the session.
