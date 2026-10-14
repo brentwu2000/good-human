@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djapujcfbtp2o"
-path="res://.godot/imported/retired_fisher_retired_fisher_game_base.jpg-ca5ad2f4ebff470bfde2a9284a4399a1.ctex"
+uid="uid://lh7arkp70x4r"
+path="res://.godot/imported/market_auntie_market_auntie_game_base.png-92e0bd898e080dff7edaca3e74d79a0a.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "3db936dd0234c3646c0f42a7aa7e27e2"
+"md5": "b95172cb197c6906d363306a6ac13e5e"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/retired_fisher/retired_fisher_retired_fisher_game_base.jpg"
-dest_files=["res://.godot/imported/retired_fisher_retired_fisher_game_base.jpg-ca5ad2f4ebff470bfde2a9284a4399a1.ctex"]
+source_file="res://assets/characters/human/models/market_auntie/market_auntie_market_auntie_game_base.png"
+dest_files=["res://.godot/imported/market_auntie_market_auntie_game_base.png-92e0bd898e080dff7edaca3e74d79a0a.ctex"]
 
 [params]
 

@@ -1,6 +1,6 @@
 {
   "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\delivery_rider\\delivery_rider_game.glb",
-  "created": "2026-10-14T11:57:03",
+  "created": "2026-10-14T14:44:43",
   "tool": "blender rig_lods.py",
   "model": "blender",
   "model_licence": "GPL tool; output belongs to the user",
@@ -14,10 +14,10 @@
   "params": {
     "lod": "lod2",
     "game": {
-      "base": 1024,
+      "base": 2048,
+      "format": "PNG",
       "normal": 0,
-      "tote": 256,
-      "orm": "multiplied into base"
+      "uv": "own (rebaked from LOD0)"
     }
   },
   "note": "",

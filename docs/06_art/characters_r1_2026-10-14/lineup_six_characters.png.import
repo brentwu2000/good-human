@@ -2,19 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cc6r66qlqlm8i"
-path="res://.godot/imported/delivery_rider_delivery_rider_game_base.jpg-578e0282a0fb22e7efa6f3bb3344b81b.ctex"
+uid="uid://77ckp2rhj4qx"
+path="res://.godot/imported/lineup_six_characters.png-a4fc4ffebf96d870d2b4ba6fb1f95735.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "38972320e5a3119505432ee552f3f662"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/delivery_rider/delivery_rider_delivery_rider_game_base.jpg"
-dest_files=["res://.godot/imported/delivery_rider_delivery_rider_game_base.jpg-578e0282a0fb22e7efa6f3bb3344b81b.ctex"]
+source_file="res://docs/06_art/characters_r1_2026-10-14/lineup_six_characters.png"
+dest_files=["res://.godot/imported/lineup_six_characters.png-a4fc4ffebf96d870d2b4ba6fb1f95735.ctex"]
 
 [params]
 
@@ -26,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

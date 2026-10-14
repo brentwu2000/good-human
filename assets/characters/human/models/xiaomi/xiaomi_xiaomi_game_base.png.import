@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b328w4k6ysnyn"
-path="res://.godot/imported/market_auntie_market_auntie_game_base.jpg-aea82a8af1a86adada9f9a5cbcc96b02.ctex"
+uid="uid://bnmyvgr2kkrda"
+path="res://.godot/imported/xiaomi_xiaomi_game_base.png-86fddf4ad86fa7d0c8e6788dedc61a5e.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "f40f149168076a4af5765e08d06ca844"
+"md5": "5315a006489cae167bc76ec34dd6638d"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/market_auntie/market_auntie_market_auntie_game_base.jpg"
-dest_files=["res://.godot/imported/market_auntie_market_auntie_game_base.jpg-aea82a8af1a86adada9f9a5cbcc96b02.ctex"]
+source_file="res://assets/characters/human/models/xiaomi/xiaomi_xiaomi_game_base.png"
+dest_files=["res://.godot/imported/xiaomi_xiaomi_game_base.png-86fddf4ad86fa7d0c8e6788dedc61a5e.ctex"]
 
 [params]
 

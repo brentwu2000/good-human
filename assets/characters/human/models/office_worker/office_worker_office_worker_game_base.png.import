@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bkxmcrpmehptd"
-path="res://.godot/imported/office_worker_office_worker_game_base.jpg-f9c471f57522050a584c1c0421554abf.ctex"
+uid="uid://d05dnl8akbtie"
+path="res://.godot/imported/office_worker_office_worker_game_base.png-b4aabc4067b425a1fe2b6b3ae6b83543.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "14b426c13376f7c076ae610233c78bee"
+"md5": "109b670d80978356e8a39aca4645f28a"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/office_worker/office_worker_office_worker_game_base.jpg"
-dest_files=["res://.godot/imported/office_worker_office_worker_game_base.jpg-f9c471f57522050a584c1c0421554abf.ctex"]
+source_file="res://assets/characters/human/models/office_worker/office_worker_office_worker_game_base.png"
+dest_files=["res://.godot/imported/office_worker_office_worker_game_base.png-b4aabc4067b425a1fe2b6b3ae6b83543.ctex"]
 
 [params]
 

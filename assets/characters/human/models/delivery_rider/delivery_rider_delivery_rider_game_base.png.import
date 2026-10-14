@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bqxklr7ekncpv"
-path="res://.godot/imported/gym_coach_gym_coach_game_base.jpg-1741e88b166856205dbe3119be62c7f2.ctex"
+uid="uid://d2wrj1alqieca"
+path="res://.godot/imported/delivery_rider_delivery_rider_game_base.png-c9c98e661d92509a0e0a2e8c876fd6f3.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "11ff66f3512d32670e9c2778c2653caf"
+"md5": "294eb1dc31bbed2767544fc3a8de1c27"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/gym_coach/gym_coach_gym_coach_game_base.jpg"
-dest_files=["res://.godot/imported/gym_coach_gym_coach_game_base.jpg-1741e88b166856205dbe3119be62c7f2.ctex"]
+source_file="res://assets/characters/human/models/delivery_rider/delivery_rider_delivery_rider_game_base.png"
+dest_files=["res://.godot/imported/delivery_rider_delivery_rider_game_base.png-c9c98e661d92509a0e0a2e8c876fd6f3.ctex"]
 
 [params]
 

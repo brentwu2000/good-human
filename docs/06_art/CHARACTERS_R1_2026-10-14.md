@@ -34,3 +34,21 @@ Stats are rolled as for everyone: the gym coach's build says nothing about how h
 - Sheet rights UNKNOWN (owner to confirm). The sheets' combat skills are not built.
 
 Images: `characters_r1_2026-10-14/`.
+
+## Surface r2 — the grandma's fix (owner: 「模型貼皮質感很差 請依照奶奶的調整方式修正」)
+Same diagnosis as the grandma's surface v4: the texture was painted on LOD0's 95k-triangle UVs and
+squeezed onto the 6k game LOD (triangle fragments, mottled colour). Applied to all six game models
+(office worker, market auntie, retired fisher, delivery rider, gym coach, Xiaomi):
+1. **Own UVs + rebake** (`rig_lods.py --rebake-game 2048`): the decimated game LOD is smart-unwrapped
+   and its base colour baked from LOD0 (Cycles, selected-to-active, 16 px margin) into a 2048 PNG
+   (JPEG blotched flat colour). No normal map, matte.
+2. **One colour per material**: shade variants output their base colour; shading comes from AO.
+   5x5→7x7 majority filter, 4 rounds.
+3. **Continuous object-space clothing areas** (`"fixed"` zones in `paint_stylized.py`): jacket,
+   helmet, gloves, trousers, vest, tank top, arms, shins are filled by position, not by the noisy
+   projection. Patterns that are the design (auntie's florals, the husky print) keep a palette.
+Steps 1→3: `surface_step1_rebake.png`, `surface_step3_flat_zones.png` (grandma on the left).
+
+Cost: game files 1.1–1.3 MB → 4.5–5.8 MB (2048 PNG). 1024 PNG would be ~1.5 MB — size is for
+the owner to decide later. Open: faces are still the projected painting (softer than the
+grandma's drawn features); the market auntie and the office worker keep some blotches.

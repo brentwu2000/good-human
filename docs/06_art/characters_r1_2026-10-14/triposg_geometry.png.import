@@ -2,19 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1e7rvfey5s0c"
-path="res://.godot/imported/xiaomi_xiaomi_game_base.jpg-ea70bff7a1c1a0f3a7b592ca3e1fe929.ctex"
+uid="uid://bhwp68f8eocfo"
+path="res://.godot/imported/triposg_geometry.png-1e4f1b1a8ceb9e99cd3d9619c8e84e49.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "f5f5c361efdd70d52d313afd5c306d8c"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/xiaomi/xiaomi_xiaomi_game_base.jpg"
-dest_files=["res://.godot/imported/xiaomi_xiaomi_game_base.jpg-ea70bff7a1c1a0f3a7b592ca3e1fe929.ctex"]
+source_file="res://docs/06_art/characters_r1_2026-10-14/triposg_geometry.png"
+dest_files=["res://.godot/imported/triposg_geometry.png-1e4f1b1a8ceb9e99cd3d9619c8e84e49.ctex"]
 
 [params]
 
@@ -26,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
