@@ -1,6 +1,6 @@
 {
   "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\market_auntie\\market_auntie_game.glb",
-  "created": "2026-10-14T19:03:50",
+  "created": "2026-10-14T19:29:07",
   "tool": "blender rig_lods.py",
   "model": "blender",
   "model_licence": "GPL tool; output belongs to the user",
@@ -12,7 +12,7 @@
     }
   ],
   "params": {
-    "lod": "lod2",
+    "lod": "lod1",
     "game": {
       "base": 2048,
       "format": "PNG",

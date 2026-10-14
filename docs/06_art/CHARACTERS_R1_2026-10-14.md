@@ -74,3 +74,25 @@ Region smoothing alone left blotches, so more areas are now decided by position,
 - `paint_stylized.py` zones also accept `smooth` (extra majority rounds inside the zone).
 `surface_step5_colour_by_position.png`. 47 test scenes pass.
 Open: a dark stroke on the auntie's nose bridge; some skin patches remain in her side curls.
+
+## r5 — closer to the sheets (owner: 「按照你的建議，精修直到你覺得跟設計稿一樣」)
+Compared each character with its sheet (`sheet_vs_game_*.png`: sheet left, game right) and fixed:
+- **Patterns are the design, not noise**: new zone option `ref_project` projects the sheet's own
+  front or back view onto the zone and snaps it to a palette with a light filter, so the shapes
+  survive — the rider's shiba box and jacket patches, the auntie's floral apron and blouse, the
+  gym coach's sling bag, the fisher's vest pockets.
+- **Gym coach head back to his sheet** (small head, huge body; head share 0.14, no scaling): the
+  grandma's 0.24 made him a big-headed cartoon and lost the 「壯漢」.
+- **Office worker's eyes**: small eyes behind the lenses (`eye_white_r`), not lenses filled white;
+  beige sneakers as on the sheet. Gym tank top is sleeveless again.
+- **Game LOD 12k triangles** (`--game-lod lod1`): muscles, pockets and folds keep their shape.
+  Game files 4.8–5.9 MB.
+47 test scenes pass.
+
+### Still different from the sheets (not paint)
+- Geometry from TripoSG: the gym coach's neck/trapezius is one lump; hands are simple mitts;
+  shoes and hat lures have no modelled detail.
+- Accessories left out for gameplay: the auntie's basket, the fisher's rod case and net, the
+  coach's shaker bottle; the auntie's satchel and the coach's towel are only painted.
+- Posture: all share the owner's relaxed idle; the sheets give each a pose of their own
+  (the office worker's slouch, the coach's hands-on-hips, the auntie's arm on her bag).
