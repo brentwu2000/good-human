@@ -1,0 +1,21 @@
+{
+  "bones": 49,
+  "clips": [
+    "Idle",
+    "Walk",
+    "Sit",
+    "M2M_Run",
+    "M2M_Sneak",
+    "M2M_Fetch",
+    "M2M_Bark",
+    "M2M_Alert",
+    "M2M_Jump",
+    "M2M_Howl",
+    "M2M_Sit",
+    "M2M_Idle"
+  ],
+  "matching_library_bind_rest": true,
+  "surfaces": 7,
+  "textured_surfaces": 3,
+  "triangles": 14969
+}

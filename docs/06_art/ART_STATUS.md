@@ -12,13 +12,15 @@ New adopter background `market_vendor` with her own model, through the AI 3D fac
 zones mode, head share 0.24, rig_lods). Game LOD2 6k tris, 1.2 MB. REVIEW / B; sheet rights
 UNKNOWN. [Record](MARKET_AUNTIE_R1_2026-10-13.md).
 
-## Chihuahua delivery refinement — 2026-10-13
+## Chihuahua r38 delivered — 2026-10-14
 
-IN_PROGRESS under owner instruction to continue until deliverable. Whole-body
-review found seated-base anatomy, merged hindquarters and shoulder facets that
-cannot be solved by local paint. Testing adapted CC0 Mesh2Motion body topology
-with retained Chihuahua identity; structural candidate remains in build/dog_delivery.
-Runtime remains r37 until full appearance, skin, motion and budget gates pass.
+Runtime model and matching motion library published. Standing body anatomy,
+continuous coat, repaired head/neck transition, single weighted tongue and jaw
+neutral, grounded seated paws. 14,969 tris / 49 bones / four skin influences.
+912 evaluated poses; 68 runtime captures reviewed; 161 regression checks PASS.
+ART grade S / final candidate at normal gameplay camera. Close-up head texture
+and rear detail remain simplified; inherited reference rights remain unchanged.
+[Delivery and previews](CHIHUAHUA_DELIVERY_R38_2026-10-14.md).
 
 ## Office worker r1 (Claude) — 2026-10-13
 

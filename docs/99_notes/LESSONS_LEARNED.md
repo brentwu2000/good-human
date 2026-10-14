@@ -175,3 +175,12 @@ so previously subtle spikes became conspicuous. Zero flipped faces is not a
 visual acceptance criterion. Fade the smoothing mask out before fragile tips,
 compare both profiles in Godot, and retain unresolved tips as explicit work.
 Final r36 preserves z >= 0.337 m; max local movement 2.5 mm.
+
+
+## Chihuahua r38 export and skin — 2026-10-14
+
+- Set fake_user on every retained Blender Action before saving. Unassigned actions can disappear after reopening even when the current scene looks correct.
+- Retarget scaled animals with joint translations as well as rotations; rotation-only adaptation left seated front feet floating. Check actual evaluated skin, not just joint coordinates.
+- Recompute custom normals after skull edits, averaging coincident physical vertices across UV splits. Otherwise smooth shading can preserve old hard seams.
+- Inspect rear and raised-chin poses before accepting a neck patch; a front-view repair can protrude as colored side panels.
+- Appended Blender datablocks may retain a library reference to an old checkpoint. Save exports to a distinct filename rather than overwriting that referenced library.

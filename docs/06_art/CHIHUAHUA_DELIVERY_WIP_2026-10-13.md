@@ -63,3 +63,6 @@ Remaining visible issues: rear foot/hock folding in seated poses, rigid mouth
 expression, some angular rear-skull contour and head/body material mismatch.
 Need full evaluated-skin contact checks, export/Godot validation and source archive.
 Runtime remains r37; candidate remains B and has not passed the delivery gate.
+
+
+Superseded by [r38 runtime delivery](CHIHUAHUA_DELIVERY_R38_2026-10-14.md) on 2026-10-14.

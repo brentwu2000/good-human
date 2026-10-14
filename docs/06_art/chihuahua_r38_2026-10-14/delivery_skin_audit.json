@@ -1,0 +1,78 @@
+{
+  "triangles": 14969,
+  "bones": 49,
+  "vertices": 9246,
+  "trimmed_weights": 770,
+  "clips": {
+    "Run": {
+      "frames": 27,
+      "lowest": -6.705522537231445e-07,
+      "highest_lowest": 2.7474015951156616e-08,
+      "height_max": 0.3605354130268097,
+      "nonfinite_frames": 0
+    },
+    "Sneak": {
+      "frames": 77,
+      "lowest": -1.8087448552250862e-06,
+      "highest_lowest": -4.2514875531196594e-07,
+      "height_max": 0.23849350214004517,
+      "nonfinite_frames": 0
+    },
+    "Fetch": {
+      "frames": 59,
+      "lowest": -5.109468474984169e-06,
+      "highest_lowest": -2.420041710138321e-06,
+      "height_max": 0.23333844542503357,
+      "nonfinite_frames": 0
+    },
+    "Bark": {
+      "frames": 167,
+      "lowest": -1.0776566341519356e-05,
+      "highest_lowest": -4.877336323261261e-06,
+      "height_max": 0.3379911780357361,
+      "nonfinite_frames": 0
+    },
+    "Alert": {
+      "frames": 95,
+      "lowest": -1.2464821338653564e-05,
+      "highest_lowest": -8.723814971745014e-06,
+      "height_max": 0.29605159163475037,
+      "nonfinite_frames": 0
+    },
+    "Jump": {
+      "frames": 131,
+      "lowest": -1.4728400856256485e-05,
+      "highest_lowest": 0.21224160492420197,
+      "height_max": 0.6296513676643372,
+      "nonfinite_frames": 0
+    },
+    "Howl": {
+      "frames": 139,
+      "lowest": -4.537403583526611e-06,
+      "highest_lowest": -4.108995199203491e-06,
+      "height_max": 0.35337987542152405,
+      "nonfinite_frames": 0
+    },
+    "Sit": {
+      "frames": 79,
+      "lowest": -7.416121661663055e-06,
+      "highest_lowest": -6.549176760017872e-06,
+      "height_max": 0.3617110848426819,
+      "nonfinite_frames": 0
+    },
+    "Idle": {
+      "frames": 79,
+      "lowest": -1.4730612747371197e-05,
+      "highest_lowest": -1.249462366104126e-05,
+      "height_max": 0.3364129960536957,
+      "nonfinite_frames": 0
+    },
+    "Walk": {
+      "frames": 59,
+      "lowest": -3.548711538314819e-05,
+      "highest_lowest": -1.0419636964797974e-05,
+      "height_max": 0.33586812019348145,
+      "nonfinite_frames": 0
+    }
+  }
+}

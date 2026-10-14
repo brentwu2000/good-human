@@ -1,0 +1,28 @@
+{
+  "revision": "r38",
+  "date": "2026-10-14",
+  "grade": "S final candidate for normal gameplay camera; inherited reference rights unchanged",
+  "triangles": 14969,
+  "bones": 49,
+  "surfaces": 7,
+  "model_sha256": "8be6cd5a5f11cf05406d0e6171e413c99c7342b7b12bc78d0238dc310a44512b",
+  "motion_sha256": "ff75f18991ee8dffdf09233bf41bf32c04e6b17e440efab4805f112ac2fa250d",
+  "editable_source": "C:/Users/b/Documents/good-human-3d-pipeline/blender/dog/chihuahua_r38_2026-10-14/chihuahua_r38_editable.blend",
+  "editable_source_sha256": "ffdef164241d5a1d2180c754034256eda50ad34b07b5c1f6a30e06864bf28d12",
+  "body_source": {
+    "path": "assets/_source/mesh2motion/fox-animations.glb",
+    "sha256": "80e80641a5692a14aba7616a46d2a28d3595479764887c578c766b99dba8a0d0",
+    "author": "Scott Petrovic / Mesh2Motion",
+    "url": "https://github.com/scottpetrovic/mesh2motion-app",
+    "commit": "653a969",
+    "license": "CC0-1.0 (art); MIT (code)",
+    "retrieved": "2026-10-09"
+  },
+  "head_source": "r37 Chihuahua; inherited factory/reference terms remain; entire derivative is not asserted CC0",
+  "runtime_capture": {
+    "views": 8,
+    "poses": 60,
+    "byte_identical_to_direct_candidate": 0,
+    "review": "Runtime contact sheets visually inspected; pixel equality is not claimed."
+  }
+}

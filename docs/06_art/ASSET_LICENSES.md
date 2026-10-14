@@ -1,5 +1,14 @@
 # Third-Party Asset License Register
 
+## Chihuahua r38 delivery — 2026-10-14
+
+Project-authored adaptation of the existing CC0 Mesh2Motion fox body/rig/motion
+(Scott Petrovic; retrieved 2026-10-09, commit 653a969) and r37 Chihuahua head.
+No new retrieval; originals retained. Commercial modification rights of the
+CC0 body do not replace inherited head/reference terms. ART grade S / final
+candidate for gameplay; rights status unchanged. Packed editable source and
+hashes: [delivery record](CHIHUAHUA_DELIVERY_R38_2026-10-14.md).
+
 ## Chihuahua structural study — 2026-10-13
 
 Existing Mesh2Motion fox topology (Scott Petrovic, CC0 1.0; retrieved 2026-10-09,
