@@ -21,5 +21,13 @@
     }
   },
   "note": "",
-  "class": "UNKNOWN"
+  "class": "UNKNOWN",
+  "v5_texturing": {
+    "date": "2026-10-15",
+    "tool": "art_pipeline (Texturing v5) segment_regions → approve_regions → paint_regions → qa_export",
+    "config": "art_pipeline/config/characters/retired_fisher.json",
+    "qa": "art_pipeline/reports/retired_fisher/qa_report.json (PASS)",
+    "approval": "accept_candidates, delegated by the owner 2026-10-15 (套色直到可交付)",
+    "sha256": "22578922fbb382b0496b12bd50d560398a62b0056d450c5eeb2148e307052990"
+  }
 }

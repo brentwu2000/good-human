@@ -118,6 +118,9 @@ def main():
         source = ["" for _ in range(nf)]
         reasons = {}
         face_rgb = {}
+        fallback = {}
+        cls_ids = {c: i + 1 for i, c in enumerate(cfg["bone_classes"])}
+        face_cls = np.zeros(nf, dtype=np.int32)
         if o.name in cfg.get("separate_meshes", {}):
             rid = by_name[cfg["separate_meshes"][o.name]]["id"]
             region[:] = rid
@@ -154,7 +157,46 @@ def main():
                     for c, wgt in vclass[vi].items():
                         acc[c] = acc.get(c, 0) + wgt
                 cls = max(acc, key=acc.get) if acc else None
+                face_cls[f.index] = cls_ids.get(cls, 0)
+                forced = None
+                for rule in cfg.get("share_force", []):
+                    # A sleeve that ends below the bone joint: faces carrying at least
+                    # `min` of their weight on these bones are that region.
+                    tot = sum(sum(g.weight for g in me.vertices[vi].groups) for vi in f.vertices) or 1.0
+                    share = sum(g.weight for vi in f.vertices for g in me.vertices[vi].groups
+                                if any(fnmatch.fnmatch(groups[g.group], b) for b in rule["bones"])) / tot
+                    if share >= rule["min"] and cls in rule.get("classes", [cls]):
+                        forced = rule["region"]
+                if forced:
+                    region[f.index] = by_name[forced]["id"]
+                    conf[f.index] = 1.0
+                    source[f.index] = "share_force"
+                    continue
+                if cls in cfg.get("bone_force", {}):
+                    # The sheet decides here, not the projected colour (the auntie's
+                    # sleeves came out skin-coloured; her sheet has purple sleeves).
+                    region[f.index] = by_name[cfg["bone_force"][cls]]["id"]
+                    conf[f.index] = 1.0
+                    source[f.index] = f"bone_force:{cls}"
+                    continue
                 allowed = cfg["bone_priors"].get(cls, names)
+                facing = cfg.get("front_only_regions", {})
+                if facing:
+                    # Drawn eyes and mouth are on the front of the face: a face turned
+                    # away (the back of a cap brim) cannot be one. Rest pose, the
+                    # character faces -Y.
+                    fy = -(o.matrix_world.to_3x3() @ f.normal).normalized().y
+
+                    def facing_ok(n_):
+                        rule = facing.get(n_)
+                        if rule is None:
+                            return True
+                        if isinstance(rule, dict):
+                            # e.g. skin on the head only where it can be seen from the
+                            # front or side (flecks on the back of the hair are hair).
+                            return cls not in rule.get("classes", [cls]) or fy >= rule["min"]
+                        return fy >= rule
+                    allowed = [n_ for n_ in allowed if facing_ok(n_)]
                 # Colour candidates: per-corner colours (colour attribute), or the face
                 # centre and three points near it (texture: small UV triangles sit next
                 # to unpainted padding).
@@ -180,13 +222,33 @@ def main():
                     # region is nearly as close as the overall nearest, the allowed one stands.
                     if ok.any() and np.sqrt(d[ok].min()) - np.sqrt(d.min()) < cfg["review"].get("prior_tolerance", 0.06):
                         best_any = best_ok
+                    # Aliases: allowed regions whose colours are as near as the best (an
+                    # orange vest and an orange bag strap) cannot be told apart by colour.
+                    # The bone prior's order decides (first listed wins), and an alias is
+                    # not a competitor in the margin.
+                    tie = cfg["review"].get("tie_eps", 0.03)
+                    dreg = {}
+                    for n_ in allowed:
+                        sel = match_reg == by_name[n_]["id"]
+                        if sel.any():
+                            dreg[n_] = float(np.sqrt(d[sel].min()))
+                    if dreg:
+                        dmin = min(dreg.values())
+                        pref = next(n_ for n_ in allowed if n_ in dreg and dreg[n_] <= dmin + tie)
+                        if best_any == best_ok:
+                            best_any = by_name[pref]["id"]
+                        best_ok = by_name[pref]["id"]
+                    aliases = {by_name[n_]["id"] for n_, dd in dreg.items() if dd <= dmin + tie} if dreg else set()
                     # margin: how much nearer the chosen region is than the nearest other region
-                    other = d[(match_reg != best_ok) & ok]  # competitors that are possible here
+                    other = d[~np.isin(match_reg, list(aliases | {best_ok})) & ok]  # competitors that are possible here
                     d1 = float(np.sqrt(d[match_reg == best_ok].min())) if best_ok else 9.0
                     d2 = float(np.sqrt(other.min())) if len(other) else 9.0
                     votes.append((best_any, best_ok, d1, d2, c))
                 if not votes:
                     reasons[f.index] = "no painted texel inside the face"
+                    # Fallback candidate if no painted neighbour gives one: the bone
+                    # class's main region.
+                    fallback[f.index] = by_name[allowed[0]]["id"]
                     continue
                 any_ids = [v[0] for v in votes]
                 ok_ids = [v[1] for v in votes]
@@ -215,6 +277,17 @@ def main():
         bm.from_mesh(me)
         bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
         bm.faces.ensure_lookup_table()
+        # A face with no painted texel (a sliver between UV islands) gets its edge
+        # neighbours' majority as the *candidate*; it stays in review.
+        for _ in range(4):
+            for f in bm.faces:
+                if region[f.index] == 0 and f.index in reasons:
+                    nb = [int(region[g.index]) for e in f.edges for g in e.link_faces if region[g.index]]
+                    if nb:
+                        region[f.index] = max(set(nb), key=nb.count)
+        for fi, rid_ in fallback.items():
+            if region[fi] == 0:
+                region[fi] = rid_
         seen = np.zeros(nf, dtype=bool)
         minf = cfg["review"]["min_island_faces"]
         for f in bm.faces:
@@ -232,6 +305,18 @@ def main():
             if len(comp) < minf and o.name not in cfg.get("separate_meshes", {}):
                 for fi in comp:
                     reasons.setdefault(fi, f"island of {len(comp)} face(s) of {names[rid - 1] if rid else '?'}")
+            merge = cfg["review"].get("merge_islands", 0)
+            if len(comp) < merge and o.name not in cfg.get("separate_meshes", {}):
+                # Specks (red bandana flecks on the back of the hair): the candidate is
+                # the surrounding region; still a review face.
+                cs = set(comp)
+                nb = [int(region[hh.index]) for fi in comp for e in bm.faces[fi].edges for hh in e.link_faces
+                      if hh.index not in cs and region[hh.index]]
+                if nb:
+                    to = max(set(nb), key=nb.count)
+                    for fi in comp:
+                        region[fi] = to
+                        reasons.setdefault(fi, f"speck island of {len(comp)} face(s) of {names[rid - 1] if rid else '?'} inside {names[to - 1]}")
         bm.free()
         final = region.copy()
         for fi in reasons:
@@ -239,6 +324,9 @@ def main():
         total_review += len(reasons)
         attr = me.attributes.get("region_id") or me.attributes.new("region_id", "INT", "FACE")
         attr.data.foreach_set("value", final.astype(np.int32))
+        # Bone class per face (1-based in config order, 0 = none) for paint-stage rules.
+        ca_ = me.attributes.get("bone_class_id") or me.attributes.new("bone_class_id", "INT", "FACE")
+        ca_.data.foreach_set("value", face_cls)
         # preview materials
         me.materials.clear()
         order = [0] + [r["id"] for r in regions]

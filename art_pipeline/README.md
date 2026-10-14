@@ -45,3 +45,30 @@ gradient → one colour per region. QA PASS; Godot matches (`reports/shiba_01/go
 orange/cream outline crisp and the same from all four sides. **Not installed**: the dogs are Codex's
 (active work on them); `assets/export/shiba_01.glb` is ready for Codex to adopt.
 Godot check tool: `tests/capture/model_turnaround.tscn -- <res://model.glb> <out dir> [prefix]`.
+
+## Character batch (2026-10-15)
+
+Office worker, market auntie, retired fisher, delivery rider, gym coach, Xiaomi: owner asked
+to run them all through v5 and compare with the sheets until deliverable; candidates were
+approved by Claude on that delegation (`approval.json` records it). All six QA PASS, Godot
+matches (`reports/<c>/godot_*.jpg`), installed over the game models (the old game texture stays
+in the model folder as `reference_texture`). Run one: `CHARS="<c>"` with the B–G commands above
+(config `art_pipeline/config/characters/<c>.json`).
+
+What the sheets needed beyond colour candidates (config keys, all optional):
+
+| Key | Stage | Does | Used for |
+|---|---|---|---|
+| tie-break (always) | B | allowed regions with the same colour (within `review.tie_eps`, 0.03) resolve by `bone_priors` order and are not each other's competitor | jacket vs bag orange; review 45 % → 5 % |
+| `bone_force` / `share_force` | B | a bone class (or a weight share on named bones) fixes the region | auntie's purple sleeves |
+| `front_only_regions` | B | a region only on faces turned to the front (number, or `{min, classes}`) | eyes/mouth never on a cap brim; no skin on the back of the head |
+| `review.merge_islands` | B | islands under N faces take the surrounding region as candidate | flecks in hair |
+| `design_palette` | D | the region's sheet colours (`match`) are the palette, not k-means of the shaded reference | auntie's apron reds/creams/blues |
+| `repaint` | D | texels that read as a named foreign region take the region's main colour | skin projected on sleeves |
+| `palette_limits` | D | a palette colour only on given bone classes / facing | rider's white hoodie only at the front; coach's print only on the front |
+| `keep_reference` | D | the region keeps the reference texels as drawn | the drawn faces (skin, eyes) |
+
+Also: unpainted sliver faces get a neighbour/bone-class candidate (B) and their corner texels
+painted (D). Not texture work, done on the way: Xiaomi's skin weights (factory `rig_full.py`
+distance skinning in world space, head above the head joint) and the gym coach's face (drawn in
+mesh-mapped pixels, `references/humans/gym_coach/paint_profile.json` → `face_drawing.note`).

@@ -1,0 +1,463 @@
+{
+  "asset": "delivery_rider",
+  "source": "art_pipeline/assets/source/delivery_rider.glb",
+  "note": "delivery_rider: game model (12k LOD1, 2048 base colour). Region colours = the flat colours its current texture was painted with (paint_profile.json outs + drawn-face colours). Regions come from skin weights + these colours (v5), never height. Sheet: orange jacket, white hoodie only at the front opening (whites limited to front-facing torso/neck); no skin on the back of the head.",
+  "reference_texture": "assets/characters/human/models/delivery_rider/delivery_rider_delivery_rider_game_base.png",
+  "regions": [
+    {
+      "id": 1,
+      "name": "skin",
+      "role": "skin",
+      "colour": [
+        0.95,
+        0.72,
+        0.56
+      ],
+      "match": [
+        [
+          0.95,
+          0.72,
+          0.56
+        ],
+        [
+          0.95,
+          0.72,
+          0.56
+        ],
+        [
+          0.95,
+          0.72,
+          0.56
+        ],
+        [
+          0.95,
+          0.62,
+          0.56
+        ],
+        [
+          0.96,
+          0.58,
+          0.54
+        ]
+      ]
+    },
+    {
+      "id": 2,
+      "name": "hair",
+      "role": "hair",
+      "colour": [
+        0.24,
+        0.16,
+        0.12
+      ],
+      "match": [
+        [
+          0.24,
+          0.16,
+          0.12
+        ]
+      ]
+    },
+    {
+      "id": 3,
+      "name": "eyes",
+      "role": "eyes",
+      "colour": [
+        0.2,
+        0.13,
+        0.11
+      ],
+      "match": [
+        [
+          0.2,
+          0.13,
+          0.11
+        ],
+        [
+          0.98,
+          0.97,
+          0.95
+        ],
+        [
+          0.3,
+          0.18,
+          0.12
+        ],
+        [
+          0.52,
+          0.2,
+          0.18
+        ]
+      ]
+    },
+    {
+      "id": 4,
+      "name": "top",
+      "role": "cloth",
+      "colour": [
+        0.92,
+        0.47,
+        0.18
+      ],
+      "match": [
+        [
+          0.92,
+          0.47,
+          0.18
+        ],
+        [
+          0.92,
+          0.47,
+          0.18
+        ],
+        [
+          0.92,
+          0.47,
+          0.18
+        ],
+        [
+          0.93,
+          0.48,
+          0.18
+        ],
+        [
+          0.72,
+          0.34,
+          0.15
+        ],
+        [
+          0.14,
+          0.12,
+          0.12
+        ],
+        [
+          0.26,
+          0.22,
+          0.21
+        ],
+        [
+          0.86,
+          0.84,
+          0.81
+        ],
+        [
+          0.86,
+          0.84,
+          0.81
+        ],
+        [
+          0.9,
+          0.88,
+          0.84
+        ],
+        [
+          0.8,
+          0.78,
+          0.75
+        ],
+        [
+          0.13,
+          0.12,
+          0.12
+        ]
+      ]
+    },
+    {
+      "id": 5,
+      "name": "accessories",
+      "role": "accessory",
+      "colour": [
+        0.92,
+        0.47,
+        0.18
+      ],
+      "match": [
+        [
+          0.92,
+          0.47,
+          0.18
+        ],
+        [
+          0.93,
+          0.48,
+          0.18
+        ],
+        [
+          0.72,
+          0.34,
+          0.15
+        ],
+        [
+          0.14,
+          0.12,
+          0.12
+        ],
+        [
+          0.26,
+          0.22,
+          0.21
+        ],
+        [
+          0.9,
+          0.63,
+          0.38
+        ],
+        [
+          0.97,
+          0.94,
+          0.88
+        ],
+        [
+          0.13,
+          0.12,
+          0.12
+        ]
+      ]
+    },
+    {
+      "id": 6,
+      "name": "bottom",
+      "role": "cloth",
+      "colour": [
+        0.22,
+        0.21,
+        0.21
+      ],
+      "match": [
+        [
+          0.22,
+          0.21,
+          0.21
+        ],
+        [
+          0.22,
+          0.21,
+          0.21
+        ]
+      ]
+    },
+    {
+      "id": 7,
+      "name": "shoes",
+      "role": "cloth",
+      "colour": [
+        0.92,
+        0.9,
+        0.86
+      ],
+      "match": [
+        [
+          0.92,
+          0.9,
+          0.86
+        ],
+        [
+          0.92,
+          0.9,
+          0.86
+        ],
+        [
+          0.13,
+          0.12,
+          0.12
+        ]
+      ]
+    }
+  ],
+  "separate_meshes": {},
+  "bone_classes": {
+    "head": [
+      "head"
+    ],
+    "neck": [
+      "neck_01"
+    ],
+    "torso": [
+      "pelvis",
+      "spine_01",
+      "spine_02",
+      "spine_03",
+      "clavicle_l",
+      "clavicle_r",
+      "Root"
+    ],
+    "arm": [
+      "upperarm_l",
+      "lowerarm_l",
+      "upperarm_r",
+      "lowerarm_r"
+    ],
+    "hand": [
+      "hand_l",
+      "hand_r",
+      "thumb_*",
+      "index_*",
+      "middle_*",
+      "ring_*",
+      "pinky_*"
+    ],
+    "thigh": [
+      "thigh_l",
+      "thigh_r"
+    ],
+    "calf": [
+      "calf_l",
+      "calf_r"
+    ],
+    "foot": [
+      "foot_l",
+      "ball_l",
+      "foot_r",
+      "ball_r"
+    ]
+  },
+  "bone_priors": {
+    "head": [
+      "skin",
+      "hair",
+      "eyes",
+      "accessories"
+    ],
+    "neck": [
+      "skin",
+      "hair",
+      "top",
+      "accessories"
+    ],
+    "torso": [
+      "top",
+      "bottom",
+      "skin",
+      "accessories"
+    ],
+    "arm": [
+      "top",
+      "skin",
+      "accessories"
+    ],
+    "hand": [
+      "skin",
+      "top",
+      "accessories"
+    ],
+    "thigh": [
+      "bottom",
+      "top",
+      "skin",
+      "accessories"
+    ],
+    "calf": [
+      "bottom",
+      "shoes",
+      "skin"
+    ],
+    "foot": [
+      "shoes",
+      "bottom",
+      "skin"
+    ]
+  },
+  "roughness": {
+    "skin": 0.65,
+    "cloth": 0.85,
+    "hair": 0.7,
+    "eyes": 0.5,
+    "accessory": 0.6
+  },
+  "detail_k": {
+    "skin": 4,
+    "hair": 1,
+    "eyes": 4,
+    "top": 4,
+    "accessories": 4,
+    "bottom": 2,
+    "shoes": 3
+  },
+  "review": {
+    "min_confidence": 0.5,
+    "min_island_faces": 3,
+    "max_review_share": 0.01,
+    "prior_tolerance": 0.06,
+    "merge_islands": 15
+  },
+  "expect": {
+    "actions": 19
+  },
+  "design_palette": [
+    "top",
+    "accessories",
+    "bottom",
+    "shoes"
+  ],
+  "keep_reference": [
+    "skin",
+    "eyes"
+  ],
+  "front_only_regions": {
+    "eyes": 0.2,
+    "skin": {
+      "min": -0.2,
+      "classes": [
+        "head",
+        "neck"
+      ]
+    }
+  },
+  "palette_limits": {
+    "top": [
+      {
+        "colour": [
+          0.86,
+          0.84,
+          0.81
+        ],
+        "classes": [
+          "torso",
+          "neck"
+        ],
+        "front_min": 0.35,
+        "back_min": 0.6
+      },
+      {
+        "colour": [
+          0.9,
+          0.88,
+          0.84
+        ],
+        "classes": [
+          "torso",
+          "neck"
+        ],
+        "front_min": 0.35,
+        "back_min": 0.6
+      },
+      {
+        "colour": [
+          0.8,
+          0.78,
+          0.75
+        ],
+        "classes": [
+          "torso",
+          "neck"
+        ],
+        "front_min": 0.35,
+        "back_min": 0.6
+      }
+    ],
+    "accessories": [
+      {
+        "colour": [
+          0.97,
+          0.94,
+          0.88
+        ],
+        "classes": [
+          "torso",
+          "neck"
+        ],
+        "back_min": 0.6
+      }
+    ]
+  }
+}

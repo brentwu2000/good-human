@@ -1,0 +1,88 @@
+{
+ "stage": "C_materials",
+ "materials": {
+  "M_skin": {
+   "colour": [
+    0.93,
+    0.72,
+    0.6
+   ],
+   "roughness": 0.65,
+   "role": "skin"
+  },
+  "M_hair": {
+   "colour": [
+    0.1,
+    0.085,
+    0.09
+   ],
+   "roughness": 0.7,
+   "role": "hair"
+  },
+  "M_eyes": {
+   "colour": [
+    0.1,
+    0.085,
+    0.09
+   ],
+   "roughness": 0.5,
+   "role": "eyes"
+  },
+  "M_top": {
+   "colour": [
+    0.86,
+    0.85,
+    0.82
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_accessories": {
+   "colour": [
+    0.13,
+    0.12,
+    0.12
+   ],
+   "roughness": 0.6,
+   "role": "accessory"
+  },
+  "M_bottom": {
+   "colour": [
+    0.25,
+    0.22,
+    0.21
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_shoes": {
+   "colour": [
+    0.9,
+    0.86,
+    0.78
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  }
+ },
+ "objects": {
+  "Character": {
+   "M_NEEDS_REVIEW": 457,
+   "M_skin": 2063,
+   "M_hair": 3769,
+   "M_eyes": 46,
+   "M_top": 976,
+   "M_accessories": 1507,
+   "M_bottom": 2419,
+   "M_shoes": 760
+  }
+ },
+ "renders": {
+  "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\office_worker\\solid_front.png",
+  "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\office_worker\\solid_back.png",
+  "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\office_worker\\solid_left.png",
+  "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\office_worker\\solid_right.png",
+  "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\office_worker\\solid_three_quarter.png"
+ },
+ "checkpoint": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\work\\office_worker_C_materials.blend"
+}

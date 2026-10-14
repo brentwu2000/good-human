@@ -1,0 +1,88 @@
+{
+ "stage": "C_materials",
+ "materials": {
+  "M_skin": {
+   "colour": [
+    0.9,
+    0.62,
+    0.44
+   ],
+   "roughness": 0.65,
+   "role": "skin"
+  },
+  "M_hair": {
+   "colour": [
+    0.13,
+    0.12,
+    0.12
+   ],
+   "roughness": 0.7,
+   "role": "hair"
+  },
+  "M_eyes": {
+   "colour": [
+    0.2,
+    0.13,
+    0.11
+   ],
+   "roughness": 0.5,
+   "role": "eyes"
+  },
+  "M_top": {
+   "colour": [
+    0.95,
+    0.94,
+    0.91
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_accessories": {
+   "colour": [
+    0.13,
+    0.12,
+    0.12
+   ],
+   "roughness": 0.6,
+   "role": "accessory"
+  },
+  "M_bottom": {
+   "colour": [
+    0.13,
+    0.12,
+    0.12
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_shoes": {
+   "colour": [
+    0.94,
+    0.93,
+    0.9
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  }
+ },
+ "objects": {
+  "Character": {
+   "M_NEEDS_REVIEW": 814,
+   "M_skin": 5527,
+   "M_hair": 372,
+   "M_eyes": 10,
+   "M_top": 1644,
+   "M_accessories": 93,
+   "M_bottom": 2639,
+   "M_shoes": 901
+  }
+ },
+ "renders": {
+  "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\solid_front.png",
+  "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\solid_back.png",
+  "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\solid_left.png",
+  "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\solid_right.png",
+  "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\solid_three_quarter.png"
+ },
+ "checkpoint": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\work\\gym_coach_C_materials.blend"
+}

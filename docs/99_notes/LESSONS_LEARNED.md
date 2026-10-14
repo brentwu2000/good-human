@@ -113,6 +113,29 @@ facets in Godot; the texture was fine. For flat stylized colour, export the game
 LOD matte without the normal map (`--no-game-normal`), and dilate UV islands so a
 downscaled texture does not pull the background into seams.
 
+**6.14 Texture QA can pass while the face is gone.** The v5 batch quantised every
+region to a palette; QA (bleed, blank, silhouette) passed for all six characters,
+but the drawn faces lost eye whites, teeth and blush. Regions that are already
+finished drawings keep the reference texels (`keep_reference: ["skin", "eyes"]`).
+Check: a before/after face close-up for every character, not only QA numbers.
+
+**6.15 Skinning by distance needs one coordinate space.** Xiaomi's fallback
+skinning compared mesh-local vertices with armature-local bones (mesh scaled 0.76):
+her head was bound to the pelvis and feet. Compare in world space. Check: count
+vertices above the head joint whose dominant bone is not head/neck (0 expected).
+
+**6.16 Colour alone cannot tell garments apart.** Generated configs gave the jacket
+and the bag the same orange: every face tied, 45 % went to review. Identical colours
+resolve by the bone prior's order, and sheet facts become rules — sleeves by bone
+(`bone_force`, `share_force`), white only on the front of the torso
+(`palette_limits`), no eyes or skin facing backwards (`front_only_regions`). Check:
+the region contact sheet against the character sheet.
+
+**6.17 A face drawn over a tilted sheet head lands skewed on a frontal mesh.** The
+gym coach's sheet head is tilted 17°; projected, his mouth sat on his nose. Draw the
+face in the mesh's own front-mapped pixels from measured landmarks (brow, eyes,
+nose tip, lip, chin), and check the face zone reaches below the mouth.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

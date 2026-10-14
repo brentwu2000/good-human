@@ -68,6 +68,13 @@ def tri_texels(uv3, T):
     l1 = ((by - cy) * (xs - cx) + (cx - bx) * (ys - cy)) / det
     l2 = ((cy - ay) * (xs - cx) + (ax - cx) * (ys - cy)) / det
     ins = (l1 >= -0.02) & (l2 >= -0.02) & (1 - l1 - l2 >= -0.02)
+    if not ins.any():
+        # A sliver thinner than a texel: its corners and centre still get paint,
+        # or the face samples unpainted black (gym coach, 2 faces).
+        pts = np.vstack([uv3, uv3.mean(0)])
+        ys_ = np.clip(pts[:, 1].astype(int), 0, T - 1)
+        xs_ = np.clip(pts[:, 0].astype(int), 0, T - 1)
+        return ys_, xs_
     return (ys[ins] - 0.5).astype(int), (xs[ins] - 0.5).astype(int)
 
 
@@ -105,6 +112,7 @@ def main():
         sys.exit("PAINT_REFUSED: the stage-B regions are not approved (reports/<asset>/approval.json)")
     bpy.ops.wm.open_mainfile(filepath=os.path.abspath(a.approved))
     regions = {r["id"]: r for r in cfg["regions"]}
+    by_name_ = {r["name"]: r for r in cfg["regions"]}
     rough = cfg.get("roughness", {})
     rep = {"stage": "D_E_paint_bake", "regions": {}}
     body = bpy.data.objects[cfg.get("body", "Character")]
@@ -169,10 +177,21 @@ def main():
     # Texels of each region.
     region_px = np.zeros((T, T), dtype=np.int16)
     alt_px = np.zeros((T, T), dtype=np.int16)  # one neighbouring region a boundary texel may take
+    # Bone class (stage B attribute) and how far the face points forward, per texel,
+    # for palette_limits.
+    fcls = np.zeros(len(me.polygons), dtype=np.int32)
+    if "bone_class_id" in me.attributes:
+        me.attributes["bone_class_id"].data.foreach_get("value", fcls)
+    rot = body.matrix_world.to_3x3()
+    ffront = np.array([-(rot @ p.normal).normalized().y for p in me.polygons], dtype=np.float32)
+    cls_px = np.zeros((T, T), dtype=np.int16)
+    front_px = np.zeros((T, T), dtype=np.float32)
     for t in me.loop_triangles:
         ys, xs = tri_texels(uv[list(t.loops)], T)
         if ys is not None:
             region_px[ys, xs] = rid[t.polygon_index]
+            cls_px[ys, xs] = fcls[t.polygon_index]
+            front_px[ys, xs] = ffront[t.polygon_index]
             nb = neigh[t.polygon_index]
             if len(nb) == 1:
                 alt_px[ys, xs] = next(iter(nb))
@@ -180,6 +199,7 @@ def main():
     out = np.zeros((T, T, 3), dtype=np.float32)
     lab = np.full((T, T), -1, dtype=np.int16)
     palettes = {}
+    far_px = np.zeros((T, T), dtype=bool)  # repainted texels: never moved at a boundary
     detail_k = cfg.get("detail_k", {})
     for r_id, r in regions.items():
         m = region_px == r_id
@@ -187,11 +207,62 @@ def main():
             continue
         k = int(detail_k.get(r["name"], 1))
         cols = srcpx[m]
-        cols = cols[cols.sum(1) > 0.02]  # unpainted padding
-        pal = kmeans(cols, k) if (k > 1 and len(cols) > k) else np.array([r["colour"]], dtype=np.float32)
+        keep = cols.sum(1) > 0.02  # unpainted padding
+        foreign = cfg.get("repaint", {}).get(r["name"])
+        far = np.zeros(len(cols), dtype=bool)
+        if foreign:
+            # Texels that read as a named foreign region (skin projected onto a sleeve)
+            # leave the palette and take the region's dominant colour; the region's
+            # own pattern colours stay.
+            def ref(names_):
+                return np.array([[x * s_ for x in c] for n_ in names_ for c in by_name_[n_]["match"] for s_ in (1.0, 0.82, 0.66)])
+            d_own = np.sqrt(((cols[:, None] - ref([r["name"]])[None]) ** 2).sum(-1)).min(1)
+            d_for = np.sqrt(((cols[:, None] - ref(foreign)[None]) ** 2).sum(-1)).min(1)
+            far = d_for < d_own
+        fit = cols[keep & ~far]
+        dp = cfg.get("design_palette", [])
+        if dp is True or r["name"] in dp:
+            # The sheet's colours themselves (config "match"), not k-means centres of
+            # the baked reference (which carry its shading and come out muddy). Each
+            # texel is compared with every design colour and its shaded copies.
+            pal = np.array(list(dict.fromkeys(tuple(c) for c in r["match"])), dtype=np.float32)
+            shades = (1.0, 0.82, 0.66)
+            cand = np.concatenate([pal * s_ for s_ in shades])
+            d = ((cols[:, None] - cand[None]) ** 2).sum(-1)
+            lb = d.argmin(1) % len(pal)
+        else:
+            pal = kmeans(fit, k) if (k > 1 and len(fit) > k) else np.array([r["colour"]], dtype=np.float32)
+            d = ((cols[:, None] - pal[None]) ** 2).sum(-1)
+            lb = d.argmin(1)
         palettes[r_id] = pal
-        d = ((srcpx[m][:, None] - pal[None]) ** 2).sum(-1)
-        lab[m] = d.argmin(1)
+        if far.any():
+            dom = np.bincount(lb[~far], minlength=len(pal)).argmax() if (~far).any() else 0
+            lb[far] = dom
+        cls_names = list(cfg["bone_classes"])
+        lims = cfg.get("palette_limits", {}).get(r["name"], [])
+        if lims and len(pal) > 1:
+            # A palette colour only where the sheet has it: the rider's white hoodie on
+            # the front of the torso (not on the orange sleeves), the coach's dark print
+            # on the front of his tank top (not as blotches on its sides). All limits
+            # apply together, so a texel cannot hop between two limited whites.
+            banned = np.zeros((int(m.sum()), len(pal)), dtype=bool)
+            for lim in lims:
+                e = int(np.argmin(((pal - np.array(lim["colour"], dtype=np.float32)) ** 2).sum(1)))
+                ok_cls = np.isin(cls_px[m], [cls_names.index(c) + 1 for c in lim.get("classes", cls_names)])
+                ok = ok_cls & (front_px[m] >= lim.get("front_min", -2.0))
+                if "back_min" in lim:
+                    # Also allowed facing backwards, whatever the bone class (the
+                    # rider's box rides on his arm and thigh weights).
+                    ok |= front_px[m] <= -lim["back_min"]
+                banned[:, e] = ~ok
+            bad = banned[np.arange(len(lb)), lb] & ~banned.all(1)
+            if bad.any():
+                d2 = ((cols[bad][:, None] - pal[None]) ** 2).sum(-1)
+                d2[banned[bad]] = np.inf
+                lb[bad] = d2.argmin(1)
+        lab[m] = lb
+        far_px[m] = far
+        rep.setdefault("repainted_texels", {})[r["name"]] = int(far.sum())
         rep["regions"][r["name"]] = {"texels": int(m.sum()), "palette": np.round(pal, 3).tolist()}
     # Light majority inside each region (never across regions).
     for _ in range(2):
@@ -211,7 +282,7 @@ def main():
     # Boundary texels: if the reference colour is clearly the neighbour region's,
     # the texel takes that region (and its palette).
     if cfg.get("boundary_texels", True):
-        bt = (alt_px > 0) & (region_px > 0)
+        bt = (alt_px > 0) & (region_px > 0) & ~far_px
         moved = 0
         for r_id, pal in palettes.items():
             for n_id, npal in palettes.items():
@@ -228,9 +299,15 @@ def main():
                 moved += int(take.sum())
         rep["boundary_texels_moved"] = moved
     rough_map = np.zeros((T, T, 3), dtype=np.float32)
+    keep_ref = set(cfg.get("keep_reference", []))
     for r_id, pal in palettes.items():
         m = region_px == r_id
         out[m] = pal[lab[m]]
+        if regions[r_id]["name"] in keep_ref:
+            # Drawn faces are already flat vector art in the reference (draw_face_map):
+            # quantising them lost eye whites, blush and teeth. They are kept as drawn.
+            keep = m & (srcpx.sum(-1) > 0.02)
+            out[keep] = srcpx[keep]
         rough_map[m] = rough.get(regions[r_id]["role"], 0.8)
     dilate(out, painted, 16)
     dilate(rough_map, painted, 16)

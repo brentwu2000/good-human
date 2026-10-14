@@ -21,5 +21,13 @@
     }
   },
   "note": "",
-  "class": "UNKNOWN"
+  "class": "UNKNOWN",
+  "v5_texturing": {
+    "date": "2026-10-15",
+    "tool": "art_pipeline (Texturing v5) segment_regions → approve_regions → paint_regions → qa_export",
+    "config": "art_pipeline/config/characters/delivery_rider.json",
+    "qa": "art_pipeline/reports/delivery_rider/qa_report.json (PASS)",
+    "approval": "accept_candidates, delegated by the owner 2026-10-15 (套色直到可交付)",
+    "sha256": "ecc79d8bf37a946eb75cc3ce3cfcb989d5a947cde6932e1fcafa5bed01b9975a"
+  }
 }

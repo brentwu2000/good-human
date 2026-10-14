@@ -1,0 +1,98 @@
+{
+ "stage": "C_materials",
+ "materials": {
+  "M_skin": {
+   "colour": [
+    0.95,
+    0.72,
+    0.56
+   ],
+   "roughness": 0.65,
+   "role": "skin"
+  },
+  "M_hair": {
+   "colour": [
+    0.8,
+    0.79,
+    0.77
+   ],
+   "roughness": 0.7,
+   "role": "hair"
+  },
+  "M_eyes": {
+   "colour": [
+    0.2,
+    0.13,
+    0.11
+   ],
+   "roughness": 0.5,
+   "role": "eyes"
+  },
+  "M_top": {
+   "colour": [
+    0.7,
+    0.69,
+    0.66
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_vest": {
+   "colour": [
+    0.48,
+    0.45,
+    0.3
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_accessories": {
+   "colour": [
+    0.78,
+    0.68,
+    0.52
+   ],
+   "roughness": 0.6,
+   "role": "accessory"
+  },
+  "M_bottom": {
+   "colour": [
+    0.33,
+    0.31,
+    0.3
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_shoes": {
+   "colour": [
+    0.17,
+    0.14,
+    0.12
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  }
+ },
+ "objects": {
+  "Character": {
+   "M_NEEDS_REVIEW": 1081,
+   "M_skin": 4887,
+   "M_hair": 96,
+   "M_eyes": 95,
+   "M_top": 359,
+   "M_vest": 1058,
+   "M_accessories": 2060,
+   "M_bottom": 1858,
+   "M_shoes": 505
+  }
+ },
+ "renders": {
+  "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\retired_fisher\\solid_front.png",
+  "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\retired_fisher\\solid_back.png",
+  "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\retired_fisher\\solid_left.png",
+  "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\retired_fisher\\solid_right.png",
+  "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\retired_fisher\\solid_three_quarter.png"
+ },
+ "checkpoint": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\work\\retired_fisher_C_materials.blend"
+}

@@ -1,0 +1,11 @@
+{
+ "gate": "stage_B_regions",
+ "approver": "claude (owner delegated 2026-10-15: \u5957\u8272\u76f4\u5230\u53ef\u4ea4\u4ed8)",
+ "decision": "accept_candidates",
+ "date": "2026-10-15T00:52:26",
+ "faces_changed": 686,
+ "overrides": [],
+ "unresolved": [],
+ "status": "APPROVED",
+ "checkpoint": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\work\\office_worker_B_approved.blend"
+}

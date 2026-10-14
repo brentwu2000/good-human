@@ -1,0 +1,99 @@
+{
+ "stage": "F_G_qa",
+ "checks": [
+  {
+   "check": "blank_or_black_faces",
+   "status": "PASS",
+   "detail": "0 faces sample black at their UV centre"
+  },
+  {
+   "check": "region_id_colour",
+   "status": "PASS",
+   "detail": "11 of 12000 faces (0.09%) show a colour outside their own and their edge neighbours' region palettes (a bleed)"
+  },
+  {
+   "check": "glb_skeleton_and_clips",
+   "status": "PASS",
+   "detail": "53 bones, 19 actions, skinned=True"
+  },
+  {
+   "check": "texture_colour_spaces",
+   "status": "PASS",
+   "detail": "base sRGB=True, roughness Non-Color=True"
+  },
+  {
+   "check": "silhouette_vs_source",
+   "status": "PASS",
+   "detail": "IoU per view {'front': 1.0, 'back': 1.0, 'left': 1.0, 'right': 1.0, 'three_quarter': 1.0, 'top': 1.0}"
+  }
+ ],
+ "export": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\export\\gym_coach.glb",
+ "baked_images": {
+  "gym_coach_basecolor": {
+   "size": [
+    2048,
+    2048
+   ],
+   "colourspace": "sRGB",
+   "packed": true
+  },
+  "gym_coach_roughness": {
+   "size": [
+    512,
+    512
+   ],
+   "colourspace": "Non-Color",
+   "packed": true
+  }
+ },
+ "glb": {
+  "armatures": 1,
+  "bones": 53,
+  "actions": 19,
+  "meshes": [
+   "Character"
+  ],
+  "skinned": true,
+  "triangles": 12000,
+  "materials": [
+   "gym_coach_game"
+  ],
+  "draw_calls_estimate": 1,
+  "images": {
+   "gym_coach_basecolor": {
+    "size": [
+     2048,
+     2048
+    ],
+    "colourspace": "sRGB"
+   },
+   "gym_coach_roughness": {
+    "size": [
+     512,
+     512
+    ],
+    "colourspace": "Non-Color"
+   }
+  },
+  "file_bytes": 3099528
+ },
+ "renders": {
+  "after": {
+   "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_after_front.png",
+   "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_after_back.png",
+   "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_after_left.png",
+   "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_after_right.png",
+   "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_after_three_quarter.png",
+   "top": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_after_top.png"
+  },
+  "before": {
+   "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_before_front.png",
+   "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_before_back.png",
+   "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_before_left.png",
+   "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_before_right.png",
+   "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_before_three_quarter.png",
+   "top": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\gym_coach\\qa_before_top.png"
+  }
+ },
+ "result": "PASS"
+}

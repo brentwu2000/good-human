@@ -1,0 +1,88 @@
+{
+ "stage": "C_materials",
+ "materials": {
+  "M_skin": {
+   "colour": [
+    0.97,
+    0.77,
+    0.63
+   ],
+   "roughness": 0.65,
+   "role": "skin"
+  },
+  "M_hair": {
+   "colour": [
+    0.2,
+    0.13,
+    0.1
+   ],
+   "roughness": 0.7,
+   "role": "hair"
+  },
+  "M_eyes": {
+   "colour": [
+    0.2,
+    0.13,
+    0.11
+   ],
+   "roughness": 0.5,
+   "role": "eyes"
+  },
+  "M_top": {
+   "colour": [
+    0.93,
+    0.74,
+    0.28
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_bottom": {
+   "colour": [
+    0.35,
+    0.47,
+    0.6
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  },
+  "M_accessories": {
+   "colour": [
+    0.24,
+    0.44,
+    0.5
+   ],
+   "roughness": 0.6,
+   "role": "accessory"
+  },
+  "M_shoes": {
+   "colour": [
+    0.66,
+    0.66,
+    0.68
+   ],
+   "roughness": 0.85,
+   "role": "cloth"
+  }
+ },
+ "objects": {
+  "Character": {
+   "M_NEEDS_REVIEW": 695,
+   "M_skin": 1108,
+   "M_hair": 4920,
+   "M_eyes": 60,
+   "M_top": 1098,
+   "M_bottom": 2387,
+   "M_accessories": 800,
+   "M_shoes": 903
+  }
+ },
+ "renders": {
+  "front": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\xiaomi\\solid_front.png",
+  "back": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\xiaomi\\solid_back.png",
+  "left": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\xiaomi\\solid_left.png",
+  "right": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\xiaomi\\solid_right.png",
+  "three_quarter": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\reports\\xiaomi\\solid_three_quarter.png"
+ },
+ "checkpoint": "C:\\Users\\b\\Documents\\good-human\\art_pipeline\\assets\\work\\xiaomi_C_materials.blend"
+}

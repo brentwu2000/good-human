@@ -1,6 +1,6 @@
 {
   "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\xiaomi\\xiaomi_game.glb",
-  "created": "2026-10-14T19:31:15",
+  "created": "2026-10-14T23:46:57",
   "tool": "blender rig_lods.py",
   "model": "blender",
   "model_licence": "GPL tool; output belongs to the user",
@@ -21,5 +21,13 @@
     }
   },
   "note": "",
-  "class": "UNKNOWN"
+  "class": "UNKNOWN",
+  "v5_texturing": {
+    "date": "2026-10-15",
+    "tool": "art_pipeline (Texturing v5) segment_regions → approve_regions → paint_regions → qa_export",
+    "config": "art_pipeline/config/characters/xiaomi.json",
+    "qa": "art_pipeline/reports/xiaomi/qa_report.json (PASS)",
+    "approval": "accept_candidates, delegated by the owner 2026-10-15 (套色直到可交付)",
+    "sha256": "c1fabaaf399a27db96db49facfb01d3709c6c0d3a090227466b10fb2b59872cd"
+  }
 }

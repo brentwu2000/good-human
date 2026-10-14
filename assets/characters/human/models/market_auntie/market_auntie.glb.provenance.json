@@ -21,5 +21,13 @@
     }
   },
   "note": "",
-  "class": "UNKNOWN"
+  "class": "UNKNOWN",
+  "v5_texturing": {
+    "date": "2026-10-15",
+    "tool": "art_pipeline (Texturing v5) segment_regions → approve_regions → paint_regions → qa_export",
+    "config": "art_pipeline/config/characters/market_auntie.json",
+    "qa": "art_pipeline/reports/market_auntie/qa_report.json (PASS)",
+    "approval": "accept_candidates, delegated by the owner 2026-10-15 (套色直到可交付)",
+    "sha256": "b74ec652dd6860c71544c04b490a77f0d7dc6ae9a3e782bff3d0d2b57f778f79"
+  }
 }

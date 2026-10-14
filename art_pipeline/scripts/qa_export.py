@@ -120,6 +120,8 @@ def main():
     bmw.faces.ensure_lookup_table()
     allowed = [{int(rid[f.index])} | {int(rid[g.index]) for e in f.edges for g in e.link_faces} for f in bmw.faces]
     bmw.free()
+    # Regions kept as drawn (config keep_reference: the faces) have no palette to check.
+    kept = {r["id"] for r in cfg["regions"] if r["name"] in cfg.get("keep_reference", [])}
     bad, black = [], 0
     for f in me.polygons:
         c = uv[list(f.loop_indices)].mean(0)
@@ -127,6 +129,8 @@ def main():
         col = px[y, x]
         if col.sum() < 0.02:
             black += 1
+        if allowed[f.index] & kept:
+            continue
         dist_own = min(np.sqrt(((pal[r] - col) ** 2).sum(1)).min() for r in allowed[f.index] if r in pal)
         if dist_own > 0.03:
             bad.append(f.index)
