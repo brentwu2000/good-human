@@ -31,3 +31,17 @@ Then v5 stages A–G per `art_pipeline/README.md`.
 - **CX-11** Optional: per-character idle poses from the sheets (office slouch, coach hands-on-hips).
 - **CX-12** The v5 shiba (`art_pipeline/assets/export/shiba_01.glb`, 2026-10-14) is still waiting
   for your decision.
+
+## Update — market auntie r3 (later 2026-10-15)
+
+Owner: 「Codex 做完了，接手阿姨」. Built on your r2 checkpoint `04_skin_refined.blend` (satchel,
+strap, bandana, apron, towel kept); installed to the runtime auntie. Details and rebuild:
+`docs/06_art/MARKET_AUNTIE_R3_2026-10-15.md`.
+- **Rig change (must not be undone silently):** `hand_*` and finger bones moved ~7 cm down to the
+  mesh wrist and shortened (chubby hands). Shared clips key only the pelvis position, so all
+  clips play; weapons now sit in the visible palm.
+- New hands (one tube per finger, skinned 1:1); arms cut free of the torso below the armpit
+  with cross weights removed; forearm/ear/nose-side texture fixes (new
+  `market_auntie_r3_basecolor`; your r2 basecolor untouched).
+- **CX-13** Hair geometry (one lumpy shell, forehead strokes) and the apron bow riding the chest
+  remain; basket / spatula / pan props are still absent.

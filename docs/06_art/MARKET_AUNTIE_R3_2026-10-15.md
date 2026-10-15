@@ -1,0 +1,48 @@
+# Market auntie r3 — 2026-10-15 (Claude)
+
+Owner: 「Codex 做完了，接手阿姨」. Built on Codex's r2 checkpoint
+(`build/market_auntie_refine_r2/04_skin_refined.blend`): his satchel, strap, bandana,
+apron, towel and r2 weights are kept. **Installed** to
+`assets/characters/human/models/market_auntie/market_auntie.glb` (candidate copy:
+`assets/art_previews/humans/market_auntie_r3/market_auntie_wip.glb`). Grade B+: clearly
+better than r2 in the hands, raised-arm poses and hair, not final art.
+
+All review captures are Godot (`tools/art/capture_auntie_r3.gd`): rest-pose views, head /
+hand / shoulder close-ups, three frames of all 19 clips, chest close-ups of Idle, Block, Jab,
+Walk_Relaxed and HeavyHook. Top row r2, bottom row r3.
+
+![static](market_auntie_r3_2026-10-15/static.jpg)
+![motion](market_auntie_r3_2026-10-15/motion_upper.jpg)
+![hands](market_auntie_r3_2026-10-15/hands.jpg)
+![head](market_auntie_r3_2026-10-15/head.jpg)
+
+## What changed
+
+| Problem (r2) | Cause | r3 |
+|---|---|---|
+| Mitten hands | generator geometry; the rig's hand bones sat ~7 cm above the visible fist | Hand and finger bones moved to the mesh wrist (fingers shortened ×0.78, drawn together: chubby). Mitten cut by a plane at the wrist; new hands built on the bones: palm from the measured wrist section, one tube per finger, each segment skinned 1:1 to its bone (fists close in the fight clips). Colour from a skin texel, no extra material. Weapons attach to `hand_*` + grip, so held items now sit in the visible palm. |
+| Strips of blouse/skirt stretching to a raised arm (Block, Jab, HeavyHook), skirt flaring dark | arm and torso were one surface from armpit to wrist, and torso vertices carried arm weight | Below the armpit (shoulder joint − 7.5 cm): faces joining arm and body removed, openings closed, arm weights dropped from torso vertices and torso weights from arm vertices (450 + 557). Old mitten flaps past the wrist removed. |
+| Towel red and sleeve purple painted on the bare forearms | projection | Forearm faces below the elbow: non-skin texels → sheet skin. |
+| Ears and specks skin-coloured inside the hair (sheet: curls cover the ears) | projection | Head/neck faces above the chin: skin islands under 80 faces and skin texels mostly surrounded by hair (side/back only) → hair colour. Only skin→hair: the drawn face is never touched. |
+| Mouth stroke projected onto the side of the nose | front projection on a protruding nose | Dark texels on the nose's side walls → skin. |
+
+Unchanged (inherited, still open): hair geometry is one lumpy shell with some dark strokes
+on the forehead; forearms crumple a little in tight guard poses (generator topology); the
+apron bow rides the chest; no basket/spatula/pan props.
+
+## Rebuild
+
+```bash
+B="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"; K=build/market_auntie_r3
+"$B" -b --factory-startup --python tools/art/auntie_r3_hands.py -- build/market_auntie_refine_r2/04_skin_refined.blend $K/01_hands.blend
+"$B" -b --factory-startup --python tools/art/auntie_r3_arms.py  -- $K/01_hands.blend $K/02_arms.blend
+"$B" -b --factory-startup --python tools/art/auntie_r3_paint.py -- $K/02_arms.blend $K/03_paint.blend $K/market_auntie_r3_basecolor.png
+"$B" -b --factory-startup --python tools/art/auntie_r3_export.py -- $K/03_paint.blend assets/art_previews/humans/market_auntie_r3/market_auntie_wip.glb
+godot --path . --resolution 640x640 --script res://tools/art/capture_auntie_r3.gd -- res://assets/art_previews/humans/market_auntie_r3/market_auntie_wip.glb <out> r3
+```
+
+Each step writes a JSON report next to its .blend (`*_hands.json`, `*_arms.json`,
+`*_paint.json`); the numbers are also in the GLB's `.provenance.json`.
+
+Start from the .blend, not the GLB: a mesh re-imported from the GLB exports the towel's
+colour attribute as plain white (Blender 5.2 glTF; LESSONS 6.18).

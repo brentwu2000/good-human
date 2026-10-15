@@ -136,6 +136,21 @@ gym coach's sheet head is tilted 17°; projected, his mouth sat on his nose. Dra
 face in the mesh's own front-mapped pixels from measured landmarks (brow, eyes,
 nose tip, lip, chin), and check the face zone reaches below the mouth.
 
+**6.18 A GLB re-imported into Blender can lose vertex colours on export.** The auntie's
+towel stripes (a corner colour attribute, correct in the .blend) exported as plain white
+from a mesh that came from the GLB, with every exporter option; Codex's .blend checkpoint
+exported them fine. Build from the .blend checkpoint. Check: read COLOR_0 from the exported
+GLB (or look at the towel in Godot), not the Blender attribute.
+
+**6.19 New faces on a mesh with a colour attribute are black in Godot.** Joined hands came
+in with colour (0,0,0), and Godot multiplies albedo by COLOR_0: black hands. Set new
+corners to white after a join. Check: count corners with colour sum < 0.01.
+
+**6.20 Raised arms tear a generated character where arm and torso are one surface.**
+Reweighting alone (Codex r2) and cutting alone both left strips; it takes both: remove the
+faces joining arm and body below the armpit, and drop arm weights from torso vertices
+(and torso weights from arm vertices). Check: chest close-ups of Block/Jab in Godot.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
