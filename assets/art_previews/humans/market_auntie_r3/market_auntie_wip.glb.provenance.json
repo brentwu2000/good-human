@@ -1,10 +1,10 @@
 {
- "date": "2026-10-15 (r3c head)",
+ "date": "2026-10-16 (r3d forehead + nose)",
  "author": "Claude (owner: 「Codex 做完了，接手阿姨」)",
  "source": "build/market_auntie_refine_r2/04_skin_refined.blend (Codex r2 checkpoint)",
  "license": "Inherited owner sheet/factory/project rig chain; reference-sheet rights remain undocumented. No new external assets.",
  "grade": "B+ / review candidate; installed to runtime",
- "sha256": "da02c9de7a3e77ef8feab2637e9c275aa2d1b6d103b483c9bd4e8e9ae0fe206d",
+ "sha256": "f173d487597f8106af2aead99546849651c0497f0739243b6cce58278a920b8d",
  "joints": 53,
  "clips": 19,
  "steps": [
@@ -171,8 +171,15 @@
    "nose_side_texels_to_skin": 776
   },
   "04": {
-   "nose_vertices_moved": 62,
+   "nose_vertices_moved": 63,
+   "forehead_lump_vertices": 47,
+   "forehead_lump_max_mm": 29.1,
    "head_texels": 435898,
+   "brow_z": {
+    "-1": 1.2538342310392572,
+    "1": 1.298
+   },
+   "bang_texels": 2211,
    "ear_faces": 63,
    "knot_centre": [
     0.038,
@@ -185,11 +192,11 @@
     0.41
    ],
    "texels": {
-    "hair": 322095,
-    "face": 61641,
+    "hair": 324239,
+    "face": 59497,
     "ear": 5343,
     "headband": 37628,
-    "mouth": 1785
+    "mouth": 2131
    }
   }
  }

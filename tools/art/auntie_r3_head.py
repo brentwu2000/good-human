@@ -45,27 +45,51 @@ HAIR_HI = np.array([0.395, 0.270, 0.200])
 HAIR_LO = np.array([0.130, 0.085, 0.070])
 
 NOSE_C = np.array([0.015, 1.176])            # x, z of the nose (front grid)
-NOSE_BASE_Y = -0.205                         # face plane in front of the cheeks
-NOSE_R = 0.072
-NOSE_KEEP = 0.35
+NOSE_BASE_Y = -0.215                         # face plane in front of the cheeks
+NOSE_R = 0.075
+NOSE_SCALE = 0.62
 
-# ---- 1. nose geometry.
+# ---- 1. nose geometry: the whole bulb scaled toward a point inside the face, so
+# it stays round (r3c squashed only its depth: a flat disc, a pig's snout).
 names = {g.index: g.name for g in body.vertex_groups}
 inv = bw.inverted()
+C = Vector((NOSE_C[0], NOSE_BASE_Y + 0.012, NOSE_C[1] - 0.004))
 moved = 0
 for v in me.vertices:
     p = bw @ v.co
     d = math.hypot(p.x - NOSE_C[0], p.z - NOSE_C[1])
-    if d < NOSE_R and p.y < NOSE_BASE_Y:
-        fall = (1 - d / NOSE_R) ** 0.5
-        k = 1 - (1 - NOSE_KEEP) * fall
-        ny = NOSE_BASE_Y + (p.y - NOSE_BASE_Y) * k
-        nx = NOSE_C[0] + (p.x - NOSE_C[0]) * (1 - 0.25 * fall)
-        nz = NOSE_C[1] + (p.z - NOSE_C[1]) * (1 - 0.25 * fall)
-        v.co = inv @ Vector((nx, ny, nz))
+    if d < NOSE_R and p.y < NOSE_BASE_Y + 0.01:
+        fall = 0.5 + 0.5 * math.cos(math.pi * d / NOSE_R)      # 1 at the centre, 0 at the rim
+        t_ = min(max((NOSE_BASE_Y + 0.01 - p.y) / 0.025, 0.0), 1.0)   # and 0 at the cheek surface
+        fall *= t_ * t_ * (3 - 2 * t_)
+        k = 1 - (1 - NOSE_SCALE) * fall
+        v.co = inv @ (C + (p - C) * k)
         moved += 1
 me.update()
 report["nose_vertices_moved"] = moved
+
+# ---- 1b. forehead lumps: the generator's hair shell left lumps lying on the
+# forehead (r3c painted them skin: "肉瘤"). Fit the smooth forehead (y as a
+# quadratic of x, z on vertices of the forehead, refitted without outliers) and
+# pull everything standing out of it back onto it, eased at the edges.
+fv = [v for v in me.vertices]
+FP = np.array([bw @ v.co for v in fv])
+reg = (np.abs(FP[:, 0] - 0.012) < 0.15) & (FP[:, 2] > 1.215) & (FP[:, 2] < 1.36) & (FP[:, 1] < -0.12)
+Af = lambda x, z: np.stack([np.ones_like(x), x, z, x * x, z * z, x * z], 1)
+sel = reg.copy()
+for _ in range(4):
+    cf, *_ = np.linalg.lstsq(Af(FP[sel, 0], FP[sel, 2]), FP[sel, 1], rcond=None)
+    r_ = FP[:, 1] - Af(FP[:, 0], FP[:, 2]) @ cf
+    sel = reg & (np.abs(r_) < 0.004)
+lump = reg & (r_ < -0.003)
+ex = np.clip((0.15 - np.abs(FP[:, 0] - 0.012)) / 0.03, 0, 1) * np.clip((FP[:, 2] - 1.215) / 0.02, 0, 1)
+for i in np.nonzero(lump)[0]:
+    p = FP[i].copy()
+    p[1] = p[1] - r_[i] * ex[i]          # onto the surface (r_ < 0: in front of it)
+    fv[i].co = inv @ Vector(p)
+me.update()
+report["forehead_lump_vertices"] = int(lump.sum())
+report["forehead_lump_max_mm"] = round(float(-r_[lump].min() * 1000), 1) if lump.any() else 0
 
 # ---- 2. texels of the head with their 3D point and normal.
 mat = me.materials[0]
@@ -137,6 +161,28 @@ face_oval = (((X - 0.01) / 0.168) ** 2 + ((Z - 1.17) / np.where(Z < 1.17, 0.145,
 # The middle of the face counts whatever way it faces (the nose's underside).
 inner = (np.abs(X - 0.012) < 0.11) & (Z > 1.08) & (Z < 1.30) & (Y < -0.12)
 face = face_oval & (Z < hair_z) & (frontish | inner)
+# Bangs: curls of the hair shell lying on the forehead stick out in front of the
+# smooth forehead. Fit the forehead/cheeks (y as a quadratic of x, z, refitted
+# without outliers); anything above the eyes standing out of it is hair.
+fit_m = face & (Z > 1.20) & (Z < 1.34) & (np.abs(X) < 0.13) & frontish
+Afit = lambda x, z: np.stack([np.ones_like(x), x, z, x * x, z * z, x * z], 1)
+sel = fit_m.copy()
+for _ in range(3):
+    coef, *_ = np.linalg.lstsq(Afit(X[sel], Z[sel]), Y[sel], rcond=None)
+    res = Y - Afit(X, Z) @ coef
+    sel = fit_m & (np.abs(res) < 0.006)
+BROW_Z = 1.292
+brow_strip = (np.abs(Z - BROW_Z - 0.006) < 0.016) & (np.abs(np.abs(X - 0.012) - 0.088) < 0.05)
+bangs = face & (Z > 1.262) & (res < -0.006)
+# Brows sit just under the bangs: on each side, the lowest bang texel above the eye.
+brow_z = {}
+for sx in (-1, 1):
+    side_b = bangs & (np.abs(X - 0.012 - sx * 0.088) < 0.035)
+    low = np.percentile(Z[side_b], 5) if side_b.sum() > 50 else 1.31
+    brow_z[sx] = float(min(BROW_Z + 0.006, low - 0.012))
+report["brow_z"] = brow_z
+report["bang_texels"] = int(bangs.sum())
+face &= ~bangs
 # Ears: skin at the sides at cheek height (the sheet shows them).
 # Only the ear islands themselves: skin-coloured faces in connected groups of
 # 8-60 at the sides (the specks around them are hair).
@@ -191,7 +237,7 @@ out_col = col.copy()
 # Hair everywhere on the head that is not face, ear or headband fabric.
 # Only texels that are hair, headband red or skin specks now (never the blouse
 # collar or the towel at the neck).
-hair = ~face & ~ear & ~fabric & ((lum < 0.3) | red | dot_cream | skinlike)
+hair = (~face & ~ear & ~fabric & ((lum < 0.3) | red | dot_cream | skinlike)) | bangs
 # Below the jaw at the front (neck) keep what is there.
 keep_neck = (Z < 1.06) & frontish & ~face_oval
 hair &= ~keep_neck
@@ -237,13 +283,9 @@ for sx in (-1, 1):
     a = np.clip(1.15 - e, 0, 1) * 0.75
     m = feat & (a > 0)
     out_col[m] = out_col[m] * (1 - a[m, None]) + BLUSH * a[m, None]
-# nose tip pink (on the shrunken nose)
-nt = feat & (ell(0.003, 1.172, 0.032, 0.026) < 1) & (Y < NOSE_BASE_Y + 0.005)
-a = np.clip(1 - ell(0.003, 1.165, 0.032, 0.024), 0, 1) * 0.6
-out_col[nt] = out_col[nt] * (1 - a[nt, None]) + SKIN_PINK * a[nt, None]
 # brows: thin, arched, a little outward-down
 for sx in (-1, 1):
-    m = feat & arc(sx * 0.088, 1.302, 0.042, 0.012, 0.0045)
+    m = feat & arc(sx * 0.088, 1.290, 0.040, 0.011, 0.0045)
     out_col[m] = LINE
 # closed happy eyes (arched up) with a small lash at the outer end
 for sx in (-1, 1):

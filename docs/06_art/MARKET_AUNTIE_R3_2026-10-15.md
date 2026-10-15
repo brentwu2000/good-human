@@ -52,6 +52,15 @@ brows z 1.33, eyes 1.24, mouth 1.13, chin 1.03, hairline 1.345).
 | happy closed eyes, thin arched brows, wide smile, rosy cheeks | old projected strokes, thin flat mouth | redrawn: arched brows, ∩ eyes with a lash, open smile with teeth, soft blush, pink nose tip |
 | ears visible | painted hair in r3 | ear islands (cheek height) skin again |
 
+### r3d — 「瀏海被弄成肉瘤，鼻子像豬鼻」
+
+- **Forehead lumps**: r3c painted the hair shell's lumps on the forehead skin. Now the smooth
+  forehead is fitted (quadratic surface, outliers dropped) and the 47 vertices standing out of
+  it (up to 29 mm) are pulled back onto it; brows drawn symmetric at z 1.29.
+- **Pig nose**: r3c squashed only the depth, leaving a flat disc with a pink tip. Now the whole
+  bulb is scaled (62 %) toward a point inside the face, eased to 0 at the rim and at the cheek
+  surface, so it stays round; the pink tip is gone.
+
 Still open: hair geometry is one lumpy shell (a few dark strokes on the forehead read as
 curls); the sheet's basket, spatula and pan are not modelled (the spatula is her weapon on
 the sheet — gameplay scope, P-05).
