@@ -26,9 +26,18 @@ Walk_Relaxed and HeavyHook. Top row r2, bottom row r3.
 | Ears and specks skin-coloured inside the hair (sheet: curls cover the ears) | projection | Head/neck faces above the chin: skin islands under 80 faces and skin texels mostly surrounded by hair (side/back only) → hair colour. Only skin→hair: the drawn face is never touched. |
 | Mouth stroke projected onto the side of the nose | front projection on a protruding nose | Dark texels on the nose's side walls → skin. |
 
-Unchanged (inherited, still open): hair geometry is one lumpy shell with some dark strokes
-on the forehead; forearms crumple a little in tight guard poses (generator topology); the
-apron bow rides the chest; no basket/spatula/pan props.
+### r3b — the problems left after r3 (owner: 「你有遇到問題，想方法解決」)
+
+| Problem left in r3 | Cause found | Fix |
+|---|---|---|
+| Apron top corners (the red "bow") rode the shoulder in guard poses | those chest vertices carried 50–100 % upper-arm weight | apron vertices (by texel: not purple / skin / hair, on the front of the chest) give their arm weight to `spine_03` (266 vertices) |
+| Sleeve broke into purple shards on a bent arm; zigzag hem | the owner-fitted elbow sat at 38 % of her arm, inside the sleeve (hem at ~65 %) | elbow joint moved to 60 % of shoulder→wrist; every arm vertex below the armpit re-weighted along the chain (upper arm / forearm blend ±3 cm at the elbow, forearm / hand at the wrist); straight hem found per texel along the arm |
+| Forearms patchy (darker blotches) | projection's baked shading | forearm below the hem is flat sheet skin |
+| Hands looked tiny on thick forearms | finger radius from an average hand | fingers ~1.3× thicker, hand 12.5 cm |
+
+Still open: hair geometry is one lumpy shell (a few dark strokes on the forehead read as
+curls); the sheet's basket, spatula and pan are not modelled (the spatula is her weapon on
+the sheet — gameplay scope, P-05).
 
 ## Rebuild
 

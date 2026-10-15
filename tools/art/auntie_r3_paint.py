@@ -49,9 +49,21 @@ def tri_texels(uv3):
     return (ys[ins] - 0.5).astype(int), (xs[ins] - 0.5).astype(int)
 
 
-forearm_faces = set()
+# Sleeve hem: the sheet has a clean hem at the elbow; the projection left a zigzag
+# of purple and skin. Per arm, every texel of the arm faces gets its rest-pose 3D
+# point (barycentric); its distance along the upper arm decides: above the hem
+# sleeve (non-purple → sleeve colour), below it skin. The hem is where sleeve
+# purple drops below half, measured on the texels themselves.
+
+
+def purple_px(c):
+    return (c[..., 2] > c[..., 0] * 0.9) & (c[..., 2] > c[..., 1])
+
+
+arm_faces_of = {}
 for s in "lr":
-    elbow_z = (aw @ arm.data.bones[f"lowerarm_{s}"].head_local).z - 0.035
+    pit = (aw @ arm.data.bones[f"upperarm_{s}"].head_local).z - 0.075
+    ids = set()
     for p in me.polygons:
         if p.material_index != 0:
             continue
@@ -59,24 +71,80 @@ for s in "lr":
         if not all(v.groups for v in vs):
             continue
         dom = [names[max(v.groups, key=lambda g: g.weight).group] for v in vs]
-        if all(d in (f"lowerarm_{s}", f"hand_{s}") for d in dom) and max((bw_ @ v.co).z for v in vs) < elbow_z:
-            forearm_faces.add(p.index)
-report["faces"] = len(forearm_faces)
-mask = np.zeros((H, W), dtype=bool)
-for t in me.loop_triangles:
-    if t.polygon_index in forearm_faces:
+        if all(d in (f"upperarm_{s}", f"lowerarm_{s}", f"hand_{s}") for d in dom) and (bw_ @ p.center).z < pit:
+            ids.add(p.index)
+    arm_faces_of[s] = ids
+vco = np.array([bw_ @ v.co for v in me.vertices])
+hem_report, sleeve_px, skin_px = {}, np.zeros((H, W), bool), np.zeros((H, W), bool)
+for s in "lr":
+    S = aw @ arm.data.bones[f"upperarm_{s}"].head_local
+    E = aw @ arm.data.bones[f"lowerarm_{s}"].head_local
+    up = np.array((E - S).normalized())
+    Sv = np.array(S)
+    tys, txs, tas = [], [], []
+    for t in me.loop_triangles:
+        if t.polygon_index not in arm_faces_of[s]:
+            continue
         uv3 = np.array([uvl[li].uv[:] for li in t.loops]) * [W, H]
-        ys, xs = tri_texels(uv3)
-        if ys is not None:
-            mask[ys, xs] = True
+        P = vco[list(t.vertices)]
+        x0, y0 = np.floor(uv3.min(0)).astype(int)
+        x1, y1 = np.ceil(uv3.max(0)).astype(int)
+        x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, W - 1), min(y1, H - 1)
+        if x1 < x0 or y1 < y0:
+            continue
+        xs, ys = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+        (ax_, ay_), (bx_, by_), (cx_, cy_) = uv3
+        det = (by_ - cy_) * (ax_ - cx_) + (cx_ - bx_) * (ay_ - cy_)
+        if abs(det) < 1e-12:
+            continue
+        l1 = ((by_ - cy_) * (xs - cx_) + (cx_ - bx_) * (ys - cy_)) / det
+        l2 = ((cy_ - ay_) * (xs - cx_) + (ax_ - cx_) * (ys - cy_)) / det
+        l3 = 1 - l1 - l2
+        ins = (l1 >= -0.05) & (l2 >= -0.05) & (l3 >= -0.05)
+        pts = l1[ins, None] * P[0] + l2[ins, None] * P[1] + l3[ins, None] * P[2]
+        tys.append((ys[ins] - 0.5).astype(int))
+        txs.append((xs[ins] - 0.5).astype(int))
+        tas.append((pts - Sv) @ up)
+    ty, tx, ta = np.concatenate(tys), np.concatenate(txs), np.concatenate(tas)
+    pu = purple_px(px[ty, tx, :3])
+    prof = []
+    for a_ in np.arange(0.0, ta.max(), 0.02):
+        m = (ta >= a_) & (ta < a_ + 0.02)
+        if m.sum():
+            prof.append((round(float(a_), 2), int(m.sum()), round(float(pu[m].mean()), 2)))
+    report.setdefault("purple_profile", {})[s] = prof
+    hem = None
+    for a_ in np.arange(0.0, ta.max(), 0.004):
+        m = (ta >= a_) & (ta < a_ + 0.012)
+        if m.sum() > 30 and pu[m].mean() < 0.5 and a_ > 0.03:
+            hem = a_
+            break
+    hem = ta.max() if hem is None else hem
+    hem_report[s] = {"hem_along_upperarm_m": round(float(hem), 3), "upperarm_len_m": round(float(np.linalg.norm(np.array(E - S))), 3)}
+    above = ta < hem
+    sleeve_px[ty[above], tx[above]] = True
+    skin_px[ty[~above], tx[~above]] = True
+report["sleeve_hem"] = hem_report
+sleeve_mask = sleeve_px & ~skin_px
+forearm_faces = set()
+mask = skin_px & ~sleeve_px
 rgb = px[..., :3]
 # Skin-like: warm, light, low blue relative to red (shaded skin included).
 r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
 skinlike = (r > 0.55) & (r >= g) & (g >= b * 0.95) & ((r - b) > 0.18) & ((r - g) < 0.32)
-bad = mask & ~skinlike
+# Flat colour like the sheet: the whole forearm is skin (baked shading in the
+# projection left darker patches that read as dirt or bruises).
+bad = mask
 report["texels_seen"] = int(mask.sum())
 report["texels_repainted"] = int(bad.sum())
 rgb[bad] = SKIN
+sl = rgb[sleeve_mask]
+is_pu = (sl[:, 2] > sl[:, 0] * 0.9) & (sl[:, 2] > sl[:, 1])
+SLEEVE = np.median(sl[is_pu], 0) if is_pu.any() else np.array([0.52, 0.49, 0.68])
+fix = sleeve_mask & ~mask & ~((rgb[..., 2] > rgb[..., 0] * 0.9) & (rgb[..., 2] > rgb[..., 1]))
+rgb[fix] = SLEEVE
+report["sleeve_texels_to_purple"] = int(fix.sum())
+report["sleeve_colour"] = [round(float(x), 3) for x in SLEEVE]
 px[..., :3] = rgb
 
 # ---- Head: skin showing through the hair. The sheet's curly bob covers the ears;

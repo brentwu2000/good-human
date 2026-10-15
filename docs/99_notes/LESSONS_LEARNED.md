@@ -151,6 +151,12 @@ Reweighting alone (Codex r2) and cutting alone both left strips; it takes both: 
 faces joining arm and body below the armpit, and drop arm weights from torso vertices
 (and torso weights from arm vertices). Check: chest close-ups of Block/Jab in Godot.
 
+**6.21 A joint fitted from another body can sit inside a garment.** The auntie's
+owner-fitted elbow was at 38 % of her arm while her sleeve ended at ~65 %: a bent arm broke
+the sleeve into shards and painting a "clean hem" could not fix it. Measure where the
+mesh's garment edges are and put the joint below them (elbow at 60 %), then re-weight
+along the chain. Check: compare joint heights with garment hems before tuning paint.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

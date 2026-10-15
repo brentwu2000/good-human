@@ -1,10 +1,10 @@
 {
- "date": "2026-10-15",
+ "date": "2026-10-15 (r3b)",
  "author": "Claude (owner: 「Codex 做完了，接手阿姨」)",
  "source": "build/market_auntie_refine_r2/04_skin_refined.blend (Codex r2 checkpoint)",
  "license": "Inherited owner sheet/factory/project rig chain; reference-sheet rights remain undocumented. No new external assets.",
  "grade": "B+ / review candidate; installed to runtime",
- "sha256": "6ad32a4974183b244857732ec5e76dee6b8ad40dd4cf4e921d3bac8c811f0902",
+ "sha256": "25b9801d5253399e66008a58329f65519856795c4cf3f54bd15d6b726391fed8",
  "joints": 53,
  "clips": 19,
  "steps": [
@@ -17,33 +17,33 @@
   "01": {
    "l": {
     "mesh_wrist": [
-     0.3345,
-     -0.0938,
-     0.6198
+     0.3405,
+     -0.0778,
+     0.6445
     ],
-    "wrist_radius": 0.0412,
+    "wrist_radius": 0.0415,
     "old_bone_wrist": [
      0.3459,
      -0.0495,
      0.6966
     ],
     "wrist_section_measured": [
-     0.0456,
-     0.0824,
-     51
+     0.0524,
+     0.0825,
+     58
     ],
     "palm_section": [
-     0.0456,
-     0.0824,
-     0.0478
+     0.0524,
+     0.0825,
+     0.0551
     ],
-    "palm_length": 0.062
+    "palm_length": 0.0738
    },
    "r": {
     "mesh_wrist": [
-     -0.3245,
-     -0.0916,
-     0.6208
+     -0.3207,
+     -0.0769,
+     0.6397
     ],
     "wrist_radius": 0.04,
     "old_bone_wrist": [
@@ -52,16 +52,16 @@
      0.6966
     ],
     "wrist_section_measured": [
-     0.0444,
-     0.0812,
-     42
+     0.049,
+     0.0928,
+     41
     ],
     "palm_section": [
-     0.0444,
-     0.0812,
-     0.0467
+     0.049,
+     0.0928,
+     0.0514
     ],
-    "palm_length": 0.062
+    "palm_length": 0.0738
    },
    "skin_uv": [
     0.2768007218837738,
@@ -73,11 +73,11 @@
     0.6313725709915161
    ],
    "remaining_hand_weights_moved": {
-    "lowerarm": 364,
-    "pelvis": 1925
+    "lowerarm": 314,
+    "pelvis": 1996
    },
-   "mitten_vertices_removed": 622,
-   "forearm_vertices_moved_to_lowerarm": 677,
+   "mitten_vertices_removed": 690,
+   "forearm_vertices_moved_to_lowerarm": 585,
    "towel_probe": {
     "before_join": [
      [
@@ -119,29 +119,47 @@
    "corners_whitened": 3440
   },
   "02": {
-   "welded_vertices": 4660,
+   "welded_vertices": 4636,
    "l": {
     "armpit_z": 0.885,
-    "bridge_faces": 127
+    "bridge_faces": 119
    },
    "r": {
     "armpit_z": 0.885,
-    "bridge_faces": 57
+    "bridge_faces": 39
    },
-   "wrist_leftover_faces": 62,
+   "wrist_leftover_faces": 50,
    "weights_cleaned": {
-    "body": 450,
-    "arm": 557
+    "body": 425,
+    "arm": 526
    },
-   "faces_removed": 246,
-   "fill_faces": 4,
-   "open_edges_before": 300,
-   "open_edges_after": 405
+   "elbow_forearm_vertices_rechained": 1455,
+   "apron_vertices_off_the_arms": 266,
+   "faces_removed": 208,
+   "fill_faces": 1,
+   "open_edges_before": 297,
+   "open_edges_after": 375
   },
   "03": {
-   "faces": 795,
-   "texels_repainted": 27544,
-   "texels_seen": 59637,
+   "faces": 0,
+   "texels_repainted": 29669,
+   "texels_seen": 29669,
+   "sleeve_hem": {
+    "l": {
+     "hem_along_upperarm_m": 0.3,
+     "upperarm_len_m": 0.217
+    },
+    "r": {
+     "hem_along_upperarm_m": 0.292,
+     "upperarm_len_m": 0.217
+    }
+   },
+   "sleeve_texels_to_purple": 3380,
+   "sleeve_colour": [
+    0.459,
+    0.439,
+    0.62
+   ],
    "hair_colour": [
     0.118,
     0.075,

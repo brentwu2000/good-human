@@ -43,5 +43,7 @@ strap, bandana, apron, towel kept); installed to the runtime auntie. Details and
 - New hands (one tube per finger, skinned 1:1); arms cut free of the torso below the armpit
   with cross weights removed; forearm/ear/nose-side texture fixes (new
   `market_auntie_r3_basecolor`; your r2 basecolor untouched).
-- **CX-13** Hair geometry (one lumpy shell, forehead strokes) and the apron bow riding the chest
-  remain; basket / spatula / pan props are still absent.
+- r3b: elbow joint moved to 60 % of shoulder→wrist (the owner-fitted one sat inside the sleeve);
+  arm weights re-chained; apron top corners moved off the arm bones.
+- **CX-13** Hair geometry (one lumpy shell, forehead strokes) remains; basket / spatula / pan
+  props are still absent.

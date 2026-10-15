@@ -40,9 +40,10 @@ aw, bw_ = arm.matrix_world, body.matrix_world
 FINGERS = ("thumb", "index", "middle", "ring", "pinky")
 FINGER_SCALE = 0.78     # chain length (chubby, short)
 GATHER = 0.35           # finger bases drawn toward the knuckle centre
-RADIUS = {"thumb": 0.0135, "index": 0.0120, "middle": 0.0124, "ring": 0.0118, "pinky": 0.0105}
+RADIUS = {"thumb": 0.0175, "index": 0.0158, "middle": 0.0162, "ring": 0.0155, "pinky": 0.0138}   # thick: her forearms are thick
 SIDES = 10
-HAND_LEN = 0.105       # wrist to fingertip, chubby (palm ~6 cm, fingers ~4.5 cm)
+ELBOW_FRAC = 0.60
+HAND_LEN = 0.125       # wrist to fingertip, chubby (palm ~6 cm, fingers ~4.5 cm)
 report = {}
 
 
@@ -130,6 +131,13 @@ for s in "lr":
     low = eb[f"lowerarm_{s}"]
     if low.tail != new_w:
         low.tail = new_w
+    # Elbow: the owner-fitted joint sat at 38 % of her arm, inside the sleeve (the
+    # sleeve hem is at ~65 %), so the sleeve broke into shards on a bent arm. It
+    # goes to ELBOW_FRAC of shoulder → wrist, just below the hem.
+    up = eb[f"upperarm_{s}"]
+    elbow = up.head + (new_w - up.head) * ELBOW_FRAC
+    up.tail = elbow
+    low.head = elbow
 bpy.ops.object.mode_set(mode="OBJECT")
 
 

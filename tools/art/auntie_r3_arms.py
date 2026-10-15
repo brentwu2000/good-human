@@ -115,6 +115,86 @@ for v in bm.verts:
                     w[g] *= k
                 cleaned["arm"] += 1
 report["weights_cleaned"] = cleaned
+
+# Elbow and forearm: the generator's heat weights are noisy here, and a bent elbow
+# crumpled the forearm. Every arm vertex below the armpit (the elbow moved), weights follow the chain
+# (shoulder → elbow → wrist): a smooth upper-arm/forearm blend across the elbow
+# and a forearm/hand blend at the wrist.
+
+
+def smooth(e0, e1, x):
+    t = min(max((x - e0) / (e1 - e0), 0.0), 1.0)
+    return t * t * (3 - 2 * t)
+
+
+chain = 0
+for s in "lr":
+    E = aw @ arm.data.bones[f"lowerarm_{s}"].head_local
+    Wr = aw @ arm.data.bones[f"hand_{s}"].head_local
+    S = aw @ arm.data.bones[f"upperarm_{s}"].head_local
+    up_dir = (E - S).normalized()
+    fo_dir = (Wr - E).normalized()
+    gu, gl, gh = (next(g.index for g in body.vertex_groups if g.name == n)
+                  for n in (f"upperarm_{s}", f"lowerarm_{s}", f"hand_{s}"))
+    for v in bm.verts:
+        if tag[v] != s:
+            continue
+        p = bw_ @ v.co
+        # signed distance along the chain from the elbow (bisecting plane at the elbow)
+        bis = (up_dir + fo_dir).normalized()
+        dE = (p - E).dot(bis)
+        if p.z >= report[s]["armpit_z"]:
+            continue   # the shoulder keeps its clavicle blend
+        dW = (p - Wr).dot(fo_dir)
+        w_low = smooth(-0.02, 0.04, dE)
+        w_hand = smooth(-0.02, 0.015, dW)
+        w = v[deform]
+        for g in list(w.keys()):
+            del w[g]
+        wu, wl, wh = 1.0 - w_low, w_low * (1.0 - w_hand), w_low * w_hand
+        for g, x in ((gu, wu), (gl, wl), (gh, wh)):
+            if x > 1e-3:
+                w[g] = x
+        chain += 1
+report["elbow_forearm_vertices_rechained"] = chain
+
+# The apron's top corners sit on the chest beside the armpit and carried mostly
+# upper-arm weight: in a guard pose they rode the arm (the red "bow" on the
+# shoulder). Apron = front faces whose texel is not blouse purple, skin or hair.
+mat0 = body.data.materials[0]
+img = next(n.image for n in mat0.node_tree.nodes if n.type == "TEX_IMAGE" and n.image and "rough" not in n.image.name.lower())
+IW, IH = img.size
+ipx = np.array(img.pixels[:], dtype=np.float32).reshape(IH, IW, img.channels)[..., :3]
+
+
+def is_apron(f):
+    u = sum((l[uvl].uv for l in f.loops), f.loops[0][uvl].uv * 0) / len(f.loops)
+    r_, g_, b_ = ipx[min(int(u[1] * IH), IH - 1), min(int(u[0] * IW), IW - 1)]
+    purple = b_ > r_ * 0.9 and b_ > g_
+    skin = r_ > 0.6 and r_ >= g_ >= b_ * 0.9 and (r_ - b_) > 0.18 and (r_ - g_) < 0.3
+    dark = (0.299 * r_ + 0.587 * g_ + 0.114 * b_) < 0.22
+    return not (purple or skin or dark)
+
+
+apron_v = set()
+for f in bm.faces:
+    if f.material_index != 0:
+        continue
+    c = bw_ @ f.calc_center_median()
+    if 0.70 < c.z < 1.02 and abs(c.x) < 0.24 and c.y < -0.08 and is_apron(f):
+        apron_v.update(f.verts)
+sp = next(g.index for g in body.vertex_groups if g.name == "spine_03")
+moved = 0
+for v in apron_v:
+    w = v[deform]
+    armw = [g for g in w.keys() if gname[g].split("_")[0] in FAM]
+    if armw:
+        add = sum(w[g] for g in armw)
+        for g in armw:
+            del w[g]
+        w[sp] = w.get(sp, 0.0) + add
+        moved += 1
+report["apron_vertices_off_the_arms"] = moved
 bmesh.ops.delete(bm, geom=dead, context="FACES_ONLY")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
 opened = [e for e in bm.edges if e.is_boundary and e not in was_open]
