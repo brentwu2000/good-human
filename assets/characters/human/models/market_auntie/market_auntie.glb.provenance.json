@@ -1,16 +1,17 @@
 {
- "date": "2026-10-15 (r3b)",
+ "date": "2026-10-15 (r3c head)",
  "author": "Claude (owner: 「Codex 做完了，接手阿姨」)",
  "source": "build/market_auntie_refine_r2/04_skin_refined.blend (Codex r2 checkpoint)",
  "license": "Inherited owner sheet/factory/project rig chain; reference-sheet rights remain undocumented. No new external assets.",
  "grade": "B+ / review candidate; installed to runtime",
- "sha256": "25b9801d5253399e66008a58329f65519856795c4cf3f54bd15d6b726391fed8",
+ "sha256": "da02c9de7a3e77ef8feab2637e9c275aa2d1b6d103b483c9bd4e8e9ae0fe206d",
  "joints": 53,
  "clips": 19,
  "steps": [
   "tools/art/auntie_r3_hands.py",
   "tools/art/auntie_r3_arms.py",
   "tools/art/auntie_r3_paint.py",
+  "tools/art/auntie_r3_head.py",
   "tools/art/auntie_r3_export.py"
  ],
  "reports": {
@@ -165,9 +166,31 @@
     0.075,
     0.059
    ],
-   "head_skin_islands_to_hair_faces": 58,
-   "head_texels_to_hair": 5761,
+   "head_skin_islands_to_hair_faces": 8,
+   "head_texels_to_hair": 2448,
    "nose_side_texels_to_skin": 776
+  },
+  "04": {
+   "nose_vertices_moved": 62,
+   "head_texels": 435898,
+   "ear_faces": 63,
+   "knot_centre": [
+    0.038,
+    -0.036,
+    1.487
+   ],
+   "headband_plane_normal": [
+    0.0,
+    0.912,
+    0.41
+   ],
+   "texels": {
+    "hair": 322095,
+    "face": 61641,
+    "ear": 5343,
+    "headband": 37628,
+    "mouth": 1785
+   }
   }
  }
 }

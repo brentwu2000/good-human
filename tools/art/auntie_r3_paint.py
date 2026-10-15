@@ -218,7 +218,8 @@ for f in head:
         seen.add(g)
         comp.append(g)
         st += [h for e in g.edges for h in e.link_faces if h in hs and h not in seen and C[h] == "S"]
-    if len(comp) < 80:       # the face itself is ~470 faces; ears 17-33; specks 1-5
+    cx_ = np.mean([(bw_ @ g.calc_center_median()).x for g in comp])
+    if len(comp) < 80 and abs(cx_) < 0.2:   # specks; not the face (~470) nor the ears (sheet shows them)
         flip += comp
 report["head_skin_islands_to_hair_faces"] = len(flip)
 head_mask = np.zeros((H, W), dtype=bool)      # head faces not facing the front

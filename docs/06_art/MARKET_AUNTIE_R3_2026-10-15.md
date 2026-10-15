@@ -35,6 +35,23 @@ Walk_Relaxed and HeavyHook. Top row r2, bottom row r3.
 | Forearms patchy (darker blotches) | projection's baked shading | forearm below the hem is flat sheet skin |
 | Hands looked tiny on thick forearms | finger radius from an average hand | fingers ~1.3× thicker, hand 12.5 cm |
 
+### r3c — the head (owner: 「頭還是需要改」)
+
+![head vs sheet](market_auntie_r3_2026-10-15/head_vs_sheet.jpg)
+
+`tools/art/auntie_r3_head.py`: every head texel gets its rest-pose 3D point and normal, so
+the head is redrawn as shapes in the mesh's own front coordinates (measured on a front grid:
+brows z 1.33, eyes 1.24, mouth 1.13, chin 1.03, hairline 1.345).
+
+| Sheet | r3b | r3c |
+|---|---|---|
+| dark brown curly bob, lighter curls | near-black flat shell | sheet brown; lighter where the shell's lumps face an up-front light, thin strands |
+| clean rounded hairline | jagged, dark strokes on the forehead | hairline arch, flat skin below it |
+| headband: a band over the crown + knot | red cap over the whole crown, dots grown into blotches | band (plane through the crown and above the ears, 6 cm) + knot only; flat red with even cream dots on a 3D lattice |
+| small button nose | 11 cm bulb, 4 cm out | front part keeps 35 % of its depth, drawn in (62 vertices) |
+| happy closed eyes, thin arched brows, wide smile, rosy cheeks | old projected strokes, thin flat mouth | redrawn: arched brows, ∩ eyes with a lash, open smile with teeth, soft blush, pink nose tip |
+| ears visible | painted hair in r3 | ear islands (cheek height) skin again |
+
 Still open: hair geometry is one lumpy shell (a few dark strokes on the forehead read as
 curls); the sheet's basket, spatula and pan are not modelled (the spatula is her weapon on
 the sheet — gameplay scope, P-05).
@@ -46,7 +63,8 @@ B="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"; K=build/market_
 "$B" -b --factory-startup --python tools/art/auntie_r3_hands.py -- build/market_auntie_refine_r2/04_skin_refined.blend $K/01_hands.blend
 "$B" -b --factory-startup --python tools/art/auntie_r3_arms.py  -- $K/01_hands.blend $K/02_arms.blend
 "$B" -b --factory-startup --python tools/art/auntie_r3_paint.py -- $K/02_arms.blend $K/03_paint.blend $K/market_auntie_r3_basecolor.png
-"$B" -b --factory-startup --python tools/art/auntie_r3_export.py -- $K/03_paint.blend assets/art_previews/humans/market_auntie_r3/market_auntie_wip.glb
+"$B" -b --factory-startup --python tools/art/auntie_r3_head.py  -- $K/03_paint.blend $K/04_head.blend $K/market_auntie_r3_basecolor_head.png
+"$B" -b --factory-startup --python tools/art/auntie_r3_export.py -- $K/04_head.blend assets/art_previews/humans/market_auntie_r3/market_auntie_wip.glb
 godot --path . --resolution 640x640 --script res://tools/art/capture_auntie_r3.gd -- res://assets/art_previews/humans/market_auntie_r3/market_auntie_wip.glb <out> r3
 ```
 

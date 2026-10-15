@@ -45,5 +45,8 @@ strap, bandana, apron, towel kept); installed to the runtime auntie. Details and
   `market_auntie_r3_basecolor`; your r2 basecolor untouched).
 - r3b: elbow joint moved to 60 % of shoulder→wrist (the owner-fitted one sat inside the sleeve);
   arm weights re-chained; apron top corners moved off the arm bones.
+- r3c head: redrawn in 3D front coordinates (`tools/art/auntie_r3_head.py`): sheet-brown hair,
+  band + knot headband, hairline, new face features, nose geometry reduced (62 vertices).
+  Texture is now `market_auntie_r3_basecolor_head`.
 - **CX-13** Hair geometry (one lumpy shell, forehead strokes) remains; basket / spatula / pan
   props are still absent.

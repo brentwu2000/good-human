@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1td31ivd0gns"
-path="res://.godot/imported/market_auntie_wip_market_auntie_r3_basecolor.png-66dbf9a0826be9c61aee83719f7ca7dc.ctex"
+uid="uid://dc7xsi4xn01ch"
+path="res://.godot/imported/market_auntie_wip_market_auntie_r3_basecolor_head.png-316d5fc9a4ee552fe98fa331a1370eac.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "cdd92b18a544c4776acd0caa2ab7536e"
+"md5": "fe80ac3f2aac7e5031d056590410d457"
 }
 
 [deps]
 
-source_file="res://assets/art_previews/humans/market_auntie_r3/market_auntie_wip_market_auntie_r3_basecolor.png"
-dest_files=["res://.godot/imported/market_auntie_wip_market_auntie_r3_basecolor.png-66dbf9a0826be9c61aee83719f7ca7dc.ctex"]
+source_file="res://assets/art_previews/humans/market_auntie_r3/market_auntie_wip_market_auntie_r3_basecolor_head.png"
+dest_files=["res://.godot/imported/market_auntie_wip_market_auntie_r3_basecolor_head.png-316d5fc9a4ee552fe98fa331a1370eac.ctex"]
 
 [params]
 
