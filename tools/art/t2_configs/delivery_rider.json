@@ -1,0 +1,14 @@
+{
+  "id": "delivery_rider",
+  "src": "assets/characters/human/models/delivery_rider/delivery_rider.glb",
+  "body": "Character",
+  "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/delivery_rider/delivery_rider_front.png",
+  "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/delivery_rider/delivery_rider_back.png",
+  "out": "assets/characters/human/models/delivery_rider/delivery_rider.glb",
+  "sheet_skin": [
+    230,
+    147,
+    103
+  ],
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+}

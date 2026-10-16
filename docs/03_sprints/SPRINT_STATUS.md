@@ -3,10 +3,12 @@
 ## ART characters — 2026-10-17 (Claude): Trellis2 texture pass
 
 Owner chose Trellis.2-generated body textures after a side-by-side test (「你處理，把它修好」,
-then 「其他角色都處理…直到都可以交付進遊戲內」). Market auntie installed (r4: sheet front/back
-multi-view texture, drawn face kept, white towel). 47 test scenes pass. REVIEW / B+. Other
-humans IN_PROGRESS through the same pipeline. Licence chain (nvdiffrast not used, DINOv3 OK,
-Aero-Ex GGUF unstated) in the [record](../06_art/TRELLIS2_TEXTURE_PASS_2026-10-17.md).
+then 「其他角色都處理…直到都可以交付進遊戲內」). Installed for all seven humans (market auntie,
+grandma, delivery rider, gym coach, office worker, retired fisher, Xiaomi): sheet front/back
+multi-view texture, white-balanced to the sheet's skin, drawn faces kept; geometry, rigs and
+19 clips unchanged. Godot captures of every clip without failures; 47 test scenes pass.
+REVIEW / B+. Dogs not yet. Licence chain (nvdiffrast not used, DINOv3 OK, Aero-Ex GGUF
+unstated) in the [record](../06_art/TRELLIS2_TEXTURE_PASS_2026-10-17.md).
 
 ## ART characters — 2026-10-14 (Claude): rider, gym coach, Xiaomi r1
 

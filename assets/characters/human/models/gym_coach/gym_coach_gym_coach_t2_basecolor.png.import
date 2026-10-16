@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgglt4e6mut15"
-path="res://.godot/imported/office_worker_office_worker_basecolor.png-36edda1c2789a3473647e63daf833881.ctex"
+uid="uid://csynhkpqec3w6"
+path="res://.godot/imported/gym_coach_gym_coach_t2_basecolor.png-5822b031c71205639787a5a74c1c0311.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "81679969daf71e99dae336a1bdc87677"
+"md5": "bf961eb21d20a2598fbc09a6b3a9ad48"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/office_worker/office_worker_office_worker_basecolor.png"
-dest_files=["res://.godot/imported/office_worker_office_worker_basecolor.png-36edda1c2789a3473647e63daf833881.ctex"]
+source_file="res://assets/characters/human/models/gym_coach/gym_coach_gym_coach_t2_basecolor.png"
+dest_files=["res://.godot/imported/gym_coach_gym_coach_t2_basecolor.png-5822b031c71205639787a5a74c1c0311.ctex"]
 
 [params]
 

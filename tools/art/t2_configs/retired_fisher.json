@@ -1,0 +1,14 @@
+{
+  "id": "retired_fisher",
+  "src": "assets/characters/human/models/retired_fisher/retired_fisher.glb",
+  "body": "Character",
+  "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/retired_fisher/retired_fisher_front.png",
+  "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/retired_fisher/retired_fisher_back.png",
+  "out": "assets/characters/human/models/retired_fisher/retired_fisher.glb",
+  "sheet_skin": [
+    222,
+    162,
+    119
+  ],
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+}

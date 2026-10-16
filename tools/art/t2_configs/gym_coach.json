@@ -1,0 +1,15 @@
+{
+  "id": "gym_coach",
+  "src": "build/t2/gym_coach/src_codex_refine_1015.glb",
+  "src_note": "Codex refine 2026-10-15 candidate: neck/shoulder shelf reduction; its texture is replaced",
+  "body": "Character",
+  "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/gym_coach/gym_coach_front.png",
+  "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/gym_coach/gym_coach_back.png",
+  "out": "assets/characters/human/models/gym_coach/gym_coach.glb",
+  "sheet_skin": [
+    238,
+    174,
+    128
+  ],
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+}

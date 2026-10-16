@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0mbl6fwnghhr"
-path="res://.godot/imported/grandma_grandma_basecolor.png-b2ab16d50a8e8d93e71c027afd81b636.ctex"
+uid="uid://bycqv1gjaafgg"
+path="res://.godot/imported/retired_fisher_retired_fisher_t2_basecolor.png-88e94f8645880aaf1604af8ff6438192.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "5025684b37b2e0e84c7e88c39fadb15c"
+"md5": "a2b8fe1386eae95bcb9066579eda5a60"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/ai_grandma/grandma_grandma_basecolor.png"
-dest_files=["res://.godot/imported/grandma_grandma_basecolor.png-b2ab16d50a8e8d93e71c027afd81b636.ctex"]
+source_file="res://assets/characters/human/models/retired_fisher/retired_fisher_retired_fisher_t2_basecolor.png"
+dest_files=["res://.godot/imported/retired_fisher_retired_fisher_t2_basecolor.png-88e94f8645880aaf1604af8ff6438192.ctex"]
 
 [params]
 

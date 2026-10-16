@@ -1,0 +1,14 @@
+{
+  "id": "xiaomi",
+  "src": "assets/characters/human/models/xiaomi/xiaomi.glb",
+  "body": "Character",
+  "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/xiaomi/xiaomi_front.png",
+  "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/xiaomi/xiaomi_back.png",
+  "out": "assets/characters/human/models/xiaomi/xiaomi.glb",
+  "sheet_skin": [
+    234,
+    160,
+    129
+  ],
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+}

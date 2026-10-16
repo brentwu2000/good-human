@@ -33,7 +33,20 @@ g.hf_repo = "Aero-Ex/Trellis2-GGUF"
 g.load()
 pipe = g._model
 
-imgs = {k: g._preprocess(Path(v).read_bytes(), 0.85, force_cpu=True) for k, v in views.items()}
+def fit(im, ratio=0.85, size=1024):
+    """Re-frame on the non-white subject: a near-white sheet background (grandma) survives
+    background removal and the subject stays small (37 % of the frame), losing colour."""
+    a = np.asarray(im.convert("RGB")).astype(int)
+    ys, xs = np.nonzero(np.abs(a - 255).sum(-1) > 30)
+    y0, y1, x0, x1 = ys.min(), ys.max(), xs.min(), xs.max()
+    side = int(max(y1 - y0, x1 - x0) / ratio)
+    cy, cx = (y0 + y1) // 2, (x0 + x1) // 2
+    canvas = Image.new("RGB", (side, side), (255, 255, 255))
+    canvas.paste(im.convert("RGB").crop((x0, y0, x1 + 1, y1 + 1)),
+                 (x0 - (cx - side // 2), y0 - (cy - side // 2)))
+    return canvas.resize((size, size), Image.LANCZOS)
+
+imgs = {k: fit(g._preprocess(Path(v).read_bytes(), 0.85, force_cpu=True)) for k, v in views.items()}
 for k, im in imgs.items():
     im.save(out.with_name(out.stem + f"_in_{k}.png"))
 

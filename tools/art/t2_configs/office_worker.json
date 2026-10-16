@@ -1,0 +1,14 @@
+{
+  "id": "office_worker",
+  "src": "assets/characters/human/models/office_worker/office_worker.glb",
+  "body": "Character",
+  "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/office_worker/office_worker_front.png",
+  "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/office_worker/office_worker_back.png",
+  "out": "assets/characters/human/models/office_worker/office_worker.glb",
+  "sheet_skin": [
+    227,
+    156,
+    119
+  ],
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+}

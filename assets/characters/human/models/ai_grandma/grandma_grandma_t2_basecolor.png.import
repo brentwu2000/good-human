@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cvax4fk35tjnb"
-path="res://.godot/imported/gym_coach_gym_coach_basecolor.png-0233aec2629266bb0bd1672d67ab84d9.ctex"
+uid="uid://eo1b3hoqbixf"
+path="res://.godot/imported/grandma_grandma_t2_basecolor.png-2bea4d43967e2537153cba6512d2c05c.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "bbd8219bee171c09eb28d0207d50e3ac"
+"md5": "55fffd5f5a2020e0ae16dd1139d51bd5"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/gym_coach/gym_coach_gym_coach_basecolor.png"
-dest_files=["res://.godot/imported/gym_coach_gym_coach_basecolor.png-0233aec2629266bb0bd1672d67ab84d9.ctex"]
+source_file="res://assets/characters/human/models/ai_grandma/grandma_grandma_t2_basecolor.png"
+dest_files=["res://.godot/imported/grandma_grandma_t2_basecolor.png-2bea4d43967e2537153cba6512d2c05c.ctex"]
 
 [params]
 

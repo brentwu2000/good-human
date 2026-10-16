@@ -1,0 +1,26 @@
+{
+  "id": "grandma",
+  "src": "assets/characters/human/models/ai_grandma/grandma.glb",
+  "body": "Character",
+  "front": "C:/Users/b/Documents/good_human_stylized_factory/references/original/grandma_front.png",
+  "back": "C:/Users/b/Documents/good_human_stylized_factory/references/original/grandma_back.png",
+  "out": "assets/characters/human/models/ai_grandma/grandma.glb",
+  "sheet_skin": [
+    215,
+    160,
+    133
+  ],
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)",
+  "hair_tone": [
+    177,
+    167,
+    172
+  ],
+  "hair_tone_note": "sheet front, low-saturation pixels of the top 10% (silver)",
+  "face": {
+    "zc": 1.315,
+    "az": 0.08,
+    "ax": 0.068
+  },
+  "face_note": "measured on the runtime face: hairline z 1.387, brows 1.324, chin 1.246 (the auto ellipse reached the hair)"
+}

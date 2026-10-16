@@ -1,10 +1,11 @@
 """Trellis2 texture pass, step 4 (Claude, 2026-10-17): new basecolor into the character, export.
   blender -b --factory-startup --python tools/art/t2_finish.py -- <config.json> <work_dir> <out.glb>
 - White balance: Trellis2 colour has an orange/dark cast; per-channel gain so its skin (inside
-  the face mask) matches the sheet's skin (config sheet_skin, else measured on the front view).
+  the face mask) matches the sheet's skin (config sheet_skin).
 - The drawn face (current texture) is kept under the face mask, tone-matched to the new skin
   (LESSONS 6.14: generated faces lose the drawn features).
 - hands_skin: hands whose UVs collapse to a point get the forearm skin painted on that texel.
+- hair_tone [r,g,b]: hair (t2_hairmask) scaled to the sheet's hair colour.
 - corner_colors {material keyword: rgba}: corner colours of those faces (Godot multiplies them).
 Texels the bake did not reach keep the current texture.
 """
@@ -54,22 +55,11 @@ m = load(os.path.join(work, "t2_facemask.png"))[..., 0].copy()
 coverage = (t.sum(-1) > 0.003)[..., None]
 
 def sheet_skin():
-    if "sheet_skin" in cfg:
-        return np.array(cfg["sheet_skin"], float) / 255.0
-    im = bpy.data.images.load(os.path.abspath(cfg["front"]))
-    w, h = im.size
-    a = np.empty(w * h * 4, np.float32); im.pixels.foreach_get(a)
-    a = a.reshape(h, w, 4)[::-1, :, :3]  # top row first
-    bg = np.median(np.concatenate([a[:8, :8].reshape(-1, 3), a[:8, -8:].reshape(-1, 3)]), 0)
-    fg = np.abs(a - bg).sum(-1) > 0.12
-    ys = np.nonzero(fg.any(1))[0]
-    top, bot = ys[0], ys[-1]
-    head = a[top: top + int(0.3 * (bot - top))]
-    r, g, b = head[..., 0], head[..., 1], head[..., 2]
-    sk = (r > 0.55) & (r - b > 0.18) & (r - g > 0.06) & (g > b) & (fg[top: top + int(0.3 * (bot - top))])
-    if sk.sum() < 200:
-        raise SystemExit("sheet skin not found; set sheet_skin in the config")
-    return np.median(head[sk], 0)
+    # Measured outside Blender: median of the largest face-skin blob on the sheet front
+    # (a top-of-figure measure picks up jackets/blouses, LESSONS 6.25).
+    if "sheet_skin" not in cfg:
+        raise SystemExit("set sheet_skin [r,g,b] in the config (largest face-skin blob on the sheet front)")
+    return np.array(cfg["sheet_skin"], float) / 255.0
 
 skin_ref = sheet_skin()
 tt = t[m > 0.6]
@@ -78,6 +68,14 @@ gain = np.clip(skin_ref / np.median(tt[sk], 0), 0.8, 2.2)
 print("T2_FINISH sheet skin", (skin_ref * 255).round(), "gain", gain.round(3))
 t3 = np.clip(t * gain, 0, 1)
 res = np.where(coverage, t3, c)
+
+# Hair tone: a light hair colour (grandma's silver) comes out dark.
+if cfg.get("hair_tone") and os.path.exists(os.path.join(work, "t2_hairmask.png")):
+    hm = load(os.path.join(work, "t2_hairmask.png"))[..., 0] > 0.5
+    hm &= coverage[..., 0]
+    gh = (np.array(cfg["hair_tone"], float) / 255.0) / np.maximum(np.median(res[hm], 0), 1e-3)
+    res[hm] = np.clip(res[hm] * gh, 0, 1)
+    print("T2_FINISH hair tone", hm.sum(), "texels, gain", gh.round(2))
 
 # Drawn face, tone-matched.
 sel = m > 0.6

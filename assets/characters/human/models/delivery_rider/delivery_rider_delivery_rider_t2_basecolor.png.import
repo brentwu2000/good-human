@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bss1fxlv2bbgt"
-path="res://.godot/imported/retired_fisher_retired_fisher_basecolor.png-3468598c55177c6ab25ac2bd2dd71179.ctex"
+uid="uid://bitto52m8o0c2"
+path="res://.godot/imported/delivery_rider_delivery_rider_t2_basecolor.png-b9d7465f56bbb3e06dccc40d80a2e3e1.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "80a10034bcb7a828fe9350090a82df20"
+"md5": "d4b6a0be2e8c67daeb0885b66a455c04"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/retired_fisher/retired_fisher_retired_fisher_basecolor.png"
-dest_files=["res://.godot/imported/retired_fisher_retired_fisher_basecolor.png-3468598c55177c6ab25ac2bd2dd71179.ctex"]
+source_file="res://assets/characters/human/models/delivery_rider/delivery_rider_delivery_rider_t2_basecolor.png"
+dest_files=["res://.godot/imported/delivery_rider_delivery_rider_t2_basecolor.png-b9d7465f56bbb3e06dccc40d80a2e3e1.ctex"]
 
 [params]
 

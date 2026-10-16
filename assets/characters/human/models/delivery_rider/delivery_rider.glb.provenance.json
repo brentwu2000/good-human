@@ -1,33 +1,23 @@
 {
-  "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\lod\\humans\\delivery_rider\\delivery_rider_game.glb",
-  "created": "2026-10-14T19:30:17",
-  "tool": "blender rig_lods.py",
-  "model": "blender",
-  "model_licence": "GPL tool; output belongs to the user",
-  "model_class": "COMMERCIAL_OK",
-  "inputs": [
-    {
-      "file": "C:\\Users\\b\\Documents\\good_human_stylized_factory\\blender_work\\humans\\delivery_rider\\lod0_toon_prop.glb",
-      "class": "UNKNOWN"
-    }
-  ],
-  "params": {
-    "lod": "lod1",
-    "game": {
-      "base": 2048,
-      "format": "PNG",
-      "normal": 0,
-      "uv": "own (rebaked from LOD0)"
-    }
-  },
-  "note": "",
-  "class": "UNKNOWN",
-  "v5_texturing": {
-    "date": "2026-10-15",
-    "tool": "art_pipeline (Texturing v5) segment_regions → approve_regions → paint_regions → qa_export",
-    "config": "art_pipeline/config/characters/delivery_rider.json",
-    "qa": "art_pipeline/reports/delivery_rider/qa_report.json (PASS)",
-    "approval": "accept_candidates, delegated by the owner 2026-10-15 (套色直到可交付)",
-    "sha256": "ecc79d8bf37a946eb75cc3ce3cfcb989d5a947cde6932e1fcafa5bed01b9975a"
-  }
+ "date": "2026-10-17 (Trellis2 texture pass)",
+ "author": "Claude (owner: 「其他角色都處理，用同樣流程，直到都可以交付進遊戲內」)",
+ "source": "assets/characters/human/models/delivery_rider/delivery_rider.glb geometry, rig and clips unchanged; new body basecolor",
+ "texture": "Trellis.2 (Microsoft, MIT) multi-view texture (sheet front+back, guidance 3.0, 25 steps, seed 1) via Modly extension modly-trellis2-gguf-extension caa85c7; Aero-Ex/Trellis2-GGUF Q5_K_M (licence not stated; quantised MIT weights); DINOv3 encoder (DINOv3 License 2025-08-19, commercial use allowed); colours baked on vertices + Blender Cycles bake (nvdiffrast not used). Drawn face kept.",
+ "inputs": [
+  "C:/Users/b/Documents/good_human_stylized_factory/references/humans/delivery_rider/delivery_rider_front.png",
+  "C:/Users/b/Documents/good_human_stylized_factory/references/humans/delivery_rider/delivery_rider_back.png"
+ ],
+ "config": "tools/art/t2_configs/delivery_rider.json",
+ "steps": [
+  "tools/art/t2_prep.py",
+  "tools/art/t2_texture.py",
+  "tools/art/t2_bake.py",
+  "tools/art/t2_finish.py"
+ ],
+ "license": "inherited sheet/factory chain (see ASSET_LICENSES)",
+ "grade": "B+ / installed",
+ "sha256": "8677c3b0a873806900b10b03a4ed5007b9629e4cd446374594ecbe5928903495",
+ "previous": {
+  "created": "2026-10-14T19:30:17"
+ }
 }

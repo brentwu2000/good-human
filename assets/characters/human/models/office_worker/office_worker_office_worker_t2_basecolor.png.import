@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1ppw5d3fah7x"
-path="res://.godot/imported/delivery_rider_delivery_rider_basecolor.png-a893c6836f38b04cccae6077d0462a9f.ctex"
+uid="uid://b443ykxwhsqmq"
+path="res://.godot/imported/office_worker_office_worker_t2_basecolor.png-d68f3ce8f1ce3781ae88420c91d08cf0.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "605deea57c67b0e324ba3b413086de27"
+"md5": "9a8c03c065fb54c8fa7f07fe826332b0"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/delivery_rider/delivery_rider_delivery_rider_basecolor.png"
-dest_files=["res://.godot/imported/delivery_rider_delivery_rider_basecolor.png-a893c6836f38b04cccae6077d0462a9f.ctex"]
+source_file="res://assets/characters/human/models/office_worker/office_worker_office_worker_t2_basecolor.png"
+dest_files=["res://.godot/imported/office_worker_office_worker_t2_basecolor.png-d68f3ce8f1ce3781ae88420c91d08cf0.ctex"]
 
 [params]
 

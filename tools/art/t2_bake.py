@@ -11,6 +11,7 @@ Config options used here:
   bare_forearms              forearm past `hem` (elbow -> wrist) is skin; hands too
   hands_skin                 hands get forearm skin (hands whose UVs are one point)
   face {zc, az, ax}          face ellipse (rest pose, m); measured from the head when absent
+Also writes t2_hairmask.png (crown + back of head) for t2_finish's hair_tone.
 """
 import colorsys
 import json
@@ -161,8 +162,16 @@ az = float(f.get("az", 0.35 * (hz1 - hz0)))
 ax = float(f.get("ax", 0.56 * hw))
 print("T2_BAKE head z %.3f-%.3f half width %.3f -> face cx %.3f zc %.3f az %.3f ax %.3f" % (hz0, hz1, hw, cx, zc, az, ax))
 
+# ---- 4. hair mask (crown above the face and the back of the head, not ears/cheeks):
+# t2_finish scales it to the sheet's hair colour after the white balance (hair_tone).
+rf = ((P[:, 0] - cx) / ax) ** 2 + ((P[:, 2] - zc) / az) ** 2
+hair = is_head & (((nrm[:, 1] <= 0.2) & (rf > 1.0) & (P[:, 2] > zc + 0.2 * az))
+                  | ((nrm[:, 1] > 0.2) & (P[:, 2] > zc - az)))
+print("T2_BAKE hair mask %d verts" % hair.sum())
+
 col = me.color_attributes.new("t2", "FLOAT_COLOR", "POINT")
 msk = me.color_attributes.new("mask", "FLOAT_COLOR", "POINT")
+hmk = me.color_attributes.new("hair", "FLOAT_COLOR", "POINT")
 for i, p in enumerate(pts):
     col.data[i].color = (*lin[i], 1.0)
     r = ((p.x - cx) / ax) ** 2 + ((p.z - zc) / az) ** 2
@@ -170,6 +179,8 @@ for i, p in enumerate(pts):
     if nrm[i, 1] < -0.15 and r < 1.0:
         m = min(1.0, (1.0 - r) / 0.3) ** 1.2  # full core, soft rim
     msk.data[i].color = (m, m, m, 1.0)
+    hv_ = 1.0 if hair[i] else 0.0
+    hmk.data[i].color = (hv_, hv_, hv_, 1.0)
 
 sc = bpy.context.scene
 sc.render.engine = "CYCLES"
@@ -188,7 +199,8 @@ for poly in me.polygons:
     poly.material_index = 0
 bpy.context.view_layer.objects.active = hi
 hi.select_set(True)
-for name, layer, cs in [("t2_basecolor", "t2", "sRGB"), ("t2_facemask", "mask", "Non-Color")]:
+for name, layer, cs in [("t2_basecolor", "t2", "sRGB"), ("t2_facemask", "mask", "Non-Color"),
+                       ("t2_hairmask", "hair", "Non-Color")]:
     img = bpy.data.images.new(name, size, size, alpha=False, float_buffer=False)
     img.colorspace_settings.name = cs
     tex.image = img; nt.nodes.active = tex

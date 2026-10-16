@@ -175,6 +175,12 @@ the hand from the input image fixed it. Also: r3 hands map every corner to one U
 bake never reaches them (paint the texel); the strap floats ~5 cm off the body, so measure
 strap distance in the front view. Check: compare the input image with the mesh pose first.
 
+**6.25 A near-white sheet background defeats background removal's framing.** The grandma's
+views went to Trellis2 with the subject at 37 % of the frame (the light grey survived as
+"foreground"), and her silver hair came out dark red-brown. `t2_texture.py` re-frames on the
+non-white subject to 85 %. Measuring "sheet skin" over the top 30 % of the figure took the
+rider's orange jacket; use the largest face-skin blob. Check: open `colours_in_front.png`.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://chlelv126whit"
-path="res://.godot/imported/xiaomi_xiaomi_basecolor.png-09671e85c72548f155296876f4e10f2b.ctex"
+uid="uid://b6khomb6ih0c4"
+path="res://.godot/imported/xiaomi_xiaomi_t2_basecolor.png-785175198f80eaf203ab9d1272e05e90.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "ebd87940529ba43c9c3230991e8a8d71"
+"md5": "86af5b2c54c4559a3d07d1bfbcc504b6"
 }
 
 [deps]
 
-source_file="res://assets/characters/human/models/xiaomi/xiaomi_xiaomi_basecolor.png"
-dest_files=["res://.godot/imported/xiaomi_xiaomi_basecolor.png-09671e85c72548f155296876f4e10f2b.ctex"]
+source_file="res://assets/characters/human/models/xiaomi/xiaomi_xiaomi_t2_basecolor.png"
+dest_files=["res://.godot/imported/xiaomi_xiaomi_t2_basecolor.png-785175198f80eaf203ab9d1272e05e90.ctex"]
 
 [params]
 

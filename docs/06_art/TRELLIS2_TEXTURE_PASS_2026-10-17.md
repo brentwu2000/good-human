@@ -54,3 +54,24 @@ orphaned extracted textures, Godot import, `tests/run_all.sh`.
 | Character | Source geometry | Notes |
 |---|---|---|
 | Market auntie | r3d checkpoint `build/market_auntie_r3/04_head.blend` | front view without the strap-holding hand; towel plain white (sheet); bare forearms; hands (single-UV) painted |
+| Grandma | runtime GLB | sheet views have a near-white background: the subject stayed at 37 % of the Trellis2 input (fixed: re-framed to 85 %); silver hair came out dark → `hair_tone` (sheet silver) after the white balance; face ellipse measured on the runtime face (the automatic one reached the hair) |
+| Delivery rider | runtime GLB | helmet/headphones now dark like the sheet front (old texture: orange cap); generated brows show above the drawn ones |
+| Gym coach | Codex refine 2026-10-15 candidate (neck/shoulder shelf reduction) | its refined texture superseded |
+| Office worker | runtime GLB | — |
+| Retired fisher | runtime GLB | — |
+| Xiaomi | runtime GLB | — |
+
+Sheet skin per character = median of the largest face-skin blob on the sheet front (the first,
+top-30 % measure took the rider's orange jacket and the grandma's blouse).
+
+## Check
+
+Godot (`tools/art/capture_auntie_r3.gd` on each runtime GLB): all 19 clips captured, no failures,
+for all seven. Full front/back/Jab overview reviewed. 47 test scenes pass.
+
+## Open
+
+- Delivery rider: generated brows above the drawn ones (CX-13).
+- Grandma: a small bluish spot at the right temple (old texture edge under the face mask).
+- Market auntie: floral print softer than the sheet (CX-14).
+- Poodle and the other dogs are not part of this pass yet.

@@ -11,6 +11,8 @@ the 19 clips are unchanged. The drawn faces are kept (tone-matched).
   sheet's towel is white; your r2 woven stripes are gone). Your satchel/strap are unchanged.
 - Gym coach: built on your 2026-10-15 refine candidate (neck/shoulder shelf reduction kept);
   its refined texture is superseded by the Trellis2 one.
+- Grandma, delivery rider, office worker, retired fisher, Xiaomi: built from the runtime GLBs.
+  Grandma's silver hair is tone-mapped to the sheet (`hair_tone`), her face ellipse is set by hand.
 - The other 2026-10-15 refine candidates (texture-only) are superseded by this pass.
 
 ## How it is rebuilt
@@ -34,5 +36,7 @@ in `C:/Users/b/tools/modly`, ~10 GB of weights). Work files in `build/t2/<id>/`:
   (prop paint on the body, seams at UV island borders, hair/skin borders). Local paint fixes
   on `t2_basecolor` are welcome; record them so a re-run does not erase them (a re-run starts
   from `colours.npz`).
+- **CX-15** Delivery rider: the generated brows sit above the drawn ones (double brows);
+  grandma: small bluish spot at the right temple.
 - **CX-14** Market auntie's floral apron is softer than the sheet's print; an authored print
   over the Trellis2 base would be an improvement.
