@@ -1,0 +1,17 @@
+{
+  "id": "market_auntie",
+  "src": "build/market_auntie_r3/04_head.blend",
+  "body": "Character",
+  "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/market_auntie/market_auntie_front_nohand.png",
+  "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/market_auntie/market_auntie_back.png",
+  "sheet_skin": [243, 176, 128],
+  "exclude_material_keywords": ["towel"],
+  "corner_colors": {"towel": [0.93, 0.92, 0.88, 1.0]},
+  "props": [{"object": "Auntie_Satchel", "min_z": 0.62}],
+  "strap_radius": 0.06,
+  "bare_forearms": true,
+  "hem": 0.15,
+  "hands_skin": true,
+  "face": {"zc": 1.185, "az": 0.19, "ax": 0.15},
+  "out": "assets/characters/human/models/market_auntie/market_auntie.glb"
+}

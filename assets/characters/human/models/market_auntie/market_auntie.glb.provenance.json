@@ -1,203 +1,23 @@
 {
- "date": "2026-10-16 (r3d forehead + nose)",
- "author": "Claude (owner: 「Codex 做完了，接手阿姨」)",
- "source": "build/market_auntie_refine_r2/04_skin_refined.blend (Codex r2 checkpoint)",
+ "date": "2026-10-17 (r4 Trellis2 texture pass)",
+ "author": "Claude (owner: 「你處理，把它修好」)",
+ "source": "build/market_auntie_r3/04_head.blend (r3d) geometry, rig and 19 clips unchanged; new basecolor",
+ "texture": "Trellis.2 (Microsoft, MIT) multi-view texture via Modly extension modly-trellis2-gguf-extension caa85c7, Aero-Ex/Trellis2-GGUF Q5_K_M (repo states no licence; quantised MIT weights), DINOv3 encoder (DINOv3 License 2025-08-19: commercial use allowed, no claim on outputs), colours baked on vertices then Blender Cycles bake (nvdiffrast NOT used). Inputs: sheet front with the strap-holding hand filled with blouse fabric, sheet back. Guidance 3.0, 25 steps, seed 1.",
+ "steps": [
+  "tools/art/t2_prep.py",
+  "tools/art/t2_texture.py",
+  "tools/art/t2_bake.py",
+  "tools/art/t2_finish.py",
+  "config tools/art/t2_configs/market_auntie.json"
+ ],
  "license": "Inherited owner sheet/factory/project rig chain; reference-sheet rights remain undocumented. No new external assets.",
- "grade": "B+ / review candidate; installed to runtime",
- "sha256": "f173d487597f8106af2aead99546849651c0497f0739243b6cce58278a920b8d",
+ "grade": "B+ / installed",
+ "sha256": "9c91a9e4f7ef5c561028c563bfc2551add14f74f80376b4fb4161d8092784467",
  "joints": 53,
  "clips": 19,
- "steps": [
-  "tools/art/auntie_r3_hands.py",
-  "tools/art/auntie_r3_arms.py",
-  "tools/art/auntie_r3_paint.py",
-  "tools/art/auntie_r3_head.py",
-  "tools/art/auntie_r3_export.py"
- ],
- "reports": {
-  "01": {
-   "l": {
-    "mesh_wrist": [
-     0.3405,
-     -0.0778,
-     0.6445
-    ],
-    "wrist_radius": 0.0415,
-    "old_bone_wrist": [
-     0.3459,
-     -0.0495,
-     0.6966
-    ],
-    "wrist_section_measured": [
-     0.0524,
-     0.0825,
-     58
-    ],
-    "palm_section": [
-     0.0524,
-     0.0825,
-     0.0551
-    ],
-    "palm_length": 0.0738
-   },
-   "r": {
-    "mesh_wrist": [
-     -0.3207,
-     -0.0769,
-     0.6397
-    ],
-    "wrist_radius": 0.04,
-    "old_bone_wrist": [
-     -0.3346,
-     -0.0495,
-     0.6966
-    ],
-    "wrist_section_measured": [
-     0.049,
-     0.0928,
-     41
-    ],
-    "palm_section": [
-     0.049,
-     0.0928,
-     0.0514
-    ],
-    "palm_length": 0.0738
-   },
-   "skin_uv": [
-    0.2768007218837738,
-    0.8673263192176819
-   ],
-   "skin_texel_srgb": [
-    0.9686275124549866,
-    0.7803922295570374,
-    0.6313725709915161
-   ],
-   "remaining_hand_weights_moved": {
-    "lowerarm": 314,
-    "pelvis": 1996
-   },
-   "mitten_vertices_removed": 690,
-   "forearm_vertices_moved_to_lowerarm": 585,
-   "towel_probe": {
-    "before_join": [
-     [
-      0.6,
-      0.1,
-      0.1
-     ],
-     [
-      0.9,
-      0.9,
-      0.8
-     ]
-    ],
-    "after_join": [
-     [
-      0.6,
-      0.1,
-      0.1
-     ],
-     [
-      0.9,
-      0.9,
-      0.8
-     ]
-    ],
-    "after_whiten": [
-     [
-      0.6,
-      0.1,
-      0.1
-     ],
-     [
-      0.9,
-      0.9,
-      0.8
-     ]
-    ]
-   },
-   "corners_whitened": 3440
-  },
-  "02": {
-   "welded_vertices": 4636,
-   "l": {
-    "armpit_z": 0.885,
-    "bridge_faces": 119
-   },
-   "r": {
-    "armpit_z": 0.885,
-    "bridge_faces": 39
-   },
-   "wrist_leftover_faces": 50,
-   "weights_cleaned": {
-    "body": 425,
-    "arm": 526
-   },
-   "elbow_forearm_vertices_rechained": 1455,
-   "apron_vertices_off_the_arms": 266,
-   "faces_removed": 208,
-   "fill_faces": 1,
-   "open_edges_before": 297,
-   "open_edges_after": 375
-  },
-  "03": {
-   "faces": 0,
-   "texels_repainted": 29669,
-   "texels_seen": 29669,
-   "sleeve_hem": {
-    "l": {
-     "hem_along_upperarm_m": 0.3,
-     "upperarm_len_m": 0.217
-    },
-    "r": {
-     "hem_along_upperarm_m": 0.292,
-     "upperarm_len_m": 0.217
-    }
-   },
-   "sleeve_texels_to_purple": 3380,
-   "sleeve_colour": [
-    0.459,
-    0.439,
-    0.62
-   ],
-   "hair_colour": [
-    0.118,
-    0.075,
-    0.059
-   ],
-   "head_skin_islands_to_hair_faces": 8,
-   "head_texels_to_hair": 2448,
-   "nose_side_texels_to_skin": 776
-  },
-  "04": {
-   "nose_vertices_moved": 63,
-   "forehead_lump_vertices": 47,
-   "forehead_lump_max_mm": 29.1,
-   "head_texels": 435898,
-   "brow_z": {
-    "-1": 1.2538342310392572,
-    "1": 1.298
-   },
-   "bang_texels": 2211,
-   "ear_faces": 63,
-   "knot_centre": [
-    0.038,
-    -0.036,
-    1.487
-   ],
-   "headband_plane_normal": [
-    0.0,
-    0.912,
-    0.41
-   ],
-   "texels": {
-    "hair": 324239,
-    "face": 59497,
-    "ear": 5343,
-    "headband": 37628,
-    "mouth": 2131
-   }
-  }
+ "previous": {
+  "date": "2026-10-16 (r3d forehead + nose)",
+  "author": "Claude (owner: 「Codex 做完了，接手阿姨」)",
+  "sha256": "f173d487597f8106af2aead99546849651c0497f0739243b6cce58278a920b8d"
  }
 }

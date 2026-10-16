@@ -157,6 +157,24 @@ the sleeve into shards and painting a "clean hem" could not fix it. Measure wher
 mesh's garment edges are and put the joint below them (elbow at 60 %), then re-weight
 along the chain. Check: compare joint heights with garment hems before tuning paint.
 
+**6.22 A generator's own download list can miss files.** Trellis2 (Modly extension) geometry
+ran, then texturing failed on `shape_enc_...` not found: its pattern `encoders/**/*.safetensors`
+needs a subfolder, the files sit directly in `encoders/`. Fetch `encoders/*` too. Check: run
+both nodes (generate and texture) once before a batch, not only the first.
+
+**6.23 Trellis2 texture colours drift because of a default, not the model.** The Modly
+extension's texture guidance defaults to 1.0 (its README: 3.0): the blouse came out brown, the
+print a rust smear. At 3.0 the sheet's colours return; a skin white balance against the sheet
+fixes the remaining dark cast. Its multi-view sampler weighs "left"/"right" by the vertical axis
+(use front/back only, model turned to face +X). Check: sample the raw albedo, not a render.
+
+**6.24 A texture generator paints the reference's pose, not the mesh's.** The sheet's front
+has a hand holding the strap on the chest; Trellis2 painted that hand onto our hanging-arm
+model, and a two-sided towel from the 3/4 view. Colour rules in 3D chased it for hours; erasing
+the hand from the input image fixed it. Also: r3 hands map every corner to one UV point, so a
+bake never reaches them (paint the texel); the strap floats ~5 cm off the body, so measure
+strap distance in the front view. Check: compare the input image with the mesh pose first.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
