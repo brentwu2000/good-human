@@ -1,0 +1,33 @@
+{
+  "id": "dog_frenchie",
+  "src": "assets/characters/dog/models/breeds/frenchie.glb",
+  "body": "DogBody",
+  "subdiv": 1,
+  "keep_face": false,
+  "keep_face_note": "the face has its own material and texture, untouched",
+  "runs": [
+    {
+      "name": "fb",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/frenchie_front.png",
+      "back": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/frenchie_back.png",
+      "facing": "front"
+    },
+    {
+      "name": "side",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/frenchie_side.png",
+      "back": "mirror:C:/Users/b/Documents/good_human_stylized_factory/references/dogs/frenchie_side.png",
+      "facing": "left"
+    }
+  ],
+  "sheet_body": [
+    170,
+    128,
+    110
+  ],
+  "sheet_body_note": "median of the sheet front+side subject pixels (2026-10-17)",
+  "out": "assets/characters/dog/models/breeds/frenchie.glb",
+  "bake_materials": [
+    "GrandmaBody"
+  ],
+  "material": "GrandmaBody"
+}

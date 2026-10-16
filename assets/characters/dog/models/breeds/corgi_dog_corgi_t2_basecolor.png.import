@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bst83hv8voqxu"
-path="res://.godot/imported/chihuahua_head_albedo.png-6946ee38555b6923aa088b56ea98df06.ctex"
+uid="uid://b46lon7n1b7fm"
+path="res://.godot/imported/corgi_dog_corgi_t2_basecolor.png-fbad6a0cb731e67cc866523ea7a43497.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "10dd8fd978cd8540110c57152eafd6a2"
+"md5": "33692b1ec46abb38759ac415196b218f"
 }
 
 [deps]
 
-source_file="res://assets/characters/dog/models/breeds/chihuahua_head_albedo.png"
-dest_files=["res://.godot/imported/chihuahua_head_albedo.png-6946ee38555b6923aa088b56ea98df06.ctex"]
+source_file="res://assets/characters/dog/models/breeds/corgi_dog_corgi_t2_basecolor.png"
+dest_files=["res://.godot/imported/corgi_dog_corgi_t2_basecolor.png-fbad6a0cb731e67cc866523ea7a43497.ctex"]
 
 [params]
 

@@ -74,4 +74,27 @@ for all seven. Full front/back/Jab overview reviewed. 47 test scenes pass.
 - Delivery rider: generated brows above the drawn ones (CX-13).
 - Grandma: a small bluish spot at the right temple (old texture edge under the face mask).
 - Market auntie: floral print softer than the sheet (CX-14).
-- Poodle and the other dogs are not part of this pass yet.
+- Poodle: not part of the pass (Codex's r40 refinement is in progress).
+
+## Dogs (breed opponents)
+
+Same tools, per-dog configs `tools/art/t2_configs/dog_<breed>.json`:
+- **Two Trellis2 runs, blended by normal**: front+back views give the head and rear; a dog's
+  long flanks need the side view, so a second run uses the side view and its mirror as
+  "front"/"back" with the mesh unturned (its left flank is already +X); `t2_bake` weighs the
+  first run by normal·body axis², the second by normal·side axis².
+- White balance against the sheet's whole-subject median (`sheet_body`; there is no skin).
+- Codex's drawn face stays: face ellipse `face_auto` {zc 0.44, az 0.56, ax 1.3} of the head
+  (covers eyes, muzzle, mouth), no tone matching. Trellis2 alone paints small brown eyes and a
+  grey nose.
+- Frenchie, pomeranian: the face is a separate material/texture; only the coat material is
+  baked (`bake_materials`). Chihuahua: coat and head are two textures behind a Mix with the
+  vertex colour; two passes (`dog_chihuahua.json`, then `dog_chihuahua_head.json` with the same
+  colours and gain, face kept).
+
+| Dog | Result |
+|---|---|
+| Corgi, shiba, golden | coat as before or cleaner, Codex face kept |
+| Frenchie | the flat cream body now carries the sheet's brown patches |
+| Chihuahua | white chest/legs of the sheet (was flat tan); a light smear on the muzzle side |
+| Pomeranian | slightly paler than before, within the sheet's range |

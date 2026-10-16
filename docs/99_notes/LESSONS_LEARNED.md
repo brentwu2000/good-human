@@ -181,6 +181,12 @@ views went to Trellis2 with the subject at 37 % of the frame (the light grey sur
 non-white subject to 85 %. Measuring "sheet skin" over the top 30 % of the figure took the
 rider's orange jacket; use the largest face-skin blob. Check: open `colours_in_front.png`.
 
+**6.26 A dog is not a person to a front/back texture generator.** Front and back views only
+see the head and the rear: the corgi's flanks were guessed. A second run with the side view
+(mesh unturned, its left flank is +X) blended by normal fixes it. The face ellipse fitted on
+human heads missed the dog's eyes (they sit a whole head half-width out): measure the eyes on
+a close-up before trusting a mask, and check the mask by diffing old/new texels inside it.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

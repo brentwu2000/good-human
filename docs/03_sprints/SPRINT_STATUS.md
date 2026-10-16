@@ -7,7 +7,8 @@ then 「其他角色都處理…直到都可以交付進遊戲內」). Installed
 grandma, delivery rider, gym coach, office worker, retired fisher, Xiaomi): sheet front/back
 multi-view texture, white-balanced to the sheet's skin, drawn faces kept; geometry, rigs and
 19 clips unchanged. Godot captures of every clip without failures; 47 test scenes pass.
-REVIEW / B+. Dogs not yet. Licence chain (nvdiffrast not used, DINOv3 OK, Aero-Ex GGUF
+REVIEW / B+. Breed dogs (corgi, shiba, golden, frenchie, pomeranian, chihuahua) installed
+the same way with Codex faces kept; poodle skipped (Codex r40 in progress). Licence chain (nvdiffrast not used, DINOv3 OK, Aero-Ex GGUF
 unstated) in the [record](../06_art/TRELLIS2_TEXTURE_PASS_2026-10-17.md).
 
 ## ART characters — 2026-10-14 (Claude): rider, gym coach, Xiaomi r1

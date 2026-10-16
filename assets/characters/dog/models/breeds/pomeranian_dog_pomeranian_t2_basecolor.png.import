@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhy07fq83ngdp"
-path="res://.godot/imported/shiba_shiba_basecolor_codex.png-bc2d389bb97539b8f40a773f6b1639fd.ctex"
+uid="uid://wwn6uv03mxks"
+path="res://.godot/imported/pomeranian_dog_pomeranian_t2_basecolor.png-5972cece52172d98da9d33868288b51e.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "56d91ae32eaa26f6e1b60d0fa39e3ca9"
+"md5": "bd735dd64dcbd3d5311057b9defce76d"
 }
 
 [deps]
 
-source_file="res://assets/characters/dog/models/breeds/shiba_shiba_basecolor_codex.png"
-dest_files=["res://.godot/imported/shiba_shiba_basecolor_codex.png-bc2d389bb97539b8f40a773f6b1639fd.ctex"]
+source_file="res://assets/characters/dog/models/breeds/pomeranian_dog_pomeranian_t2_basecolor.png"
+dest_files=["res://.godot/imported/pomeranian_dog_pomeranian_t2_basecolor.png-5972cece52172d98da9d33868288b51e.ctex"]
 
 [params]
 

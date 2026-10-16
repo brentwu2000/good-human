@@ -1,11 +1,14 @@
 """Trellis2 texture pass, step 4 (Claude, 2026-10-17): new basecolor into the character, export.
   blender -b --factory-startup --python tools/art/t2_finish.py -- <config.json> <work_dir> <out.glb>
 - White balance: Trellis2 colour has an orange/dark cast; per-channel gain so its skin (inside
-  the face mask) matches the sheet's skin (config sheet_skin).
+  the face mask) matches the sheet's skin (config sheet_skin), or, with sheet_body (dogs), so
+  the whole body's median matches the sheet front's foreground median.
 - The drawn face (current texture) is kept under the face mask, tone-matched to the new skin
   (LESSONS 6.14: generated faces lose the drawn features).
 - hands_skin: hands whose UVs collapse to a point get the forearm skin painted on that texel.
 - hair_tone [r,g,b]: hair (t2_hairmask) scaled to the sheet's hair colour.
+- gain [r,g,b]: fixed white-balance gain (a second texture of the same character).
+- create_base: the body has no basecolor texture (vertex colours): one is created.
 - corner_colors {material keyword: rgba}: corner colours of those faces (Godot multiplies them).
 Texels the bake did not reach keep the current texture.
 """
@@ -27,17 +30,56 @@ else:
 body = bpy.data.objects[cfg.get("body", "Character")]
 
 def base_image(ob):
+    def upstream(sock, depth=0):
+        # Base Color may come through a Mix with the vertex colour (Codex's chihuahua).
+        if not sock.is_linked or depth > 4:
+            return None
+        n = sock.links[0].from_node
+        if n.type == "TEX_IMAGE":
+            return n
+        for s in n.inputs:
+            r = upstream(s, depth + 1)
+            if r is not None:
+                return r
+        return None
     for s in ob.material_slots:
         if not (s.material and s.material.node_tree):
             continue
+        if cfg.get("material") and s.material.name != cfg["material"]:
+            continue
         for n in s.material.node_tree.nodes:
-            if n.type == "BSDF_PRINCIPLED" and n.inputs["Base Color"].is_linked:
-                src_n = n.inputs["Base Color"].links[0].from_node
-                if src_n.type == "TEX_IMAGE":
-                    return s.material, src_n
+            if n.type == "BSDF_PRINCIPLED":
+                tex = upstream(n.inputs["Base Color"])
+                if tex is not None:
+                    return s.material, tex
     raise SystemExit("no basecolor texture on " + ob.name)
 
-mat, tex_node = base_image(body)
+def make_base(ob):
+    """Vertex-coloured body (player shiba): a new image texture replaces the colour attribute
+    as Base Color, and the attribute is removed (Godot multiplies albedo by COLOR_0)."""
+    mat = ob.material_slots[0].material
+    nt = mat.node_tree
+    bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+    vc = [n for n in nt.nodes if n.type in ("VERTEX_COLOR", "ATTRIBUTE")]
+    size = int(cfg.get("texture_size", 2048))
+    # The old look, for texels the bake does not reach: the attribute's mean colour.
+    ca = ob.data.color_attributes[0]
+    mean = np.array([sum(d.color[k] for d in ca.data) / len(ca.data) for k in range(3)])
+    img = bpy.data.images.new(cfg["id"] + "_old", size, size, alpha=False)
+    img.pixels.foreach_set(np.tile(np.r_[mean, 1.0], size * size).astype(np.float32))
+    tex = nt.nodes.new("ShaderNodeTexImage"); tex.image = img
+    nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    for n in vc:
+        nt.nodes.remove(n)
+    while ob.data.color_attributes:
+        ob.data.color_attributes.remove(ob.data.color_attributes[0])
+    print("T2_FINISH vertex colours -> texture on", mat.name)
+    return mat, tex
+
+if cfg.get("create_base"):
+    mat, tex_node = make_base(body)
+else:
+    mat, tex_node = base_image(body)
 cur = tex_node.image
 W, H = cur.size
 
@@ -61,11 +103,20 @@ def sheet_skin():
         raise SystemExit("set sheet_skin [r,g,b] in the config (largest face-skin blob on the sheet front)")
     return np.array(cfg["sheet_skin"], float) / 255.0
 
-skin_ref = sheet_skin()
-tt = t[m > 0.6]
-sk = (tt[:, 0] > 0.3) & (tt[:, 0] > tt[:, 1]) & (tt[:, 1] > tt[:, 2])
-gain = np.clip(skin_ref / np.median(tt[sk], 0), 0.8, 2.2)
-print("T2_FINISH sheet skin", (skin_ref * 255).round(), "gain", gain.round(3))
+if cfg.get("gain"):
+    gain = np.array(cfg["gain"], float)  # shared with another part of the same character
+    print("T2_FINISH fixed gain", gain.round(3))
+elif cfg.get("sheet_body"):
+    # No skin to match (dogs): the whole baked body against the sheet's foreground median.
+    ref = np.array(cfg["sheet_body"], float) / 255.0
+    gain = np.clip(ref / np.median(t[coverage[..., 0]], 0), 0.8, 2.2)
+    print("T2_FINISH sheet body", cfg["sheet_body"], "gain", gain.round(3))
+else:
+    skin_ref = sheet_skin()
+    tt = t[m > 0.6]
+    sk = (tt[:, 0] > 0.3) & (tt[:, 0] > tt[:, 1]) & (tt[:, 1] > tt[:, 2])
+    gain = np.clip(skin_ref / np.median(tt[sk], 0), 0.8, 2.2)
+    print("T2_FINISH sheet skin", (skin_ref * 255).round(), "gain", gain.round(3))
 t3 = np.clip(t * gain, 0, 1)
 res = np.where(coverage, t3, c)
 
@@ -78,11 +129,13 @@ if cfg.get("hair_tone") and os.path.exists(os.path.join(work, "t2_hairmask.png")
     print("T2_FINISH hair tone", hm.sum(), "texels, gain", gh.round(2))
 
 # Drawn face, tone-matched.
-sel = m > 0.6
+sel = m > 0.6 if cfg.get("keep_face", True) else np.zeros_like(m, bool)
 cs, ts = c[sel], t3[sel]
 skin = (cs[:, 0] > 0.55) & (cs[:, 0] > cs[:, 2] + 0.1)
 if skin.sum() > 100:
     gface = np.median(ts[skin], 0) / np.maximum(np.median(cs[skin], 0), 1e-3)
+    if not cfg.get("face_tone", True):
+        gface = np.ones(3)  # dogs: the body white balance already matches the old face
     print("T2_FINISH face tone gain", gface.round(3))
     res = res * (1 - m[..., None]) + np.clip(c * gface, 0, 1) * m[..., None]
 

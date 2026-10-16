@@ -1,0 +1,36 @@
+{
+  "id": "dog_golden",
+  "src": "assets/characters/dog/models/breeds/golden.glb",
+  "body": "DogBody",
+  "subdiv": 1,
+  "keep_face": true,
+  "keep_face_note": "the face (eyes, nose, mouth) stays from the current texture: Trellis2 paints small brown eyes and a grey nose",
+  "runs": [
+    {
+      "name": "fb",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/golden_front.png",
+      "back": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/golden_back.png",
+      "facing": "front"
+    },
+    {
+      "name": "side",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/golden_side.png",
+      "back": "mirror:C:/Users/b/Documents/good_human_stylized_factory/references/dogs/golden_side.png",
+      "facing": "left"
+    }
+  ],
+  "sheet_body": [
+    212,
+    147,
+    93
+  ],
+  "sheet_body_note": "median of the sheet front+side subject pixels (2026-10-17)",
+  "out": "assets/characters/dog/models/breeds/golden.glb",
+  "face_auto": {
+    "zc": 0.44,
+    "az": 0.56,
+    "ax": 1.3
+  },
+  "face_tone": false,
+  "face_auto_note": "eyes sit at ~1.0 head half-width; ellipse covers eyes, muzzle and mouth (corgi measured)"
+}

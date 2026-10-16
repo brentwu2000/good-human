@@ -1,9 +1,13 @@
 """Trellis2 texture pass, step 3 (Claude, 2026-10-17): vertex colours -> the body's own UVs.
-  blender -b <work>/hi.blend --python tools/art/t2_bake.py -- <config.json> <colours.npz> <work_dir>
+  blender -b <work>/hi.blend --python tools/art/t2_bake.py -- <config.json> <colours.npz[@front|@left],...> <work_dir>
+Several colour sets (dogs: front/back run + side run) blend per vertex by normal: a "front"
+set weighs normals along the body axis (y), a "left" set normals across it (x).
 A Cycles emit bake (no nvdiffrast). Writes <work>/t2_basecolor.png (Trellis2 colour in the game
 UVs, raw) and <work>/t2_facemask.png (white over the drawn face, soft rim).
 Config options used here:
   exclude_material_keywords  body faces left out (own material, e.g. the auntie's towel)
+  bake_materials             only these materials' faces are baked (dogs with a separate
+                             face/collar material)
   props [{object, min_z}]    real straps/bags: the generator also paints them onto the body,
                              offset; body texels near them (front view) are refilled from the
                              mirrored side
@@ -11,6 +15,8 @@ Config options used here:
   bare_forearms              forearm past `hem` (elbow -> wrist) is skin; hands too
   hands_skin                 hands get forearm skin (hands whose UVs are one point)
   face {zc, az, ax}          face ellipse (rest pose, m); measured from the head when absent
+  keep_face                  false: no face/hair masks
+  face_auto {zc, az, ax}     coefficients of the measured ellipse (dogs: wider, eyes included)
 Also writes t2_hairmask.png (crown + back of head) for t2_finish's hair_tone.
 """
 import colorsys
@@ -28,15 +34,19 @@ cfg_path, npz, work = sys.argv[sys.argv.index("--") + 1:][:3]
 cfg = json.load(open(cfg_path, encoding="utf-8"))
 work = Path(work)
 size = int(cfg.get("texture_size", 2048))
-d = np.load(npz)
-gp, gc = d["pos"], d["col"].astype(np.float32) / 255.0
-# Trellis2 colours are sRGB bytes; a float colour attribute is linear.
-gc = np.where(gc <= 0.04045, gc / 12.92, ((gc + 0.055) / 1.055) ** 2.4)
-bp = np.stack([gp[:, 0], -gp[:, 2], gp[:, 1]], 1)  # glTF (Y up, +Z front) -> Blender
-kd = kdtree.KDTree(len(bp))
-for i, p in enumerate(bp):
-    kd.insert(p, i)
-kd.balance()
+sets = []
+for spec in npz.split(","):
+    path, _, facing = spec.partition("@")
+    d = np.load(path)
+    gp, gc = d["pos"], d["col"].astype(np.float32) / 255.0
+    # Trellis2 colours are sRGB bytes; a float colour attribute is linear.
+    gc = np.where(gc <= 0.04045, gc / 12.92, ((gc + 0.055) / 1.055) ** 2.4)
+    bp = np.stack([gp[:, 0], -gp[:, 2], gp[:, 1]], 1)  # glTF (Y up, +Z front) -> Blender
+    kd = kdtree.KDTree(len(bp))
+    for i, p in enumerate(bp):
+        kd.insert(p, i)
+    kd.balance()
+    sets.append((kd, gc, facing or "front"))
 
 hi = bpy.data.objects["hi"]
 dg0 = bpy.context.evaluated_depsgraph_get()
@@ -60,8 +70,10 @@ for o in list(bpy.data.objects):
     if o is not hi:
         bpy.data.objects.remove(o)
 me = hi.data
+only = cfg.get("bake_materials")
 excl = [i for i, s in enumerate(hi.material_slots)
-        if s.material and any(k in s.material.name for k in cfg.get("exclude_material_keywords", []))]
+        if s.material and (any(k in s.material.name for k in cfg.get("exclude_material_keywords", []))
+                           or (only and s.material.name not in only))]
 if excl:
     bm = bmesh.new(); bm.from_mesh(me)
     bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index in excl], context="FACES")
@@ -73,10 +85,16 @@ P = np.array([tuple(p) for p in pts])
 nrm = np.array([tuple(mw.to_3x3() @ v.normal) for v in me.vertices])
 
 lin = np.zeros((nv, 3))
-for i, p in enumerate(pts):
-    near = kd.find_n(p, 4)
-    w = np.array([1.0 / max(dist, 1e-5) for _, _, dist in near])
-    lin[i] = (gc[[j for _, j, _ in near]] * w[:, None]).sum(0) / w.sum()
+wsum = np.zeros(nv)
+for kd, gc, facing in sets:
+    ax_i = 1 if facing == "front" else 0
+    wv = (nrm[:, ax_i] ** 2 + 0.05) if len(sets) > 1 else np.ones(nv)
+    for i, p in enumerate(pts):
+        near = kd.find_n(p, 4)
+        w = np.array([1.0 / max(dist, 1e-5) for _, _, dist in near])
+        lin[i] += wv[i] * (gc[[j for _, j, _ in near]] * w[:, None]).sum(0) / w.sum()
+    wsum += wv
+lin /= wsum[:, None]
 srgb = np.where(lin <= 0.0031308, lin * 12.92, 1.055 * np.power(np.maximum(lin, 0), 1 / 2.4) - 0.055)
 hsv = np.array([colorsys.rgb_to_hsv(*c) for c in srgb])
 
@@ -151,32 +169,37 @@ if (cfg.get("bare_forearms") or cfg.get("hands_skin")) and fore.sum() > 50:
         print("T2_BAKE forearm skin %d verts" % fix.sum())
     print("T2_BAKE hands %d verts <- forearm skin %s" % (is_hand.sum(), np.median(srgb[fore], 0).round(3)))
 
-# ---- 3. face ellipse (rest pose): from the head when not given.
-hv = P[is_head & (nrm[:, 1] < -0.3)]
-hz0, hz1 = float(P[is_head, 2].min()), float(P[is_head, 2].max())
-hw = float(np.percentile(np.abs(hv[:, 0] - np.median(hv[:, 0])), 95)) if len(hv) else 0.15
-f = cfg.get("face") or {}
-cx = float(f.get("cx", np.median(hv[:, 0]) if len(hv) else 0.0))
-zc = float(f.get("zc", hz0 + 0.43 * (hz1 - hz0)))  # fitted on the auntie
-az = float(f.get("az", 0.35 * (hz1 - hz0)))
-ax = float(f.get("ax", 0.56 * hw))
-print("T2_BAKE head z %.3f-%.3f half width %.3f -> face cx %.3f zc %.3f az %.3f ax %.3f" % (hz0, hz1, hw, cx, zc, az, ax))
+keep_face = cfg.get("keep_face", True) and is_head.any()
+cx = zc = az = ax = 0.0
+hair = np.zeros(nv, bool)
+if keep_face:
+    # ---- 3. face ellipse (rest pose): from the head when not given.
+    hv = P[is_head & (nrm[:, 1] < -0.3)]
+    hz0, hz1 = float(P[is_head, 2].min()), float(P[is_head, 2].max())
+    hw = float(np.percentile(np.abs(hv[:, 0] - np.median(hv[:, 0])), 95)) if len(hv) else 0.15
+    f = cfg.get("face") or {}
+    fa = {"zc": 0.43, "az": 0.35, "ax": 0.56, **cfg.get("face_auto", {})}  # fitted on the auntie
+    cx = float(f.get("cx", np.median(hv[:, 0]) if len(hv) else 0.0))
+    zc = float(f.get("zc", hz0 + fa["zc"] * (hz1 - hz0)))
+    az = float(f.get("az", fa["az"] * (hz1 - hz0)))
+    ax = float(f.get("ax", fa["ax"] * hw))
+    print("T2_BAKE head z %.3f-%.3f half width %.3f -> face cx %.3f zc %.3f az %.3f ax %.3f" % (hz0, hz1, hw, cx, zc, az, ax))
 
-# ---- 4. hair mask (crown above the face and the back of the head, not ears/cheeks):
-# t2_finish scales it to the sheet's hair colour after the white balance (hair_tone).
-rf = ((P[:, 0] - cx) / ax) ** 2 + ((P[:, 2] - zc) / az) ** 2
-hair = is_head & (((nrm[:, 1] <= 0.2) & (rf > 1.0) & (P[:, 2] > zc + 0.2 * az))
-                  | ((nrm[:, 1] > 0.2) & (P[:, 2] > zc - az)))
-print("T2_BAKE hair mask %d verts" % hair.sum())
+    # ---- 4. hair mask (crown above the face and the back of the head, not ears/cheeks):
+    # t2_finish scales it to the sheet's hair colour after the white balance (hair_tone).
+    rf = ((P[:, 0] - cx) / ax) ** 2 + ((P[:, 2] - zc) / az) ** 2
+    hair = is_head & (((nrm[:, 1] <= 0.2) & (rf > 1.0) & (P[:, 2] > zc + 0.2 * az))
+                      | ((nrm[:, 1] > 0.2) & (P[:, 2] > zc - az)))
+    print("T2_BAKE hair mask %d verts" % hair.sum())
 
 col = me.color_attributes.new("t2", "FLOAT_COLOR", "POINT")
 msk = me.color_attributes.new("mask", "FLOAT_COLOR", "POINT")
 hmk = me.color_attributes.new("hair", "FLOAT_COLOR", "POINT")
 for i, p in enumerate(pts):
     col.data[i].color = (*lin[i], 1.0)
-    r = ((p.x - cx) / ax) ** 2 + ((p.z - zc) / az) ** 2
+    r = ((p.x - cx) / ax) ** 2 + ((p.z - zc) / az) ** 2 if keep_face else 9.0
     m = 0.0
-    if nrm[i, 1] < -0.15 and r < 1.0:
+    if keep_face and nrm[i, 1] < -0.15 and r < 1.0:
         m = min(1.0, (1.0 - r) / 0.3) ** 1.2  # full core, soft rim
     msk.data[i].color = (m, m, m, 1.0)
     hv_ = 1.0 if hair[i] else 0.0

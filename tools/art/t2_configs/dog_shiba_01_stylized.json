@@ -1,0 +1,30 @@
+{
+  "id": "dog_shiba_01_stylized",
+  "src": "assets/characters/dog/models/shiba_01/shiba_01_stylized.glb",
+  "body": "Shiba_Body",
+  "subdiv": 2,
+  "keep_face": false,
+  "keep_face_note": "eyes and nose are separate meshes; the coat was vertex colours",
+  "runs": [
+    {
+      "name": "fb",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/shiba_front.png",
+      "back": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/shiba_back.png",
+      "facing": "front"
+    },
+    {
+      "name": "side",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/shiba_side.png",
+      "back": "mirror:C:/Users/b/Documents/good_human_stylized_factory/references/dogs/shiba_side.png",
+      "facing": "left"
+    }
+  ],
+  "sheet_body": [
+    215,
+    156,
+    105
+  ],
+  "sheet_body_note": "median of the sheet front+side subject pixels (2026-10-17)",
+  "out": "assets/characters/dog/models/shiba_01/shiba_01_stylized.glb",
+  "create_base": true
+}

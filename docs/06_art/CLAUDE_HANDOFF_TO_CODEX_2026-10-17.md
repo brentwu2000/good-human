@@ -15,6 +15,11 @@ the 19 clips are unchanged. The drawn faces are kept (tone-matched).
   Grandma's silver hair is tone-mapped to the sheet (`hair_tone`), her face ellipse is set by hand.
 - The other 2026-10-15 refine candidates (texture-only) are superseded by this pass.
 
+- **Breed dogs** (corgi, shiba, golden, frenchie, pomeranian, chihuahua): coat basecolor
+  replaced by a two-run Trellis2 texture; your faces are kept (face ellipse / separate face
+  materials untouched). Chihuahua: body_albedo and head_albedo both replaced (face kept),
+  coat corner colours were already white. Poodle untouched (your r40).
+
 ## How it is rebuilt
 
 `bash tools/art/t2_run.sh tools/art/t2_configs/<id>.json` (needs the Modly Trellis2 extension
@@ -38,5 +43,7 @@ in `C:/Users/b/tools/modly`, ~10 GB of weights). Work files in `build/t2/<id>/`:
   from `colours.npz`).
 - **CX-15** Delivery rider: the generated brows sit above the drawn ones (double brows);
   grandma: small bluish spot at the right temple.
+- **CX-16** Dogs: chihuahua muzzle-side light smear; pomeranian a little paler than the sheet;
+  check the face/coat border on each dog in motion.
 - **CX-14** Market auntie's floral apron is softer than the sheet's print; an authored print
   over the Trellis2 base would be an improvement.

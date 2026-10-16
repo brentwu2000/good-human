@@ -1,6 +1,9 @@
 """Trellis2 texture pass, step 2: multi-view texture, colours baked on vertices (no nvdiffrast rasterising).
   <trellis2 venv python> tools/art/t2_texture.py <mesh.glb> <out.npz> front=<png> [back=<png>]
-                   [--guidance 3.0] [--steps 25] [--res 1024]
+                   [--guidance 3.0] [--steps 25] [--res 1024] [--facing front|left]
+--facing left: the "front" view shows the character's left flank (dogs: side view), so the
+mesh is not turned (its left side is already +X). A view "mirror:<png>" is flipped (the
+other flank).
 Guidance 3.0: the extension's default 1.0 lets the colours drift (LESSONS 6.23).
 Writes positions in the input GLB's own space plus RGB per vertex.
 Runs in the Modly Trellis2 extension venv (C:/Users/b/tools/modly). Claude, 2026-10-17."""
@@ -16,7 +19,7 @@ from generator import Trellis2GGUFGenerator  # noqa: E402
 
 args = sys.argv[1:]
 mesh_path, out = Path(args[0]), Path(args[1])
-opts = {"guidance": 3.0, "steps": 25, "res": 1024}
+opts = {"guidance": 3.0, "steps": 25, "res": 1024, "facing": "front"}
 views = {}
 i = 2
 while i < len(args):
@@ -37,6 +40,14 @@ def fit(im, ratio=0.85, size=1024):
     """Re-frame on the non-white subject: a near-white sheet background (grandma) survives
     background removal and the subject stays small (37 % of the frame), losing colour."""
     a = np.asarray(im.convert("RGB")).astype(int)
+    # Keep the largest subject: sheet crops can carry a sliver of the neighbouring view.
+    from scipy import ndimage
+    fg = np.abs(a - 255).sum(-1) > 30
+    lab, n = ndimage.label(ndimage.binary_closing(fg, iterations=3))
+    if n > 1:
+        keep = lab == (np.argmax(ndimage.sum(fg, lab, range(1, n + 1))) + 1)
+        a = np.where(keep[..., None], a, 255)
+        im = Image.fromarray(a.astype(np.uint8))
     ys, xs = np.nonzero(np.abs(a - 255).sum(-1) > 30)
     y0, y1, x0, x1 = ys.min(), ys.max(), xs.min(), xs.max()
     side = int(max(y1 - y0, x1 - x0) / ratio)
@@ -46,7 +57,14 @@ def fit(im, ratio=0.85, size=1024):
                  (x0 - (cx - side // 2), y0 - (cy - side // 2)))
     return canvas.resize((size, size), Image.LANCZOS)
 
-imgs = {k: fit(g._preprocess(Path(v).read_bytes(), 0.85, force_cpu=True)) for k, v in views.items()}
+def view(v):
+    if v.startswith("mirror:"):
+        import io
+        im = Image.open(v[7:]).transpose(Image.FLIP_LEFT_RIGHT)
+        b = io.BytesIO(); im.save(b, "PNG"); return b.getvalue()
+    return Path(v).read_bytes()
+
+imgs = {k: fit(g._preprocess(view(v), 0.85, force_cpu=True)) for k, v in views.items()}
 for k, im in imgs.items():
     im.save(out.with_name(out.stem + f"_in_{k}.png"))
 
@@ -57,6 +75,8 @@ src_v = np.asarray(mesh.vertices).copy()
 # "left"/"right" by the vertical one, so only front/back views are usable and the
 # character (glTF front +Z) is turned to face +X: x' = z, z' = -x.
 rot = np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]], dtype=float)
+if opts["facing"] == "left":
+    rot = np.eye(3)
 mesh.vertices = src_v @ rot.T
 t0 = time.time()
 with torch.no_grad():

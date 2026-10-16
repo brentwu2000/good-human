@@ -1,0 +1,23 @@
+{
+ "date": "2026-10-17 (Trellis2 texture pass)",
+ "author": "Claude (owner: 「其他角色都處理，用同樣流程，直到都可以交付進遊戲內」)",
+ "source": "assets/characters/dog/models/breeds/golden.glb: geometry, rig, weights and clips unchanged; coat basecolor replaced, Codex's face kept",
+ "texture": "Trellis.2 (Microsoft, MIT) multi-view texture, two runs (sheet front+back; sheet side+mirrored side) blended by normal, guidance 3.0, 25 steps, seed 1, via Modly extension modly-trellis2-gguf-extension caa85c7; Aero-Ex/Trellis2-GGUF Q5_K_M (licence not stated; quantised MIT weights); DINOv3 encoder (DINOv3 License 2025-08-19, commercial use allowed); colours baked on vertices + Blender Cycles bake (nvdiffrast not used).",
+ "inputs": [
+  "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/golden_front.png",
+  "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/golden_side.png"
+ ],
+ "configs": [
+  "tools/art/t2_configs/dog_golden.json"
+ ],
+ "steps": [
+  "tools/art/t2_prep.py",
+  "tools/art/t2_texture.py",
+  "tools/art/t2_bake.py",
+  "tools/art/t2_finish.py"
+ ],
+ "license": "owner breed sheets (ChatGPT image generation) + project chain; see assets/art_previews/dogs/PROVENANCE.md",
+ "grade": "B+ / installed",
+ "sha256": "6c1059b9e3cabfcedd43655bdf063fa4e7c9f666e4aa5fe2d7da7a9458a96765",
+ "previous": {}
+}

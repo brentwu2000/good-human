@@ -1,0 +1,42 @@
+{
+  "id": "dog_chihuahua",
+  "src": "assets/characters/dog/models/breeds/chihuahua.glb",
+  "body": "DogBody_Delivery",
+  "subdiv": 1,
+  "keep_face": false,
+  "keep_face_note": "the face has its own material and texture, untouched",
+  "runs": [
+    {
+      "name": "fb",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/chihuahua_front.png",
+      "back": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/chihuahua_back.png",
+      "facing": "front"
+    },
+    {
+      "name": "side",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/chihuahua_side.png",
+      "back": "mirror:C:/Users/b/Documents/good_human_stylized_factory/references/dogs/chihuahua_side.png",
+      "facing": "left"
+    }
+  ],
+  "sheet_body": [
+    214,
+    159,
+    116
+  ],
+  "sheet_body_note": "median of the sheet front+side subject pixels (2026-10-17)",
+  "out": "assets/characters/dog/models/breeds/chihuahua.glb",
+  "bake_materials": [
+    "Chihuahua_ContinuousCoat"
+  ],
+  "material": "Chihuahua_ContinuousCoat",
+  "corner_colors": {
+    "Chihuahua_ContinuousCoat": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "corner_colors_note": "Base Color = texture x vertex colour; the coat's corners go white so the new texture shows as baked"
+}

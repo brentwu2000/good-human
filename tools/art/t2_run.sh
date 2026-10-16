@@ -15,11 +15,22 @@ get() { python -c "import json,sys;print(json.load(open(sys.argv[1],encoding='ut
 
 [ -f "$W/hi.blend" ] || "$BL" -b --factory-startup --python tools/art/t2_prep.py -- "$CFGW" "$WW" 2>&1 | grep -E "^T2_|Error" | grep -v -E "GPUShader|gpu module" || true
 [ -f "$W/hi.glb" ] || { echo "prep failed" >&2; exit 1; }
-if [ ! -f "$W/colours.npz" ]; then
-  BACK=$(get back); ARGS=(front="$(get front)"); [ -n "$BACK" ] && ARGS+=(back="$BACK")
-  PYTHONIOENCODING=utf-8 PYTHONUNBUFFERED=1 "$T2PY" tools/art/t2_texture.py "$WW/hi.glb" "$WW/colours.npz" "${ARGS[@]}" > "$W/texture.log" 2>&1
-  grep "\[t2\]" "$W/texture.log"
-fi
-"$BL" -b "$WW/hi.blend" --python tools/art/t2_bake.py -- "$CFGW" "$WW/colours.npz" "$WW" 2>&1 | grep -E "^T2_|Error" | grep -v -E "GPUShader|gpu module" || true
+# Colour sets: one front/back run, or the config's "runs" (dogs: + a side run).
+RUNS=$(python -c "
+import json,sys
+c=json.load(open(sys.argv[1],encoding='utf-8'))
+runs=c.get('runs') or [{'name':'','front':c['front'],'back':c.get('back',''),'facing':'front'}]
+for r in runs: print('|'.join([r['name'],r['front'],r.get('back',''),r.get('facing','front')]))" "$CFG")
+SETS=""
+while IFS='|' read -r NAME FRONT BACK FACING; do
+  NPZ="colours${NAME:+_$NAME}.npz"
+  if [ ! -f "$W/$NPZ" ]; then
+    ARGS=(front="$FRONT"); [ -n "$BACK" ] && ARGS+=(back="$BACK")
+    PYTHONIOENCODING=utf-8 PYTHONUNBUFFERED=1 "$T2PY" tools/art/t2_texture.py "$WW/hi.glb" "$WW/$NPZ" "${ARGS[@]}" --facing "$FACING" > "$W/texture${NAME:+_$NAME}.log" 2>&1
+    grep "\[t2\]" "$W/texture${NAME:+_$NAME}.log"
+  fi
+  SETS="${SETS:+$SETS,}$WW/$NPZ@$FACING"
+done <<< "$RUNS"
+"$BL" -b "$WW/hi.blend" --python tools/art/t2_bake.py -- "$CFGW" "$SETS" "$WW" 2>&1 | grep -E "^T2_|Error" | grep -v -E "GPUShader|gpu module" || true
 "$BL" -b --factory-startup --python tools/art/t2_finish.py -- "$CFGW" "$WW" "$OUT" 2>&1 | grep -E "^T2_|Error" | grep -v -E "GPUShader|gpu module" || true
 [ -f "$OUT" ] && echo "T2_DONE $ID -> $OUT"
