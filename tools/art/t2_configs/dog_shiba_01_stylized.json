@@ -26,5 +26,24 @@
   ],
   "sheet_body_note": "median of the sheet front+side subject pixels (2026-10-17)",
   "out": "assets/characters/dog/models/shiba_01/shiba_01_stylized.glb",
-  "create_base": true
+  "create_base": true,
+  "eye_objects": [
+    "Eye_L",
+    "Eye_R"
+  ],
+  "eye_clear": 2.2,
+  "nose_object": "Nose",
+  "fill_smooth": 80,
+  "stray_red": {
+    "near": "neck",
+    "radius": 0.14,
+    "hue_max": 24,
+    "sat_min": 0.5,
+    "below_value": 0.62
+  },
+  "clear_dark_bones": [
+    "tail_"
+  ],
+  "dark_value": 0.45,
+  "stray_red_note": "the side run paints a collar bar along the spine (hue ~20, darker than the coat)"
 }

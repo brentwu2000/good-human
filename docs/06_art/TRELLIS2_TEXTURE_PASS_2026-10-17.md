@@ -98,3 +98,16 @@ Same tools, per-dog configs `tools/art/t2_configs/dog_<breed>.json`:
 | Frenchie | the flat cream body now carries the sheet's brown patches |
 | Chihuahua | white chest/legs of the sheet (was flat tan); a light smear on the muzzle side |
 | Pomeranian | slightly paler than before, within the sheet's range |
+
+## Player shiba (`shiba_01`, `shiba_01_stylized`)
+
+The coat was vertex colours (eyes and nose are separate meshes): `create_base` gives the coat an
+image texture and removes the colour attribute. The shiba sheet's eyes, a collar bar along the
+spine (side run) and dark tail marks were painted on the body: refilled from the coat around
+them (`eye_objects`/`nose_object` band, `stray_red`, `clear_dark_bones`). Taking the back from
+the front/back run instead (`top_from`) was tried and rejected: that run sees the back edge-on
+and paints it dark brown. The game uses `shiba_01.glb` (soft toon is off); the stylized one
+keeps a faint spine bar and hard-edged fill patches on the forehead (CX-16).
+
+Tests: 47 scenes; `combat_motion_3d_test` failed once ("leaning into being dragged") and
+passed on three reruns (timing, not art).

@@ -14,6 +14,13 @@ Config options used here:
   strap_radius               front-view refill distance (m), default 0.06
   bare_forearms              forearm past `hem` (elbow -> wrist) is skin; hands too
   hands_skin                 hands get forearm skin (hands whose UVs are one point)
+  top_from front|left        run that colours upward-facing surfaces (the back)
+  stray_red {near, radius, hue_max, sat_min, below_value}  red texels farther than radius (m) from that joint are refilled
+  clear_dark_bones, dark_value  dark texels (raw value < dark_value) on those bones refilled
+  nose_object                with eye_objects: clear the band from above the nose to above
+                             the eyes (painted eyes sit where the sheet has them)
+  eye_objects, eye_clear     separate eye meshes: body texels within eye_clear x their radius
+                             are refilled from the fur around (no painted second eyes)
   face {zc, az, ax}          face ellipse (rest pose, m); measured from the head when absent
   keep_face                  false: no face/hair masks
   face_auto {zc, az, ax}     coefficients of the measured ellipse (dogs: wider, eyes included)
@@ -64,6 +71,20 @@ if sv:
     for i, v in enumerate(sv):
         skd.insert(Vector((v.x, 0.0, v.z)), i)
     skd.balance()
+# Separate eye meshes (player shiba): the generator paints eyes around them as well.
+eyes = []
+for name in cfg.get("eye_objects", []):
+    ob = bpy.data.objects.get(name)
+    if ob is None:
+        continue
+    ev = ob.evaluated_get(dg0)
+    vs = np.array([tuple(ev.matrix_world @ x.co) for x in ev.data.vertices])
+    c_ = vs.mean(0)
+    eyes.append((c_, float(np.linalg.norm(vs - c_, axis=1).max())))
+nose_c = None
+if cfg.get("nose_object") and bpy.data.objects.get(cfg["nose_object"]):
+    ev = bpy.data.objects[cfg["nose_object"]].evaluated_get(dg0)
+    nose_c = np.array([tuple(ev.matrix_world @ x.co) for x in ev.data.vertices]).mean(0)
 arm_ob = next(o for o in bpy.data.objects if o.type == "ARMATURE")
 JOINT = {b.name: arm_ob.matrix_world @ b.head_local for b in arm_ob.data.bones}
 for o in list(bpy.data.objects):
@@ -86,9 +107,15 @@ nrm = np.array([tuple(mw.to_3x3() @ v.normal) for v in me.vertices])
 
 lin = np.zeros((nv, 3))
 wsum = np.zeros(nv)
+# Upward-facing surfaces (the back) are seen by neither run straight on; "top_from" picks the
+# run that owns them (the player shiba's side run paints a collar bar along the spine).
+top_from = cfg.get("top_from")
+up = nrm[:, 2] > 0.55
 for kd, gc, facing in sets:
     ax_i = 1 if facing == "front" else 0
     wv = (nrm[:, ax_i] ** 2 + 0.05) if len(sets) > 1 else np.ones(nv)
+    if top_from and len(sets) > 1:
+        wv = np.where(up, 1.0 if facing == top_from else 0.0, wv)
     for i, p in enumerate(pts):
         near = kd.find_n(p, 4)
         w = np.array([1.0 / max(dist, 1e-5) for _, _, dist in near])
@@ -121,6 +148,35 @@ if skd is not None:
     sd = np.array([skd.find(Vector((p.x, 0.0, p.z)))[2] for p in pts])
     olive = (hsv[:, 0] * 360 > 32) & (hsv[:, 0] * 360 < 85) & (hsv[:, 1] > 0.2)
     flag = front & ((sd < float(cfg.get("strap_radius", 0.06))) | ((sd < 0.15) & olive))
+for c_, r_ in eyes:
+    near_eye = np.linalg.norm(P - c_, axis=1) < r_ * float(cfg.get("eye_clear", 2.2))
+    flag |= near_eye
+    print("T2_BAKE painted eye cleared: %d verts (eye radius %.3f)" % (near_eye.sum(), r_))
+if cfg.get("stray_red"):
+    # A collar painted away from the neck (player shiba: a red bar on the back).
+    sr = cfg["stray_red"]
+    hue = hsv[:, 0] * 360
+    red = ((hue < float(sr.get("hue_max", 18))) | (hue > 335)) & (hsv[:, 1] > float(sr.get("sat_min", 0.4)))
+    if "below_value" in sr:
+        red &= hsv[:, 2] < float(sr["below_value"])
+    far = np.linalg.norm(P - np.array(JOINT[sr.get("near", "neck")]), axis=1) > float(sr.get("radius", 0.14))
+    flag |= red & far
+    print("T2_BAKE stray red cleared: %d verts" % (red & far).sum())
+if cfg.get("clear_dark_bones"):
+    # Dark painted marks (shadow of the sheet's tail curl) on these bones' skin.
+    on = np.array([b.startswith(tuple(cfg["clear_dark_bones"])) for b in bone])
+    dark = on & (hsv[:, 2] < float(cfg.get("dark_value", 0.3)))
+    flag |= dark
+    print("T2_BAKE dark marks cleared: %d verts" % dark.sum())
+if eyes and nose_c is not None:
+    # The generator places its eyes where the sheet has them, not on the eye meshes: clear
+    # the front of the head from just above the nose to above the eyes (fur on the model).
+    ez = float(np.mean([c_[2] for c_, _ in eyes])); ex = float(np.mean([abs(c_[0]) for c_, _ in eyes]))
+    er = float(np.mean([r_ for _, r_ in eyes]))
+    band = (is_head & (nrm[:, 1] < -0.2) & (P[:, 2] > nose_c[2] + 0.25 * (ez - nose_c[2]))
+            & (P[:, 2] < ez + 3 * er) & (np.abs(P[:, 0]) < 2.6 * ex))
+    flag |= band
+    print("T2_BAKE eye band cleared: %d verts" % band.sum())
 if flag.any():
     fill = lin.copy()
     src_of = np.full(nv, -1)
@@ -136,7 +192,7 @@ if flag.any():
                 src_of[w_] = src_of[u]; q.append(w_)
     idx = np.nonzero(flag & (src_of >= 0))[0]
     fill[idx] = lin[src_of[idx]]
-    for _ in range(25):
+    for _ in range(int(cfg.get("fill_smooth", 25))):
         fill[idx] = np.array([fill[adj[u]].mean(0) for u in idx])
     # A strap is diagonal: the mirrored point (-x) is plain cloth with the same print.
     vkd = kdtree.KDTree(nv)

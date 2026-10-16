@@ -26,5 +26,20 @@
   ],
   "sheet_body_note": "median of the sheet front+side subject pixels (2026-10-17)",
   "out": "assets/characters/dog/models/shiba_01/shiba_01.glb",
-  "create_base": true
+  "create_base": true,
+  "eye_objects": [
+    "Eye_L",
+    "Eye_R"
+  ],
+  "eye_clear": 2.2,
+  "nose_object": "Nose",
+  "fill_smooth": 80,
+  "stray_red": {
+    "near": "neck",
+    "radius": 0.14
+  },
+  "clear_dark_bones": [
+    "tail_"
+  ],
+  "dark_value": 0.45
 }

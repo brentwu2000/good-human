@@ -19,6 +19,8 @@ the 19 clips are unchanged. The drawn faces are kept (tone-matched).
   replaced by a two-run Trellis2 texture; your faces are kept (face ellipse / separate face
   materials untouched). Chihuahua: body_albedo and head_albedo both replaced (face kept),
   coat corner colours were already white. Poodle untouched (your r40).
+- **Player shiba** (`shiba_01`, `shiba_01_stylized`): the coat's vertex colours are replaced by
+  an image texture (the colour attribute is removed); eyes, nose, rig and clips unchanged.
 
 ## How it is rebuilt
 
@@ -44,6 +46,7 @@ in `C:/Users/b/tools/modly`, ~10 GB of weights). Work files in `build/t2/<id>/`:
 - **CX-15** Delivery rider: the generated brows sit above the drawn ones (double brows);
   grandma: small bluish spot at the right temple.
 - **CX-16** Dogs: chihuahua muzzle-side light smear; pomeranian a little paler than the sheet;
+  stylized player shiba: faint spine bar, hard-edged forehead fill, two dark curl marks;
   check the face/coat border on each dog in motion.
 - **CX-14** Market auntie's floral apron is softer than the sheet's print; an authored print
   over the Trellis2 base would be an improvement.
