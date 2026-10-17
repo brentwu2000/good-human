@@ -9,7 +9,8 @@ spot, is never on the fighting side, never hurt or knocked down; the leash stays
 ([XIAOMI_INTEGRATION_AUDIT.md](../04_systems/XIAOMI_INTEGRATION_AUDIT.md)). `xiaomi_proxy_test`
 34 checks. Phase 2 REVIEW (owner: 「照你的建議做」): spring glove (toy weapon) and toy battery,
 found only by her (other owners' loot unchanged), no repair cooldown, 積木雨/超級兔兔 placeholders;
-`xiaomi_proxy_gear_test` 26 checks; suite 49/49. Phase 3 (robot art CX-17, Xiaomi clips CX-18) next.
+`xiaomi_proxy_gear_test` 26 checks; suite 49/49. Phase 3 REVIEW: generated bunny robot model (TripoSG + Trellis2, six rigid parts on the greybox
+joints), heart spring glove, Xiaomi remote/cheer/pick-up gestures; suite 49/49. Poodle retextured (Claude took it over).
 
 ## ART characters — 2026-10-17 (Claude): Trellis2 texture pass
 

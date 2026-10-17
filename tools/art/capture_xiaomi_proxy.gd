@@ -88,6 +88,12 @@ func _run() -> void:
 			side.current = true
 			await _frames(3)
 			_shot(out + "/side.png")
+			# Close on the robot, from the opponent's side (its face, the glove).
+			var to_opp := (first.human_global_position() - robot.global_position).normalized()
+			side.global_position = robot.global_position + to_opp * 1.3 + across * 0.5 + Vector3(0, 0.7, 0)
+			side.look_at(robot.global_position + Vector3(0, 0.5, 0))
+			await _frames(3)
+			_shot(out + "/robot_close.png")
 			side.current = false
 			game_cam.current = true
 			side.queue_free()

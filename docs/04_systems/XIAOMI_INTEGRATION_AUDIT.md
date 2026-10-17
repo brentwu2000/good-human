@@ -103,3 +103,11 @@ Owner: 「照你的建議做 Phase 2」 — conflicts 6–10 resolved as recomme
 UI: in her walks the bag says 「讓兔兔帶著」, 「🔋 給兔兔充電」 / 「🩹 給兔兔修一修」.
 Check: `tests/xiaomi_proxy_gear_test` (26 checks: other owners' rolls unchanged and never toy parts; she finds both; robot wears and fights with the glove, she keeps it in her backpack; battery +30 %; glove lost on defeat, battery in the dog's backpack comes home; pair and stash survive save + reload). `data_loot_test` registers the two items and checks toy parts never sit in shared entries. Suite 49/49 (`fight_body_contact_test` failed once in one full run, passed 4 reruns: seed-dependent, non-proxy path unchanged).
 Open (Phase 3): robot model (CX-17), Xiaomi clips (CX-18), robot body contact.
+
+## Phase 3 — done 2026-10-17 (REVIEW, Claude took CX-17/18/19 over on the owner's word)
+
+- **Robot model**: sheet front/side/back cropped (`good_human_stylized_factory/references/props/bunny_robot/`), TripoSG (Modly) from the front, `tools/art/robot_prep.py` (clean, 1.0 m, 150k hi / 12k low + UV), Trellis2 colours from front+back (`t2_texture.py`), `tools/art/robot_finish.py` (bake, white balance to the sheet, cut into six rigid parts with origins on the greybox joints, turned to face -Z). `assets/characters/proxy/bunny_robot.glb`; `BunnyRobot3D` hangs the parts on Hips/Torso/Head/ArmL/R/LegL/R (`MODEL_FIT` 0.43, primitive build stays as fallback). ~1.03 m in game.
+- **Spring glove**: heart-shaped glove on a spring (sheet), `WeaponProp3D._spring_glove`.
+- **Xiaomi**: SAFE plays M2M_Phone with a pink remote in her right hand; a win plays M2M_Cheer_One; a loss she walks to the robot and plays M2M_PickUp. No hurt/KO clips.
+- Note: the model faces -Z in Godot, so in Blender its face is +Y — a "front" render from -Y shows the back of the head.
+Check: suite 49/49, `xiaomi_proxy_test` 34, `xiaomi_proxy_gear_test` 26. Capture `xiaomi_proxy_phase3_robot.png`.

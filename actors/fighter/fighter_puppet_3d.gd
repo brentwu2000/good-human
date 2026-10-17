@@ -130,6 +130,10 @@ var held: WeaponData
 ## Xiaomi toy proxy: a child carries what she finds in her backpack, never in
 ## her hand (her robot is the one that fights with it).
 var keep_held_in_bag: bool = false
+## Xiaomi toy proxy: a library clip (M2M_*) standing in for the idle while
+## set, e.g. her holding the robot's remote. Empty = the ordinary idle.
+var idle_override: String = ""
+var _hand_prop: Node3D
 var _prop: Node3D
 ## The smear behind it while a blow is fast (between the wind-up's end and
 ## the follow-through, `TRAIL_FROM`..`TRAIL_UNTIL` of the attack clip).
@@ -330,6 +334,8 @@ func set_ambient(moving: bool) -> void:
 	elif _gesture_left > 0.0:
 		return
 	var clip := skeletal.ambient_clip(moving)
+	if not moving and not idle_override.is_empty() and not skeletal.m2m_clip(idle_override).is_empty():
+		clip = skeletal.m2m_clip(idle_override)
 	# Hurt, standing still, they stand hurt (Mesh2Motion "Idle Hurt").
 	if not moving and condition_state() != Condition.HEALTHY:
 		var hurt := skeletal.m2m_clip("M2M_Idle_Hurt")
@@ -1108,6 +1114,28 @@ func play_gesture(clip: String, rate: float = 1.0) -> bool:
 	skeletal.player.speed_scale = rate
 	_gesture_left = skeletal.player.get_animation(name).length / rate
 	return true
+
+
+## Xiaomi toy proxy: a small prop in the right hand (her robot's remote), or
+## none. Skeletal bodies only.
+func show_hand_prop(prop: Node3D) -> void:
+	if _hand_prop != null and is_instance_valid(_hand_prop):
+		var mount := _hand_prop.get_parent()
+		if mount is BoneAttachment3D:
+			mount.queue_free()
+		else:
+			_hand_prop.queue_free()
+	_hand_prop = null
+	var skeletal := _body as P04HumanVisual
+	if prop == null or skeletal == null or skeletal.skeleton == null or skeletal.skeleton.find_bone("hand_r") < 0:
+		if prop != null:
+			prop.queue_free()
+		return
+	var mount := BoneAttachment3D.new()
+	mount.bone_name = "hand_r"
+	skeletal.skeleton.add_child(mount)
+	mount.add_child(prop)
+	_hand_prop = prop
 
 
 ## An automatic note about this fighter's own mechanics: shown only when the

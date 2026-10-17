@@ -67,3 +67,8 @@ Her fights are fought by a **placeholder bunny toy robot** built in code on the 
   game no longer plays them on her).
 - **CX-19** Spring glove prop (`WeaponData.Archetype.TOY`, placeholder `WeaponProp3D._spring_glove`):
   a toy spring boxing glove the robot wears; pink, cream coil. Toy battery icon optional.
+
+**Update (same day): CX-17, CX-18, CX-19 and the poodle were taken over by Claude** (owner). Robot:
+`assets/characters/proxy/bunny_robot.glb` (rebuild: `tools/art/robot_prep.py` → `t2_texture.py` →
+`robot_finish.py`); its parts must keep the names Part_Head/Torso/ArmL/ArmR/LegL/LegR with origins on
+their joints. Poodle: Trellis2 coat, your face/ear fur kept, your r40 candidate not used.

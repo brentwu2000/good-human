@@ -207,6 +207,9 @@ func set_state(value: State) -> void:
 		puppet.show_hp(false)
 	elif value == State.COMBAT:
 		puppet.set_fighting()
+	# Xiaomi toy proxy: at her safe spot she works the robot's remote.
+	puppet.idle_override = "M2M_Phone" if value == State.SAFE else ""
+	puppet.show_hand_prop(_remote() if value == State.SAFE else null)
 
 
 ## The owner walks behind the dog, which is exactly where the chase camera is.
@@ -221,6 +224,16 @@ func set_faded(value: bool) -> void:
 		return
 	faded = hidden
 	puppet.visible = not hidden
+
+
+## The robot's remote control: a small pink box with an antenna.
+func _remote() -> Node3D:
+	var root := Node3D.new()
+	root.name = "Remote"
+	root.add_child(Greybox.box(Vector3(0.07, 0.11, 0.025), Color(0.96, 0.46, 0.63), Vector3(0, 0.05, 0)))
+	root.add_child(Greybox.sphere(0.014, Color(0.98, 0.94, 0.88), Vector3(0, 0.07, -0.016)))
+	root.add_child(Greybox.cylinder(0.004, 0.08, Color(0.3, 0.3, 0.32), Vector3(0.025, 0.14, 0)))
+	return root
 
 
 func say(text: String, color: Color = Color.WHITE, seconds: float = 1.6) -> void:

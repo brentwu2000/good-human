@@ -703,13 +703,18 @@ func _finish_proxy_fight(result: CombatSimulation.Result, encounter: EncounterDa
 			var reward := run_manager.grant_reward(encounter.reward_table)
 			robot.say("耶！", Color(1.0, 0.75, 0.88), 1.2)
 			robot.stow(1.2)
-			human.puppet.play_acknowledge(dog.global_position)
+			# She cheers for it; the dog is still thanked (acknowledge beat).
+			if not human.puppet.play_gesture("M2M_Cheer_One", 1.0):
+				human.puppet.play_acknowledge(dog.global_position)
 			acknowledge_left = ACKNOWLEDGE_SECONDS
 			human.say("好狗狗！兔兔也好棒！" + ("（撿到%s）" % reward.item.display_name if reward != null else ""), Color(0.6, 1.0, 0.6), 2.0)
 		CombatSimulation.Result.DEFEAT:
 			# The robot is down, not her: she picks it up and the walk ends.
 			robot.shutdown()
 			robot.stow(DEFEAT_SECONDS)
+			# She goes to pick it up (no fall, no hurt).
+			human.safe_target = robot.global_position + (human.global_position - robot.global_position).normalized() * 0.5
+			human.puppet.idle_override = "M2M_PickUp"
 			human.say("兔兔！……沒電了，我們回家修好你。", Color(1.0, 0.85, 0.9), 2.4)
 			proxy_defeated = true
 			_defeated_by = encounter.human.display_name

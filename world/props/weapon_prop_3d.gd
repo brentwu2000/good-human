@@ -107,11 +107,22 @@ static func build(weapon: WeaponData) -> Node3D:
 
 ## Xiaomi toy proxy: a toy spring boxing glove — a short coil and a big pink
 ## glove on the end. Never a real weapon.
+## Sheet (替身配色與模組 / 彈簧拳套): a heart-shaped glove with a gold squiggle.
 static func _spring_glove(root: Node3D) -> void:
-	for i in 4:
-		root.add_child(Greybox.cylinder(0.05, 0.03, Color(0.96, 0.46, 0.63) if i % 2 == 0 else Color(0.98, 0.94, 0.88), Vector3(0, 0.03 + i * 0.035, 0)))
-	root.add_child(Greybox.sphere(0.11, Color(0.92, 0.30, 0.52), Vector3(0, 0.22, 0)))
-	root.add_child(Greybox.sphere(0.04, Color(0.98, 0.94, 0.88), Vector3(0.05, 0.24, -0.07)))
+	var pink := Color(0.96, 0.40, 0.62)
+	var cream := Color(0.98, 0.94, 0.88)
+	for i in 5:
+		root.add_child(Greybox.cylinder(0.045, 0.028, pink if i % 2 == 0 else cream, Vector3(0, 0.02 + i * 0.032, 0)))
+	# Heart: two lobes at the punching end, a point towards the coil.
+	var glove := Node3D.new()
+	glove.name = "HeartGlove"
+	glove.position = Vector3(0, 0.25, 0)
+	root.add_child(glove)
+	glove.add_child(Greybox.sphere(0.085, pink, Vector3(-0.06, 0.04, 0)))
+	glove.add_child(Greybox.sphere(0.085, pink, Vector3(0.06, 0.04, 0)))
+	glove.add_child(Greybox.box(Vector3(0.12, 0.12, 0.13), pink, Vector3(0, -0.035, 0), Vector3(0, 0, PI * 0.25)))
+	glove.add_child(Greybox.box(Vector3(0.10, 0.012, 0.012), Color(0.98, 0.78, 0.30), Vector3(0, 0.03, -0.085), Vector3(0, 0, 0.35)))
+	glove.add_child(Greybox.sphere(0.03, cream, Vector3(0.07, 0.08, -0.06)))
 
 
 ## An old dumbbell: a short bar across the fist, a plate at each end.

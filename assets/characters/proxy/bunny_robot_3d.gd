@@ -17,7 +17,67 @@ const GOLD := Color(0.95, 0.74, 0.32)
 const INK := Color(0.16, 0.13, 0.16)
 
 
-static func build(_data: FighterData) -> Node3D:
+## Phase 3 model (tools/art/robot_*.py): rigid toy parts Part_Head / Part_Torso /
+## Part_ArmL/R / Part_LegL/R, each with its origin on its joint, hips at
+## Greybox.HIP_HEIGHT. When present it replaces the primitive build below.
+const MODEL_PATH := "res://assets/characters/proxy/bunny_robot.glb"
+## The model is cut at its hip (13 % of its height) and scaled so that hip is
+## at HIP_HEIGHT; this brings it to the primitive's size, so the same
+## body_scale (0.42) makes either one about 1.0 m tall:
+## (1.0 m / 0.42) / (0.72 / 0.13).
+const MODEL_FIT: float = 0.43
+
+
+static func build(data: FighterData) -> Node3D:
+	if ResourceLoader.exists(MODEL_PATH):
+		var built := _from_model(load(MODEL_PATH) as PackedScene)
+		if built != null:
+			return built
+	return _primitive(data)
+
+
+## The generated model on the greybox joints: each part hangs from the joint
+## FighterPuppet3D turns (Hips/Torso/Head/ArmL/ArmR/LegL/LegR).
+static func _from_model(scene: PackedScene) -> Node3D:
+	if scene == null:
+		return null
+	var source := scene.instantiate() as Node3D
+	var part := func(name: String) -> Node3D: return source.find_child("Part_" + name, true, false) as Node3D
+	var names := ["Head", "Torso", "ArmL", "ArmR", "LegL", "LegR"]
+	for n: String in names:
+		if part.call(n) == null:
+			source.free()
+			return null
+	var root := Node3D.new()
+	root.name = "BunnyRobot"
+	var fit := Node3D.new()
+	fit.name = "Fit"
+	fit.scale = Vector3.ONE * MODEL_FIT
+	root.add_child(fit)
+	var torso_at: Vector3 = (part.call("Torso") as Node3D).position
+	for side in ["L", "R"]:
+		var leg := _joint(fit, "Leg" + side, (part.call("Leg" + side) as Node3D).position)
+		_adopt(part.call("Leg" + side), leg)
+	var hips := _joint(fit, "Hips", torso_at)
+	var torso := _joint(hips, "Torso", Vector3.ZERO)
+	_adopt(part.call("Torso"), torso)
+	for side in ["L", "R"]:
+		var arm := _joint(torso, "Arm" + side, (part.call("Arm" + side) as Node3D).position - torso_at)
+		_adopt(part.call("Arm" + side), arm)
+	var head := _joint(torso, "Head", (part.call("Head") as Node3D).position - torso_at)
+	_adopt(part.call("Head"), head)
+	source.free()
+	root.set_meta("skeletal_art", false)
+	return root
+
+
+static func _adopt(piece: Node3D, joint: Node3D) -> void:
+	piece.get_parent().remove_child(piece)
+	piece.position = Vector3.ZERO
+	joint.add_child(piece)
+
+
+static func _primitive(_data: FighterData) -> Node3D:
 	var root := Node3D.new()
 	root.name = "BunnyRobot"
 	var hip := Greybox.HIP_HEIGHT
