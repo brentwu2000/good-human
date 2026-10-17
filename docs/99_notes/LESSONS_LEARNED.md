@@ -217,6 +217,18 @@ chain. Bones identical before/after a re-export said nothing here. Check: `build
 measure (elbow ~40 %, wrist ~75–80 % of the arm) and the same-clip upper-body sheet for every
 character, not one fight capture.
 
+**6.31 Shared clips must be converted per skeleton, or every character but the source fights
+wrong.** The fight / relaxed / Mesh2Motion libraries set each bone's own rotation and were made on
+the P-04 owner. Every other character's rests differ (other proportions, arms at other angles,
+hands rolled 65–98 degrees), so in the real fight library the rider and office worker raised an arm
+overhead and the grandma flailed — while `capture_auntie_r3` looked "fine" because it plays each
+model's own first-pass clips, not what the fight uses. `P04HumanVisual._for_this_skeleton` converts
+each shared library once per skeleton: A = R_src⁻¹·S·R_this (S swings limb bones only onto the
+source's direction; a torso is not a stick), keys become A_parent⁻¹·L·A_bone, and bones the clip
+never keys (spine_01, clavicles, neck_01, Root) get the source's rest, converted. Check:
+`tools/art/check_retarget.gd` (limb directions vs the P-04 owner in Fight_Stance must be ~0) and
+`tools/art/capture_fight_poses.gd` (the library the game plays, every human).
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

@@ -179,9 +179,121 @@ func _add_relaxed_clips() -> void:
 		var source_player := _find_type(source, "AnimationPlayer") as AnimationPlayer
 		if source_player != null:
 			_relaxed_library = source_player.get_animation_library(&"")
+			_source_rests[_relaxed_library] = _rest_rotations(_find_type(source, "Skeleton3D") as Skeleton3D)
 		source.free()
 	if _relaxed_library != null:
-		player.add_animation_library(RELAXED_LIBRARY, _relaxed_library)
+		player.add_animation_library(RELAXED_LIBRARY, _for_this_skeleton(_relaxed_library))
+
+
+## Shared clip libraries were authored on the P-04 owner's skeleton and set each bone's own
+## rotation. Every character on the OwnerSkeleton has its own rests (other proportions, other
+## bone rolls: hands and forearms differ by 65–98 degrees), so played as they are, the same
+## rotations twisted their wrists and bent arms the wrong way (owner, 2026-10-17: 「手部錯位」).
+## Each shared library is converted once per skeleton so every bone makes the same move in
+## the world (LESSONS 6.31): A = R_source⁻¹·S·R_this (global rest; S swings this bone's direction
+## onto the source's), and a key L becomes A_parent⁻¹·L·A_bone.
+static var _source_rests: Dictionary = {}
+## Bones that are swung onto the source's direction (arms, hands, legs).
+const LIMB_BONES := ["clavicle", "upperarm", "lowerarm", "hand", "index", "middle", "ring", "pinky", "thumb", "thigh", "calf", "foot", "ball"]
+static var _converted: Dictionary = {}
+
+
+static func _rest_rotations(sk: Skeleton3D) -> Dictionary:
+	var out := {}
+	if sk == null:
+		return out
+	for i in sk.get_bone_count():
+		var g := sk.get_bone_global_rest(i)
+		# The way the bone points: towards the child that continues its chain — a spine
+		# towards the neck, not a shoulder (child order differs between rigs); a hand towards
+		# the middle of its fingers — else its own +Y.
+		var axis := g.basis.orthonormalized() * Vector3.UP
+		var me := sk.get_bone_name(i)
+		var sided := me.ends_with("_l") or me.ends_with("_r")
+		var picks: Array[Vector3] = []
+		for c in sk.get_bone_children(i):
+			var cn := sk.get_bone_name(c)
+			if not sided and (cn.ends_with("_l") or cn.ends_with("_r")):
+				continue
+			picks.append(sk.get_bone_global_rest(c).origin)
+		if not picks.is_empty():
+			var mid := Vector3.ZERO
+			for p in picks:
+				mid += p
+			var to_child := mid / picks.size() - g.origin
+			if to_child.length() > 0.001:
+				axis = to_child.normalized()
+		out[sk.get_bone_name(i)] = [g.basis.orthonormalized().get_rotation_quaternion(), axis, sk.get_bone_rest(i).basis.orthonormalized().get_rotation_quaternion()]
+	return out
+
+
+func _for_this_skeleton(library: AnimationLibrary) -> AnimationLibrary:
+	var source: Dictionary = _source_rests.get(library, {})
+	if skeleton == null or source.is_empty() or OS.get_environment("GH_NO_RETARGET") == "1":
+		return library
+	var mine := _rest_rotations(skeleton)
+	var offset := {}
+	var differs := false
+	for bone: String in mine:
+		if not source.has(bone):
+			continue
+		var r_src: Quaternion = source[bone][0]
+		var r_dst: Quaternion = mine[bone][0]
+		# Swing this bone's rest onto the source's direction first (its own roll kept):
+		# a different rest pose (arms wider, lower) then still points each limb where the
+		# clip points it, instead of offset by the rest difference.
+		# Limbs only: a torso, neck or head is not a stick along its bone (a round belly
+		# leans the auntie's spine back), and swinging it upright folded her forward.
+		var limb := LIMB_BONES.any(func(prefix: String) -> bool: return bone.begins_with(prefix))
+		var swing := Quaternion(mine[bone][1] as Vector3, source[bone][1] as Vector3) if limb else Quaternion.IDENTITY
+		var a: Quaternion = r_src.inverse() * swing * r_dst
+		offset[bone] = a
+		differs = differs or a.angle_to(Quaternion.IDENTITY) > deg_to_rad(0.5)
+	if not differs:
+		return library
+	# One conversion per library and skeleton shape (every character of a background shares it).
+	var key := "%d:%s" % [library.get_instance_id(), str(offset.values().map(func(q: Quaternion) -> String: return "%.3f,%.3f,%.3f,%.3f" % [q.x, q.y, q.z, q.w]).hash())]
+	if _converted.has(key):
+		return _converted[key]
+	var out := AnimationLibrary.new()
+	for clip_name in library.get_animation_list():
+		var clip := library.get_animation(clip_name).duplicate(true) as Animation
+		for t in clip.get_track_count():
+			if clip.track_get_type(t) != Animation.TYPE_ROTATION_3D:
+				continue
+			var bone := clip.track_get_path(t).get_concatenated_subnames()
+			var index := skeleton.find_bone(bone)
+			if index < 0 or not offset.has(bone):
+				continue
+			var parent := skeleton.get_bone_parent(index)
+			var a_bone: Quaternion = offset[bone]
+			var a_parent: Quaternion = offset.get(skeleton.get_bone_name(parent), Quaternion.IDENTITY) if parent >= 0 else Quaternion.IDENTITY
+			for k in clip.track_get_key_count(t):
+				var q: Quaternion = clip.track_get_key_value(t, k)
+				clip.track_set_key_value(t, k, (a_parent.inverse() * q * a_bone).normalized())
+		# Bones the clip never keys (spine_01, the clavicles, neck_01, Root) sit at their
+		# rest: here that must be the source's rest, converted, or the chain bends by the
+		# difference (37 degrees in the office worker's spine).
+		var keyed := {}
+		var prefix := ""
+		for t in clip.get_track_count():
+			if clip.track_get_type(t) == Animation.TYPE_ROTATION_3D:
+				var path := clip.track_get_path(t)
+				keyed[String(path.get_concatenated_subnames())] = true
+				prefix = String(path).get_slice(":", 0)
+		if not prefix.is_empty():
+			for bone: String in offset:
+				if keyed.has(bone):
+					continue
+				var index := skeleton.find_bone(bone)
+				var parent := skeleton.get_bone_parent(index)
+				var a_parent: Quaternion = offset.get(skeleton.get_bone_name(parent), Quaternion.IDENTITY) if parent >= 0 else Quaternion.IDENTITY
+				var track := clip.add_track(Animation.TYPE_ROTATION_3D)
+				clip.track_set_path(track, NodePath("%s:%s" % [prefix, bone]))
+				clip.rotation_track_insert_key(track, 0.0, (a_parent.inverse() * (source[bone][2] as Quaternion) * (offset[bone] as Quaternion)).normalized())
+		out.add_animation(clip_name, clip)
+	_converted[key] = out
+	return out
 
 
 ## "fight/<clip>" when the fight library has it, else "".
@@ -198,9 +310,10 @@ func _add_fight_clips() -> void:
 		var source_player := _find_type(source, "AnimationPlayer") as AnimationPlayer
 		if source_player != null:
 			_fight_library = source_player.get_animation_library(&"")
+			_source_rests[_fight_library] = _rest_rotations(_find_type(source, "Skeleton3D") as Skeleton3D)
 		source.free()
 	if _fight_library != null:
-		player.add_animation_library(FIGHT_LIBRARY, _fight_library)
+		player.add_animation_library(FIGHT_LIBRARY, _for_this_skeleton(_fight_library))
 
 
 func _add_m2m_clips() -> void:
@@ -211,9 +324,10 @@ func _add_m2m_clips() -> void:
 		var source_player := _find_type(source, "AnimationPlayer") as AnimationPlayer
 		if source_player != null:
 			_m2m_library = source_player.get_animation_library(&"")
+			_source_rests[_m2m_library] = _rest_rotations(_find_type(source, "Skeleton3D") as Skeleton3D)
 		source.free()
 	if _m2m_library != null:
-		player.add_animation_library(M2M_LIBRARY, _m2m_library)
+		player.add_animation_library(M2M_LIBRARY, _for_this_skeleton(_m2m_library))
 
 
 ## "m2m/<clip>" when the Mesh2Motion library has it, else "".

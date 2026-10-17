@@ -147,3 +147,11 @@ in every earlier version). Coach fixed with `tools/art/refit_arms.py` (now a `re
 his t2 config). Grandma's guard sits at face height and her block crosses over her head: her
 joints are right, her arms are long for her height (0.66 m) — a proportion matter, left as is.
 Dogs use their own clips (dog motion tests pass).
+
+### Hands in fights, every human (owner: 「還是有很明顯的手部錯位問題」)
+
+The cause was not the coach alone: the shared fight clips set each bone's rotation as authored on
+the P-04 owner, and every other character's skeleton rests differently. `P04HumanVisual` now converts
+each shared library per skeleton (LESSONS 6.31). `check_retarget.gd`: limb directions match the P-04
+owner (0 deg) for all six; `capture_fight_poses.gd` before/after in `build/refit/fight_guard_before_after.png`.
+Open: grandma's M2M_Phone spreads her arms (she never plays it); her guard sits high (long arms).
