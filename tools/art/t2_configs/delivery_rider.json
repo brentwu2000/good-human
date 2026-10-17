@@ -1,6 +1,6 @@
 {
   "id": "delivery_rider",
-  "src": "assets/characters/human/models/delivery_rider/delivery_rider.glb",
+  "src": "git:79daa70^:assets/characters/human/models/delivery_rider/delivery_rider.glb",
   "body": "Character",
   "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/delivery_rider/delivery_rider_front.png",
   "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/delivery_rider/delivery_rider_back.png",
@@ -10,5 +10,21 @@
     147,
     103
   ],
-  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)",
+  "keep_boxes": [
+    {
+      "min": [
+        -0.26,
+        0.0,
+        0.78
+      ],
+      "max": [
+        0.26,
+        0.6,
+        1.24
+      ],
+      "facing": "back"
+    }
+  ],
+  "keep_boxes_note": "owner: the corgi box print was prettier before; the old texture stays on the back of the box (measured x -0.26..0.26, z 0.78..1.24)"
 }

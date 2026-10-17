@@ -21,6 +21,8 @@ Config options used here:
                              the eyes (painted eyes sit where the sheet has them)
   eye_objects, eye_clear     separate eye meshes: body texels within eye_clear x their radius
                              are refilled from the fur around (no painted second eyes)
+  paint_boxes [{min, max, rgb, not_back}]  recolour a part, keeping its shading
+  keep_boxes [{min, max, facing}]  the current texture stays there (t2_keepmask)
   face {zc, az, ax}          face ellipse (rest pose, m); measured from the head when absent
   keep_face                  false: no face/hair masks
   face_auto {zc, az, ax}     coefficients of the measured ellipse (dogs: wider, eyes included)
@@ -225,6 +227,21 @@ if (cfg.get("bare_forearms") or cfg.get("hands_skin")) and fore.sum() > 50:
         print("T2_BAKE forearm skin %d verts" % fix.sum())
     print("T2_BAKE hands %d verts <- forearm skin %s" % (is_hand.sum(), np.median(srgb[fore], 0).round(3)))
 
+# paint_boxes: recolour a body part the generator got wrong (the auntie's shoulder towel lump
+# came out as blouse print), keeping its light and shadow: colour x (luminance / median).
+for pb in cfg.get("paint_boxes", []):
+    lo_, hi_ = np.array(pb["min"]), np.array(pb["max"])
+    sel_p = np.all((P >= lo_) & (P <= hi_), axis=1) & ~is_head & ~is_hand
+    if pb.get("not_back"):
+        sel_p &= nrm[:, 1] < 0.4
+    if sel_p.any():
+        lum = lin[sel_p] @ np.array([0.2126, 0.7152, 0.0722])
+        rel = np.clip(lum / max(np.median(lum), 1e-4), 0.55, 1.2) ** float(pb.get("shade_gamma", 0.6))
+        tgt = np.array(pb["rgb"], float) / 255.0
+        tgt = np.where(tgt <= 0.04045, tgt / 12.92, ((tgt + 0.055) / 1.055) ** 2.4)
+        lin[sel_p] = np.clip(tgt[None, :] * rel[:, None], 0, 1)
+        print("T2_BAKE painted box %d verts" % sel_p.sum())
+
 keep_face = cfg.get("keep_face", True) and is_head.any()
 cx = zc = az = ax = 0.0
 hair = np.zeros(nv, bool)
@@ -251,6 +268,20 @@ if keep_face:
 col = me.color_attributes.new("t2", "FLOAT_COLOR", "POINT")
 msk = me.color_attributes.new("mask", "FLOAT_COLOR", "POINT")
 hmk = me.color_attributes.new("hair", "FLOAT_COLOR", "POINT")
+kmk = me.color_attributes.new("keep", "FLOAT_COLOR", "POINT")
+# keep_boxes: rest-pose boxes (m) where the current texture stays (an illustration Trellis2
+# blurs, e.g. the rider's corgi box); facing front|back limits it to that side.
+keep = np.zeros(nv)
+for bx in cfg.get("keep_boxes", []):
+    lo_, hi_ = np.array(bx["min"]), np.array(bx["max"])
+    inside = np.all((P >= lo_) & (P <= hi_), axis=1)
+    if bx.get("facing") == "back":
+        inside &= nrm[:, 1] > 0.3
+    elif bx.get("facing") == "front":
+        inside &= nrm[:, 1] < -0.3
+    keep[inside] = 1.0
+if keep.any():
+    print("T2_BAKE keep boxes %d verts" % (keep > 0).sum())
 for i, p in enumerate(pts):
     col.data[i].color = (*lin[i], 1.0)
     r = ((p.x - cx) / ax) ** 2 + ((p.z - zc) / az) ** 2 if keep_face else 9.0
@@ -260,6 +291,7 @@ for i, p in enumerate(pts):
     msk.data[i].color = (m, m, m, 1.0)
     hv_ = 1.0 if hair[i] else 0.0
     hmk.data[i].color = (hv_, hv_, hv_, 1.0)
+    kmk.data[i].color = (keep[i], keep[i], keep[i], 1.0)
 
 sc = bpy.context.scene
 sc.render.engine = "CYCLES"
@@ -279,7 +311,7 @@ for poly in me.polygons:
 bpy.context.view_layer.objects.active = hi
 hi.select_set(True)
 for name, layer, cs in [("t2_basecolor", "t2", "sRGB"), ("t2_facemask", "mask", "Non-Color"),
-                       ("t2_hairmask", "hair", "Non-Color")]:
+                       ("t2_hairmask", "hair", "Non-Color"), ("t2_keepmask", "keep", "Non-Color")]:
     img = bpy.data.images.new(name, size, size, alpha=False, float_buffer=False)
     img.colorspace_settings.name = cs
     tex.image = img; nt.nodes.active = tex

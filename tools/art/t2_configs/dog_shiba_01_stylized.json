@@ -1,6 +1,6 @@
 {
   "id": "dog_shiba_01_stylized",
-  "src": "assets/characters/dog/models/shiba_01/shiba_01_stylized.glb",
+  "src": "git:dc36354^:assets/characters/dog/models/shiba_01/shiba_01_stylized.glb",
   "body": "Shiba_Body",
   "subdiv": 2,
   "keep_face": false,

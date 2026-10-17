@@ -1,6 +1,6 @@
 {
   "id": "dog_frenchie",
-  "src": "assets/characters/dog/models/breeds/frenchie.glb",
+  "src": "git:cdbf968^:assets/characters/dog/models/breeds/frenchie.glb",
   "body": "DogBody",
   "subdiv": 1,
   "keep_face": false,

@@ -1,6 +1,6 @@
 {
   "id": "retired_fisher",
-  "src": "assets/characters/human/models/retired_fisher/retired_fisher.glb",
+  "src": "git:79daa70^:assets/characters/human/models/retired_fisher/retired_fisher.glb",
   "body": "Character",
   "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/retired_fisher/retired_fisher_front.png",
   "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/retired_fisher/retired_fisher_back.png",
@@ -10,5 +10,12 @@
     162,
     119
   ],
-  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)",
+  "face": {
+    "cx": -0.005,
+    "zc": 1.285,
+    "az": 0.115,
+    "ax": 0.15
+  },
+  "face_note": "owner: beard looked wrong; the old drawn white wedge (z 1.11-1.17, off-centre) is left out: the beard below the mouth comes from Trellis2 (the sheet's)"
 }

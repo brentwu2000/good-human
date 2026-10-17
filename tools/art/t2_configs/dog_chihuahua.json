@@ -1,6 +1,6 @@
 {
   "id": "dog_chihuahua",
-  "src": "assets/characters/dog/models/breeds/chihuahua.glb",
+  "src": "git:cdbf968^:assets/characters/dog/models/breeds/chihuahua.glb",
   "body": "DogBody_Delivery",
   "subdiv": 1,
   "keep_face": false,

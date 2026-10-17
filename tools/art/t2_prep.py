@@ -14,6 +14,8 @@ cfg_path, work = sys.argv[sys.argv.index("--") + 1:][:2]
 cfg = json.load(open(cfg_path, encoding="utf-8"))
 os.makedirs(work, exist_ok=True)
 src = os.path.abspath(cfg["src"])
+if cfg["src"].startswith("git:"):
+    src = os.path.join(os.path.abspath(work), "src.glb")  # extracted by t2_run.sh
 if src.endswith(".blend"):
     bpy.ops.wm.open_mainfile(filepath=src)
 else:

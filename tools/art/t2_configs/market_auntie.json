@@ -4,14 +4,53 @@
   "body": "Character",
   "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/market_auntie/market_auntie_front_nohand.png",
   "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/market_auntie/market_auntie_back.png",
-  "sheet_skin": [243, 176, 128],
-  "exclude_material_keywords": ["towel"],
-  "corner_colors": {"towel": [0.93, 0.92, 0.88, 1.0]},
-  "props": [{"object": "Auntie_Satchel", "min_z": 0.62}],
+  "sheet_skin": [
+    243,
+    176,
+    128
+  ],
+  "props": [
+    {
+      "object": "Auntie_Satchel",
+      "min_z": 0.62
+    }
+  ],
   "strap_radius": 0.06,
   "bare_forearms": true,
   "hem": 0.15,
   "hands_skin": true,
-  "face": {"zc": 1.185, "az": 0.19, "ax": 0.15},
-  "out": "assets/characters/human/models/market_auntie/market_auntie.glb"
+  "face": {
+    "zc": 1.185,
+    "az": 0.19,
+    "ax": 0.15
+  },
+  "out": "assets/characters/human/models/market_auntie/market_auntie.glb",
+  "delete_materials": [
+    "towel"
+  ],
+  "paint_boxes": [
+    {
+      "min": [
+        -0.27,
+        -0.4,
+        0.8
+      ],
+      "max": [
+        -0.06,
+        0.12,
+        1.07
+      ],
+      "rgb": [
+        222,
+        220,
+        226
+      ],
+      "not_back": false,
+      "shade_gamma": 1.0
+    }
+  ],
+  "towel_note": "owner: the shoulder towel looked wrong. The flat slab (Codex r2, 640 faces) read as a board; it is removed and the body's own towel lump on her right shoulder is painted white with the generator's shading",
+  "exclude_material_keywords": [
+    "towel"
+  ]
 }

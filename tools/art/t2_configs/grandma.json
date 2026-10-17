@@ -1,6 +1,6 @@
 {
   "id": "grandma",
-  "src": "assets/characters/human/models/ai_grandma/grandma.glb",
+  "src": "git:79daa70^:assets/characters/human/models/ai_grandma/grandma.glb",
   "body": "Character",
   "front": "C:/Users/b/Documents/good_human_stylized_factory/references/original/grandma_front.png",
   "back": "C:/Users/b/Documents/good_human_stylized_factory/references/original/grandma_back.png",
@@ -18,9 +18,10 @@
   ],
   "hair_tone_note": "sheet front, low-saturation pixels of the top 10% (silver)",
   "face": {
-    "zc": 1.315,
-    "az": 0.08,
-    "ax": 0.068
+    "cx": 0.006,
+    "zc": 1.28,
+    "az": 0.085,
+    "ax": 0.085
   },
-  "face_note": "measured on the runtime face: hairline z 1.387, brows 1.324, chin 1.246 (the auto ellipse reached the hair)"
+  "face_note": "owner: 「臉色看起來很臭」; the mask stopped above the mouth corners/jowls, Trellis2's shading there read as a frown; now brows to chin"
 }

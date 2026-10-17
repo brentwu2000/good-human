@@ -1,6 +1,6 @@
 {
   "id": "xiaomi",
-  "src": "assets/characters/human/models/xiaomi/xiaomi.glb",
+  "src": "git:79daa70^:assets/characters/human/models/xiaomi/xiaomi.glb",
   "body": "Character",
   "front": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/xiaomi/xiaomi_front.png",
   "back": "C:/Users/b/Documents/good_human_stylized_factory/references/humans/xiaomi/xiaomi_back.png",

@@ -1,5 +1,5 @@
 {
- "date": "2026-10-17 (r4 Trellis2 texture pass)",
+ "date": "2026-10-17 (Trellis2 texture pass, owner fixes: towel/face/mouth/beard/bag)",
  "author": "Claude (owner: 「你處理，把它修好」)",
  "source": "build/market_auntie_r3/04_head.blend (r3d) geometry, rig and 19 clips unchanged; new basecolor",
  "texture": "Trellis.2 (Microsoft, MIT) multi-view texture via Modly extension modly-trellis2-gguf-extension caa85c7, Aero-Ex/Trellis2-GGUF Q5_K_M (repo states no licence; quantised MIT weights), DINOv3 encoder (DINOv3 License 2025-08-19: commercial use allowed, no claim on outputs), colours baked on vertices then Blender Cycles bake (nvdiffrast NOT used). Inputs: sheet front with the strap-holding hand filled with blouse fabric, sheet back. Guidance 3.0, 25 steps, seed 1.",
@@ -12,7 +12,7 @@
  ],
  "license": "Inherited owner sheet/factory/project rig chain; reference-sheet rights remain undocumented. No new external assets.",
  "grade": "B+ / installed",
- "sha256": "9c91a9e4f7ef5c561028c563bfc2551add14f74f80376b4fb4161d8092784467",
+ "sha256": "0ee3a24c9c2620686b0224e6b56d093962071af1004d9c5f80aeaaaa312807f7",
  "joints": 53,
  "clips": 19,
  "previous": {

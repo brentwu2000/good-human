@@ -13,6 +13,12 @@ BL="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 T2PY="${T2PY:-/c/Users/b/tools/modly/data/extensions/trellis2/venv/Scripts/python.exe}"
 get() { python -c "import json,sys;print(json.load(open(sys.argv[1],encoding='utf-8')).get(sys.argv[2],''))" "$CFG" "$1"; }
 
+# "src": "git:<rev>:<path>" = that file at that revision (the version before a pass overwrote it).
+SRC=$(get src)
+if [[ "$SRC" == git:* ]]; then
+  REV=${SRC#git:}; REV=${REV%%:*}; P=${SRC#git:*:}
+  [ -f "$W/src.glb" ] || git show "$REV:$P" > "$W/src.glb"
+fi
 [ -f "$W/hi.blend" ] || "$BL" -b --factory-startup --python tools/art/t2_prep.py -- "$CFGW" "$WW" 2>&1 | grep -E "^T2_|Error" | grep -v -E "GPUShader|gpu module" || true
 [ -f "$W/hi.glb" ] || { echo "prep failed" >&2; exit 1; }
 # Colour sets: one front/back run, or the config's "runs" (dogs: + a side run).

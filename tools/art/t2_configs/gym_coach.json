@@ -11,5 +11,12 @@
     174,
     128
   ],
-  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)"
+  "sheet_skin_note": "median of the largest face-skin blob on the sheet front (2026-10-17)",
+  "face": {
+    "cx": 0.02,
+    "zc": 1.565,
+    "az": 0.19,
+    "ax": 0.155
+  },
+  "face_note": "owner: 「嘴巴斜一邊」; the drawn mouth spans x -0.04..+0.13 (measured), past the old mask's +0.09: its right corner was Trellis2's; also covers the doubled brows"
 }

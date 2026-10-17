@@ -111,3 +111,20 @@ keeps a faint spine bar and hard-edged fill patches on the forehead (CX-16).
 
 Tests: 47 scenes; `combat_motion_3d_test` failed once ("leaning into being dragged") and
 passed on three reruns (timing, not art).
+
+## Owner fixes (same day)
+
+Owner: 「阿姨肩上披著的毛巾，阿嬤的臉色看起來很臭，外送員背面包包的圖案沒有原本漂亮，健身教練的嘴巴斜一邊，退休阿伯的鬍子」.
+
+| Problem | Cause | Fix |
+|---|---|---|
+| Auntie's towel read as a white board | Codex's r2 towel is a flat slab; the body's own towel lump under it was painted blouse print | slab removed (`delete_materials`), the lump on her right shoulder painted white keeping the generator's shading (`paint_boxes`) |
+| Grandma looked grumpy | face mask stopped above the mouth corners; Trellis2's shading there read as a frown | mask brows to chin, below the hairline |
+| Rider's bag print blurred | Trellis2 smears the corgi illustration | old texture kept on the box back (`keep_boxes`, measured) |
+| Coach's mouth slanted, double brows | drawn mouth spans x -0.04..+0.13, past the mask's +0.09 | mask measured from the drawn features (ray grid over the old texture) |
+| Fisher's beard a white wedge | old drawn wedge, off-centre | mask ends under the mouth: the beard is Trellis2's (the sheet's) |
+
+Sources are now pinned to the version before the pass (`"src": "git:<rev>:<path>"`): after
+installing, the runtime GLB already holds the new texture, and a re-run "kept" that instead
+of the drawn face. Comparison: `good_human_stylized_factory/renders/trellis2_compare/five_fixes.png`.
+47 tests pass; Godot captures of all clips for the five, no failures.

@@ -1,6 +1,6 @@
 {
   "id": "dog_corgi",
-  "src": "assets/characters/dog/models/breeds/corgi.glb",
+  "src": "git:cdbf968^:assets/characters/dog/models/breeds/corgi.glb",
   "body": "DogBody",
   "subdiv": 1,
   "keep_face": true,

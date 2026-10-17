@@ -9,6 +9,10 @@
 - hair_tone [r,g,b]: hair (t2_hairmask) scaled to the sheet's hair colour.
 - gain [r,g,b]: fixed white-balance gain (a second texture of the same character).
 - create_base: the body has no basecolor texture (vertex colours): one is created.
+- keep_boxes (t2_keepmask): the current texture stays there, tone-matched (keep_tone).
+- delete_materials [keyword]: faces of those materials removed before export.
+- corner_cloth {noise, hem, hem_dark}: per-face grain and a darker band at the lowest end.
+- corner_shade s: corner colours darkened up to s on faces turned away from an up-front light.
 - corner_colors {material keyword: rgba}: corner colours of those faces (Godot multiplies them).
 Texels the bake did not reach keep the current texture.
 """
@@ -22,6 +26,8 @@ import numpy as np
 cfg_path, work, out = sys.argv[sys.argv.index("--") + 1:][:3]
 cfg = json.load(open(cfg_path, encoding="utf-8"))
 src = os.path.abspath(cfg["src"])
+if cfg["src"].startswith("git:"):
+    src = os.path.join(os.path.abspath(work), "src.glb")  # extracted by t2_run.sh
 if src.endswith(".blend"):
     bpy.ops.wm.open_mainfile(filepath=src)
 else:
@@ -139,6 +145,24 @@ if skin.sum() > 100:
     print("T2_FINISH face tone gain", gface.round(3))
     res = res * (1 - m[..., None]) + np.clip(c * gface, 0, 1) * m[..., None]
 
+# Kept regions (keep_boxes): the current texture, tone-matched to the new one around them.
+kp = os.path.join(work, "t2_keepmask.png")
+if cfg.get("keep_boxes") and os.path.exists(kp):
+    import numpy as _np
+    km = load(kp)[..., 0]
+    # soften the edge a little in texture space
+    try:
+        from scipy import ndimage as _nd
+        km = _nd.gaussian_filter(km, 3)
+    except Exception:
+        pass
+    sel_k = km > 0.6
+    if sel_k.sum() > 100:
+        gk = _np.median(t3[sel_k], 0) / _np.maximum(_np.median(c[sel_k], 0), 1e-3)
+        gk = _np.clip(gk, 0.8, 1.25) if cfg.get("keep_tone", True) else _np.ones(3)
+        res = res * (1 - km[..., None]) + _np.clip(c * gk, 0, 1) * km[..., None]
+        print("T2_FINISH kept old texture", int(sel_k.sum()), "texels, tone", gk.round(3))
+
 if cfg.get("hands_skin"):
     gn = {g.index: g.name for g in body.vertex_groups}
     def dom(v):
@@ -172,13 +196,44 @@ tex_node.image = img
 for kw, rgba in cfg.get("corner_colors", {}).items():
     idx = [i for i, s in enumerate(body.material_slots) if s.material and kw in s.material.name]
     ca = body.data.color_attributes[0]
+    shade = cfg.get("corner_shade")  # soft light/shadow so a plain cloth does not read as paper
+    cloth = cfg.get("corner_cloth", {})  # {"noise": per-face grain, "hem": end band share, "hem_dark": k}
+    rng = np.random.default_rng(1)
+    fz = [f.center.z for f in body.data.polygons if f.material_index in idx]
+    z_lo, z_hi = (min(fz), max(fz)) if fz else (0.0, 1.0)
     n = 0
     for f in body.data.polygons:
         if f.material_index in idx:
             for li in f.loop_indices:
-                ca.data[li].color = rgba
+                col_ = list(rgba)
+                if shade:
+                    nz = f.normal
+                    # Lambert from an up-front-left light; s = darkest share (folds, the side away)
+                    lam = max(0.0, 0.35 * nz[0] - 0.55 * nz[1] + 0.76 * nz[2])
+                    k_ = 1.0 - float(shade) * (1.0 - lam)
+                    col_ = [col_[0] * k_, col_[1] * k_, col_[2] * min(1.0, k_ * 1.04), col_[3]]
+                ca.data[li].color = col_
+            if cloth:
+                g = 1.0 + float(cloth.get("noise", 0.0)) * rng.uniform(-1, 1)
+                hz = (f.center.z - z_lo) / max(z_hi - z_lo, 1e-6)
+                if hz < float(cloth.get("hem", 0.0)):
+                    g *= float(cloth.get("hem_dark", 0.8))
+                for li in f.loop_indices:
+                    c4 = ca.data[li].color
+                    ca.data[li].color = (min(1, c4[0] * g), min(1, c4[1] * g), min(1, c4[2] * g), c4[3])
             n += 1
-    print("T2_FINISH corner colour", kw, n, "faces")
+    print("T2_FINISH corner colour", kw, n, "faces", "shaded" if shade else "")
+
+# delete_materials: faces of these materials are removed (the auntie's flat towel slab).
+dm = cfg.get("delete_materials", [])
+if dm:
+    import bmesh
+    idx = [i for i, s in enumerate(body.material_slots) if s.material and any(k in s.material.name for k in dm)]
+    bm = bmesh.new(); bm.from_mesh(body.data)
+    gone = [f for f in bm.faces if f.material_index in idx]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    bm.to_mesh(body.data); bm.free()
+    print("T2_FINISH deleted", len(gone), "faces of", dm)
 
 # Export what the character is made of: the rig, skinned meshes, meshes on the rig.
 for o in bpy.context.scene.objects:

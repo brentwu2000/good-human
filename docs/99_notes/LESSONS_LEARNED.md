@@ -187,6 +187,12 @@ see the head and the rear: the corgi's flanks were guessed. A second run with th
 human heads missed the dog's eyes (they sit a whole head half-width out): measure the eyes on
 a close-up before trusting a mask, and check the mask by diffing old/new texels inside it.
 
+**6.27 A pass that reads "the current texture" must not read its own output.** The Trellis2
+configs pointed at the runtime GLBs; after installing, a re-run's "keep the drawn face / the
+old bag print" kept the new texture (the bag's tone ratio came out 1.0, the giveaway). Pin the
+source to the revision before the pass (`git:<rev>:<path>`). Check: print the tone gain of a
+kept region; 1.0 means old and new are the same image.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
