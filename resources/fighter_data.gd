@@ -34,6 +34,10 @@ func armed(held: WeaponData, power: float = 1.0) -> FighterData:
 ## authored clips drive it). It carries its own proportions: body_scale is not
 ## applied to it. Null = the shared P-04 human.
 @export var skeletal_model: PackedScene
+## Xiaomi toy proxy: a body that is not a person ("bunny_robot"), built by its
+## own builder on the greybox joints so every greybox action plays on it.
+## Empty = a human.
+@export var body_kind: StringName = &""
 
 @export_group("Placeholder Look")
 @export var skin_color: Color = Color(0.95, 0.8, 0.65)

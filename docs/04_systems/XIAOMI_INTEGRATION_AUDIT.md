@@ -69,3 +69,20 @@ Phase 2 (skills/modules/save) and Phase 3 (robot art through the AI 3D factory) 
   `granddaughter`); a 10-year-old adopting alone could later show grandma beside her (not now).
 - **D3 Sprint order.** This is outside the current plan (P-05 gate / Sprint 05–06). Phase 1 is
   self-contained and does not change other owners; it starts now on the owner's instruction.
+
+## Phase 1 — done 2026-10-17 (REVIEW)
+
+Decisions: D1 leash stays with Xiaomi (owner), D2 she comes to the shelter like any visitor (owner).
+
+| Part | Where |
+|---|---|
+| Data | `HumanBackgroundData.combat_proxy`, `FighterData.body_kind`; background `granddaughter` (xiaomi.glb, proxy `bunny_robot.tres`); skills 彈簧愛心拳 / 彈簧重拳 / 兔兔飛踢 / 兔兔翻滾 + block; `HumanCandidate.to_proxy_fighter_data` (her own rolled stats), `PairState/Game.owner_has_proxy/owner_proxy_fighter` |
+| Robot | `assets/characters/proxy/bunny_robot_3d.gd` (placeholder on the greybox joints, ~1.0 m), `actors/proxy/bunny_proxy_3d.gd` (pop out, shutdown, pack away) |
+| Fight | `CombatCoordinator3D.fighter_node()/fighter_puppet()`: the robot while it is out; `_deploy_proxy`, `_send_xiaomi_to_safety` (clear spot 2.6 m back, fallback: hidden), `_keep_xiaomi_safe`, fighters keep 1.4 m from her (`_walkable`), `_finish_proxy_fight` |
+| Xiaomi | `HumanFollower3D.State.SAFE`; weapons stay in her backpack (`FighterPuppet3D.keep_held_in_bag`), robot holds them; never walks hurt |
+| Dog | bark measured on the robot; leash in her fights = only the drag-out → robot called back |
+| Camera / atmosphere / opponent dog | frame and place by `fighter_node()` |
+| Loss | robot shutdown + 「兔兔！……沒電了」; result 「🔧 兔兔沒電了，送去修理……」, HUD 「兔兔電量變少了/快沒電了」; same loss rules |
+
+Check: `tests/xiaomi_proxy_test` (34 checks: never COMBAT/DOWN, ≥1.8 m from the opponent while fighting, robot takes the blows and holds the weapon, win / call-back / loss clean up, loss rules and repair text). Full suite 48/48. Capture `tools/art/capture_xiaomi_proxy.tscn` → `xiaomi_proxy_phase1_capture.png`.
+Not yet (Phase 2/3): toy modules and repair cooldown, 積木雨/超級兔兔, Xiaomi's remote/cheer/hug clips (she uses her ambient clips), final robot art.

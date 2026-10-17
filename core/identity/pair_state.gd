@@ -50,6 +50,22 @@ static func adopted(adopted_dog: DogCandidate, adopter: HumanCandidate, name: St
 	return pair
 
 
+## Xiaomi toy proxy: whether someone fights for the human (cheap, per frame).
+func has_proxy() -> bool:
+	if is_classic or human == null:
+		return false
+	var bg := human.background()
+	return bg != null and bg.combat_proxy != null
+
+
+## Xiaomi toy proxy: who fights for the human, or null when they fight
+## themselves (everyone but a proxy background, and the classic pair).
+func owner_proxy_fighter() -> FighterData:
+	if is_classic or human == null:
+		return null
+	return human.to_proxy_fighter_data("%s的兔兔" % human_custom_name)
+
+
 ## The human as the walk's fighter, built once per load.
 func owner_fighter() -> FighterData:
 	if _fighter == null:

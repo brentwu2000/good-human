@@ -2,10 +2,12 @@
 
 ## FEATURE Xiaomi toy proxy — 2026-10-17 (Claude, owner: 「準備開始動工」)
 
-Owner spec `docs/04_systems/XIAOMI_TOY_PROXY.md`: Xiaomi becomes an adopter whose fights are
-fought by a bunny toy robot; she is never a target. Phase 0 audit REVIEW
-([XIAOMI_INTEGRATION_AUDIT.md](../04_systems/XIAOMI_INTEGRATION_AUDIT.md)); Phase 1 waits on
-decisions D1 (leash) / D2 (adoption).
+Owner spec `docs/04_systems/XIAOMI_TOY_PROXY.md`: Xiaomi is an adopter (background
+`granddaughter`, owner D2) whose fights are fought by a bunny toy robot; she steps to a safe
+spot, is never on the fighting side, never hurt or knocked down; the leash stays in her hand
+(owner D1). Phase 0 audit and Phase 1 minimum loop REVIEW
+([XIAOMI_INTEGRATION_AUDIT.md](../04_systems/XIAOMI_INTEGRATION_AUDIT.md)). `xiaomi_proxy_test`
+34 checks; suite 48/48. Phase 2 (modules, repair cooldown, skills) / Phase 3 (robot art) next.
 
 ## ART characters — 2026-10-17 (Claude): Trellis2 texture pass
 

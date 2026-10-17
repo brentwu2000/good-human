@@ -50,3 +50,18 @@ in `C:/Users/b/tools/modly`, ~10 GB of weights). Work files in `build/t2/<id>/`:
   check the face/coat border on each dog in motion.
 - **CX-14** Market auntie's floral apron is softer than the sheet's print; an authored print
   over the Trellis2 base would be an improvement.
+
+## Xiaomi toy proxy (gameplay, 2026-10-17)
+
+Xiaomi is now an adopter (`data/identity/human_backgrounds/granddaughter.tres`, her xiaomi.glb).
+Her fights are fought by a **placeholder bunny toy robot** built in code on the greybox joints
+(`assets/characters/proxy/bunny_robot_3d.gd`, ~1.0 m with ears). Sheet:
+`assets/characters/human/concepts/xiaomi_bunny_robot_visual_target_01.png`.
+
+- **CX-17** Bunny robot model (spec §6): pink/cream, rabbit ears, spring boxing-glove fists,
+  heart chest panel, wheels; GLB with separable ears/fists/body/wheels. To swap it in, the
+  model needs joints the greybox actions turn (Hips, Torso, Head, ArmL/R, LegL/R) or a rig with
+  attack/hit/fall/cheer/shutdown clips — say which, and `HumanModular3D.build` gets a branch.
+- **CX-18** Xiaomi clips (only these, spec §6): press the remote, cheer, hug/pick up the robot,
+  walk away safely. Never hurt/KO clips for her (her 19 OwnerSkeleton clips include them; the
+  game no longer plays them on her).

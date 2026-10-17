@@ -138,7 +138,7 @@ func _fighter_position(side: int) -> Vector3:
 	if _engagement == null:
 		return Vector3.ZERO
 	if side == CombatSimulation.PLAYER:
-		return coordinator.human.global_position
+		return coordinator.fighter_node().global_position
 	return _engagement.pair.human_global_position()
 
 

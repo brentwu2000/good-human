@@ -55,6 +55,22 @@ func to_fighter_data(display_name: String) -> FighterData:
 	return fighter
 
 
+## Xiaomi toy proxy: the one who fights for this person, or null when they
+## fight themselves. Their own rolled stats (fairness: no background is
+## stronger), the proxy's skills and body.
+func to_proxy_fighter_data(display_name: String) -> FighterData:
+	var bg := background()
+	if bg == null or bg.combat_proxy == null:
+		return null
+	var proxy := bg.combat_proxy.duplicate(true) as FighterData
+	proxy.display_name = display_name
+	proxy.stats.strength = stats.get(&"strength", 5)
+	proxy.stats.endurance = stats.get(&"endurance", 5)
+	proxy.stats.agility = stats.get(&"agility", 5)
+	proxy.stats.will = stats.get(&"will", 5)
+	return proxy
+
+
 func serialize() -> Dictionary:
 	var prefs: Dictionary = {}
 	for key in preference_weights:

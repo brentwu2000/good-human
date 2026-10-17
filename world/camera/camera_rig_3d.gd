@@ -381,13 +381,21 @@ func _looking_up_at_most(direction: Vector3) -> Vector3:
 	return (flat.normalized() * cos(limit) + Vector3.UP * sin(limit)).normalized()
 
 
+## The body fighting on the dog's side: the owner, or Xiaomi's robot while it
+## is out (docs/04_systems/XIAOMI_TOY_PROXY.md). Outside fights, the owner.
+func _fighter_actor() -> Node3D:
+	if coordinator != null and coordinator.engagement != null:
+		return coordinator.fighter_node()
+	return owner_actor
+
+
 ## The point the fight is happening at: between the two humans, weighted towards
 ## the owner so the player's human is the one being watched.
 func combat_center() -> Vector3:
 	var head := Vector3(0, 1.1, 0)
 	if owner_actor == null:
 		return dog.global_position + head
-	var owner_point := owner_actor.global_position + head
+	var owner_point := _fighter_actor().global_position + head
 	# Being thanked is between the two of them; the beaten pair is not part of it.
 	if coordinator == null or coordinator.pair == null or context == Context.AFFECTION:
 		return owner_point
@@ -400,7 +408,7 @@ func _boom_distance() -> float:
 	var distance: float = current["distance"]
 	if context == Context.EXPLORE or owner_actor == null:
 		return distance
-	var apart := _flat_distance(dog.global_position, owner_actor.global_position)
+	var apart := _flat_distance(dog.global_position, _fighter_actor().global_position)
 	return distance + maxf(apart - combat_spread_from, 0.0) * combat_spread
 
 
@@ -452,7 +460,7 @@ func _composed_look(anchor: Vector3) -> Vector3:
 	# Waist-to-chest height on the people, not the camera's own low pivot,
 	# so a low camera still frames them head to foot.
 	var height := Vector3(0, float(current.get("subject", current["pivot"])), 0)
-	var subject := owner_actor.global_position + height
+	var subject := _fighter_actor().global_position + height
 	if coordinator != null and coordinator.pair != null:
 		subject = subject.lerp(coordinator.pair.human_global_position() + height, 0.4)
 	var offset := subject - anchor
@@ -554,7 +562,7 @@ func _fight_yaw() -> Variant:
 	var past_dog := atan2(-to_fight.x, -to_fight.z)
 	if coordinator == null or coordinator.pair == null or context == Context.AFFECTION:
 		return past_dog
-	var line := coordinator.pair.human_global_position() - owner_actor.global_position
+	var line := coordinator.pair.human_global_position() - _fighter_actor().global_position
 	line.y = 0.0
 	if line.length() < 0.1:
 		return past_dog
@@ -662,7 +670,7 @@ func _fade_fighters_at_the_lens() -> void:
 	var bodies: Array[Node3D] = []
 	if coordinator != null and coordinator.engagement != null and owner_actor != null:
 		var pair := coordinator.engagement.pair
-		bodies = [owner_actor.puppet, pair.human_puppet]
+		bodies = [coordinator.fighter_puppet(), pair.human_puppet]
 		if pair._dog != null:
 			bodies.append(pair._dog)
 	for body in _near_faded.duplicate():
@@ -698,7 +706,7 @@ func _blocks_the_lens(body: Node3D) -> bool:
 		return false
 	# The P-02 camera is built round the owner (ADR-014): they are the subject,
 	# not something in the way of the dog.
-	if not combat_pov and owner_actor != null and body == owner_actor.puppet:
+	if not combat_pov and owner_actor != null and (body == owner_actor.puppet or (coordinator != null and body == coordinator.fighter_puppet())):
 		return false
 	var forward := -global_basis.z
 	# Chest height for a person, back height for their dog.

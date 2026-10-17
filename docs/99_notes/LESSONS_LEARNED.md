@@ -193,6 +193,12 @@ old bag print" kept the new texture (the bag's tone ratio came out 1.0, the give
 source to the revision before the pass (`git:<rev>:<path>`). Check: print the tone gain of a
 kept region; 1.0 means old and new are the same image.
 
+**6.28 A test fight against a pair that is not out yet has an invisible opponent.** The
+Xiaomi capture showed the robot fighting thin air: `get_pairs()[0]` was a pair whose time
+had not come (`is_present()` false, hidden in the tree), and `start_engagement` does not check
+presence (the game only lets the dog provoke pairs that are out). Tests and captures pick
+`is_present() and is_idle()` pairs. Check: print `human_puppet.is_visible_in_tree()`.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

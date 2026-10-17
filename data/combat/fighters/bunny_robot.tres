@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="FighterData" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://resources/fighter_data.gd" id="1_fighter"]
+[ext_resource type="Script" path="res://resources/combat_stats.gd" id="2_stats"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_bunny_spring_punch.tres" id="3_punch"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_bunny_spring_hook.tres" id="4_hook"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_bunny_kick.tres" id="5_kick"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_block.tres" id="6_block"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_bunny_roll.tres" id="7_roll"]
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="8_skill"]
+
+[sub_resource type="Resource" id="Resource_stats"]
+script = ExtResource("2_stats")
+strength = 5
+endurance = 5
+agility = 5
+will = 5
+
+[resource]
+script = ExtResource("1_fighter")
+id = &"bunny_robot"
+display_name = "兔兔"
+stats = SubResource("Resource_stats")
+skills = Array[ExtResource("8_skill")]([ExtResource("3_punch"), ExtResource("4_hook"), ExtResource("5_kick"), ExtResource("6_block"), ExtResource("7_roll")])
+body_kind = &"bunny_robot"
+body_scale = Vector2(0.42, 0.42)

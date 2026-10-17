@@ -31,6 +31,11 @@ enum Reaction { INTERESTED, AMUSED, CAUTIOUS, STARTLED, AFFECTIONATE, INDIFFEREN
 ## Their own model on the OwnerSkeleton (e.g. the office worker's), worn by
 ## everyone of this background; null = the shared P-04 human in their colours.
 @export var skeletal_model: PackedScene
+## Xiaomi toy proxy (docs/04_systems/XIAOMI_TOY_PROXY.md): who fights for
+## people of this background. Null = they fight themselves. When set, this
+## fighter (with the person's own rolled stats) takes every blow, and the
+## person stays out of the fight: never a target, never hurt.
+@export var combat_proxy: FighterData
 
 @export_group("Reactions")
 ## Reaction -> what they say (short, in their own voice).

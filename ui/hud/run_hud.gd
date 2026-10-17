@@ -223,7 +223,9 @@ func _update_risk_badge(value: RunValue) -> void:
 	# said as a consequence, never as a number or a bar.
 	_shown_owner_stage = _owner_stage()
 	if _shown_owner_stage > 0:
-		var said := "主人受傷了" if _shown_owner_stage == 1 else "主人快撐不住了"
+		# Xiaomi toy proxy: the condition is her robot's battery, not her.
+		var proxy_owner := Game.owner_has_proxy()
+		var said := ("兔兔電量變少了" if proxy_owner else "主人受傷了") if _shown_owner_stage == 1 else ("兔兔快沒電了" if proxy_owner else "主人快撐不住了")
 		text = said if text.is_empty() else text + " · " + said
 		color = Color(1.0, 0.82, 0.55) if _shown_owner_stage == 1 else Color(1.0, 0.62, 0.55)
 	_risk_label.text = text

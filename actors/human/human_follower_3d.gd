@@ -3,8 +3,10 @@ extends CharacterBody3D
 ## 3D owner on a leash. FOLLOW: walks after the dog. COMBAT: fights where the
 ## fight started; the engagement drives its position while the dog stays free.
 ## DOWN: knocked out. Mirrors HumanFollower (2D).
+## SAFE (Xiaomi toy proxy): her bunny robot fights; she walks to a spot away
+## from it and watches. Never a fighter, never hit, never knocked down.
 
-enum State { FOLLOW, COMBAT, DOWN }
+enum State { FOLLOW, COMBAT, DOWN, SAFE }
 
 @export var dog: DogController3D
 @export var fighter: FighterData
@@ -27,6 +29,9 @@ var speed_multiplier: float = 1.0
 var condition_speed: float = 1.0
 var hold_time: float = 0.0
 var faded: bool = false
+## SAFE: where she stands and what she watches.
+var safe_target: Vector3
+var safe_look_at: Vector3
 
 var puppet: FighterPuppet3D
 var _bubble: Label3D
@@ -94,6 +99,8 @@ func _physics_process(delta: float) -> void:
 		_bubble.text = ""
 	if state == State.FOLLOW:
 		_follow(delta)
+	elif state == State.SAFE:
+		_stand_safe(delta)
 	_draw_leash()
 
 
@@ -122,6 +129,22 @@ func _follow(delta: float) -> void:
 		global_position = _follow_anchor() - to_dog.normalized() * max_length
 	if planar.length() > 0.2:
 		puppet.rotation.y = lerp_angle(puppet.rotation.y, atan2(-planar.x, -planar.z), minf(delta * 8.0, 1.0))
+	puppet.set_ambient(planar.length() > 0.3)
+
+
+## SAFE: walk to `safe_target`, then stand watching `safe_look_at`.
+func _stand_safe(delta: float) -> void:
+	var to_spot := safe_target - global_position
+	to_spot.y = 0.0
+	var target := to_spot.normalized() * walk_speed if to_spot.length() > 0.12 else Vector3.ZERO
+	var planar := Vector3(velocity.x, 0.0, velocity.z).move_toward(target, 20.0 * delta)
+	velocity = Vector3(planar.x, velocity.y - 9.8 * delta, planar.z)
+	move_and_slide()
+	if is_on_floor():
+		velocity.y = 0.0
+	var facing := planar if planar.length() > 0.3 else safe_look_at - global_position
+	if Vector2(facing.x, facing.z).length() > 0.01:
+		puppet.rotation.y = lerp_angle(puppet.rotation.y, atan2(-facing.x, -facing.z), minf(delta * 8.0, 1.0))
 	puppet.set_ambient(planar.length() > 0.3)
 
 
@@ -180,6 +203,8 @@ func set_state(value: State) -> void:
 	if value == State.FOLLOW:
 		puppet.revive()
 		puppet.show_hp(false)
+	elif value == State.SAFE:
+		puppet.show_hp(false)
 	elif value == State.COMBAT:
 		puppet.set_fighting()
 
@@ -191,7 +216,7 @@ func set_state(value: State) -> void:
 ## the owner is back there.
 func set_faded(value: bool) -> void:
 	# Never hide a fighter. In combat the owner is the thing being watched.
-	var hidden := value and state == State.FOLLOW
+	var hidden := value and state in [State.FOLLOW, State.SAFE]
 	if faded == hidden:
 		return
 	faded = hidden

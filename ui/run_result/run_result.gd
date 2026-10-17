@@ -36,8 +36,13 @@ func show_result(result: RunResult) -> void:
 		RunResult.Outcome.EXTRACTED:
 			_title_label.text = "🏠 平安回家！"
 		RunResult.Outcome.DEFEATED:
-			_title_label.text = "🏥 主人被送去醫院了……"
-			_summary_label.text = "被%s打倒了，休息一下就會好。\n狗狗安全口袋裡的東西保住了。\n%s" % [result.defeated_by, _summary_label.text]
+			if Game.owner_has_proxy():
+				# Xiaomi toy proxy: her robot lost, not her. Same cost, repair wording.
+				_title_label.text = "🔧 兔兔沒電了，送去修理……"
+				_summary_label.text = "兔兔被%s打到沒電了，修好就能再出動。\n狗狗安全口袋裡的東西保住了。\n%s" % [result.defeated_by, _summary_label.text]
+			else:
+				_title_label.text = "🏥 主人被送去醫院了……"
+				_summary_label.text = "被%s打倒了，休息一下就會好。\n狗狗安全口袋裡的東西保住了。\n%s" % [result.defeated_by, _summary_label.text]
 		_:
 			_title_label.text = "😵 散步失敗……"
 

@@ -50,6 +50,17 @@ const RELEASE_SECONDS: float = 1.4
 const ACKNOWLEDGE_SECONDS: float = 1.9
 ## How long into that beat the hand actually lands.
 const PET_AT: float = 0.75
+## Xiaomi toy proxy (docs/04_systems/XIAOMI_TOY_PROXY.md). Where she goes when
+## her robot fights: this far back from where it starts, away from the opponent.
+const PROXY_SAFE_DISTANCE: float = 2.6
+## She is never closer than this to the opponent; if the fight drifts towards
+## her she moves off again.
+const PROXY_MIN_GAP: float = 2.2
+## The fighters' footwork keeps this far from her (same rule as the dog margin).
+const XIAOMI_CLEARANCE: float = 1.4
+## Her size for checking a spot is clear of walls.
+const XIAOMI_RADIUS: float = 0.2
+const XIAOMI_HEIGHT: float = 1.35
 
 var last_result: CombatSimulation.Result = CombatSimulation.Result.NONE
 ## Active fight or null.
@@ -74,11 +85,48 @@ var release_left: float = 0.0
 ## Counting down while the owner is thanking the dog.
 var acknowledge_left: float = 0.0
 var _base_fighter: FighterData
+## Xiaomi toy proxy: who fights for the owner (null: they fight themselves),
+## this walk's version (growth applied), and the robot while it is out.
+var _base_proxy: FighterData
+var _proxy_fighter: FighterData
+var proxy: BunnyProxy3D
+## Fallback: no safe spot found, so she is out of the fight area and unseen.
+var _xiaomi_hidden: bool = false
+## True when the last loss was the robot's (the result says repair, not hospital).
+var proxy_defeated: bool = false
 
 
 func _ready() -> void:
 	_base_fighter = human.fighter
+	set_proxy_fighter(Game.owner_proxy_fighter() if Game.has_pair() else null)
 	run_manager.run_started.connect(_on_run_started)
+
+
+## Xiaomi toy proxy: who fights for the owner from the next walk on (null:
+## the owner fights). Set from the save's pair; tests set it directly.
+func set_proxy_fighter(data: FighterData) -> void:
+	_base_proxy = data
+	_proxy_fighter = data
+	# A child keeps what she finds in her backpack; her robot holds it.
+	if human != null and human.puppet != null:
+		human.puppet.keep_held_in_bag = data != null
+		if data != null:
+			human.puppet.hold(null)
+
+
+## True when the owner's fights are fought by a proxy (Xiaomi's robot).
+func uses_proxy() -> bool:
+	return _proxy_fighter != null
+
+
+## The body on the player's side of the fight: the robot while it is out,
+## otherwise the owner. Everything that draws or measures that side uses this.
+func fighter_node() -> Node3D:
+	return proxy if proxy != null and is_instance_valid(proxy) else human
+
+
+func fighter_puppet() -> FighterPuppet3D:
+	return proxy.puppet if proxy != null and is_instance_valid(proxy) else human.puppet
 
 
 func get_pairs() -> Array[OpponentPair3D]:
@@ -114,6 +162,8 @@ func _owner_tags() -> Array[StringName]:
 
 func _on_run_started(_seed: int) -> void:
 	engagement = null
+	_retire_proxy(0.0)
+	proxy_defeated = false
 	_apply_owner_condition()
 	_defeat_left = -1.0
 	last_result = CombatSimulation.Result.NONE
@@ -122,6 +172,10 @@ func _on_run_started(_seed: int) -> void:
 		human.fighter = GrowthResolver.apply_to_fighter(_base_fighter, Game.human_growth, DataRegistry.training)
 		# P05-07: how they will use anything they pick up on this walk.
 		human.fighter.style = GrowthResolver.combat_style(Game.human_growth, DataRegistry.training, _owner_tags())
+	if _base_proxy != null:
+		# The robot fights with what the walks taught them, like any owner.
+		_proxy_fighter = GrowthResolver.apply_to_fighter(_base_proxy, Game.human_growth, DataRegistry.training)
+		_proxy_fighter.style = GrowthResolver.combat_style(Game.human_growth, DataRegistry.training, _owner_tags())
 	_pairs.clear()
 	for node in get_tree().get_nodes_in_group(OpponentPair3D.GROUP):
 		var p := node as OpponentPair3D
@@ -155,10 +209,15 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	_axis = gap.normalized() if gap.length() > 0.01 else Vector3.FORWARD
 	_side_axis = Vector3.UP.cross(_axis)
 	var lateral := 1.0 if run_manager.run_rng.randf() < 0.5 else -1.0
+	# Xiaomi toy proxy: her robot comes out where she stood and takes her place.
+	var body_fighter := human.fighter
+	if uses_proxy():
+		_deploy_proxy(a, b)
+		body_fighter = _proxy_fighter
 	# P05-02: the owner fights with whatever they are holding, and is seen
 	# holding it.
-	human.puppet.hold(run_manager.equipped_weapon, run_manager.equipped_state())
-	var held := human.fighter.armed(run_manager.equipped_weapon, WeaponCondition.power_scale(run_manager.equipped_state()))
+	fighter_puppet().hold(run_manager.equipped_weapon, run_manager.equipped_state())
+	var held := body_fighter.armed(run_manager.equipped_weapon, WeaponCondition.power_scale(run_manager.equipped_state()))
 	var sim := CombatSimulation.new(held, opponent.encounter.human, run_manager.run_rng.randi(), null, gap.length() * UNITS_PER_METER)
 	sim.set_lateral(lateral)
 	# S05-02: the owner starts the fight in whatever state the walk left them.
@@ -169,12 +228,17 @@ func start_engagement(opponent: OpponentPair3D) -> void:
 	engagement = Engagement3D.new(sim, opponent)
 	_accumulator = 0.0
 	last_result = CombatSimulation.Result.NONE
-	human.set_state(HumanFollower3D.State.COMBAT)
-	human.puppet.show_hp(true)
-	human.puppet.set_hp_ratio(owner_fighter.hp_ratio())
+	if uses_proxy():
+		# She steps back and watches; the robot is the only one on her side.
+		_send_xiaomi_to_safety(a, b)
+		proxy.puppet.set_fighting()
+	else:
+		human.set_state(HumanFollower3D.State.COMBAT)
+	fighter_puppet().show_hp(true)
+	fighter_puppet().set_hp_ratio(owner_fighter.hp_ratio())
 	opponent.begin_combat()
 	opponent.human_puppet.shout("你家的狗在叫什麼？！", Color(1.0, 0.8, 0.5))
-	human.say("欸欸欸，不是我…", Color(1.0, 0.9, 0.6))
+	human.say("兔兔，拜託你了！" if uses_proxy() else "欸欸欸，不是我…", Color(1.0, 0.9, 0.6))
 	blows_landed = 0
 	release_left = 0.0
 	acknowledge_left = 0.0
@@ -209,6 +273,7 @@ func _process(delta: float) -> void:
 		_sync()
 		return
 	_update_dog_block(delta)
+	_keep_xiaomi_safe()
 	_accumulator += delta * time_scale
 	while _accumulator >= STEP and engagement != null and not sim.is_finished():
 		_accumulator -= STEP
@@ -230,6 +295,12 @@ func _walk_owner_condition(delta: float) -> void:
 
 
 func _apply_owner_condition() -> void:
+	if uses_proxy():
+		# The condition is her robot's battery: she herself is never hurt and
+		# never walks hurt.
+		human.puppet.set_hp_ratio(1.0)
+		human.condition_speed = 1.0
+		return
 	var condition := run_manager.owner_condition
 	human.puppet.set_hp_ratio(condition)
 	human.condition_speed = 1.0 - DataRegistry.balance.owner_hurt_slowdown * human.puppet.hurt_amount()
@@ -255,7 +326,7 @@ func _hit_stop(skill: CombatSkillData) -> float:
 func _contact_point() -> Vector3:
 	if engagement == null:
 		return Vector3.ZERO
-	return (human.global_position + engagement.pair.human_global_position()) * 0.5
+	return (fighter_node().global_position + engagement.pair.human_global_position()) * 0.5
 
 
 ## Freezes the fight for `stop` seconds and shakes the view, scaled by the hit.
@@ -286,7 +357,7 @@ func is_owner_down() -> bool:
 ## simulation's too (`_world_position`); nothing here moves anyone.
 func _update_motion(delta: float) -> void:
 	var sim := engagement.simulation
-	var puppets := [human.puppet, engagement.pair.human_puppet]
+	var puppets := [fighter_puppet(), engagement.pair.human_puppet]
 	for side in 2:
 		var fighter: CombatFighter = sim.fighters[side]
 		var puppet: FighterPuppet3D = puppets[side]
@@ -322,6 +393,10 @@ func _walkable(ground: Vector2) -> float:
 	if _dog_counts():
 		var from_dog := Vector2(at.x - dog.global_position.x, at.z - dog.global_position.z).length()
 		misplaced += maxf(DOG_CLEARANCE - from_dog, 0.0)
+	# Xiaomi toy proxy: the fight is walked round her the same way.
+	if proxy != null and human.state == HumanFollower3D.State.SAFE and not _xiaomi_hidden:
+		var from_her := Vector2(at.x - human.global_position.x, at.z - human.global_position.z).length()
+		misplaced += maxf(XIAOMI_CLEARANCE - from_her, 0.0)
 	return misplaced + (0.0 if _clear_of_world(at) else WALL_MISPLACEMENT)
 
 
@@ -334,7 +409,7 @@ func _clear_of_world(at: Vector3) -> bool:
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = capsule
 	# Clear of the ground itself: only what they would walk into counts.
-	query.transform = Transform3D(Basis.IDENTITY, Vector3(at.x, human.global_position.y + capsule.height * 0.5 + 0.05, at.z))
+	query.transform = Transform3D(Basis.IDENTITY, Vector3(at.x, fighter_node().global_position.y + capsule.height * 0.5 + 0.05, at.z))
 	query.collision_mask = Greybox.WORLD_LAYER
 	return space.intersect_shape(query, 1).is_empty()
 
@@ -357,7 +432,7 @@ func _update_dog_block(delta: float) -> void:
 
 
 func _fight_centre() -> Vector3:
-	return (human.global_position + engagement.pair.human_global_position()) * 0.5
+	return (fighter_node().global_position + engagement.pair.human_global_position()) * 0.5
 
 
 func _ground_to_world(ground: Vector2) -> Vector3:
@@ -368,7 +443,7 @@ func _ground_to_world(ground: Vector2) -> Vector3:
 func _world_position(side: int) -> Vector3:
 	var ground := engagement.simulation.world_position(side) / UNITS_PER_METER
 	var p := _origin + _axis * ground.x + _side_axis * ground.y
-	var y := human.global_position.y if side == CombatSimulation.PLAYER else engagement.pair.human_global_position().y
+	var y := fighter_node().global_position.y if side == CombatSimulation.PLAYER else engagement.pair.human_global_position().y
 	return Vector3(p.x, y, p.z)
 
 
@@ -377,18 +452,19 @@ func _sync() -> void:
 	var opponent := engagement.pair
 	var player_fighter := sim.fighters[CombatSimulation.PLAYER]
 	var opponent_fighter := sim.fighters[CombatSimulation.OPPONENT]
-	human.global_position = _world_position(CombatSimulation.PLAYER)
+	var body := fighter_node()
+	body.global_position = _world_position(CombatSimulation.PLAYER)
 	opponent.set_human_global_position(_world_position(CombatSimulation.OPPONENT))
-	human.puppet.face_towards(opponent.human_global_position())
-	opponent.human_puppet.face_towards(human.global_position)
-	human.puppet.set_hp_ratio(player_fighter.hp_ratio())
+	fighter_puppet().face_towards(opponent.human_global_position())
+	opponent.human_puppet.face_towards(body.global_position)
+	fighter_puppet().set_hp_ratio(player_fighter.hp_ratio())
 	opponent.human_puppet.set_hp_ratio(opponent_fighter.hp_ratio())
-	human.puppet.set_guard(player_fighter.is_guarding())
+	fighter_puppet().set_guard(player_fighter.is_guarding())
 	opponent.human_puppet.set_guard(opponent_fighter.is_guarding())
 
 
 func _on_combat_event(kind: StringName, side: int, skill: CombatSkillData, amount: float) -> void:
-	var own := human.puppet
+	var own := fighter_puppet()
 	var theirs := engagement.pair.human_puppet
 	# P05-09: every blow landed with what they hold, or taken on it, wears it.
 	if kind in [&"hit", &"blocked"] and run_manager.equipped_weapon != null and run_manager.equipped_weapon.moveset != null:
@@ -463,10 +539,14 @@ func _on_finished(result: CombatSimulation.Result) -> void:
 	# P05-09: worn out in that fight, it gives way now.
 	var worn := run_manager.equipped_weapon
 	if run_manager.break_if_worn_out():
-		human.puppet.hold(null)
+		fighter_puppet().hold(null)
 		human.say("（%s壞掉了……）" % worn.display_name, Color(0.9, 0.85, 0.75), 2.0)
 	release_left = RELEASE_SECONDS
 	opponent.end_combat(result)
+	if proxy != null:
+		_finish_proxy_fight(result, encounter)
+		engagement_ended.emit(ended, result)
+		return
 	match result:
 		CombatSimulation.Result.VICTORY:
 			human.set_state(HumanFollower3D.State.FOLLOW)
@@ -514,7 +594,7 @@ func debug_set_owner_condition(ratio: float) -> void:
 ## Debug overlay line: the camera's framing and the owner's condition.
 func debug_text() -> String:
 	var rig_text := "camera %s pov %.2f %s" % [CameraRig3D.Context.keys()[camera.context], camera.pov, "DOG-POV" if CameraRig3D.combat_pov else "over-shoulder"] if camera != null else "camera -"
-	var owner_text := "owner %s %.0f%%" % [FighterPuppet3D.Condition.keys()[human.puppet.condition_state()], owner_condition() * 100.0] if engagement != null else "owner -"
+	var owner_text := "owner %s %.0f%%" % [FighterPuppet3D.Condition.keys()[fighter_puppet().condition_state()], owner_condition() * 100.0] if engagement != null else "owner -"
 	return "Combat: %s  %s" % [rig_text, owner_text]
 
 
@@ -531,3 +611,120 @@ func debug_goto_next_pair() -> void:
 		dog.global_position = best.global_position + Vector3(0.7, 0.2, 0.9)
 		dog.velocity = Vector3.ZERO
 		human.global_position = best.global_position + Vector3(1.6, 0.2, 2.0)
+
+
+# --- Xiaomi toy proxy ------------------------------------------------------------
+
+## The robot pops out of her backpack where she stands, facing the opponent.
+func _deploy_proxy(at: Vector3, towards: Vector3) -> void:
+	_retire_proxy(0.0)
+	proxy = BunnyProxy3D.new()
+	proxy.name = "BunnyProxy"
+	human.get_parent().add_child(proxy)
+	proxy.setup(_proxy_fighter)
+	proxy.global_position = at
+	proxy.puppet.face_towards(towards)
+	proxy.deploy()
+
+
+## Sends her to a spot behind where the robot starts, away from the opponent
+## and clear of walls; with none, out of the fight area and unseen (spec §2).
+func _send_xiaomi_to_safety(robot_at: Vector3, opponent_at: Vector3) -> void:
+	_xiaomi_hidden = false
+	human.set_state(HumanFollower3D.State.SAFE)
+	human.safe_look_at = (robot_at + opponent_at) * 0.5
+	var spot: Variant = _safe_spot(robot_at, opponent_at)
+	if spot == null:
+		_xiaomi_hidden = true
+		human.puppet.visible = false
+		human.safe_target = human.global_position
+		return
+	human.safe_target = spot
+
+
+## A clear spot PROXY_SAFE_DISTANCE back from `robot_at` (fanning out to the
+## sides), well clear of the opponent, or null.
+func _safe_spot(robot_at: Vector3, opponent_at: Vector3) -> Variant:
+	var away := robot_at - opponent_at
+	away.y = 0.0
+	away = away.normalized() if away.length() > 0.01 else Vector3.BACK
+	for degrees: float in [0.0, 35.0, -35.0, 70.0, -70.0, 105.0, -105.0]:
+		for distance: float in [PROXY_SAFE_DISTANCE, PROXY_SAFE_DISTANCE * 1.5]:
+			var spot: Vector3 = robot_at + away.rotated(Vector3.UP, deg_to_rad(degrees)) * distance
+			spot.y = human.global_position.y
+			if Vector2(spot.x - opponent_at.x, spot.z - opponent_at.z).length() < PROXY_MIN_GAP + 1.0:
+				continue
+			if _clear_for(spot, XIAOMI_RADIUS, XIAOMI_HEIGHT):
+				return spot
+	return null
+
+
+func _clear_for(at: Vector3, radius: float, height: float) -> bool:
+	if not is_inside_tree():
+		return true
+	var space := get_viewport().get_world_3d().direct_space_state
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = radius
+	capsule.height = height
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = capsule
+	query.transform = Transform3D(Basis.IDENTITY, Vector3(at.x, at.y + height * 0.5 + 0.05, at.z))
+	query.collision_mask = Greybox.WORLD_LAYER
+	return space.intersect_shape(query, 1).is_empty()
+
+
+## If the fight drifts towards her spot, she moves off again.
+func _keep_xiaomi_safe() -> void:
+	if proxy == null or _xiaomi_hidden or human.state != HumanFollower3D.State.SAFE:
+		return
+	var opponent_at := engagement.pair.human_global_position()
+	var gap := Vector2(human.safe_target.x - opponent_at.x, human.safe_target.z - opponent_at.z).length()
+	var robot_gap := Vector2(human.safe_target.x - proxy.global_position.x, human.safe_target.z - proxy.global_position.z).length()
+	human.safe_look_at = _fight_centre()
+	if gap >= PROXY_MIN_GAP + 0.6 and robot_gap >= XIAOMI_CLEARANCE:
+		return
+	var spot: Variant = _safe_spot(proxy.global_position, opponent_at)
+	if spot != null:
+		human.safe_target = spot
+
+
+## The end of a fight her robot fought. She is never knocked down: a win is
+## the robot cheering and packing away, a loss is its battery running flat.
+func _finish_proxy_fight(result: CombatSimulation.Result, encounter: EncounterData) -> void:
+	var robot := proxy
+	proxy = null
+	robot.puppet.show_hp(false)
+	if _xiaomi_hidden:
+		_xiaomi_hidden = false
+		human.puppet.visible = true
+	match result:
+		CombatSimulation.Result.VICTORY:
+			human.set_state(HumanFollower3D.State.FOLLOW)
+			var reward := run_manager.grant_reward(encounter.reward_table)
+			robot.say("耶！", Color(1.0, 0.75, 0.88), 1.2)
+			robot.stow(1.2)
+			human.puppet.play_acknowledge(dog.global_position)
+			acknowledge_left = ACKNOWLEDGE_SECONDS
+			human.say("好狗狗！兔兔也好棒！" + ("（撿到%s）" % reward.item.display_name if reward != null else ""), Color(0.6, 1.0, 0.6), 2.0)
+		CombatSimulation.Result.DEFEAT:
+			# The robot is down, not her: she picks it up and the walk ends.
+			robot.shutdown()
+			robot.stow(DEFEAT_SECONDS)
+			human.say("兔兔！……沒電了，我們回家修好你。", Color(1.0, 0.85, 0.9), 2.4)
+			proxy_defeated = true
+			_defeated_by = encounter.human.display_name
+			_defeat_left = DEFEAT_SECONDS
+		_:
+			robot.say("（收回背包）", Color(0.9, 0.9, 0.95), 1.0)
+			robot.stow(0.2)
+			human.set_state(HumanFollower3D.State.FOLLOW)
+			human.say("兔兔，回來！", Color(0.85, 0.85, 0.85))
+
+
+func _retire_proxy(delay: float) -> void:
+	if proxy != null and is_instance_valid(proxy):
+		proxy.stow(delay)
+	proxy = null
+	if _xiaomi_hidden:
+		_xiaomi_hidden = false
+		human.puppet.visible = true

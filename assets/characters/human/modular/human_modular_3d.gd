@@ -9,6 +9,9 @@ const TEAL := Color("#3b8f86")
 
 
 static func build(data: FighterData) -> Node3D:
+	# Xiaomi toy proxy: not a person, its own builder on the greybox joints.
+	if data.body_kind == &"bunny_robot":
+		return BunnyRobot3D.build(data)
 	# Review candidate only; final-art approval is separate from the asset import.
 	if ProjectSettings.get_setting("art/use_p04_candidate", false):
 		var candidate := P04HumanVisual.new(data.skeletal_model)

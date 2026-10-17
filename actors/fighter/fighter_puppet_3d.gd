@@ -127,6 +127,9 @@ var _posed: Array = []
 var _side_rng := RandomNumberGenerator.new()
 ## P-05: what they are holding, and the prop showing it.
 var held: WeaponData
+## Xiaomi toy proxy: a child carries what she finds in her backpack, never in
+## her hand (her robot is the one that fights with it).
+var keep_held_in_bag: bool = false
 var _prop: Node3D
 ## The smear behind it while a blow is fast (between the wind-up's end and
 ## the follow-through, `TRAIL_FROM`..`TRAIL_UNTIL` of the attack clip).
@@ -194,6 +197,9 @@ func apply(fighter: FighterData) -> void:
 ## body carries it on the hand bone, so it follows every clip; the greybox
 ## carries it at the end of the arm.
 func hold(weapon: WeaponData, condition: WeaponCondition.State = WeaponCondition.State.GOOD) -> void:
+	# Xiaomi toy proxy: she carries it in her backpack; her robot holds it.
+	if keep_held_in_bag:
+		weapon = null
 	if weapon == held and (_prop != null) == (weapon != null and not weapon.is_unarmed()):
 		show_condition(condition)
 		return

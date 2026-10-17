@@ -62,6 +62,16 @@ func owner_fighter() -> FighterData:
 	return pair_state.owner_fighter() if pair_state != null else load(HumanCandidate.TEMPLATE_PATH) as FighterData
 
 
+## Xiaomi toy proxy: whether a proxy fights for the owner.
+func owner_has_proxy() -> bool:
+	return pair_state != null and pair_state.has_proxy()
+
+
+## Xiaomi toy proxy: who fights for the owner, or null (they fight themselves).
+func owner_proxy_fighter() -> FighterData:
+	return pair_state.owner_proxy_fighter() if pair_state != null else null
+
+
 ## S06-07: the dog's talent for `stat` ("nose", "energy", "voice"), 1.0
 ## without a pair. Rolled at the shelter, leaning the way its traits do.
 func dog_talent(stat: StringName) -> float:

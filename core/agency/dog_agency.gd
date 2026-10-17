@@ -136,9 +136,11 @@ func _bark_in_fight() -> BarkResult:
 	if to_opponent.length() > BARK_RANGE or rad_to_deg(dog.facing.angle_to(to_opponent.normalized())) > BARK_FACING_ANGLE:
 		outcome.emit("…太遠或沒對著對手叫", false)
 		return BarkResult.UNHEARD
-	var at_opponent := rad_to_deg(_flat(dog.global_position - opponent_position).angle_to(_flat(human.global_position - opponent_position)))
+	# The body fighting on the dog's side: the owner, or Xiaomi's robot.
+	var fighter_at := coordinator.fighter_node().global_position
+	var at_opponent := rad_to_deg(_flat(dog.global_position - opponent_position).angle_to(_flat(fighter_at - opponent_position)))
 	if at_opponent < BARK_SIDE_ANGLE:
-		if _flat(dog.global_position - human.global_position).length() <= BARK_STARTLE_DISTANCE:
+		if _flat(dog.global_position - fighter_at).length() <= BARK_STARTLE_DISTANCE:
 			# Right behind your own human: they're the one who jumps.
 			engagement.simulation.distract(CombatSimulation.PLAYER, BARK_OWNER_STARTLE_SECONDS)
 			if FighterPuppet3D.show_combat_text:
@@ -189,6 +191,9 @@ func _bark_effect() -> float:
 # --- Leash ----------------------------------------------------------------------------
 
 func _update_leash(delta: float) -> void:
+	if coordinator.is_fighting() and human.state == HumanFollower3D.State.SAFE:
+		_update_leash_proxy(delta)
+		return
 	if not coordinator.is_fighting() or human.state != HumanFollower3D.State.COMBAT:
 		_drag_out_time = 0.0
 		return
@@ -245,6 +250,32 @@ func _update_leash(delta: float) -> void:
 	else:
 		last_pull = &"repositioned"
 	pulled.emit(last_pull)
+
+
+## Xiaomi toy proxy (owner decision D1, 2026-10-17): the lead stays in her hand
+## at her safe spot, not on the robot, so a pull cannot move the fighter. A
+## long hard pull away from the fight is her calling the robot back (the same
+## drag-out, the same disengage); nothing else.
+func _update_leash_proxy(delta: float) -> void:
+	var engagement := coordinator.engagement
+	var to_dog := _flat(dog.global_position - human.global_position)
+	var over := to_dog.length() - human.max_length
+	var dog_velocity := _flat(dog.velocity)
+	var moving_away := dog_velocity.length() >= PULL_MIN_DOG_SPEED and dog_velocity.dot(to_dog.normalized()) > 0.0
+	var fight_axis := _flat(engagement.pair.human_global_position() - human.global_position).normalized()
+	var away_share := -to_dog.normalized().dot(fight_axis)
+	if over < DRAG_OUT_EXTRA or not moving_away or away_share < PULL_AWAY_SHARE:
+		_drag_out_time = 0.0
+		return
+	_drag_out_time += delta
+	if _drag_out_time < DRAG_OUT_SECONDS:
+		return
+	_drag_out_time = 0.0
+	last_pull = &"escaped"
+	outcome.emit("✦ 小米把兔兔叫回來了", true)
+	training_moment.emit(&"agency_pull_escape", engagement.pair.spot_id)
+	pulled.emit(last_pull)
+	engagement.simulation.disengage()
 
 
 func _flat(v: Vector3) -> Vector3:

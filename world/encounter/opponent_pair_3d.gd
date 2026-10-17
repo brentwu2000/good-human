@@ -353,7 +353,7 @@ func _place_dog() -> void:
 func _wanted_dog_offset() -> Vector3:
 	if state != State.COMBAT or coordinator == null or coordinator.human == null:
 		return DOG_OFFSET
-	var away := human_puppet.global_position - coordinator.human.global_position
+	var away := human_puppet.global_position - coordinator.fighter_node().global_position
 	away.y = 0.0
 	if away.length_squared() < 0.0001:
 		return DOG_OFFSET
