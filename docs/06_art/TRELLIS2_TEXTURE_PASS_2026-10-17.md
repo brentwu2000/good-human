@@ -136,3 +136,14 @@ v5) was a flat-topped trapezoid 4.5 cm right of the eyes' midpoint with a stray 
 `redraw_mouth` in `t2_finish.py` erases it (skin fill = linear colour-vs-height fit over the
 skin around it) and paints a symmetric grin in the face's front coordinates: lifted corners,
 upper teeth, dark mouth, small tongue, dark lip line. Comparison: `coach_mouth.png`.
+
+### Gym coach arm joints (owner: 「戰鬥時候手的方向錯誤」, 「請你檢查每一個角色」)
+
+Every human checked with the same fight clips and the same camera (guard, jab, hook, block) and
+by where the elbow/wrist joints sit along the arm (office worker 40 % / 78 %, rider 39/80, fisher
+40/75, auntie 48/80, grandma 36/72, coach 24/48 → 57). Bone rest rotations of all 16 models are
+identical before and after the Trellis2 re-export (so the pass did not cause it; the coach had it
+in every earlier version). Coach fixed with `tools/art/refit_arms.py` (now a `refit_arms` step in
+his t2 config). Grandma's guard sits at face height and her block crosses over her head: her
+joints are right, her arms are long for her height (0.66 m) — a proportion matter, left as is.
+Dogs use their own clips (dog motion tests pass).

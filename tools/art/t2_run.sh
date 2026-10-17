@@ -39,4 +39,8 @@ while IFS='|' read -r NAME FRONT BACK FACING; do
 done <<< "$RUNS"
 "$BL" -b "$WW/hi.blend" --python tools/art/t2_bake.py -- "$CFGW" "$SETS" "$WW" 2>&1 | grep -E "^T2_|Error" | grep -v -E "GPUShader|gpu module" || true
 "$BL" -b --factory-startup --python tools/art/t2_finish.py -- "$CFGW" "$WW" "$OUT" 2>&1 | grep -E "^T2_|Error" | grep -v -E "GPUShader|gpu module" || true
+# Arm joints refit onto the character's own arms (gym coach; LESSONS 6.30).
+if [ "$(get refit_arms)" = "True" ] && [ -f "$OUT" ]; then
+  "$BL" -b --factory-startup --python tools/art/refit_arms.py -- "$OUT" "$OUT" 2>&1 | grep -E "^REFIT|Error" | grep -v -E "GPUShader|gpu module" || true
+fi
 [ -f "$OUT" ] && echo "T2_DONE $ID -> $OUT"

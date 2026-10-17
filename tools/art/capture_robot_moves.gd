@@ -1,7 +1,8 @@
 extends "res://tests/test_case.gd"
 ## Capture tool (Claude, 2026-10-17): the bunny robot in a real fight, from its side, many
 ## frames, to read which arm moves and which way.
-##   godot --path <project> --resolution 540x540 res://tools/art/capture_robot_moves.tscn -- <out_dir>
+##   godot --path <project> --resolution 540x540 res://tools/art/capture_robot_moves.tscn -- <out_dir> [background_id]
+## With a background other than granddaughter it watches that owner fight (hands by bone).
 
 var _tree: SceneTree
 
@@ -22,7 +23,8 @@ func _run() -> void:
 	await _wait_for_scene(Game.HOME_SCENE)
 	var xiaomi := HumanCandidate.new()
 	xiaomi.id = &"human_xiaomi"
-	xiaomi.background_id = &"granddaughter"
+	var bg_id: StringName = StringName(OS.get_cmdline_user_args()[1]) if OS.get_cmdline_user_args().size() > 1 else &"granddaughter"
+	xiaomi.background_id = bg_id
 	for stat in HumanCandidate.STAT_NAMES:
 		xiaomi.stats[stat] = 5
 	Game.pair_state = PairState.adopted(PairState.classic().dog, xiaomi, "小米", "")
@@ -40,7 +42,7 @@ func _run() -> void:
 	map.human.global_position = pair.global_position + Vector3(1.6, 0.2, 2.0)
 	coordinator.start_engagement(pair)
 	await _frames(30)
-	var robot := coordinator.proxy
+	var robot: Node3D = coordinator.fighter_node()
 	var cam := Camera3D.new()
 	map.add_child(cam)
 	cam.current = true
@@ -49,30 +51,48 @@ func _run() -> void:
 		var opp := pair.human_global_position()
 		var mid := (robot.global_position + opp) * 0.5
 		var across := (opp - robot.global_position).cross(Vector3.UP).normalized()
-		cam.global_position = robot.global_position + across * 2.2 + (robot.global_position - opp).normalized() * 0.6 + Vector3(0, 0.8, 0)
-		cam.look_at(robot.global_position + Vector3(0, 0.5, 0))
+		var close := OS.get_cmdline_user_args().size() > 2 and OS.get_cmdline_user_args()[2] == "close"
+		if close:
+			# From the opponent's side, at chest height, close on the hands.
+			var h := 1.2 if coordinator.proxy == null else 0.6
+			cam.global_position = robot.global_position + (opp - robot.global_position).normalized() * 1.1 + across * 0.55 + Vector3(0, h + 0.1, 0)
+			cam.look_at(robot.global_position + Vector3(0, h, 0))
+		else:
+			cam.global_position = robot.global_position + across * 2.2 + (robot.global_position - opp).normalized() * 0.6 + Vector3(0, 0.8, 0)
+			cam.look_at(robot.global_position + Vector3(0, 0.5, 0))
 		await _seconds(0.12)
-		var fighter := coordinator.engagement.simulation.fighters[CombatSimulation.PLAYER] if coordinator.engagement != null else null
+		var fighter: CombatFighter = coordinator.engagement.simulation.fighters[CombatSimulation.PLAYER] if coordinator.engagement != null else null
 		var tag := "%s_%s" % [CombatFighter.Phase.keys()[fighter.phase], fighter.action.animation_key if fighter != null and fighter.action != null else "none"] if fighter != null else "end"
 		get_viewport().get_texture().get_image().save_png("%s/%02d_%s.png" % [out, i, tag])
 		# Where each arm's lowest point is, relative to the robot's facing (+ = towards the opponent).
 		var facing := (opp - robot.global_position)
 		facing.y = 0.0
 		facing = facing.normalized()
-		var body := robot.puppet._body
+		var body: Node3D = coordinator.fighter_puppet()._body
 		var line := "MEASURE %s" % tag
-		for nm in ["ArmL", "ArmR", "LegL", "LegR"]:
-			var joint := Greybox.part(body, nm)
-			var lowest := Vector3.INF
-			for m in joint.find_children("*", "MeshInstance3D", true, false):
-				var mi := m as MeshInstance3D
-				var bb := mi.global_transform * mi.get_aabb()
-				var c := bb.get_center()
-				if lowest == Vector3.INF or c.y < lowest.y:
-					lowest = c
-			var rel := lowest - joint.global_position
+		var skel: Skeleton3D = null
+		for s in body.find_children("*", "Skeleton3D", true, false):
+			skel = s
+		if skel != null:
 			var side := facing.cross(Vector3.UP)
-			line += "  %s fwd %+.2f side %+.2f (joint side %+.2f)" % [nm, rel.dot(facing), rel.dot(side), (joint.global_position - robot.global_position).dot(side)]
+			for bone in ["hand_l", "hand_r", "foot_l", "foot_r"]:
+				var bi := skel.find_bone(bone)
+				if bi < 0:
+					continue
+				var at := skel.global_transform * skel.get_bone_global_pose(bi).origin
+				var rel := at - robot.global_position
+				line += "  %s fwd %+.2f side %+.2f up %.2f" % [bone, rel.dot(facing), rel.dot(side), rel.y]
+		else:
+			for nm in ["ArmL", "ArmR", "LegL", "LegR"]:
+				var joint := Greybox.part(body, nm)
+				var lowest := Vector3.INF
+				for m in joint.find_children("*", "MeshInstance3D", true, false):
+					var mi := m as MeshInstance3D
+					var c := (mi.global_transform * mi.get_aabb()).get_center()
+					if lowest == Vector3.INF or c.y < lowest.y:
+						lowest = c
+				var rel := lowest - joint.global_position
+				line += "  %s fwd %+.2f" % [nm, rel.dot(facing)]
 		print(line)
 	check(true, "captured")
 	finish()

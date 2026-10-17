@@ -207,6 +207,16 @@ body is built facing local +Z (ArmL at -X) under one node turned 180 deg (`Bunny
 measure each limb's offset along the facing during a strike (`tools/art/capture_robot_moves.tscn`
 prints MEASURE lines; forward must be positive), not only a capture.
 
+**6.30 A character's arm joints must sit on its own arms.** The gym coach's guard bent his
+forearms back over his shoulders: his OwnerSkeleton was scaled from a smaller body, so the elbow
+sat at 24 % of his arm (mid-bicep) and the wrist at 48 % (his elbow), and his arms angle less than
+the skeleton's. The shared fight clips set each bone's own rotation, so what decides where an arm
+goes is that each bone lies along its limb — `tools/art/refit_arms.py` puts the joints on the arm's
+centreline (elbow = where it reaches furthest out, wrist a hand short of the tip) and re-weights the
+chain. Bones identical before/after a re-export said nothing here. Check: `build`-style reach
+measure (elbow ~40 %, wrist ~75–80 % of the arm) and the same-clip upper-body sheet for every
+character, not one fight capture.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.
