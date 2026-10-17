@@ -18,5 +18,20 @@
     "az": 0.19,
     "ax": 0.155
   },
-  "face_note": "owner: 「嘴巴斜一邊」; the drawn mouth spans x -0.04..+0.13 (measured), past the old mask's +0.09: its right corner was Trellis2's; also covers the doubled brows"
+  "face_note": "owner: 「嘴巴斜一邊」; the drawn mouth spans x -0.04..+0.13 (measured), past the old mask's +0.09: its right corner was Trellis2's; also covers the doubled brows",
+  "redraw_mouth": {
+    "cx": 0.0,
+    "z": 1.505,
+    "half_w": 0.078,
+    "depth": 0.032,
+    "lift": 0.016,
+    "teeth": 0.0145,
+    "erase": {
+      "cx": 0.03,
+      "z": 1.5,
+      "ax": 0.135,
+      "az": 0.05
+    }
+  },
+  "redraw_mouth_note": "owner: the mouth did not look human. The drawn mouth was a flat-topped trapezoid 4.5 cm right of the eyes' midpoint with a stray line; redrawn as a symmetric grin (sheet: wide smile, upper teeth)"
 }

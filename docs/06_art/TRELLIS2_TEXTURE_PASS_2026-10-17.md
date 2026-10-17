@@ -128,3 +128,11 @@ Sources are now pinned to the version before the pass (`"src": "git:<rev>:<path>
 installing, the runtime GLB already holds the new texture, and a re-run "kept" that instead
 of the drawn face. Comparison: `good_human_stylized_factory/renders/trellis2_compare/five_fixes.png`.
 47 tests pass; Godot captures of all clips for the five, no failures.
+
+### Coach's mouth (owner: 「人的嘴是可以像教練這樣嗎…需要改嘴型」)
+
+Texture, not geometry: the clay head has only a faint smile groove. The drawn mouth (texturing
+v5) was a flat-topped trapezoid 4.5 cm right of the eyes' midpoint with a stray line beside it.
+`redraw_mouth` in `t2_finish.py` erases it (skin fill = linear colour-vs-height fit over the
+skin around it) and paints a symmetric grin in the face's front coordinates: lifted corners,
+upper teeth, dark mouth, small tongue, dark lip line. Comparison: `coach_mouth.png`.

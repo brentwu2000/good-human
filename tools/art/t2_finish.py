@@ -10,6 +10,8 @@
 - gain [r,g,b]: fixed white-balance gain (a second texture of the same character).
 - create_base: the body has no basecolor texture (vertex colours): one is created.
 - keep_boxes (t2_keepmask): the current texture stays there, tone-matched (keep_tone).
+- redraw_mouth {cx, z, half_w, depth, lift, teeth, erase{cx,z,ax,az}}: erase the drawn mouth,
+  paint a symmetric grin in front coordinates.
 - delete_materials [keyword]: faces of those materials removed before export.
 - corner_cloth {noise, hem, hem_dark}: per-face grain and a darker band at the lowest end.
 - corner_shade s: corner colours darkened up to s on faces turned away from an up-front light.
@@ -162,6 +164,82 @@ if cfg.get("keep_boxes") and os.path.exists(kp):
         gk = _np.clip(gk, 0.8, 1.25) if cfg.get("keep_tone", True) else _np.ones(3)
         res = res * (1 - km[..., None]) + _np.clip(c * gk, 0, 1) * km[..., None]
         print("T2_FINISH kept old texture", int(sel_k.sum()), "texels, tone", gk.round(3))
+
+# redraw_mouth: erase the drawn mouth and paint a symmetric grin in the face's own front
+# coordinates (x, z rest pose, m). Texels get their 3D point by rasterising the body's
+# triangles in UV space.
+rm = cfg.get("redraw_mouth")
+if rm:
+    er = rm["erase"]
+    me_ = body.data
+    me_.calc_loop_triangles()
+    uvl = me_.uv_layers[0].data
+    mw = body.matrix_world
+    V = np.array([tuple(mw @ v.co) for v in me_.vertices])
+    NZ = np.array([tuple((mw.to_3x3() @ v.normal).normalized()) for v in me_.vertices])
+    box = (abs(V[:, 0] - er["cx"]) < er["ax"] * 1.3) & (abs(V[:, 2] - er["z"]) < er["az"] * 1.6) & (NZ[:, 1] < -0.2)
+    tex_x = np.full((H, W), np.nan); tex_z = np.full((H, W), np.nan)
+    for tri in me_.loop_triangles:
+        vs = tri.vertices
+        if not all(box[i] for i in vs):
+            continue
+        uv = np.array([uvl[li].uv[:] for li in tri.loops]) * [W, H]
+        x0, y0 = np.floor(uv.min(0)).astype(int); x1, y1 = np.ceil(uv.max(0)).astype(int)
+        if x1 - x0 > 200 or y1 - y0 > 200:
+            continue
+        gx, gy = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+        (ax_, ay_), (bx_, by_), (cx_, cy_) = uv
+        den = (by_ - cy_) * (ax_ - cx_) + (cx_ - bx_) * (ay_ - cy_)
+        if abs(den) < 1e-9:
+            continue
+        l1 = ((by_ - cy_) * (gx - cx_) + (cx_ - bx_) * (gy - cy_)) / den
+        l2 = ((cy_ - ay_) * (gx - cx_) + (ax_ - cx_) * (gy - cy_)) / den
+        l3 = 1 - l1 - l2
+        inside = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
+        P3 = V[list(vs)]
+        X = l1 * P3[0, 0] + l2 * P3[1, 0] + l3 * P3[2, 0]
+        Z = l1 * P3[0, 2] + l2 * P3[1, 2] + l3 * P3[2, 2]
+        yy, xx = gy[inside].astype(int), gx[inside].astype(int)
+        ok = (yy >= 0) & (yy < H) & (xx >= 0) & (xx < W)
+        tex_x[yy[ok], xx[ok]] = X[inside][ok]; tex_z[yy[ok], xx[ok]] = Z[inside][ok]
+    # Grow the 3D map a few texels over island borders (seams would keep old pixels).
+    for _ in range(6):
+        for sh in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+            nx = np.roll(tex_x, sh, (0, 1)); nzz = np.roll(tex_z, sh, (0, 1))
+            m_ = np.isnan(tex_x) & ~np.isnan(nx)
+            tex_x[m_] = nx[m_]; tex_z[m_] = nzz[m_]
+    have = ~np.isnan(tex_x)
+    # image rows: Blender pixels are bottom-up, uv v also bottom-up -> same orientation
+    d_er = ((tex_x - er["cx"]) / er["ax"]) ** 2 + ((tex_z - er["z"]) / er["az"]) ** 2
+    ring = have & (d_er > 1.3) & (d_er < 2.2)
+    # Skin fill: a linear colour-vs-height fit over skin-coloured ring texels (smooth, no bands).
+    rr = res[ring]
+    skin_ok = (rr[:, 0] > 0.45) & (rr[:, 0] > rr[:, 1]) & (rr[:, 1] > rr[:, 2]) & (rr[:, 0] - rr[:, 2] < 0.5)
+    zr = tex_z[ring][skin_ok]; cr = rr[skin_ok]
+    A = np.stack([zr - er["z"], np.ones_like(zr)], 1)
+    coef, *_ = np.linalg.lstsq(A, cr, rcond=None)
+    zz = np.nan_to_num(tex_z, nan=er["z"]) - er["z"]
+    fill = np.clip(zz[..., None] * coef[0] + coef[1], 0, 1)
+    skin_c = coef[1]
+    ew = np.clip((1.3 - np.nan_to_num(d_er, nan=9)) / 0.5, 0, 1)[..., None] * have[..., None]
+    res = res * (1 - ew) + fill * ew
+    # the grin: u in [-1, 1] across the mouth
+    cx0, zm, hw = rm["cx"], rm["z"], rm["half_w"]
+    u = (tex_x - cx0) / hw
+    up = zm + rm["lift"] * u ** 2                       # upper lip: corners lifted
+    lo = zm - rm["depth"] * (1 - u ** 2) + rm["lift"] * u ** 2 * 0.9  # lower lip: deep U
+    inside_m = have & (np.abs(u) <= 1) & (tex_z <= up) & (tex_z >= lo)
+    teeth = inside_m & (tex_z >= up - rm["teeth"] * np.sqrt(np.clip(1 - u ** 2, 0, 1)))
+    px_m = 0.0018  # ~ one texel in metres on this face, for the outline
+    edge = have & (np.abs(u) <= 1.06) & (
+        (np.abs(tex_z - up) < px_m * 1.4) | (np.abs(tex_z - lo) < px_m * 1.4) & (np.abs(u) <= 1))
+    mouth_col = np.array(rm.get("inner", [0.42, 0.09, 0.10]))
+    res[inside_m] = mouth_col
+    tongue = inside_m & (tex_z < lo + rm["depth"] * 0.26) & (np.abs(u) < 0.42)
+    res[tongue] = np.array(rm.get("tongue", [0.80, 0.38, 0.40]))
+    res[teeth] = np.array([0.97, 0.96, 0.94])
+    res[edge] = np.array(rm.get("line", [0.30, 0.08, 0.08]))
+    print("T2_FINISH redrew mouth: %d texels, erase %d, skin %s" % (inside_m.sum(), (ew[..., 0] > 0.5).sum(), (skin_c * 255).round()))
 
 if cfg.get("hands_skin"):
     gn = {g.index: g.name for g in body.vertex_groups}
