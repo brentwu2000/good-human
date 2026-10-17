@@ -1,0 +1,39 @@
+{
+  "id": "dog_poodle",
+  "src": "git:070a8f6:assets/characters/dog/models/breeds/poodle.glb",
+  "src_note": "runtime poodle (Codex r28 line); Codex's r40 candidate was in progress and is not used (owner: Claude takes the poodle over)",
+  "body": "DogBody",
+  "subdiv": 1,
+  "bake_materials": [
+    "GrandmaBody"
+  ],
+  "material": "GrandmaBody",
+  "keep_face": true,
+  "face_auto": {
+    "zc": 0.44,
+    "az": 0.56,
+    "ax": 1.3
+  },
+  "face_tone": false,
+  "runs": [
+    {
+      "name": "fb",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/poodle_front.png",
+      "back": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/poodle_back.png",
+      "facing": "front"
+    },
+    {
+      "name": "side",
+      "front": "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/poodle_side.png",
+      "back": "mirror:C:/Users/b/Documents/good_human_stylized_factory/references/dogs/poodle_side.png",
+      "facing": "left"
+    }
+  ],
+  "sheet_body": [
+    214,
+    138,
+    92
+  ],
+  "sheet_body_note": "median of the sheet front+side subject pixels (2026-10-17)",
+  "out": "assets/characters/dog/models/breeds/poodle.glb"
+}

@@ -1,0 +1,13 @@
+{
+ "date": "2026-10-17 (Trellis2 texture pass)",
+ "author": "Claude (owner: 「你可以接手嗎」 → 貴賓犬)",
+ "source": "git 070a8f6 runtime poodle: geometry, rig, weights and clips unchanged; coat basecolor replaced, Codex's face and ear-fur material kept. Codex's r40 candidate not used.",
+ "texture": "Trellis.2 (MIT) two runs (sheet front+back; side+mirrored side) blended by normal, guidance 3.0, 25 steps, seed 1; Aero-Ex/Trellis2-GGUF Q5_K_M (licence not stated); DINOv3 (commercial use allowed); vertex colours + Blender bake (nvdiffrast not used).",
+ "inputs": [
+  "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/poodle_front.png",
+  "C:/Users/b/Documents/good_human_stylized_factory/references/dogs/poodle_side.png"
+ ],
+ "config": "tools/art/t2_configs/dog_poodle.json",
+ "grade": "B+ / installed",
+ "sha256": "efb1fd46cd29c95e738ec35eee89bd3c1ce49553014a7596e73c38a39e87e53b"
+}
