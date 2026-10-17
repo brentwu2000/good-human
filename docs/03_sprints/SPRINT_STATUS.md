@@ -1,5 +1,12 @@
 # Sprint Status
 
+## FEATURE Xiaomi toy proxy — 2026-10-17 (Claude, owner: 「準備開始動工」)
+
+Owner spec `docs/04_systems/XIAOMI_TOY_PROXY.md`: Xiaomi becomes an adopter whose fights are
+fought by a bunny toy robot; she is never a target. Phase 0 audit REVIEW
+([XIAOMI_INTEGRATION_AUDIT.md](../04_systems/XIAOMI_INTEGRATION_AUDIT.md)); Phase 1 waits on
+decisions D1 (leash) / D2 (adoption).
+
 ## ART characters — 2026-10-17 (Claude): Trellis2 texture pass
 
 Owner chose Trellis.2-generated body textures after a side-by-side test (「你處理，把它修好」,
