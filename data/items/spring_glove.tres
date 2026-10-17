@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"spring_glove"
+display_name = "彈簧拳套"
+description = "玩具店的彈簧拳套，裝在兔兔手上會「啵嗡」地伸出去。"
+type = 4
+rarity = 1
+stackable = false
+max_stack = 1
+value = 30
+loot_class = 1
+size_class = 1
+proxy_only = true

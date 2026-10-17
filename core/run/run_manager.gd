@@ -365,7 +365,7 @@ func record_territory_mark(territory_id: StringName) -> void:
 func grant_reward(table: LootTableData) -> ItemStack:
 	if not is_running() or table == null:
 		return null
-	var stack := table.roll(run_rng)
+	var stack := table.roll(run_rng, Game.owner_has_proxy())
 	if stack == null:
 		return null
 	var left := human_run_inventory.add_stack(stack)

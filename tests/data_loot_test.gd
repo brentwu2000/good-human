@@ -7,6 +7,8 @@ const SPRINT_ITEMS: Array[StringName] = [
 	&"half_tennis_ball", &"banyan_frisbee",
 	# P-05: the broom (long object); the old dumbbell is training kit (owner, 2026-10-09).
 	&"broom", &"old_dumbbell",
+	# Xiaomi toy proxy, Phase 2: toy parts only an owner with a proxy finds.
+	&"spring_glove", &"toy_battery",
 ]
 const TABLE_PATHS: Array[String] = [
 	"res://data/loot_tables/residential_trash.tres",
@@ -56,6 +58,8 @@ func _test_table_data(path: String) -> void:
 		return
 	check(not table.entries.is_empty(), "%s has entries" % table.id)
 	for entry in table.entries:
+		check(entry.item != null and not entry.item.proxy_only, "%s: toy parts never sit in the shared entries" % table.id)
+	for entry in table.entries + table.proxy_entries:
 		check(entry.item != null and DataRegistry.has_item(entry.item.id), "%s entry item registered" % table.id)
 		check(entry.weight > 0, "%s entry weight > 0" % table.id)
 		check(entry.min_quantity <= entry.max_quantity, "%s entry quantity range valid" % table.id)

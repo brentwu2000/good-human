@@ -86,3 +86,20 @@ Decisions: D1 leash stays with Xiaomi (owner), D2 she comes to the shelter like 
 
 Check: `tests/xiaomi_proxy_test` (34 checks: never COMBAT/DOWN, ≥1.8 m from the opponent while fighting, robot takes the blows and holds the weapon, win / call-back / loss clean up, loss rules and repair text). Full suite 48/48. Capture `tools/art/capture_xiaomi_proxy.tscn` → `xiaomi_proxy_phase1_capture.png`.
 Not yet (Phase 2/3): toy modules and repair cooldown, 積木雨/超級兔兔, Xiaomi's remote/cheer/hug clips (she uses her ambient clips), final robot art.
+
+## Phase 2 — done 2026-10-17 (REVIEW)
+
+Owner: 「照你的建議做 Phase 2」 — conflicts 6–10 resolved as recommended:
+
+| # | Decision | Implementation |
+|---|---|---|
+| 6 | No repair cooldown (no other owner has a hospital cooldown) | text only (Phase 1) |
+| 7 | Toy parts in existing slots only | **彈簧拳套** = weapon (`WeaponData.Archetype.TOY`, moveset `spring_glove`: 伸縮拳 reach 100, 重彈 104, block, 兔兔翻滾; wears out at 30; drawn as a pink spring glove); **玩具電池** = recovery item (`owner_recovery` 0.3 → the robot's battery). Casing/chip slots not built. |
+| — | Found only by her, other owners untouched | `ItemData.proxy_only`; `LootTableData.proxy_entries` join the roll only when `Game.owner_has_proxy()` (park search: glove 6, battery 10; residential trash: 5, 10). Same entries, same seed → same rolls for every other owner (tested). |
+| 8 | 積木雨 / 超級兔兔 data placeholders | `skill_bunny_block_rain.tres`, `skill_super_bunny.tres` (priority 0, in no skill list; the simulation has no slow/area effect) |
+| 9 | Growth: Xiaomi's growth drives her robot | (Phase 1) |
+| 10 | Robot may use umbrella/broom | unchanged |
+
+UI: in her walks the bag says 「讓兔兔帶著」, 「🔋 給兔兔充電」 / 「🩹 給兔兔修一修」.
+Check: `tests/xiaomi_proxy_gear_test` (26 checks: other owners' rolls unchanged and never toy parts; she finds both; robot wears and fights with the glove, she keeps it in her backpack; battery +30 %; glove lost on defeat, battery in the dog's backpack comes home; pair and stash survive save + reload). `data_loot_test` registers the two items and checks toy parts never sit in shared entries. Suite 49/49 (`fight_body_contact_test` failed once in one full run, passed 4 reruns: seed-dependent, non-proxy path unchanged).
+Open (Phase 3): robot model (CX-17), Xiaomi clips (CX-18), robot body contact.

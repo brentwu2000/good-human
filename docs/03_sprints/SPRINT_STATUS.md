@@ -7,7 +7,9 @@ Owner spec `docs/04_systems/XIAOMI_TOY_PROXY.md`: Xiaomi is an adopter (backgrou
 spot, is never on the fighting side, never hurt or knocked down; the leash stays in her hand
 (owner D1). Phase 0 audit and Phase 1 minimum loop REVIEW
 ([XIAOMI_INTEGRATION_AUDIT.md](../04_systems/XIAOMI_INTEGRATION_AUDIT.md)). `xiaomi_proxy_test`
-34 checks; suite 48/48. Phase 2 (modules, repair cooldown, skills) / Phase 3 (robot art) next.
+34 checks. Phase 2 REVIEW (owner: 「照你的建議做」): spring glove (toy weapon) and toy battery,
+found only by her (other owners' loot unchanged), no repair cooldown, 積木雨/超級兔兔 placeholders;
+`xiaomi_proxy_gear_test` 26 checks; suite 49/49. Phase 3 (robot art CX-17, Xiaomi clips CX-18) next.
 
 ## ART characters — 2026-10-17 (Claude): Trellis2 texture pass
 

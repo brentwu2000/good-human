@@ -69,10 +69,13 @@ func _on_slot_pressed(inventory: Inventory, index: int) -> void:
 		_detail_label.text = "%s（$%d）：%s\n%s\n再點一格移動，或按「丟掉」" % [WeaponCondition.name_of(stack), stack.item.value, stack.item.description, safe_line(stack.item)]
 		_discard_button.disabled = false
 		_use_button.visible = run_manager != null and stack.item.owner_recovery > 0.0
+		# Xiaomi toy proxy: what the walk's condition means for her is her robot's battery.
+		if Game.owner_has_proxy():
+			_use_button.text = "🔋 給兔兔充電" if stack.item.proxy_only else "🩹 給兔兔修一修"
 		_use_button.disabled = run_manager == null or not run_manager.can_use_on_owner(inventory, index)
 		var weapon := DataRegistry.weapon_for_item(stack.item_id)
 		_hold_button.visible = run_manager != null and weapon != null and inventory == _human
-		_hold_button.text = "放下不拿" if run_manager != null and run_manager.equipped_stack == stack else "讓主人拿著"
+		_hold_button.text = "放下不拿" if run_manager != null and run_manager.equipped_stack == stack else ("讓兔兔帶著" if Game.owner_has_proxy() else "讓主人拿著")
 		if weapon != null:
 			_detail_label.text += "\n" + WeaponCompare.describe(weapon, stack.condition, run_manager.equipped_weapon if run_manager != null else null, Game.owner_fighter().skills)
 		_update_highlight()

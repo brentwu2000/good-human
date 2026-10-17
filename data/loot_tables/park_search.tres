@@ -13,6 +13,9 @@
 [ext_resource type="Resource" path="res://data/items/boxing_gloves.tres" id="item_boxing_gloves"]
 [ext_resource type="Resource" path="res://data/items/mysterious_item.tres" id="item_mysterious_item"]
 
+[ext_resource type="Resource" path="res://data/items/spring_glove.tres" id="item_spring_glove"]
+[ext_resource type="Resource" path="res://data/items/toy_battery.tres" id="item_toy_battery"]
+
 [sub_resource type="Resource" id="entry_tennis_ball"]
 script = ExtResource("2_entry")
 item = ExtResource("item_tennis_ball")
@@ -83,8 +86,23 @@ weight = 1
 min_quantity = 1
 max_quantity = 1
 
+[sub_resource type="Resource" id="entry_spring_glove"]
+script = ExtResource("2_entry")
+item = ExtResource("item_spring_glove")
+weight = 6
+min_quantity = 1
+max_quantity = 1
+
+[sub_resource type="Resource" id="entry_toy_battery"]
+script = ExtResource("2_entry")
+item = ExtResource("item_toy_battery")
+weight = 10
+min_quantity = 1
+max_quantity = 2
+
 [resource]
 script = ExtResource("1_table")
 id = &"park_search"
 entries = Array[ExtResource("2_entry")]([SubResource("entry_tennis_ball"), SubResource("entry_dog_toy"), SubResource("entry_sports_drink"), SubResource("entry_jump_rope"), SubResource("entry_hand_grip"), SubResource("entry_old_running_shoes"), SubResource("entry_umbrella"), SubResource("entry_old_sports_watch"), SubResource("entry_boxing_gloves"), SubResource("entry_mysterious_item")])
 nothing_weight = 20
+proxy_entries = Array[ExtResource("2_entry")]([SubResource("entry_spring_glove"), SubResource("entry_toy_battery")])

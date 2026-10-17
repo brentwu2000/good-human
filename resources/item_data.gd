@@ -26,6 +26,10 @@ enum SizeClass { SMALL, MEDIUM, LARGE }
 ## S05-02: how much of the owner's condition (0..1) using it on them gives
 ## back. 0 = it cannot be used on the owner.
 @export_range(0.0, 1.0) var owner_recovery: float = 0.0
+## Xiaomi toy proxy (Phase 2): a toy part for her bunny robot. Only rolled
+## (LootTableData.proxy_entries) when the owner's fights are fought by a proxy;
+## owner_recovery on it charges the robot's battery.
+@export var proxy_only: bool = false
 @export var loot_class: LootClass = LootClass.VALUABLE
 @export var size_class: SizeClass = SizeClass.SMALL
 

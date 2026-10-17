@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"toy_battery"
+display_name = "玩具電池"
+description = "還有電的玩具電池，可以幫兔兔充一點電。"
+type = 2
+rarity = 0
+stackable = true
+max_stack = 5
+value = 8
+owner_recovery = 0.3
+loot_class = 4
+proxy_only = true

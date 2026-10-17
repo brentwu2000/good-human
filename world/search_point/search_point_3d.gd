@@ -51,7 +51,7 @@ func _ready() -> void:
 func prepare(run: RunManager) -> void:
 	_run = run
 	cancel_search()
-	_pending_loot = loot_table.roll(run.run_rng) if loot_table != null else null
+	_pending_loot = loot_table.roll(run.run_rng, Game.owner_has_proxy()) if loot_table != null else null
 	# P05-09: a weapon lying in the street is not new.
 	if _pending_loot != null:
 		var weapon := DataRegistry.weapon_for_item(_pending_loot.item_id)
@@ -137,7 +137,7 @@ func _finish_search() -> void:
 	cancel_search()
 	_name_label.text = display_label
 	if not _has_rolled:
-		_pending_loot = loot_table.roll(_run.run_rng) if loot_table != null else null
+		_pending_loot = loot_table.roll(_run.run_rng, Game.owner_has_proxy()) if loot_table != null else null
 		_has_rolled = true
 	var before := _pending_loot
 	_pending_loot = _run.resolve_search(self, _pending_loot)

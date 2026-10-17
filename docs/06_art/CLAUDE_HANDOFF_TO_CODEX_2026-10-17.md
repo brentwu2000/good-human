@@ -65,3 +65,5 @@ Her fights are fought by a **placeholder bunny toy robot** built in code on the 
 - **CX-18** Xiaomi clips (only these, spec §6): press the remote, cheer, hug/pick up the robot,
   walk away safely. Never hurt/KO clips for her (her 19 OwnerSkeleton clips include them; the
   game no longer plays them on her).
+- **CX-19** Spring glove prop (`WeaponData.Archetype.TOY`, placeholder `WeaponProp3D._spring_glove`):
+  a toy spring boxing glove the robot wears; pink, cream coil. Toy battery icon optional.

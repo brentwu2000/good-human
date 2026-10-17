@@ -45,6 +45,7 @@ const TIP := {
 	WeaponData.Archetype.UMBRELLA: 0.6,
 	WeaponData.Archetype.LONG_OBJECT: 0.79,
 	WeaponData.Archetype.HEAVY_BLUNT: 0.12,
+	WeaponData.Archetype.TOY: 0.22,
 }
 
 
@@ -97,9 +98,20 @@ static func build(weapon: WeaponData) -> Node3D:
 			_broom(root)
 		WeaponData.Archetype.HEAVY_BLUNT:
 			_dumbbell(root)
+		WeaponData.Archetype.TOY:
+			_spring_glove(root)
 		_:
 			root.add_child(Greybox.cylinder(0.02, 1.0, Color(0.5, 0.45, 0.4), Vector3(0, 0.45, 0)))
 	return root
+
+
+## Xiaomi toy proxy: a toy spring boxing glove — a short coil and a big pink
+## glove on the end. Never a real weapon.
+static func _spring_glove(root: Node3D) -> void:
+	for i in 4:
+		root.add_child(Greybox.cylinder(0.05, 0.03, Color(0.96, 0.46, 0.63) if i % 2 == 0 else Color(0.98, 0.94, 0.88), Vector3(0, 0.03 + i * 0.035, 0)))
+	root.add_child(Greybox.sphere(0.11, Color(0.92, 0.30, 0.52), Vector3(0, 0.22, 0)))
+	root.add_child(Greybox.sphere(0.04, Color(0.98, 0.94, 0.88), Vector3(0.05, 0.24, -0.07)))
 
 
 ## An old dumbbell: a short bar across the fist, a plate at each end.

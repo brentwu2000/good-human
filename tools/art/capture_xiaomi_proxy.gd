@@ -54,7 +54,8 @@ func _run() -> void:
 	check(coordinator.uses_proxy(), "the walk knows her robot fights")
 
 	# She carries a weapon in her backpack, not in her hand.
-	var umbrella := ItemStack.new(DataRegistry.get_item(&"umbrella"), 1)
+	var gear_id: StringName = StringName(OS.get_cmdline_user_args()[1]) if OS.get_cmdline_user_args().size() > 1 else &"umbrella"
+	var umbrella := ItemStack.new(DataRegistry.get_item(gear_id), 1)
 	run.take_weapon(umbrella)
 	await _frames(2)
 	check(human.puppet.held == null, "a weapon she finds goes in her backpack, not her hand")

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponMoveSet" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://resources/weapon_move_set.gd" id="1_moves"]
+[ext_resource type="Script" path="res://resources/combat_skill_data.gd" id="6_skill"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_glove_spring_punch.tres" id="2_punch"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_glove_spring_smash.tres" id="3_smash"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_block.tres" id="4_block"]
+[ext_resource type="Resource" path="res://data/combat/skills/skill_bunny_roll.tres" id="5_roll"]
+
+[resource]
+script = ExtResource("1_moves")
+id = &"spring_glove"
+attacks = Array[ExtResource("6_skill")]([ExtResource("2_punch"), ExtResource("3_smash")])
+defenses = Array[ExtResource("6_skill")]([ExtResource("4_block"), ExtResource("5_roll")])
+ideal_min = 84.0
+ideal_max = 100.0

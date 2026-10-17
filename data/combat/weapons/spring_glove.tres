@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://resources/weapon_data.gd" id="1_weapon"]
+[ext_resource type="Resource" path="res://data/items/spring_glove.tres" id="2_item"]
+[ext_resource type="Resource" path="res://data/combat/movesets/spring_glove.tres" id="3_moves"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"spring_glove"
+display_name = "彈簧拳套"
+archetype = 4
+item = ExtResource("2_item")
+moveset = ExtResource("3_moves")
+condition_max = 30
+tags = Array[StringName]([&"toy"])

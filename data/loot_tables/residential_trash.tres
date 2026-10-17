@@ -14,6 +14,9 @@
 
 [ext_resource type="Resource" path="res://data/items/broom.tres" id="item_broom"]
 
+[ext_resource type="Resource" path="res://data/items/spring_glove.tres" id="item_spring_glove"]
+[ext_resource type="Resource" path="res://data/items/toy_battery.tres" id="item_toy_battery"]
+
 [sub_resource type="Resource" id="entry_tennis_ball"]
 script = ExtResource("2_entry")
 item = ExtResource("item_tennis_ball")
@@ -84,8 +87,23 @@ weight = 7
 min_quantity = 1
 max_quantity = 1
 
+[sub_resource type="Resource" id="entry_spring_glove"]
+script = ExtResource("2_entry")
+item = ExtResource("item_spring_glove")
+weight = 5
+min_quantity = 1
+max_quantity = 1
+
+[sub_resource type="Resource" id="entry_toy_battery"]
+script = ExtResource("2_entry")
+item = ExtResource("item_toy_battery")
+weight = 10
+min_quantity = 1
+max_quantity = 2
+
 [resource]
 script = ExtResource("1_table")
 id = &"residential_trash"
 entries = Array[ExtResource("2_entry")]([SubResource("entry_tennis_ball"), SubResource("entry_dog_treat"), SubResource("entry_sports_drink"), SubResource("entry_bandage"), SubResource("entry_dog_toy"), SubResource("entry_umbrella"), SubResource("entry_old_running_shoes"), SubResource("entry_old_sports_watch"), SubResource("entry_mysterious_item"), SubResource("entry_broom")])
 nothing_weight = 25
+proxy_entries = Array[ExtResource("2_entry")]([SubResource("entry_spring_glove"), SubResource("entry_toy_battery")])

@@ -5,7 +5,9 @@ extends Resource
 ## rhythm, defence, recovery and spacing — never only their damage. The dog
 ## never uses it.
 
-enum Archetype { UNARMED, UMBRELLA, LONG_OBJECT, HEAVY_BLUNT }
+## TOY (Xiaomi toy proxy, Phase 2): a toy part her bunny robot fights with
+## (spring boxing glove); only found when her robot is the one fighting.
+enum Archetype { UNARMED, UMBRELLA, LONG_OBJECT, HEAVY_BLUNT, TOY }
 
 @export var id: StringName
 @export var display_name: String
