@@ -238,9 +238,11 @@ func hold(weapon: WeaponData, condition: WeaponCondition.State = WeaponCondition
 		return
 	var arm := _joint(_arms, 1)
 	if arm != null:
-		_prop.position = Vector3(0, -0.55, 0)
+		# A body with its own hand point (Xiaomi's robot) holds it there.
+		var hand := arm.find_child("Hand", false, false) as Node3D
+		_prop.position = Vector3.ZERO if hand != null else Vector3(0, -0.55, 0)
 		_prop.rotation.x = -PI * 0.5
-		arm.add_child(_prop)
+		(hand if hand != null else arm).add_child(_prop)
 
 
 func _add_trail(weapon: WeaponData) -> void:

@@ -199,6 +199,14 @@ had not come (`is_present()` false, hidden in the tree), and `start_engagement` 
 presence (the game only lets the dog provoke pairs that are out). Tests and captures pick
 `is_present() and is_idle()` pairs. Check: print `human_puppet.is_visible_in_tree()`.
 
+**6.29 The greybox fight choreography swings limbs towards local +Z; actors face -Z.** The bunny
+robot (the first body to use the greybox joints since the humans went skeletal) blocked and kicked
+backwards: a jab is `rotation.x -1.45` on an arm hanging down, which points it at +Z. Its parts were
+also named left/right before the model was turned 180, so ArmL sat on its right. A greybox-joint
+body is built facing local +Z (ArmL at -X) under one node turned 180 deg (`BunnyRobot3D`). Check:
+measure each limb's offset along the facing during a strike (`tools/art/capture_robot_moves.tscn`
+prints MEASURE lines; forward must be positive), not only a capture.
+
 **6.0 Retargeting third-party animation.** Transfer each bone's *world* rotation away from its own rest onto the target bone's rest — it survives different rest poses and bone rolls; copying local rotations does not. Bake per target model when sizes differ (one library per dog breed), otherwise hips heights float or sink. Scale hip travel by leg length and check the result at the biggest and smallest model (`dog_motion_test`: paws vs ground). Render a few frames of every clip before wiring it in — names lie ("Tired Hunched" is on all fours).
 
 **6.1 Imported models bring their own animation.** A preview render showed the wrong pose because the glTF's action re-posed the armature at render time. Clear `animation_data.action` and remove imported actions before posing for a still.

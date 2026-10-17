@@ -4,8 +4,9 @@
    balanced to the sheet (median of its robot pixels).
 2. Cut into rigid toy parts by height/width (Head with ears, Torso, ArmL/R, LegL/R) — a toy
    robot is rigid pieces, so FighterPuppet3D's greybox actions turn them on their joints.
-3. Turned to face -Z in Godot, scaled so the hip pivot sits at Greybox.HIP_HEIGHT (0.72), each
-   part's origin at its joint; FighterData.body_scale shrinks it back to toy size.
+3. Kept facing glTF +Z (as generated): FighterPuppet3D's greybox actions swing limbs towards
+   their local +Z, so BunnyRobot3D turns the whole body 180 deg once instead. Scaled so the hip
+   pivot sits at Greybox.HIP_HEIGHT (0.72), each part's origin at its joint (ArmL/LegL at -X).
 Config (defaults from the measured width profile): hip_z, neck_z, shoulder_z, arm_x, leg_x
 (metres on the 1.0 m prep mesh).
 """
@@ -113,15 +114,15 @@ for name in names:
 bpy.data.objects.remove(low)
 print("ROBOT parts " + ", ".join("%s %d" % (k, v) for k, v in counts.items()))
 
-# ---- 3. face -Z in Godot (Blender +Y), hip at 0.72, origins at the joints.
+# ---- 3. hip at 0.72, origins at the joints; facing unchanged (see the docstring).
 k = HIP / cfg["hip_z"]
 for name, ob in parts.items():
     piv = pivots[name]
     for v in ob.data.vertices:
         p = v.co - piv
-        v.co = Vector((-p.x, -p.y, p.z)) * k  # 180 deg about Z, then scale
+        v.co = p * k
     ob.data.update()
-    ob.location = Vector((-piv.x, -piv.y, piv.z)) * k
+    ob.location = piv * k
 print("ROBOT scale k %.3f, hip %.3f, neck %.3f, shoulder %.3f (body units); toy height at body_scale s = %.3f*s m" % (k, cfg["hip_z"] * k, cfg["neck_z"] * k, cfg["shoulder_z"] * k, k))
 
 bpy.ops.object.select_all(action="DESELECT")

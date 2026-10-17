@@ -53,6 +53,11 @@ static func _from_model(scene: PackedScene) -> Node3D:
 	var fit := Node3D.new()
 	fit.name = "Fit"
 	fit.scale = Vector3.ONE * MODEL_FIT
+	# FighterPuppet3D's greybox actions swing a limb towards its local +Z (a
+	# jab is rotation.x -1.45 on an arm hanging down). The model faces local
+	# +Z as generated, and the whole body is turned once here to face -Z like
+	# every actor, so blows, kicks and the guard go towards the opponent.
+	fit.rotation.y = PI
 	root.add_child(fit)
 	var torso_at: Vector3 = (part.call("Torso") as Node3D).position
 	for side in ["L", "R"]:
@@ -66,9 +71,32 @@ static func _from_model(scene: PackedScene) -> Node3D:
 		_adopt(part.call("Arm" + side), arm)
 	var head := _joint(torso, "Head", (part.call("Head") as Node3D).position - torso_at)
 	_adopt(part.call("Head"), head)
+	# Where a held toy goes: the bottom of each arm (FighterPuppet3D.hold looks
+	# for "Hand"), at greybox human scale so props keep their size.
+	for side in ["L", "R"]:
+		var arm := Greybox.part(fit, "Arm" + side)
+		var hand := Node3D.new()
+		hand.name = "Hand"
+		hand.position = Vector3(0, _lowest(arm), 0)
+		hand.scale = Vector3.ONE * (HAND_PROP_SCALE / MODEL_FIT)
+		arm.add_child(hand)
 	source.free()
 	root.set_meta("skeletal_art", false)
 	return root
+
+
+## A held toy's size relative to a person's (the robot's fist is big).
+const HAND_PROP_SCALE: float = 1.6
+
+
+## The lowest point of a joint's mesh, in the joint's frame.
+static func _lowest(joint: Node3D) -> float:
+	var low := 0.0
+	for m in joint.find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		var box := mi.transform * mi.get_aabb()
+		low = minf(low, box.position.y)
+	return low * 0.85
 
 
 static func _adopt(piece: Node3D, joint: Node3D) -> void:
