@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-15",
+  "author": "Codex (project art refinement)",
+  "source": "Claude 2026-10-15 runtime delivery_rider.glb",
+  "source_sha256": "ecc79d8bf37a946eb75cc3ce3cfcb989d5a947cde6932e1fcafa5bed01b9975a",
+  "license": "Inherited source chain; owner reference-sheet rights remain undocumented. No new external assets.",
+  "grade": "B / review candidate",
+  "changes": "Authored garment details and reviewed masks; face art and original rig/animation preserved. CX-10 local geometry for auntie and coach.",
+  "rig_and_animation_json_identical": true,
+  "original_binary_prefix_identical": true,
+  "runtime_unmodified": true,
+  "joints": 53,
+  "clips": 19,
+  "sha256": "fda152a7596e93da3b1026f432027ffdc1ff671a760914c257fa1eff6f18bb4b"
+}

@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-15",
+  "author": "Codex (project art refinement)",
+  "source": "Claude 2026-10-15 runtime gym_coach.glb",
+  "source_sha256": "b13dd87501dae295bb81dbc117ca38cb4e74431f44495b14289686eb4da83764",
+  "license": "Inherited source chain; owner reference-sheet rights remain undocumented. No new external assets.",
+  "grade": "B / review candidate",
+  "changes": "Authored garment details and reviewed masks; face art and original rig/animation preserved. CX-10 local geometry for auntie and coach.",
+  "rig_and_animation_json_identical": true,
+  "original_binary_prefix_identical": true,
+  "runtime_unmodified": true,
+  "joints": 53,
+  "clips": 19,
+  "sha256": "e1105fcce80ac24d356c19f9b0ab6064438165d8a66ab0bc9de77269d7ec96c4"
+}

@@ -1,5 +1,13 @@
 # Third-Party Asset License Register
 
+## Poodle budget r39 — 2026-10-14
+
+Project-authored welded reduction and 2048 px source-appearance rebake of the
+existing runtime poodle (r28 appearance / r33 skin). No new third-party retrieval
+or reference image. Existing factory/reference restrictions and Mesh2Motion
+provenance unchanged; originals preserved. REVIEW / B candidate, not published.
+[Record](POODLE_BUDGET_R39_2026-10-14.md).
+
 ## Chihuahua r38 delivery — 2026-10-14
 
 Project-authored adaptation of the existing CC0 Mesh2Motion fox body/rig/motion
@@ -221,3 +229,13 @@ Chain: owner sheet (rights UNDOCUMENTED) → Qwen-Image-Edit-2509 Q3_K_S + Light
 cut-outs → Instant Meshes (BSD-3) → Blender 5.2 scripts → P-04 OwnerSkeleton + clips
 (project-internal). Per-file provenance: `office_worker.glb.provenance.json` and
 `good_human_stylized_factory/**/*.provenance.json`. Release gate: owner confirms the sheet.
+
+
+## Six human refinement candidates — Codex, 2026-10-15
+
+assets/art_previews/humans/refine_2026_10_15/: project-authored garment patterns and local CX-10 geometry on Claude’s six v5 human models. No new third-party material. Original owner-sheet/factory/rig license chain and undocumented sheet rights remain unchanged. Per-file provenance records source and candidate hashes. B / review candidates; runtime unchanged. See [refinement record](HUMAN_REFINEMENT_2026-10-15.md).
+
+
+## Market auntie detail r2 — 2026-10-15
+
+Project-authored leather satchel/strap and local edits on the earlier v5-derived candidate. No new external assets. Inherits the original model, owner-sheet and project-rig provenance; reference rights remain undocumented. See candidate per-file provenance and MARKET_AUNTIE_DETAIL_R2_2026-10-15.md. Work in progress / B; runtime unchanged.

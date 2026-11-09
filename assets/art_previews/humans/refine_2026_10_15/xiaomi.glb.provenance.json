@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-15",
+  "author": "Codex (project art refinement)",
+  "source": "Claude 2026-10-15 runtime xiaomi.glb",
+  "source_sha256": "c1fabaaf399a27db96db49facfb01d3709c6c0d3a090227466b10fb2b59872cd",
+  "license": "Inherited source chain; owner reference-sheet rights remain undocumented. No new external assets.",
+  "grade": "B / review candidate",
+  "changes": "Authored garment details and reviewed masks; face art and original rig/animation preserved. CX-10 local geometry for auntie and coach.",
+  "rig_and_animation_json_identical": true,
+  "original_binary_prefix_identical": true,
+  "runtime_unmodified": true,
+  "joints": 53,
+  "clips": 19,
+  "sha256": "8cbfa5a4d8eac1122c5f0d0fbf3e10738d7e5655b82c0cc084169522faa1cb3c"
+}

@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-15",
+  "author": "Codex (project art refinement)",
+  "source": "Claude 2026-10-15 runtime retired_fisher.glb",
+  "source_sha256": "22578922fbb382b0496b12bd50d560398a62b0056d450c5eeb2148e307052990",
+  "license": "Inherited source chain; owner reference-sheet rights remain undocumented. No new external assets.",
+  "grade": "B / review candidate",
+  "changes": "Authored garment details and reviewed masks; face art and original rig/animation preserved. CX-10 local geometry for auntie and coach.",
+  "rig_and_animation_json_identical": true,
+  "original_binary_prefix_identical": true,
+  "runtime_unmodified": true,
+  "joints": 53,
+  "clips": 19,
+  "sha256": "17f5a7dcdc1a4d3791f6f4e3e78d2830c8365a8df2db57467d834767de5a21a3"
+}

@@ -300,3 +300,26 @@ Final r36 preserves z >= 0.337 m; max local movement 2.5 mm.
 - Recompute custom normals after skull edits, averaging coincident physical vertices across UV splits. Otherwise smooth shading can preserve old hard seams.
 - Inspect rear and raised-chin poses before accepting a neck patch; a front-view repair can protrude as colored side panels.
 - Appended Blender datablocks may retain a library reference to an old checkpoint. Save exports to a distinct filename rather than overwriting that referenced library.
+
+
+## Poodle budget r39 — 2026-10-14
+
+- Reducing an imported UV-split mesh independently across coincident vertices
+  opened visible cracks. Weld physical duplicates while preserving corner UVs
+  before reduction; check topology and renders rather than triangle count alone.
+- Even a closed reduced surface can pull eye/nose pixels across old UV seams.
+  Protect seams and rebake source appearance onto a fresh low-mesh UV layout;
+  inspect Godot face close-ups before accepting the reduction.
+- Applying a modifier can invalidate cached vertex-group RNA references. Re-fetch
+  the group by name before removal; a stale reference raised an unrelated group
+  error in the first r39 build.
+
+
+## 2026-10-15 — Approved human region masks can still hide projection errors
+
+The six v5 masks passed their gate yet included clothing pixels in skin regions and fused hands/bags in garment regions. Palette cleanup alone preserved jagged triangle boundaries; broad continuous garment masks then crossed side props. Inspect front AND sides before accepting a mask. Preserve the drawn face separately from mislabelled body skin, and roll back uncertain side patches rather than repeatedly expanding masks. Retain original rig/animation binary data when replacing texture payloads. The office worker has 54 original skin joints despite the handoff’s blanket 53-joint statement: compare to each actual source instead of forcing a count.
+
+
+## 2026-10-15 — Human deformation review and bridge context
+
+Finite bone transforms do not validate the skinned garment. Auntie’s broad torso-weight reassignment created sharper skirt folds despite unchanged bones/clips: reject it based on visual motion, preserve the old weights, and repair topology-aware regions next. Nearest-surface fitting can collapse draped cloth sideways; constrained depth rays plus bounded grid smoothing preserve the silhouette better. After open_mainfile inside a Blender bridge call, glTF export may lack context.window: pass a real window through temp_override. Prefer direct bmesh construction to mode-dependent operators in the bridge.

@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-15",
+  "author": "Codex (project art refinement)",
+  "source": "Claude 2026-10-15 runtime market_auntie.glb",
+  "source_sha256": "b74ec652dd6860c71544c04b490a77f0d7dc6ae9a3e782bff3d0d2b57f778f79",
+  "license": "Inherited source chain; owner reference-sheet rights remain undocumented. No new external assets.",
+  "grade": "B / review candidate",
+  "changes": "Authored garment details and reviewed masks; face art and original rig/animation preserved. CX-10 local geometry for auntie and coach.",
+  "rig_and_animation_json_identical": true,
+  "original_binary_prefix_identical": true,
+  "runtime_unmodified": true,
+  "joints": 53,
+  "clips": 19,
+  "sha256": "b87aea4d298aea7b5a76199b00c24fe1595ffe2db2de7018e7f9e55cb7a803bd"
+}

@@ -1,0 +1,25 @@
+{
+  "triangles": 14712,
+  "reduction_percent": 71.00283822138127,
+  "bone_count": 23,
+  "original_skeleton_and_animation_descriptors_unchanged": true,
+  "original_binary_prefix_unchanged": true,
+  "normalized_weights_max_error": 4.7497451305389404e-8,
+  "bounds": {
+    "min": [
+      -0.1560269445180893,
+      0.00003865422331728041,
+      -0.21771341562271118
+    ],
+    "max": [
+      0.15554215013980865,
+      0.45006832480430603,
+      0.21758827567100525
+    ]
+  },
+  "source_sha256": "dde998aa796f129a1f3616a52e2bccbb20b1431a39e2ddc6b3589a65486ec12d",
+  "candidate_sha256": "617acaffe0178404832dc167e10ccc0510d96ad5e31c0a3515dbde331e3b528c",
+  "candidate_godot_checks": 10,
+  "godot_capture_count": 119,
+  "scope": "Sampled visual review; dense skin audit and production retopology not certified"
+}

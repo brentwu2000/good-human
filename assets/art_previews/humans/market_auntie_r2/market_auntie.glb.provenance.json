@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-15",
+  "author": "Codex / project-authored refinements",
+  "source": "assets/art_previews/humans/refine_2026_10_15/market_auntie.glb",
+  "license": "Inherited owner sheet/factory/project rig chain; reference-sheet rights remain undocumented. No new external assets.",
+  "grade": "B / work in progress; not promoted",
+  "sha256": "6c761fc26b576b7079a31874c7aa39ef91ddf1a831796daafe9607ea29a81100",
+  "triangles": 15322,
+  "joints": 53,
+  "clips": 19,
+  "materials": 6,
+  "body_weight_trial": "rejected and rolled back; only new strap blend retained"
+}

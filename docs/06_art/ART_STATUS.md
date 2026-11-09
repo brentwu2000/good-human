@@ -1,9 +1,38 @@
 # Art Status
+
+## Market auntie detail r2 — 2026-10-15
+
+WORK IN PROGRESS / B. Independent leather satchel, strap, local ribbon/face cleanup, bounded hair/towel adjustments and retracted old side panels saved. Broad hair masks and torso skinning trial failed visual review and were rolled back. Hands, hair boundary and lifted-arm cloth deformation remain unfinished; runtime unchanged. [Record](MARKET_AUNTIE_DETAIL_R2_2026-10-15.md).
+
+## Six human refinements / CX-10 taken — 2026-10-15
+
+REVIEW / B: six refinement candidates completed, with authored garment details, protected drawn faces, an added auntie shoulder towel and bounded coach neck refinement. Final Godot: 2,052 sampled poses pass; original rig/animation data preserved. Runtime unchanged. Fused prop/hand masks that regressed were rolled back; CX-10 remains partial. [Record and labelled comparisons](HUMAN_REFINEMENT_2026-10-15.md).
+
+## Poodle refinement r40 taken — 2026-10-14
+
+IN_PROGRESS checkpoint: r40 has 14,558 triangles, a single manifold surface,
+ear unions, bounded cheek refinement and rebaked albedo. 1,170 before/after
+poses pass the skin-regression audit. Final Godot captures/acceptance remain
+pending; runtime unchanged. On 2026-10-15 the owner prioritized the six human
+characters in the new Claude handoff. Saved source:
+`build/poodle_refine_r40/poodle_r40_12_final.blend`; audit:
+`build/poodle_refine_r40/verification.json`.
+
 ## Delivery rider, gym coach, Xiaomi r1 (Claude) — 2026-10-14
 
 Three more owner sheets through the AI 3D factory. Rider on `delivery_rider`, coach on the new
 `gym_coach` background; Xiaomi is a model only (owner). Game LODs 6k tris. REVIEW / B; sheet
 rights UNKNOWN. [Record](CHARACTERS_R1_2026-10-14.md).
+
+
+## CX-07 poodle budget r39 candidate — 2026-10-14
+
+REVIEW / B; budget study reduces 50,736 to 14,712 triangles (71%). Welded
+UV boundaries, weighted reduction and rebaked source appearance. Original
+23-joint rig and animation data retained; 10 candidate checks pass, 119 Godot
+captures reviewed. Close-view seams, ear/body finish and deformation acceptance
+remain open. Runtime unchanged; CX-07 is not marked production-complete.
+[Record and comparisons](POODLE_BUDGET_R39_2026-10-14.md).
 
 ## Retired fisher r1 (Claude) — 2026-10-13
 
